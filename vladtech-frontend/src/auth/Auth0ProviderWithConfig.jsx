@@ -11,7 +11,7 @@ const Auth0ProviderWithConfig = ({ children }) => {
       clientId={clientId}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: audience,
+        audience,
         scope: "openid profile email"
       }}
     >

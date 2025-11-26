@@ -4,13 +4,17 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Employee from "./pages/Employee";
-
+import Client from "./pages/Client";
+import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
+      <Router>
+        <Navbar />
+
       <Routes>
+        {/* Public Route */}
         <Route path="/" element={<Home />} />
 
         {/* Any authenticated user */}
@@ -27,7 +31,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute role="Admin">
+            <ProtectedRoute roles={["Admin"]}>
               <Admin />
             </ProtectedRoute>
           }
@@ -37,8 +41,18 @@ function App() {
         <Route
           path="/employee"
           element={
-            <ProtectedRoute role="Employee">
+            <ProtectedRoute roles={["Employee"]}>
               <Employee />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Client-only */}
+        <Route
+          path="/client"
+          element={
+            <ProtectedRoute roles={["Client"]}>
+              <Client />
             </ProtectedRoute>
           }
         />
