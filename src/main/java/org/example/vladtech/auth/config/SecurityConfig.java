@@ -1,4 +1,4 @@
-package auth.config;
+package org.example.vladtech.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+// Security configuration class do not delete
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -27,9 +28,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("Admin")
-                        .requestMatchers("/api/employee/**").hasAnyRole("Employee", "Admin")
-                        .requestMatchers("/api/user/**").hasRole("User")
+                        .requestMatchers("/api/admin/**").hasAuthority("Admin")
+                        .requestMatchers("/api/employee/**").hasAnyAuthority("Employee", "Admin")
+                        .requestMatchers("/api/client/**").hasAuthority("Client")
+                        .requestMatchers("/api/role-assignment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
@@ -39,29 +41,38 @@ public class SecurityConfig {
         return http.build();
     }
 
+
+
+    /**
+     * Tell Spring Security:
+     *  - Read authorities from your custom claim: https://vladtech.com/roles
+     *  - DO NOT force "ROLE_" prefix
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthoritiesClaimName("https://vladtech.com/roles");
-        converter.setAuthorityPrefix("ROLE_");
 
-        JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
-        authConverter.setJwtGrantedAuthoritiesConverter(converter);
+        JwtGrantedAuthoritiesConverter gac = new JwtGrantedAuthoritiesConverter();
+        gac.setAuthorityPrefix("");  // ← IMPORTANT: DO NOT ADD "ROLE_"
+        gac.setAuthoritiesClaimName("https://vladtech.com/roles");
 
-        return authConverter;
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(gac);
+        return converter;
     }
+
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

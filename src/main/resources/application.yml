@@ -3,5 +3,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "https://dev-ljz84r2xvrlnftfv.ca.auth0.com"
-          audience: "https://vladtech/api"
+          issuer-uri: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/
+          audience: https://vladtech/api
+
+auth0:
+  domain: dev-ljz84r2xvrlnftfv.ca.auth0.com
+
+  mgmt:
+    clientId: Go2EtdDcs46rt6k03FvgEyRHSjMLw5Yh
+    clientSecret: gYK_qYkeWOMEComw24BiuG0d9PWQfDP-FcAsJGbGh_67zhnav_RBUeWCJ0FRSkcX
+    audience: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/api/v2/
+
+  default:
+    client:
+      roleId: rol_gNdmo7yH2oEE4798

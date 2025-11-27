@@ -1,4 +1,4 @@
-package auth.presentation;
+package org.example.vladtech.auth.presentation;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin")
 public class AdminController {
 
+    //demo can delete
     @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/dashboard")
     public String helloAdmin() {

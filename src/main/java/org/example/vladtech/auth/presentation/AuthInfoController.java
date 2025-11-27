@@ -1,4 +1,4 @@
-package auth.presentation;
+package org.example.vladtech.auth.presentation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -12,6 +12,7 @@ import java.util.Map;
 @RequestMapping("/api/authinfo")
 public class AuthInfoController {
 
+    //can be used for debug
         @GetMapping("/me")
         public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
             return Map.of(

@@ -2,20 +2,19 @@ package org.example.vladtech.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 
+//do not delete
 @Service
 @RequiredArgsConstructor
-public class RoleAssignmentService {
+public class RoleAssignmentServiceImpl {
 
-    private final Auth0ManagementTokenService tokenService;
+    private final Auth0ManagementTokenService managementTokenService;
 
     @Value("${auth0.domain}")
     private String domain;
@@ -23,11 +22,14 @@ public class RoleAssignmentService {
     @Value("${auth0.default.client.roleId}")
     private String clientRoleId;
 
-    private final RestTemplate rest = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Assign the "Client" role (clientRoleId) to the given Auth0 user id, e.g. "auth0|69211..."
+     */
     public void assignClientRole(String auth0UserId) {
 
-        String token = tokenService.getManagementApiToken();
+        String mgmtToken = managementTokenService.getManagementApiToken();
 
         String url = "https://" + domain + "/api/v2/roles/" + clientRoleId + "/users";
 
@@ -36,14 +38,18 @@ public class RoleAssignmentService {
         );
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(mgmtToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        rest.postForEntity(url, entity, Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity(url, entity, Void.class);
 
-        System.out.println("Client role assigned to user: " + auth0UserId);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException("Failed to assign Client role: " + response.getStatusCode());
+        }
+
+        System.out.println("✅ Client role assigned to " + auth0UserId);
     }
 }
-
