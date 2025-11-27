@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class RoleAssignmentService {
+public class RoleAssignmentServiceImpl {
 
     private final Auth0ManagementTokenService tokenService;
 

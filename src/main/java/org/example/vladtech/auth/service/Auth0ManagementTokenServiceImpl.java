@@ -1,11 +1,13 @@
 package org.example.vladtech.auth.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-public class Auth0ManagementTokenService {
+@Service
+public class Auth0ManagementTokenServiceImpl implements Auth0ManagementTokenService {
 
     @Value("${auth0.domain}")
     private String domain;
