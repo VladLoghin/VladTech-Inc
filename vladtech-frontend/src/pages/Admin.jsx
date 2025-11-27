@@ -9,7 +9,7 @@ const Admin = () => {
   const callAdminEndpoint = async () => {
     try {
       const token = await getAccessTokenSilently();
-      console.log("Access Token:", token);
+      //console.log("Access Token:", token);
 
       const response = await axios.get("http://localhost:8080/api/admin/dashboard", {
         headers: {
