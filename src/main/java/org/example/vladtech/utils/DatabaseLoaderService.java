@@ -1,4 +1,4 @@
-package org.example.vladtech.projectsubdomain.utils;
+package org.example.vladtech.utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
