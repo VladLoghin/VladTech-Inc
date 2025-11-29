@@ -3,6 +3,7 @@ package org.example.vladtech.utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 //import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 public class DatabaseLoaderService implements CommandLineRunner {
 
 //    private final ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -29,6 +31,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         /// ///////////////////////////////////////////////////////// WE DELETE THE DATA EVERY TIME WE RUN IN DEVELOPMENT ENRVORNMENT. WITH DEPLOYED, IT SHOULD BE DIFFERENT
         log.info("Clearing existing data...");
 //        projectRepository.deleteAll();
+        projectRepository.deleteAll();
 
         /// ///////////////////////////////////////////////////////////////// use this comment block below as an example for creating new thing in data
         // Sample projects
@@ -97,7 +100,59 @@ public class DatabaseLoaderService implements CommandLineRunner {
         /// /////////////////////////////////////////////////////////////////////// IMPORTANT
 
         ////////////////////////////////////////////////// add data functions below, also make sure to mark them with huge comment lines so we can easily identify what its for
+        createProject(
+                "PROJ-001",
+                "Kitchen Renovation",
+                "123 Main St", "Montreal", "Quebec", "Canada", "H1A 1A1",
+                "Complete kitchen remodel including cabinets and countertops",
+                LocalDate.of(2025, 1, 15),
+                LocalDate.of(2025, 3, 30),
+                ProjectType.ProjectTypeEnum.SCHEDULED
+        );
 
+        createProject(
+                "PROJ-002",
+                "Bathroom Repair",
+                "456 Oak Ave", "Montreal", "Quebec", "Canada", "H2B 2B2",
+                "Emergency plumbing repair and tile replacement",
+                LocalDate.of(2025, 2, 1),
+                LocalDate.of(2025, 2, 15),
+                ProjectType.ProjectTypeEnum.APPOINTMENT
+        );
     }
     ////////////////////////////////////////////////// add functions like (createProject() as an example or whatever below)
+        private void createProject(
+            String projectIdentifier,
+            String name,
+            String streetAddress,
+            String city,
+            String province,
+            String country,
+            String postalCode,
+            String description,
+            LocalDate startDate,
+            LocalDate dueDate,
+            ProjectType.ProjectTypeEnum projectTypeEnum) {
+
+        try {
+            Address address = new Address(streetAddress, city, province, country, postalCode);
+
+            ProjectType projectType = new ProjectType();
+            projectType.setType(projectTypeEnum);
+
+            Project project = new Project();
+            project.setProjectIdentifier(projectIdentifier);
+            project.setName(name);
+            project.setAddress(address);
+            project.setDescription(description);
+            project.setStartDate(startDate);
+            project.setDueDate(dueDate);
+            project.setProjectType(projectType);
+
+            projectRepository.save(project);
+            log.debug("Created project with identifier: {}", project.getProjectIdentifier());
+        } catch (Exception e) {
+            log.error("Error creating project record: {}", e.getMessage(), e);
+        }
+    }
 }
