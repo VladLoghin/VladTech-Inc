@@ -51,9 +51,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
 //                LocalDate.of(2025, 2, 15),
 //                ProjectType.ProjectTypeEnum.APPOINTMENT
 //        );
-
-        //log.info("Sample project data loaded successfully. Total projects: {}", projectRepository.count());
-    }
+//
+//        log.info("Sample project data loaded successfully. Total projects: {}", projectRepository.count());
+//    }
 
     /// ///////////////////////////////////////////////////////////////// use this comment block below as an example for the function to create a new thing
 
