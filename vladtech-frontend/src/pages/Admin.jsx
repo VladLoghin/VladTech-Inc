@@ -71,7 +71,7 @@ const Admin = () => {
       )}
       <div style={{ marginTop: "40px" }}>
         <h2>Projects</h2>
-        <button onClick={fetchProjects}>Refresh Projects</button>
+        {/* <button onClick={fetchProjects}>Refresh Projects</button> */}
         <button onClick={() => setIsModalOpen(true)} style={{ marginLeft: "10px" }}>
           New Project
         </button>
