@@ -5,6 +5,21 @@ spring:
         jwt:
           issuer-uri: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/
           audience: https://vladtech/api
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/vladtechdb
+      database: vladtechdb
+      auto-index-creation: true
+
+  mongodb:
+    embedded:
+      version: 5.0.5
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
 
 auth0:
   domain: dev-ljz84r2xvrlnftfv.ca.auth0.com
