@@ -55,7 +55,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
 //        log.info("Sample project data loaded successfully. Total projects: {}", projectRepository.count());
 //    }
 
-    /// ///////////////////////////////////////////////////////////////// use this comment block below as an example for the function to create a new thing
+        /// ///////////////////////////////////////////////////////////////// use this comment block below as an example for the function to create a new thing
 
 //    private void createProject(
 //            String projectIdentifier,
@@ -92,7 +92,12 @@ public class DatabaseLoaderService implements CommandLineRunner {
 //        }
 //    }
 
-    /// /////////////////////////////////////////////////////////////////////// IMPORTANT
+        /// /////////////////////////////////////////////////////////////////////// IMPORTANT
         ////INSERT REAL DATABASE INSERTION CODE BELOW HERE PLEASE!!!!!
-    /// /////////////////////////////////////////////////////////////////////// IMPORTANT
+        /// /////////////////////////////////////////////////////////////////////// IMPORTANT
+
+        ////////////////////////////////////////////////// add data functions below, also make sure to mark them with huge comment lines so we can easily identify what its for
+
+    }
+    ////////////////////////////////////////////////// add functions like (createProject() as an example or whatever below)
 }
