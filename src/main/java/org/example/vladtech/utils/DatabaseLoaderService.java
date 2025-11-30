@@ -101,7 +101,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         ////////////////////////////////////////////////// add data functions below, also make sure to mark them with huge comment lines so we can easily identify what its for
         createProject(
-                "PROJ-001",
+                "PROJ-1",
                 "Kitchen Renovation",
                 "123 Main St", "Montreal", "Quebec", "Canada", "H1A 1A1",
                 "Complete kitchen remodel including cabinets and countertops",
@@ -111,7 +111,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         );
 
         createProject(
-                "PROJ-002",
+                "PROJ-2",
                 "Bathroom Repair",
                 "456 Oak Ave", "Montreal", "Quebec", "Canada", "H2B 2B2",
                 "Emergency plumbing repair and tile replacement",

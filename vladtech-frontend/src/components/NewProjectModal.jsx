@@ -19,6 +19,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     }
   });
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
 
   const validateForm = () => {
     const newErrors = {};
@@ -43,17 +44,10 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         },
       });
       onProjectCreated();
-      onClose();
-      setFormData({
-        name: "",
-        description: "",
-        startDate: "",
-        dueDate: "",
-        projectType: "",
-        address: { streetAddress: "", city: "", province: "", country: "", postalCode: "" }
-      });
+      handleClose();
     } catch (error) {
       console.error("Error creating project:", error);
+      setSubmitError(error.response?.data?.message || "Failed to create project. Please try again.");
     }
   };
 
@@ -68,6 +62,20 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleClose = () => {
+    setFormData({
+      name: "",
+      description: "",
+      startDate: "",
+      dueDate: "",
+      projectType: "",
+      address: { streetAddress: "", city: "", province: "", country: "", postalCode: "" }
+    });
+    setErrors({});
+    setSubmitError("");
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -95,6 +103,11 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         overflowY: "auto"
       }}>
         <h2>New Project</h2>
+        {submitError && (
+          <div style={{ padding: "10px", backgroundColor: "#fee", color: "#c33", marginBottom: "15px", borderRadius: "4px" }}>
+            {submitError}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "15px" }}>
             <label>Project Name *</label>
@@ -215,7 +228,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
           <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               style={{ padding: "10px 20px", cursor: "pointer" }}
             >
               Cancel

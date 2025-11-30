@@ -35,11 +35,14 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
         return projectResponseMapper.entityToResponseModel(project);
     }
-
     @Override
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
-        project.setProjectIdentifier(UUID.randomUUID().toString());
+
+        //project.setProjectIdentifier(UUID.randomUUID().toString());
+
+        long count = projectRepository.count();
+        project.setProjectIdentifier("PROJ-" + (count + 1));
 
         Project savedProject = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(savedProject);
