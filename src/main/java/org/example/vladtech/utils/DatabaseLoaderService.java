@@ -121,7 +121,11 @@ public class DatabaseLoaderService implements CommandLineRunner {
         );
     }
     ////////////////////////////////////////////////// add functions like (createProject() as an example or whatever below)
-        private void createProject(
+
+    // ///////////////////////////////////////////////////////////
+    // FUNCTION TO CREATE PROJECT
+    // ///////////////////////////////////////////////////////////
+    private void createProject(
             String projectIdentifier,
             String name,
             String streetAddress,
