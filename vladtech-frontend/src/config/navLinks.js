@@ -24,4 +24,9 @@ export const navLinks = [
     path: "/client",
     roles: ["Client"],
   },
+  {
+    label: "Reviews",
+    path: "/reviews",
+    roles: "ANY",
+  },
 ];
