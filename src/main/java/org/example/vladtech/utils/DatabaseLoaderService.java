@@ -6,9 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
 import java.time.LocalDate;
+import java.util.List;
+import org.example.vladtech.reviews.data.Photo;
+import org.example.vladtech.reviews.data.Rating;
+import org.example.vladtech.reviews.data.Review;
+import org.example.vladtech.reviews.data.ReviewRepository;
 
 @Slf4j
 @Component
@@ -17,6 +24,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
 //    private final ProjectRepository projectRepository;
     private final ProjectRepository projectRepository;
+    //    private final ProjectRepository projectRepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -32,6 +41,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         log.info("Clearing existing data...");
 //        projectRepository.deleteAll();
         projectRepository.deleteAll();
+        reviewRepository.deleteAll();
 
         /// ///////////////////////////////////////////////////////////////// use this comment block below as an example for creating new thing in data
         // Sample projects
@@ -110,6 +120,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 ProjectType.ProjectTypeEnum.SCHEDULED
         );
 
+
         createProject(
                 "PROJ-2",
                 "Bathroom Repair",
@@ -119,7 +130,103 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 LocalDate.of(2025, 2, 15),
                 ProjectType.ProjectTypeEnum.APPOINTMENT
         );
+
+        ////////////////////////////////////////////////// add Reviews subdomain sample data
+        log.info("Appending sample review data to MongoDB...");
+
+        createReview(
+                "client-001",
+                "appointment-001",
+                "Amazing service! Highly recommend.",
+                true,
+                Rating.FIVE,
+                List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-002",
+                "appointment-002",
+                "Good, but could be faster.",
+                true,
+                Rating.FOUR,
+                List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-003",
+                "appointment-003",
+                "Not satisfied with the quality.",
+                false,
+                Rating.TWO,
+                List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", null))
+        );
+        createReview(
+                "client-004",
+                "appointment-004",
+                "Fantastic experience, will definitely come back!",
+                true,
+                Rating.FIVE,
+                List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-005",
+                "appointment-005",
+                "Pretty good, but room for improvement.",
+                true,
+                Rating.FOUR,
+                List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-006",
+                "appointment-006",
+                "Average service, nothing special.",
+                false,
+                Rating.THREE,
+                List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-007",
+                "appointment-007",
+                "Excellent staff and quick service!",
+                true,
+                Rating.FIVE,
+                List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-008",
+                "appointment-008",
+                "Decent service, but a bit slow.",
+                true,
+                Rating.FOUR,
+                List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-009",
+                "appointment-009",
+                "Very disappointed, would not recommend.",
+                false,
+                Rating.ONE,
+                List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", null))
+        );
+
+        createReview(
+                "client-010",
+                "appointment-010",
+                "Loved the experience! Highly professional.",
+                true,
+                Rating.FIVE,
+                List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", null))
+        );
+
+
+        log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
     }
+
     ////////////////////////////////////////////////// add functions like (createProject() as an example or whatever below)
 
     // ///////////////////////////////////////////////////////////
@@ -157,6 +264,33 @@ public class DatabaseLoaderService implements CommandLineRunner {
             log.debug("Created project with identifier: {}", project.getProjectIdentifier());
         } catch (Exception e) {
             log.error("Error creating project record: {}", e.getMessage(), e);
+        }
+
+
+    }
+
+    // ///////////////////////////////////////////////////////////
+    // FUNCTION TO CREATE REVIEW
+    // ///////////////////////////////////////////////////////////
+    private void createReview(String clientId,
+                              String appointmentId,
+                              String comment,
+                              Boolean visible,
+                              Rating rating,
+                              List<Photo> photos) {
+        try {
+            Review review = new Review();
+            review.setClientId(clientId);
+            review.setAppointmentId(appointmentId);
+            review.setComment(comment);
+            review.setVisible(visible);
+            review.setRating(rating);
+            review.setPhotos(photos);
+
+            reviewRepository.save(review);
+            log.debug("Created review for clientId: {} and appointmentId: {}", clientId, appointmentId);
+        } catch (Exception e) {
+            log.error("Error creating review record: {}", e.getMessage(), e);
         }
     }
 }

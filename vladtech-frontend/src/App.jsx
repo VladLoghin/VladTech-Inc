@@ -7,6 +7,7 @@ import Employee from "./pages/Employee";
 import Client from "./pages/Client";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import ReviewsPage from "./pages/Reviews.jsx";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -67,9 +68,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+            path="/reviews"
+            element={<ReviewsPage />}
+        />
       </Routes>
         </Layout>
     </Router>
+
   );
 }
 
