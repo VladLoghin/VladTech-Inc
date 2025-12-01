@@ -32,7 +32,6 @@ class ProjectControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
     @MockitoBean
     private ProjectService projectService;
 
