@@ -10,12 +10,25 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
+interface Review {
+    reviewId: string;
+    clientId: string;
+    appointmentId: string;
+    comment: string;
+    visible: boolean;
+    photos?: string[];
+    rating?: number;
+}
+
 const ReviewCarousel = () => {
-    const [reviews, setReviews] = useState([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
 
     useEffect(() => {
         getAllVisibleReviews()
-            .then(setReviews)
+            .then((data) => {
+                console.log("LOADED REVIEWS:", data);
+                setReviews(data);
+            })
             .catch((err) => console.error("Failed to fetch reviews", err));
     }, []);
 
@@ -27,9 +40,9 @@ const ReviewCarousel = () => {
             spaceBetween={20}
             slidesPerView={1}
             breakpoints={{
-                640: { slidesPerView: 2, spaceBetween: 20 },   // small screens
-                768: { slidesPerView: 3, spaceBetween: 30 },   // tablets
-                1024: { slidesPerView: 4, spaceBetween: 40 },  // large screens
+                640: { slidesPerView: 2, spaceBetween: 20 },
+                768: { slidesPerView: 3, spaceBetween: 30 },
+                1024: { slidesPerView: 4, spaceBetween: 40 },
             }}
             autoplay={{ delay: 3000, disableOnInteraction: false }}
             navigation
