@@ -1,6 +1,6 @@
 package org.example.vladtech.contact.presentationlayer;
 
-ublic class ContactRequestDto {
+public class ContactRequestDto {
 
     private String email;       // client's email address
     private String name;        // client's name
