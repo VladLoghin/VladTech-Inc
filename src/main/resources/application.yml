@@ -15,6 +15,18 @@ spring:
     embedded:
       version: 5.0.5
 
+  mail:
+    host: localhost
+    port: 1025
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
 de:
   flapdoodle:
     mongodb:
