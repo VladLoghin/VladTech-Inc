@@ -1,0 +1,32 @@
+spring:
+  data:
+    mongodb:
+      database: vladtechdb-test
+      auto-index-creation: true
+
+  mongodb:
+    embedded:
+      version: 7.0.7
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.7
+
+auth0:
+  domain: test-domain
+  mgmt:
+    clientId: test-client-id
+    clientSecret: test-client-secret
+    audience: test-audience
+  default:
+    client:
+      roleId: test-role-id
+
+logging:
+  level:
+    org.springframework: WARN
+    org.example.vladtech: DEBUG
+    de.flapdoodle.embed.mongo: WARN
+    org.springframework.security: WARN

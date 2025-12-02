@@ -13,13 +13,13 @@ spring:
 
   mongodb:
     embedded:
-      version: 5.0.5
+      version: 7.0.7
 
 de:
   flapdoodle:
     mongodb:
       embedded:
-        version: 5.0.5
+        version: 7.0.7
 
 auth0:
   domain: dev-ljz84r2xvrlnftfv.ca.auth0.com
