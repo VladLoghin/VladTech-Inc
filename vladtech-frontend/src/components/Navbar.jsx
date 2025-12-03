@@ -10,44 +10,35 @@ const Navbar = () => {
   const roles = user?.["https://vladtech.com/roles"] || [];
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        padding: "12px 20px",
-        background: "#222",
-        color: "white",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
+    <nav className="flex items-center justify-between px-8 py-4 bg-black/95 backdrop-blur-sm border-b border-white/10 text-white sticky top-0 z-50">
       {/* LEFT SIDE LINKS */}
-      <div style={{ display: "flex", gap: "18px" }}>
-        <Link style={{ color: "white" }} to="/">
+      <div className="flex items-center gap-8">
+        <Link className="text-white tracking-widest hover:text-yellow-400 transition-colors" to="/">
           Home
         </Link>
 
         {isAuthenticated && (
-          <Link style={{ color: "white" }} to="/dashboard">
+          <Link className="text-white hover:text-yellow-400 transition-colors" to="/dashboard">
             Dashboard
           </Link>
         )}
 
         {/* Admin-only link */}
         {roles.includes("Admin") && (
-          <Link style={{ color: "white" }} to="/admin">
+          <Link className="text-white hover:text-yellow-400 transition-colors" to="/admin">
             Admin Panel
           </Link>
         )}
 
         {/* Employee-only link */}
         {roles.includes("Employee") && (
-          <Link style={{ color: "white" }} to="/employee">
+          <Link className="text-white hover:text-yellow-400 transition-colors" to="/employee">
             Employee Tools
           </Link>
         )}
 
         {roles.includes("Client") && (
-          <Link style={{ color: "white" }} to="/client">
+          <Link className="text-white hover:text-yellow-400 transition-colors" to="/client">
             Client Area
           </Link>
         )}
@@ -57,7 +48,7 @@ const Navbar = () => {
 
 
       {/* RIGHT SIDE ACTIONS */}
-      <div style={{ display: "flex", gap: "12px" }}>
+      <div className="flex items-center gap-4">
         {!isAuthenticated && <LoginButton />}
         {isAuthenticated && <LogoutButton />}
       </div>

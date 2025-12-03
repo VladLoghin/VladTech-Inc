@@ -1,19 +1,10 @@
-import LoginButton from "../components/LoginButton";
-import Profile from "../components/Profile";
-import LogoutButton from "../components/LogoutButton";
 import useAssignClientRole from "../hooks/UseAssignClientRole";
+import HomePage from "./HomePage";
 
 const Home = () => {
     useAssignClientRole();
 
-  return (
-    <div>
-      <h1>Home Page</h1>
-      <LoginButton />
-      <LogoutButton />
-      <Profile />
-    </div>
-  );
+  return <HomePage />;
 };
 
 export default Home;
