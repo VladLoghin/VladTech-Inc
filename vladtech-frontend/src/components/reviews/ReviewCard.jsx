@@ -1,6 +1,6 @@
 import React from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
-import "./review.css";
+import "./Review.css";
 
 const ReviewCard = ({ review }) => {
     const { clientId, comment, rating, photos } = review;
