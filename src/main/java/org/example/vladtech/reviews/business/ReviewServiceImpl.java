@@ -61,7 +61,6 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
         // map fields from request to existing entity
-        requestMapper.requestModelToEntity(reviewRequest); // returns a new entity
         // copy non-ID fields
         existing.setClientId(reviewRequest.getClientId());
         existing.setAppointmentId(reviewRequest.getAppointmentId());
