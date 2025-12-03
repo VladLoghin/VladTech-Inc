@@ -5,11 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 //import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.List;
 import org.example.vladtech.reviews.data.Photo;
@@ -22,9 +19,7 @@ import org.example.vladtech.reviews.data.ReviewRepository;
 @RequiredArgsConstructor
 public class DatabaseLoaderService implements CommandLineRunner {
 
-//    private final ProjectRepository projectRepository;
     private final ProjectRepository projectRepository;
-    //    private final ProjectRepository projectRepository;
     private final ReviewRepository reviewRepository;
 
     @Override
@@ -119,7 +114,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 LocalDate.of(2025, 3, 30),
                 ProjectType.ProjectTypeEnum.SCHEDULED
         );
-
 
         createProject(
                 "PROJ-2",
@@ -265,7 +259,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
         } catch (Exception e) {
             log.error("Error creating project record: {}", e.getMessage(), e);
         }
-
 
     }
 

@@ -5,9 +5,6 @@ import java.util.List;
 
 public interface ReviewRepository extends MongoRepository<Review, String> {
 
-    // Get all reviews
-    List<Review> findAll();
-
     // Get all visible reviews
     List<Review> findByVisibleTrue();
 

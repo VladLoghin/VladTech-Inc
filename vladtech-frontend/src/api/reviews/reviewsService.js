@@ -7,7 +7,6 @@ export const getAllVisibleReviews = async () => {
         const res = await axios.get(`${API_BASE}/visible`);
         return res.data;
     } catch (err) {
-        console.error("Failed to fetch reviews:", err);
         throw err;
     }
 };

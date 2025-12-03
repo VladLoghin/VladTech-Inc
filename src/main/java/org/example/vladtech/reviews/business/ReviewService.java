@@ -1,12 +1,13 @@
 package org.example.vladtech.reviews.business;
 
 import org.example.vladtech.reviews.presentation.ReviewResponseModel;
+import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import java.util.List;
 
 public interface ReviewService {
 
     // Create a new review
-    ReviewResponseModel createReview(ReviewResponseModel reviewRequest);
+    ReviewResponseModel createReview(ReviewRequestModel reviewRequest);
 
     // Get a review by its ID
     ReviewResponseModel getReviewById(String reviewId);
@@ -24,7 +25,7 @@ public interface ReviewService {
     List<ReviewResponseModel> getReviewsByAppointment(String appointmentId);
 
     // Update an existing review
-    ReviewResponseModel updateReview(String reviewId, ReviewResponseModel reviewRequest);
+    ReviewResponseModel updateReview(String reviewId, ReviewRequestModel reviewRequest);
 
     // Delete a review by ID
     void deleteReview(String reviewId);
