@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -41,14 +42,16 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ReviewResponseModel> createReview(@RequestBody ReviewRequestModel reviewRequest) {
+    public ResponseEntity<ReviewResponseModel> createReview(
+            @Valid @RequestBody ReviewRequestModel reviewRequest
+    ) {
         return ResponseEntity.ok(reviewService.createReview(reviewRequest));
     }
 
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseModel> updateReview(
             @PathVariable String reviewId,
-            @RequestBody ReviewRequestModel reviewRequest
+            @Valid @RequestBody ReviewRequestModel reviewRequest
     ) {
         return ResponseEntity.ok(reviewService.updateReview(reviewId, reviewRequest));
     }

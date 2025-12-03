@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -12,10 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewRequestModel {
+    @NotNull
     private String clientId;
+    @NotNull
     private String appointmentId;
+    @NotNull
     private String comment;
+    @NotNull
     private Boolean visible = true; // set to false when implementing moderation
+    @NotNull
     private Rating rating;
     private List<Photo> photos;
 }
