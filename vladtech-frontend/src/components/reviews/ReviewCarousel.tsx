@@ -17,7 +17,7 @@ interface Photo {
     clientId: string;
     filename: string;
     imageType: string;
-    data: Uint8Array | null;
+    data: number[] | null;
 }
 
 interface Review {
