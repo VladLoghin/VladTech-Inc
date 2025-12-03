@@ -22,28 +22,25 @@ public class SmtpContactEmailSender implements ContactEmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 
+            // From: VladTech (stable address)
+            helper.setFrom("admin@vladtech.com");
+
+            // Reply-To: the client's email address
+            if (email.getClientEmail() != null && !email.getClientEmail().isBlank()) {
+                helper.setReplyTo(email.getClientEmail());
+            }
+
             helper.setTo(email.getDestinary());
             helper.setSubject(email.getTitle());
-
-            // Use the client's email as the From address if available
-            String fromAddress = email.getSenderEmail();
-            if (fromAddress == null || fromAddress.isBlank()) {
-                fromAddress = "no-reply@vladtech.com";
-            }
-            helper.setFrom(fromAddress);
-
             helper.setText(buildHtmlBody(email), true); // true = HTML
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            // For now just wrap in RuntimeException; later you can log properly
             throw new RuntimeException("Failed to send contact email", e);
         }
     }
 
     private String buildHtmlBody(ContactEmail email) {
-        // We reuse the structure you already defined in the mapper,
-        // but here we rebuild it quickly so this class is self-contained.
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
         sb.append("<h2>").append(email.getHeader()).append("</h2>");
