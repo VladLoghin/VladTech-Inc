@@ -22,8 +22,11 @@ public class SmtpContactEmailSender implements ContactEmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 
-            // From: VladTech (stable address)
-            helper.setFrom("admin@vladtech.com");
+            String fromAddress =
+                    (email.getClientEmail() != null && !email.getClientEmail().isBlank())
+                            ? email.getClientEmail()
+                            : "admin@vladtech.com";
+            helper.setFrom(fromAddress);
 
             // Reply-To: the client's email address
             if (email.getClientEmail() != null && !email.getClientEmail().isBlank()) {
