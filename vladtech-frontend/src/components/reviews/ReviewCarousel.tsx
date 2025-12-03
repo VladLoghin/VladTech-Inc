@@ -38,6 +38,7 @@ const ReviewCarousel = () => {
             .then((data) => {
                 setReviews(data);
             })
+            .catch((err) => console.error("Failed to fetch reviews:", err));
     }, []);
 
     if (!reviews.length) return <p className="text-center">No reviews available</p>;
