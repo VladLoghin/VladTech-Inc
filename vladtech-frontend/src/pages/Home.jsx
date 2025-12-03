@@ -2,6 +2,7 @@ import LoginButton from "../components/LoginButton";
 import Profile from "../components/Profile";
 import LogoutButton from "../components/LogoutButton";
 import useAssignClientRole from "../hooks/UseAssignClientRole";
+import ContactUs from "../components/ContactUs";
 
 const Home = () => {
     useAssignClientRole();
@@ -12,6 +13,7 @@ const Home = () => {
       <LoginButton />
       <LogoutButton />
       <Profile />
+      <ContactUs />
     </div>
   );
 };
