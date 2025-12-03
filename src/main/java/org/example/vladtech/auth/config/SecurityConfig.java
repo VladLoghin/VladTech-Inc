@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/employee/**").hasAnyAuthority("Employee", "Admin")
                         .requestMatchers("/api/client/**").hasAuthority("Client")
                         .requestMatchers("/api/role-assignment/**").permitAll()
-                        .requestMatchers("/api/v1/reviews/**").permitAll()
+                        .requestMatchers("/api/reviews/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
 
                         .anyRequest().authenticated()

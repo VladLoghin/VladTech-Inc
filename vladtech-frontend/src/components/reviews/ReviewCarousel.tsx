@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { getAllVisibleReviews } from "../../api/reviews/reviewsService";
-import "./review.css";
-import ReviewCard from "./ReviewCard";
+import { getAllVisibleReviews } from "../../api/reviews/reviewsService.js";
+import "./Review.css";
+import ReviewCard from "./ReviewCard.jsx";
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+// @ts-ignore
 import "swiper/css";
+// @ts-ignore
 import "swiper/css/navigation";
+// @ts-ignore
 import "swiper/css/pagination";
 
 interface Review {
