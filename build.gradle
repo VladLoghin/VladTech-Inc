@@ -15,6 +15,12 @@ java {
 	}
 }
 
+ext{
+    mapstructVersion = "1.6.3"
+    lombokVersion = "1.18.36"
+    lombokMapstructBindingVersion = "0.2.0"
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -43,6 +49,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+
 }
 
 tasks.named('test') {

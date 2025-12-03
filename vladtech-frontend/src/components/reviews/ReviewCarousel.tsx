@@ -13,14 +13,21 @@ import "swiper/css/navigation";
 // @ts-ignore
 import "swiper/css/pagination";
 
+interface Photo {
+    clientId: string;
+    filename: string;
+    imageType: string;
+    data: Uint8Array | null;
+}
+
 interface Review {
     reviewId: string;
     clientId: string;
     appointmentId: string;
     comment: string;
     visible: boolean;
-    photos?: string[];
-    rating?: number;
+    photos?: Photo[];
+    rating?: string;
 }
 
 const ReviewCarousel = () => {
@@ -29,10 +36,8 @@ const ReviewCarousel = () => {
     useEffect(() => {
         getAllVisibleReviews()
             .then((data) => {
-                console.log("LOADED REVIEWS:", data);
                 setReviews(data);
             })
-            .catch((err) => console.error("Failed to fetch reviews", err));
     }, []);
 
     if (!reviews.length) return <p className="text-center">No reviews available</p>;

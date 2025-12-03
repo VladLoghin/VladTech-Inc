@@ -1,101 +1,81 @@
 package org.example.vladtech.reviews.business;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
+import org.example.vladtech.reviews.mapperlayer.ReviewRequestMapper;
+import org.example.vladtech.reviews.mapperlayer.ReviewResponseMapper;
+import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import org.example.vladtech.reviews.presentation.ReviewResponseModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-
-    public ReviewServiceImpl(ReviewRepository reviewRepository) {
-        this.reviewRepository = reviewRepository;
-    }
+    private final ReviewRequestMapper requestMapper;
+    private final ReviewResponseMapper responseMapper;
 
     @Override
-    public ReviewResponseModel createReview(ReviewResponseModel reviewRequest) {
-        // map ReviewResponseModel -> Review
-        Review review = new Review();
-        review.setClientId(reviewRequest.getClientId());
-        review.setAppointmentId(reviewRequest.getAppointmentId());
-        review.setComment(reviewRequest.getComment());
-        review.setVisible(reviewRequest.getVisible());
-        review.setRating(reviewRequest.getRating());
-        review.setPhotos(reviewRequest.getPhotos());
-
+    public ReviewResponseModel createReview(ReviewRequestModel reviewRequest) {
+        Review review = requestMapper.requestModelToEntity(reviewRequest);
         Review saved = reviewRepository.save(review);
-
-        // map back to ReviewResponseModel
-        return mapToResponse(saved);
+        return responseMapper.entityToResponseModel(saved);
     }
 
     @Override
     public ReviewResponseModel getReviewById(String reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
-        return mapToResponse(review);
+        return responseMapper.entityToResponseModel(review);
     }
 
     @Override
     public List<ReviewResponseModel> getAllReviews() {
-        return reviewRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .toList();
+        return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
     }
 
     @Override
     public List<ReviewResponseModel> getAllVisibleReviews() {
-        return reviewRepository.findByVisibleTrue().stream()
-                .map(this::mapToResponse)
-                .toList();
+        return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
     }
 
     @Override
     public List<ReviewResponseModel> getReviewsByClient(String clientId) {
-        return reviewRepository.findByClientId(clientId).stream()
-                .map(this::mapToResponse)
-                .toList();
+        return responseMapper.entityListToResponseModelList(reviewRepository.findByClientId(clientId));
     }
 
     @Override
     public List<ReviewResponseModel> getReviewsByAppointment(String appointmentId) {
-        return reviewRepository.findByAppointmentId(appointmentId).stream()
-                .map(this::mapToResponse)
-                .toList();
+        return responseMapper.entityListToResponseModelList(reviewRepository.findByAppointmentId(appointmentId));
     }
 
     @Override
-    public ReviewResponseModel updateReview(String reviewId, ReviewResponseModel reviewRequest) {
+    public ReviewResponseModel updateReview(String reviewId, ReviewRequestModel reviewRequest) {
         Review existing = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
+        // map fields from request to existing entity
+        requestMapper.requestModelToEntity(reviewRequest); // returns a new entity
+        // copy non-ID fields
+        existing.setClientId(reviewRequest.getClientId());
+        existing.setAppointmentId(reviewRequest.getAppointmentId());
         existing.setComment(reviewRequest.getComment());
         existing.setVisible(reviewRequest.getVisible());
         existing.setRating(reviewRequest.getRating());
         existing.setPhotos(reviewRequest.getPhotos());
 
         Review updated = reviewRepository.save(existing);
-        return mapToResponse(updated);
+        return responseMapper.entityToResponseModel(updated);
     }
 
     @Override
     public void deleteReview(String reviewId) {
         reviewRepository.deleteById(reviewId);
-    }
-
-    private ReviewResponseModel mapToResponse(Review review) {
-        return new ReviewResponseModel(
-                review.getReviewId(),
-                review.getClientId(),
-                review.getAppointmentId(),
-                review.getComment(),
-                review.getVisible(),
-                review.getRating(),
-                review.getPhotos()
-        );
     }
 }
