@@ -2,9 +2,11 @@ package org.example.vladtech.contact.datamapperlayer;
 
 import org.example.vladtech.contact.domain.ContactEmail;
 import org.example.vladtech.contact.presentationlayer.ContactRequestDto;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 public class ContactEmailMapper {
 
     // For now we hardcode the admin address and template name.
@@ -30,6 +32,7 @@ public class ContactEmailMapper {
                 body,
                 footer,
                 requestDto.getName(),               // senderName
+                requestDto.getEmail(),              // senderEmail
                 LocalDateTime.now()                 // sentDate
         );
     }
