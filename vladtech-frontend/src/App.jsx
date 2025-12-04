@@ -11,8 +11,6 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 function App() {
   return (
       <Router>
-        <Navbar />
-
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<Home />} />

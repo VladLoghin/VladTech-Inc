@@ -6,6 +6,7 @@ import { Label } from "../components/label";
 // Removed ImageWithFallback import
 import { Send, LogIn } from "lucide-react";
 import { motion } from "motion/react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -60,6 +61,7 @@ const portfolioImages = [
 ];
 
 export default function HomePage({ onNavigate }: HomePageProps) {
+  const { loginWithRedirect, isAuthenticated } = useAuth0();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -152,17 +154,19 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             >
               CONTACT
             </button>
-            <button
-              onClick={() => alert("Login functionality coming soon!")}
-              className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
-                isNavbarDark 
-                  ? "bg-white text-black hover:bg-yellow-400" 
-                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
-              }`}
-            >
-              <LogIn className="h-4 w-4" />
-              LOGIN
-            </button>
+            {!isAuthenticated && (
+              <button
+                onClick={() => loginWithRedirect()}
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
+                  isNavbarDark 
+                    ? "bg-white text-black hover:bg-yellow-400" 
+                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                }`}
+              >
+                <LogIn className="h-4 w-4" />
+                LOGIN
+              </button>
+            )}
           </div>
         </div>
       </nav>
