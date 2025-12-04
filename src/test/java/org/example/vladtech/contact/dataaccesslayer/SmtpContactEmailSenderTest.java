@@ -36,7 +36,7 @@ class SmtpContactEmailSenderTest {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         ContactEmail email = new ContactEmail(
-                "admin@vladtech.com",         // destinary (To)
+                "cunninghamadmin4339@gmail.com",         // destinary (To)
                 "Hello",                      // title
                 "CONTACT_US",                 // template name
                 "New contact request from Jane",
@@ -64,7 +64,7 @@ class SmtpContactEmailSenderTest {
         // Assert: To is the admin address
         InternetAddress to =
                 (InternetAddress) mimeMessage.getRecipients(MimeMessage.RecipientType.TO)[0];
-        assertEquals("admin@vladtech.com", to.getAddress());
+        assertEquals("cunninghamadmin4339@gmail.com", to.getAddress());
 
         // Assert: subject
         assertEquals("Hello", mimeMessage.getSubject());

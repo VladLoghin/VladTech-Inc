@@ -25,7 +25,7 @@ public class SmtpContactEmailSender implements ContactEmailSender {
             String fromAddress =
                     (email.getClientEmail() != null && !email.getClientEmail().isBlank())
                             ? email.getClientEmail()
-                            : "admin@vladtech.com";
+                            : "cunninghamadmin4339@gmail.com";
             helper.setFrom(fromAddress);
 
             // Reply-To: the client's email address

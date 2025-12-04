@@ -23,7 +23,7 @@ class ContactEmailMapperTest {
         ContactEmail email = mapper.toContactEmail(dto);
 
         // assert
-        assertEquals("admin@vladtech.com", email.getDestinary());
+        assertEquals("cunninghamadmin4339@gmail.com", email.getDestinary());
         assertEquals("Kitchen remodel", email.getTitle());
         assertEquals("CONTACT_US", email.getTemplateName());
         assertEquals("New contact request from Cunningham", email.getHeader());

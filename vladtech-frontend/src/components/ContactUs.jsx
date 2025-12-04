@@ -9,6 +9,7 @@ function ContactUs() {
   const [success, setSuccess] = useState(false)
 
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0()
+  const isFormInvalid = subject.trim() === "" || details.trim() === "";
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -98,9 +99,12 @@ function ContactUs() {
           </label>
         </div>
 
-        <button type="submit" disabled={!isAuthenticated || isSending}>
+        <button
+          type="submit"
+          disabled={!isAuthenticated || isSending || isFormInvalid}>
           {isSending ? "Sending..." : "CONTACT US"}
         </button>
+
       </form>
 
       {success && <p>Your message was sent successfully.</p>}

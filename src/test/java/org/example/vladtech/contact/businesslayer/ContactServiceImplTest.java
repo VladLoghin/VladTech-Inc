@@ -36,7 +36,7 @@ class ContactServiceImplTest {
         dto.setMessage("Body from DTO");
 
         ContactEmail mappedEmail = new ContactEmail(
-                "admin@vladtech.com",
+                "cunninghamadmin4339@gmail.com",
                 "Subject from DTO",
                 "CONTACT_US",
                 "Header",

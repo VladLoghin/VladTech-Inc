@@ -11,7 +11,7 @@ public class ContactEmailMapper {
 
     // For now we hardcode the admin address and template name.
     // Later we can move these to application.yml if needed.
-    private static final String ADMIN_EMAIL = "admin@vladtech.com";
+    private static final String ADMIN_EMAIL = "cunninghamadmin4339@gmail.com";
     private static final String TEMPLATE_NAME = "CONTACT_US";
 
     // Map the incoming DTO from the frontend to our domain object
