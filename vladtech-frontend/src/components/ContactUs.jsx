@@ -63,14 +63,12 @@ function ContactUs() {
       setIsSending(false)
     }
   }
-
+if (!isAuthenticated) {
+        return null
+      }
   return (
     <section>
       <h1>CONTACT US</h1>
-
-      {!isAuthenticated && (
-        <p>You must be logged in to use this form.</p>
-      )}
 
       <form onSubmit={handleSubmit}>
         <div>
