@@ -16,36 +16,7 @@ const Navbar = () => {
         <Link className="text-white tracking-widest hover:text-yellow-400 transition-colors" to="/">
           Home
         </Link>
-
-        {isAuthenticated && (
-          <Link className="text-white hover:text-yellow-400 transition-colors" to="/dashboard">
-            Dashboard
-          </Link>
-        )}
-
-        {/* Admin-only link */}
-        {roles.includes("Admin") && (
-          <Link className="text-white hover:text-yellow-400 transition-colors" to="/admin">
-            Admin Panel
-          </Link>
-        )}
-
-        {/* Employee-only link */}
-        {roles.includes("Employee") && (
-          <Link className="text-white hover:text-yellow-400 transition-colors" to="/employee">
-            Employee Tools
-          </Link>
-        )}
-
-        {roles.includes("Client") && (
-          <Link className="text-white hover:text-yellow-400 transition-colors" to="/client">
-            Client Area
-          </Link>
-        )}
-
       </div>
-
-
 
       {/* RIGHT SIDE ACTIONS */}
       <div className="flex items-center gap-4">

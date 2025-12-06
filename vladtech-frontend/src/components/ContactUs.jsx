@@ -78,12 +78,44 @@ function ContactUs({ isOpen, onClose }) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/0 backdrop-blur-0 animate-in fade-in duration-300"
       onClick={onClose}
+      style={{
+        animation: 'fadeInBackdrop 0.3s ease-out forwards'
+      }}
     >
+      <style>
+        {`
+          @keyframes fadeInBackdrop {
+            from {
+              background-color: rgba(0, 0, 0, 0);
+              backdrop-filter: blur(0px);
+            }
+            to {
+              background-color: rgba(0, 0, 0, 0.8);
+              backdrop-filter: blur(8px);
+            }
+          }
+          @keyframes modalSlideIn {
+            from {
+              opacity: 0;
+              transform: scale(0.95) translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1) translateY(0);
+            }
+          }
+        `}
+      </style>
       <div 
-        className="relative w-full max-w-2xl mx-4 bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-3xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+        className="relative w-full max-w-2xl mx-4 bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-3xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          animation: 'modalSlideIn 0.4s ease-out forwards',
+          animationDelay: '0.1s',
+          opacity: 0
+        }}
       >
         {/* Close button */}
         <button
