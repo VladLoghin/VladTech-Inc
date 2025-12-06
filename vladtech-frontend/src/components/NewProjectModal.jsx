@@ -81,161 +81,142 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: "white",
-        padding: "30px",
-        borderRadius: "8px",
-        maxWidth: "500px",
-        width: "90%",
-        maxHeight: "90vh",
-        overflowY: "auto"
-      }}>
-        <h2>New Project</h2>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="bg-white border-2 border-yellow-400 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">New Project</h2>
         {submitError && (
-          <div style={{ padding: "10px", backgroundColor: "#fee", color: "#c33", marginBottom: "15px", borderRadius: "4px" }}>
+          <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
             {submitError}
           </div>
         )}
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "15px" }}>
-            <label>Project Name *</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Project Name *</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
-            {errors.name && <span style={{ color: "red", fontSize: "12px" }}>{errors.name}</span>}
+            {errors.name && <span className="text-red-600 text-sm mt-1 block">{errors.name}</span>}
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Street Address</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Street Address</label>
             <input
               type="text"
               name="address.streetAddress"
               value={formData.address.streetAddress}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>City *</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">City *</label>
             <input
               type="text"
               name="address.city"
               value={formData.address.city}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
-            {errors.city && <span style={{ color: "red", fontSize: "12px" }}>{errors.city}</span>}
+            {errors.city && <span className="text-red-600 text-sm mt-1 block">{errors.city}</span>}
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Province</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Province</label>
             <input
               type="text"
               name="address.province"
               value={formData.address.province}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Country</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Country</label>
             <input
               type="text"
               name="address.country"
               value={formData.address.country}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Postal Code</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Postal Code</label>
             <input
               type="text"
               name="address.postalCode"
               value={formData.address.postalCode}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Start Date</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Start Date</label>
             <input
               type="date"
               name="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Due Date *</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Due Date *</label>
             <input
               type="date"
               name="dueDate"
               value={formData.dueDate}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             />
-            {errors.dueDate && <span style={{ color: "red", fontSize: "12px" }}>{errors.dueDate}</span>}
+            {errors.dueDate && <span className="text-red-600 text-sm mt-1 block">{errors.dueDate}</span>}
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Project Type *</label>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-black mb-2">Project Type *</label>
             <select
               name="projectType"
               value={formData.projectType}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
             >
               <option value="">Select</option>
               <option value="APPOINTMENT">Appointment</option>
               <option value="SCHEDULED">Scheduled</option>
             </select>
-            {errors.projectType && <span style={{ color: "red", fontSize: "12px" }}>{errors.projectType}</span>}
+            {errors.projectType && <span className="text-red-600 text-sm mt-1 block">{errors.projectType}</span>}
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Description</label>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-black mb-2">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px", marginTop: "5px", minHeight: "80px" }}
+              className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black min-h-[100px] resize-none"
             />
           </div>
 
-          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+          <div className="flex gap-4 justify-end">
             <button
               type="button"
               onClick={handleClose}
-              style={{ padding: "10px 20px", cursor: "pointer" }}
+              className="px-8 py-3 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
-              style={{ padding: "10px 20px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}
+              className="px-8 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold shadow-lg"
             >
               Save
             </button>

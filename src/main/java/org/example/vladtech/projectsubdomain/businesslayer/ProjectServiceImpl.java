@@ -76,4 +76,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteProjectPhoto(String projectIdentifier, String photoId) {
     }
+
+    @Override
+    public long getProjectCount() {
+        return projectRepository.count();
+    }
+
+
 }

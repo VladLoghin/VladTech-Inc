@@ -4,6 +4,7 @@ import { Button } from "../components/button";
 import { Send, LogIn, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -59,10 +60,42 @@ const portfolioImages = [
 ];
 
 export default function HomePage({ onNavigate, onOpenContactModal }: HomePageProps) {
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isNavbarDark, setIsNavbarDark] = useState(false);
+
+  // Debug: Log user roles
+  useEffect(() => {
+    if (user) {
+      console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
+      console.log("👤 Full user object:", user);
+    }
+  }, [user]);
+
+  // NEW: dynamic stats
+  const [projectCount, setProjectCount] = useState<number | null>(null);
+  const [ageValue, setAgeValue] = useState<string>("10+");
+  const [ageUnit, setAgeUnit] = useState<string>("MONTHS");
+
+  // Fetch project count from backend
+  useEffect(() => {
+    const fetchProjectCount = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/projects/count");
+        if (response.ok) {
+          const count = await response.json();
+          setProjectCount(count);
+        }
+      } catch (error) {
+        console.error("Failed to fetch project count:", error);
+        setProjectCount(0); // Fallback to 0 if fetch fails
+      }
+    };
+    
+    fetchProjectCount();
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -97,7 +130,27 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Get 3 images for current slide
+  // NEW: compute dynamic company age (months/years)
+  useEffect(() => {
+    const foundingDate = new Date("2024-01-01"); // adjust if needed
+    const now = new Date();
+
+    const yearsDiff = now.getFullYear() - foundingDate.getFullYear();
+    const monthsDiff = now.getMonth() - foundingDate.getMonth();
+    const totalMonths = yearsDiff * 12 + monthsDiff;
+
+    if (totalMonths < 12) {
+      const displayMonths = Math.max(totalMonths, 1); // never show 0
+      setAgeValue(`${displayMonths}+`);
+      setAgeUnit("MONTHS");
+    } else {
+      const years = Math.floor(totalMonths / 12);
+      setAgeValue(`${years}+`);
+      setAgeUnit(years === 1 ? "YEAR" : "YEARS");
+    }
+  }, []);
+
+  // Get 3 images for current slide (kept as you had it)
   const getCurrentImages = () => {
     const startIndex = currentSlide * 3;
     return portfolioImages.slice(startIndex, startIndex + 3);
@@ -106,15 +159,19 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar - Changes to dark on scroll */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-all duration-300 ${
-        isNavbarDark 
-          ? "bg-black/95 border-white/10" 
-          : "bg-white/95 border-black/10"
-      }`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-all duration-300 ${
+          isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
+        }`}
+      >
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
-          <div className={`tracking-widest transition-colors ${
-            isNavbarDark ? "text-white" : "text-black"
-          }`}>VLADTECH</div>
+          <div
+            className={`tracking-widest transition-colors ${
+              isNavbarDark ? "text-white" : "text-black"
+            }`}
+          >
+            VLADTECH
+          </div>
           <div className="flex gap-12 items-center">
             <button
               onClick={() => scrollToSection("portfolio")}
@@ -140,12 +197,58 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
             >
               CONTACT
             </button>
+
+            {/* Role-based navigation links */}
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Admin") && (
+              <button
+                onClick={() => navigate("/admin")}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                ADMIN PANEL
+              </button>
+            )}
+
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Employee") && (
+              <button
+                onClick={() => navigate("/employee")}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                EMPLOYEE TOOLS
+              </button>
+            )}
+
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
+              <button
+                onClick={() => navigate("/client")}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                CLIENT AREA
+              </button>
+            )}
+
+            {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
+              <button
+                onClick={() => navigate("/dashboard")}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                DASHBOARD
+              </button>
+            )}
+
             {!isAuthenticated ? (
               <button
                 onClick={() => loginWithRedirect()}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
-                  isNavbarDark 
-                    ? "bg-white text-black hover:bg-yellow-400" 
+                  isNavbarDark
+                    ? "bg-white text-black hover:bg-yellow-400"
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
@@ -156,8 +259,8 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
               <button
                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
-                  isNavbarDark 
-                    ? "bg-white text-black hover:bg-yellow-400" 
+                  isNavbarDark
+                    ? "bg-white text-black hover:bg-yellow-400"
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
@@ -199,8 +302,8 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           className="absolute top-32 left-24 max-w-xs"
         >
           <p className="text-sm text-black/60 leading-relaxed">
-            Based in the heart of innovation—with expertise spanning construction, 
-            engineering, and technology integration for tomorrow's infrastructure.
+            Based in the heart of innovation with expertise spanning construction, engineering,
+            and technology integration for tomorrow&apos;s infrastructure.
           </p>
         </motion.div>
 
@@ -211,8 +314,8 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           className="absolute top-32 right-24 max-w-xs text-right"
         >
           <p className="text-sm text-black/60 leading-relaxed">
-            From initial idea to final execution, we work with you to craft 
-            solutions that stand the test of time. We develop. We get it done—really.
+            From initial idea to final execution, we work with you to craft solutions that stand
+            the test of time. We develop. We get it done. Really.
           </p>
         </motion.div>
 
@@ -241,7 +344,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                 </h1>
               </motion.div>
             </div>
-            
+
             {/* Overlaid Image */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -308,9 +411,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
       >
         <div className="container mx-auto px-8">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-6xl md:text-7xl text-white tracking-tight">
-              PORTFOLIO
-            </h2>
+            <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
             <button
               onClick={() => onNavigate?.("portfolio")}
               className="text-white hover:text-yellow-400 tracking-wider transition-colors"
@@ -318,7 +419,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
               VIEW ALL →
             </button>
           </div>
-          
+
           {/* Carousel - 3 Images Side by Side with Fade Animation */}
           <div className="relative max-w-7xl mx-auto h-[400px] md:h-[500px]">
             {[0, 1, 2].map((slideIndex) => (
@@ -330,18 +431,20 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                 className="absolute inset-0 grid grid-cols-3 gap-0"
                 style={{ pointerEvents: currentSlide === slideIndex ? "auto" : "none" }}
               >
-                {portfolioImages.slice(slideIndex * 3, slideIndex * 3 + 3).map((image) => (
-                  <div key={image.id} className="relative group overflow-hidden">
-                    <img
-                      src={image.url}
-                      alt={image.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+                {portfolioImages
+                  .slice(slideIndex * 3, slideIndex * 3 + 3)
+                  .map((image) => (
+                    <div key={image.id} className="relative group overflow-hidden">
+                      <img
+                        src={image.url}
+                        alt={image.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
               </motion.div>
             ))}
-            
+
             {/* Slide Indicators */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {[0, 1, 2].map((index) => (
@@ -379,13 +482,13 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <p className="text-lg text-black/70 mb-6 leading-relaxed">
-                  At VLADTECH, we're committed to transforming your vision into reality. With decades 
-                  of combined experience in construction, engineering, and technology integration, 
-                  our team delivers excellence in every project.
+                  At VLADTECH, we&apos;re committed to transforming your vision into reality. With
+                  decades of combined experience in construction, engineering, and technology
+                  integration, our team delivers excellence in every project.
                 </p>
                 <p className="text-lg text-black/70 mb-8 leading-relaxed">
-                  We believe in innovation, quality, and building lasting relationships with our clients. 
-                  From concept to completion, we're with you every step of the way.
+                  We believe in innovation, quality, and building lasting relationships with our
+                  clients. From concept to completion, we&apos;re with you every step of the way.
                 </p>
                 <div className="grid grid-cols-3 gap-8 mt-12">
                   <motion.div
@@ -395,7 +498,9 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                     transition={{ delay: 0.4, duration: 0.5 }}
                     className="text-center"
                   >
-                    <div className="text-5xl text-yellow-400 mb-2">20+</div>
+                    <div className="text-5xl text-yellow-400 mb-2">
+                      {projectCount !== null ? `${projectCount}+` : "…"}
+                    </div>
                     <div className="text-sm text-black/60 tracking-wide">PROJECTS</div>
                   </motion.div>
                   <motion.div
@@ -405,8 +510,8 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                     transition={{ delay: 0.5, duration: 0.5 }}
                     className="text-center"
                   >
-                    <div className="text-5xl text-yellow-400 mb-2">10+</div>
-                    <div className="text-sm text-black/60 tracking-wide">MONTHS</div>
+                    <div className="text-5xl text-yellow-400 mb-2">{ageValue}</div>
+                    <div className="text-sm text-black/60 tracking-wide">{ageUnit}</div>
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -437,7 +542,10 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
       </div>
 
       {/* Contact Section - Liquid Glass Apple Style with Scroll Reveal */}
-      <div id="contact" className="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+      <div
+        id="contact"
+        className="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden"
+      >
         {/* Ambient Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
@@ -462,9 +570,9 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-center text-gray-400 mb-20 text-lg tracking-wide"
             >
-              Let's build something extraordinary together
+              Let&apos;s build something extraordinary together
             </motion.p>
-            
+
             {/* Send Message Button */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
