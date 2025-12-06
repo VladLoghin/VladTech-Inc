@@ -52,11 +52,15 @@ const Navbar = () => {
           </Link>
         )}
 
-        {/* Public Reviews */}
-        <Link style={{ color: "white" }} to="/reviews">
-            Reviews
+        {/* Portfolio link */}
+        <Link style={{ color: "white" }} to="/portfolio">
+            Portfolio
         </Link>
 
+        {/* Temp Reviews link */}
+        <Link style={{color: "white"}} to="/reviews">
+            Temp
+        </Link>
       </div>
 
 
