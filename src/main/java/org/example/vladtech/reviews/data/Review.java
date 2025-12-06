@@ -31,4 +31,13 @@ public class Review {
         this.visible = visible;
         this.rating = rating;
     }
+
+    public Review(String clientId, String appointmentId, String comment, Boolean visible, Rating rating, List<Photo> photos) {
+        this.clientId = clientId;
+        this.appointmentId = appointmentId;
+        this.comment = comment;
+        this.visible = visible;
+        this.rating = rating;
+        this.photos = photos;
+    }
 }

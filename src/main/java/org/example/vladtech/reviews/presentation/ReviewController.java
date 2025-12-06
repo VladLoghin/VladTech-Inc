@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
+//import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -16,21 +16,21 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @GetMapping
-    public ResponseEntity<List<ReviewResponseModel>> getAllReviews() {
-        return ResponseEntity.ok(reviewService.getAllReviews());
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ReviewResponseModel>> getAllReviews() {
+//        return ResponseEntity.ok(reviewService.getAllReviews());
+//    }
 
-    @GetMapping("/id/{reviewId}")
-    public ResponseEntity<ReviewResponseModel> getReviewById(@PathVariable String reviewId) {
-        return ResponseEntity.ok(reviewService.getReviewById(reviewId));
-    }
+//    @GetMapping("/id/{reviewId}")
+//    public ResponseEntity<ReviewResponseModel> getReviewById(@PathVariable String reviewId) {
+//        return ResponseEntity.ok(reviewService.getReviewById(reviewId));
+//    }
 
     @GetMapping("/visible")
     public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews() {
         return ResponseEntity.ok(reviewService.getAllVisibleReviews());
     }
-
+/*
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<ReviewResponseModel>> getReviewsByClient(@PathVariable String clientId) {
         return ResponseEntity.ok(reviewService.getReviewsByClient(clientId));
@@ -61,4 +61,5 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
+ */
 }

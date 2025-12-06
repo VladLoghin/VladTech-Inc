@@ -21,6 +21,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRequestMapper requestMapper;
     private final ReviewResponseMapper responseMapper;
 
+    /*
     @Override
     public ReviewResponseModel createReview(ReviewRequestModel reviewRequest) {
         Review review = requestMapper.requestModelToEntity(reviewRequest);
@@ -39,12 +40,12 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ReviewResponseModel> getAllReviews() {
         return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
     }
-
+*/
     @Override
     public List<ReviewResponseModel> getAllVisibleReviews() {
         return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
     }
-
+/*
     @Override
     public List<ReviewResponseModel> getReviewsByClient(String clientId) {
         return responseMapper.entityListToResponseModelList(reviewRepository.findByClientId(clientId));
@@ -77,4 +78,5 @@ public class ReviewServiceImpl implements ReviewService {
     public void deleteReview(String reviewId) {
         reviewRepository.deleteById(reviewId);
     }
+ */
 }

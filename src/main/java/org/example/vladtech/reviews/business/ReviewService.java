@@ -5,7 +5,7 @@ import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import java.util.List;
 
 public interface ReviewService {
-
+/*
     // Create a new review
     ReviewResponseModel createReview(ReviewRequestModel reviewRequest);
 
@@ -14,10 +14,10 @@ public interface ReviewService {
 
     // Get all reviews
     List<ReviewResponseModel> getAllReviews();
-
+*/
     // Get all visible reviews
     List<ReviewResponseModel> getAllVisibleReviews();
-
+/*
     // Get reviews for a specific client
     List<ReviewResponseModel> getReviewsByClient(String clientId);
 
@@ -29,4 +29,5 @@ public interface ReviewService {
 
     // Delete a review by ID
     void deleteReview(String reviewId);
+    */
 }
