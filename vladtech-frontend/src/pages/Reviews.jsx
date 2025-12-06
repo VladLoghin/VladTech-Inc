@@ -14,17 +14,13 @@ const ReviewsPage = () => {
     }, []);
 
     return (
-        <div className="reviews-page">
-            {/* ====== Secondary Navbar ====== */}
+        <div className="reviews-page" data-testid="reviews-page">
             <SecondaryNavbar />
 
             <div className="container mx-auto p-4">
-                {/* ====== Carousel Section ====== */}
-                <section className="mb-10">
-                    <h2 className="title">
-                        Customer Highlights
-                    </h2>
-                    <ReviewCarousel reviews={reviews} />
+                <section className="mb-10" data-testid="reviews-carousel-section">
+                    <h2 className="title">Customer Highlights</h2>
+                    <ReviewCarousel />
                 </section>
             </div>
         </div>

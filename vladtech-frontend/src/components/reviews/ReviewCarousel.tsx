@@ -41,7 +41,7 @@ const ReviewCarousel = () => {
             .catch((err) => console.error("Failed to fetch reviews:", err));
     }, []);
 
-    if (!reviews.length) return <p className="text-center">No reviews available</p>;
+    if (!reviews.length) return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
 
     return (
         <Swiper
@@ -56,9 +56,10 @@ const ReviewCarousel = () => {
             autoplay={{ delay: 3000, disableOnInteraction: false }}
             navigation
             pagination={{ clickable: true }}
+            data-testid="review-carousel"
         >
             {reviews.map((review) => (
-                <SwiperSlide key={review.reviewId}>
+                <SwiperSlide key={review.reviewId} data-testid="review-slide">
                     <ReviewCard review={review} />
                 </SwiperSlide>
             ))}

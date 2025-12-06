@@ -32,22 +32,29 @@ const ReviewCard = ({ review }) => {
     );
 
     return (
-        <div className="review-card">
-            {imgSrc ? (
+        <div className="review-card" data-testid="review-card">
+            {imgSrc && (
                 <img
                     src={imgSrc}
                     alt={photo?.filename || clientId}
-                    onError={(e) => {
-                        e.target.src = "/images/placeholder.png"; // fallback image
-                    }}
+                    onError={(e) => { e.target.src = "/images/placeholder.png"; }}
+                    data-testid="review-image"
                 />
-            ) : null}
+            )}
 
-            <p className="client-name">{clientId}</p>
+            <p className="client-name" data-testid="review-client">{clientId}</p>
 
-            <div className="stars">{stars}</div>
+            <div className="stars" data-testid="review-stars">
+                {stars.map((star, index) =>
+                    star.type === FaStar ? (
+                        <span key={index} data-testid="review-star-filled">{star}</span>
+                    ) : (
+                        <span key={index} data-testid="review-star-empty">{star}</span>
+                    )
+                )}
+            </div>
 
-            <p className="comment">"{comment}"</p>
+            <p className="comment" data-testid="review-comment">"{comment}"</p>
         </div>
     );
 };
