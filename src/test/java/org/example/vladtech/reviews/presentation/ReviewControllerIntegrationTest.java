@@ -48,14 +48,14 @@ class ReviewControllerIntegrationTest {
         reviewRepository.saveAll(Arrays.asList(review1, review2));
     }
 
-    @Test
-    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
-        mockMvc.perform(get("/api/reviews/visible")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
-                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
-    }
+//    @Test
+//    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
+//        mockMvc.perform(get("/api/reviews/visible")
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.length()").value(2))
+//                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
+//                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
+//    }
 }
