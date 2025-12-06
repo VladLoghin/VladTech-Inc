@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/button";
-import { Input } from "../components/input";
-import { Textarea } from "../components/textarea";
-import { Label } from "../components/label";
-// Removed ImageWithFallback import
-import { Send, LogIn } from "lucide-react";
+// Removed Input, Textarea, Label imports - not needed for button-only contact section
+import { Send, LogIn, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 interface HomePageProps {
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
+  onOpenContactModal?: () => void;
 }
 
 const portfolioImages = [
@@ -60,13 +58,8 @@ const portfolioImages = [
   },
 ];
 
-export default function HomePage({ onNavigate }: HomePageProps) {
-  const { loginWithRedirect, isAuthenticated } = useAuth0();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+export default function HomePage({ onNavigate, onOpenContactModal }: HomePageProps) {
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isNavbarDark, setIsNavbarDark] = useState(false);
@@ -74,13 +67,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     element?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We'll get back to you soon.");
-    setFormData({ name: "", email: "", message: "" });
   };
 
   // Auto-swipe carousel every 4 seconds
@@ -154,7 +140,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             >
               CONTACT
             </button>
-            {!isAuthenticated && (
+            {!isAuthenticated ? (
               <button
                 onClick={() => loginWithRedirect()}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
@@ -165,6 +151,18 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               >
                 <LogIn className="h-4 w-4" />
                 LOGIN
+              </button>
+            ) : (
+              <button
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
+                  isNavbarDark 
+                    ? "bg-white text-black hover:bg-yellow-400" 
+                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                }`}
+              >
+                <LogOut className="h-4 w-4" />
+                LOGOUT
               </button>
             )}
           </div>
@@ -282,7 +280,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           >
             <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
               <Button
-                onClick={() => onNavigate("calendar")}
+                onClick={() => onNavigate?.("calendar")}
                 className="bg-black text-white hover:bg-yellow-400 hover:text-black px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
                 PORTFOLIO
@@ -290,7 +288,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </motion.div>
             <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
               <Button
-                onClick={() => onNavigate("estimations")}
+                onClick={() => onNavigate?.("estimations")}
                 className="bg-yellow-400 text-black hover:bg-black hover:text-white px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
                 CREATE ESTIMATE
@@ -314,7 +312,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               PORTFOLIO
             </h2>
             <button
-              onClick={() => onNavigate("portfolio")}
+              onClick={() => onNavigate?.("portfolio")}
               className="text-white hover:text-yellow-400 tracking-wider transition-colors"
             >
               VIEW ALL →
@@ -447,7 +445,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </div>
 
         <div className="container mx-auto px-8 relative z-10">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto text-center">
             <motion.h2
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -467,60 +465,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               Let's build something extraordinary together
             </motion.p>
             
-            {/* Contact Form - Glassmorphism */}
+            {/* Send Message Button */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative group"
             >
-              <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 via-white/10 to-yellow-400/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-50"></div>
-              <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl shadow-2xl">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="name" className="text-white/60 tracking-wider text-xs uppercase">Your Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="John Doe"
-                      required
-                      className="bg-white/5 border-white/10 focus:border-yellow-400/50 text-white placeholder:text-white/30 backdrop-blur-xl h-12"
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="email" className="text-white/60 tracking-wider text-xs uppercase">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="john@example.com"
-                      required
-                      className="bg-white/5 border-white/10 focus:border-yellow-400/50 text-white placeholder:text-white/30 backdrop-blur-xl h-12"
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="message" className="text-white/60 tracking-wider text-xs uppercase">Message</Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Tell us about your vision..."
-                      className="min-h-[140px] bg-white/5 border-white/10 focus:border-yellow-400/50 text-white placeholder:text-white/30 backdrop-blur-xl resize-none"
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20"
-                  >
-                    <Send className="mr-3 h-5 w-5" />
-                    SEND MESSAGE
-                  </Button>
-                </form>
-              </div>
+              <Button
+                onClick={onOpenContactModal}
+                className="w-full max-w-md mx-auto bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20"
+              >
+                <Send className="mr-3 h-5 w-5" />
+                SEND MESSAGE
+              </Button>
             </motion.div>
           </div>
         </div>
