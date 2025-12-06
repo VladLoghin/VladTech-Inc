@@ -567,7 +567,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
                     onClick={() => navigate("/reviews")}
                     className="text-white hover:text-yellow-400 tracking-wider transition-colors"
                 >
-                    VIEW REVIEWS →
+                    VIEW ALL →
                 </button>
             </div>
 
