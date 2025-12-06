@@ -44,3 +44,30 @@ auth0:
   default:
     client:
       roleId: rol_gNdmo7yH2oEE4798
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:0/testdb
+      database: testdb
+      auto-index-creation: true
+
+  mongodb:
+    embedded:
+      version: 7.0.7
+
+auth0:
+  domain: test-domain
+  mgmt:
+    clientId: test-client-id
+    clientSecret: test-client-secret
+    audience: test-audience
+  default:
+    client:
+      roleId: test-role-id
