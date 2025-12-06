@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { Label } from "./label"
 import { Input } from "./input"
@@ -13,8 +13,16 @@ function ContactUs({ isOpen, onClose }) {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
 
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0()
+  const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0()
   const isFormInvalid = subject.trim() === "" || details.trim() === "";
+
+  // Redirect to login if modal opens and user is not authenticated
+  useEffect(() => {
+    if (isOpen && !isAuthenticated) {
+      onClose(); // Close the modal first
+      loginWithRedirect(); // Redirect to login
+    }
+  }, [isOpen, isAuthenticated, onClose, loginWithRedirect]);
 
   const handleSubmit = async (e) => {
     e.preventDefault()
