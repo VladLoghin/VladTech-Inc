@@ -79,4 +79,9 @@ public class ProjectController {
         projectService.deleteProjectPhoto(projectIdentifier, photoId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/count")
+    public long getProjectCount() {
+        return projectService.getProjectCount();
+    }
 }

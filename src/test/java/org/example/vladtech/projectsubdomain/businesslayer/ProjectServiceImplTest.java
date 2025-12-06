@@ -219,4 +219,17 @@ class ProjectServiceImplTest {
         // Act
         assertDoesNotThrow(() -> projectService.deleteProjectPhoto("PROJ-1", "PHOTO-1"));
     }
+    @Test
+    void getProjectCount_ShouldReturnRepositoryCount() {
+        // Arrange
+        when(projectRepository.count()).thenReturn(5L);
+
+        // Act
+        long result = projectService.getProjectCount();
+
+        // Assert
+        assertEquals(5L, result);
+        verify(projectRepository, times(1)).count();
+    }
+
 }

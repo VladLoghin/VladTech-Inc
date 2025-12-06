@@ -25,4 +25,7 @@ public interface ProjectService {
     ProjectResponseModel addProjectPhoto(String projectIdentifier, PhotoResponseModel photoResponseModel);
 
     void deleteProjectPhoto(String projectIdentifier, String photoId);
+
+    long getProjectCount();
+
 }
