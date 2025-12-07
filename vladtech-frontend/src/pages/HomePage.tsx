@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/button";
 // Removed Input, Textarea, Label imports - not needed for button-only contact section
-import { Send, LogIn, LogOut } from "lucide-react";
+import { Send, LogIn, LogOut, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
@@ -65,6 +65,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isNavbarDark, setIsNavbarDark] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Debug: Log user roles
   useEffect(() => {
@@ -172,7 +173,19 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           >
             VLADTECH
           </div>
-          <div className="flex gap-12 items-center">
+          
+          {/* Hamburger Menu Button - Mobile Only */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`md:hidden transition-colors ${
+              isNavbarDark ? "text-white" : "text-black"
+            }`}
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex gap-12 items-center">
             <button
               onClick={() => scrollToSection("portfolio")}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
@@ -270,6 +283,144 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
             )}
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ 
+            opacity: isMobileMenuOpen ? 1 : 0, 
+            height: isMobileMenuOpen ? "auto" : 0 
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className={`md:hidden border-t overflow-hidden ${
+            isNavbarDark ? "border-white/10 bg-black/95" : "border-black/10 bg-white/95"
+          } backdrop-blur-sm`}
+        >
+            <div className="container mx-auto px-8 py-4 flex flex-col gap-4">
+              <button
+                onClick={() => {
+                  scrollToSection("portfolio");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                PORTFOLIO
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("about");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                ABOUT
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("contact");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                  isNavbarDark ? "text-white" : "text-black"
+                }`}
+              >
+                CONTACT
+              </button>
+
+              {/* Role-based navigation - Mobile */}
+              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Admin") && (
+                <button
+                  onClick={() => {
+                    navigate("/admin");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                    isNavbarDark ? "text-white" : "text-black"
+                  }`}
+                >
+                  ADMIN PANEL
+                </button>
+              )}
+
+              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Employee") && (
+                <button
+                  onClick={() => {
+                    navigate("/employee");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                    isNavbarDark ? "text-white" : "text-black"
+                  }`}
+                >
+                  EMPLOYEE TOOLS
+                </button>
+              )}
+
+              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
+                <button
+                  onClick={() => {
+                    navigate("/client");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                    isNavbarDark ? "text-white" : "text-black"
+                  }`}
+                >
+                  CLIENT AREA
+                </button>
+              )}
+
+              {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
+                <button
+                  onClick={() => {
+                    navigate("/dashboard");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                    isNavbarDark ? "text-white" : "text-black"
+                  }`}
+                >
+                  DASHBOARD
+                </button>
+              )}
+
+              {!isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    loginWithRedirect();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${
+                    isNavbarDark
+                      ? "bg-white text-black hover:bg-yellow-400"
+                      : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  }`}
+                >
+                  <LogIn className="h-4 w-4" />
+                  LOGIN
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    logout({ logoutParams: { returnTo: window.location.origin } });
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${
+                    isNavbarDark
+                      ? "bg-white text-black hover:bg-yellow-400"
+                      : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  }`}
+                >
+                  <LogOut className="h-4 w-4" />
+                  LOGOUT
+                </button>
+              )}
+            </div>
+          </motion.div>
       </nav>
 
       {/* Hero Section - Editorial Style */}
@@ -299,7 +450,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="absolute top-32 left-24 max-w-xs"
+          className="absolute top-32 left-24 max-w-xs hidden md:block"
         >
           <p className="text-sm text-black/60 leading-relaxed">
             Based in the heart of innovation with expertise spanning construction, engineering,
@@ -311,7 +462,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="absolute top-32 right-24 max-w-xs text-right"
+          className="absolute top-32 right-24 max-w-xs text-right hidden md:block"
         >
           <p className="text-sm text-black/60 leading-relaxed">
             From initial idea to final execution, we work with you to craft solutions that stand
