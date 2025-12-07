@@ -54,7 +54,7 @@ const ReviewCard = ({ review }) => {
                 )}
             </div>
 
-            <p className="comment" data-testid="review-comment">"{comment}"</p>
+            <p className="comment" data-testid="review-comment">{comment}</p>
         </div>
     );
 };

@@ -5,8 +5,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 interface ReviewModalProps {
     open: boolean;
     onClose: () => void;
-    onSubmitSuccess?: () => void;
-    appointmentId?: string; // optional if you want to attach
+    onSubmitSuccess?: (newReview: any) => void;
+    appointmentId?: string;
 }
 
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
@@ -23,14 +23,12 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         e.preventDefault();
 
         const formData = new FormData();
-
-        // Prepare review object for @RequestPart("review")
         const reviewPayload = {
             clientId: clientName,
             appointmentId: appointmentId || "temp-appointment",
             comment,
-            visible: true, // default visible
-            rating: stars // will map to Rating enum in backend
+            visible: true,
+            rating: stars - 1, // backend enum [0..4]
         };
 
         formData.append(
@@ -39,18 +37,17 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         );
 
         if (imageFile) {
-            formData.append("photos", imageFile); // optional photos
+            formData.append("photos", imageFile);
         }
 
         try {
             const token = await getAccessTokenSilently();
-
             const res = await fetch("http://localhost:8080/api/reviews", {
                 method: "POST",
                 body: formData,
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
             if (!res.ok) {
@@ -58,7 +55,9 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                 return;
             }
 
-            if (onSubmitSuccess) onSubmitSuccess();
+            const createdReview = await res.json(); // get created review from backend
+
+            if (onSubmitSuccess) onSubmitSuccess(createdReview);
             onClose();
 
             // Reset form
@@ -74,17 +73,12 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-
-                {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Leave a Review</h2>
                     <button onClick={onClose}><X className="w-6 h-6" /></button>
                 </div>
 
-                {/* Form */}
                 <form className="space-y-5" onSubmit={handleSubmit}>
-
-                    {/* Name */}
                     <input
                         type="text"
                         placeholder="Your name"
@@ -93,8 +87,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         className="w-full border border-gray-300 rounded-xl p-3"
                         required
                     />
-
-                    {/* Comment */}
                     <textarea
                         placeholder="Your message"
                         value={comment}
@@ -102,8 +94,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         className="w-full border border-gray-300 rounded-xl p-3 h-24"
                         required
                     />
-
-                    {/* Star rating */}
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((s) => (
                             <button
@@ -117,8 +107,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             </button>
                         ))}
                     </div>
-
-                    {/* File upload */}
                     <div>
                         <label className="block mb-1 font-medium">Upload Photo</label>
                         <input
@@ -128,8 +116,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             className="w-full border border-gray-300 rounded-xl p-2"
                         />
                     </div>
-
-                    {/* Submit */}
                     <button
                         type="submit"
                         className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold"
@@ -137,7 +123,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         Submit Review
                     </button>
                 </form>
-
             </div>
         </div>
     );

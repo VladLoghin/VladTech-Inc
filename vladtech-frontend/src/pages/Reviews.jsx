@@ -11,16 +11,13 @@ const ReviewsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [roles, setRoles] = useState([]);
 
-    const { user, isAuthenticated } = useAuth0();
+    const { user } = useAuth0();
 
     useEffect(() => {
-        // Fetch roles safely
         if (user) {
             const userRoles = user["https://vladtech.com/roles"] || [];
             setRoles(userRoles);
         }
-
-        // Fetch reviews
         fetchReviews();
     }, [user]);
 
@@ -32,7 +29,6 @@ const ReviewsPage = () => {
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
-
     const isClient = roles.includes("Client");
 
     return (
@@ -57,13 +53,12 @@ const ReviewsPage = () => {
                 </section>
             </div>
 
-            {/* Pass the open prop and onSubmitSuccess to refresh reviews */}
             <ReviewModal
                 open={showModal}
                 onClose={handleCloseModal}
-                onSubmitSuccess={() => {
-                    fetchReviews(); // Refresh the carousel
-                    handleCloseModal(); // Close modal after successful submission
+                onSubmitSuccess={(newReview) => {
+                    setReviews((prev) => [newReview, ...prev]); // auto-refresh
+                    handleCloseModal();
                 }}
             />
         </div>
