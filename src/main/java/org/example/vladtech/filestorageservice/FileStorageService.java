@@ -22,8 +22,12 @@ public class FileStorageService {
     }
 
     public String save(MultipartFile file) throws IOException {
-        String cleanName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
-        String filename = System.currentTimeMillis() + "_" + cleanName;
+        String originalName = file.getOriginalFilename();
+        if (originalName == null || originalName.contains("..") || originalName.contains("/") || originalName.contains("\\")) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+        String cleanName = originalName.replace(" ", "_");
+        String filename = System.currentTimeMillis() + "_" + java.util.UUID.randomUUID() + "_" + cleanName;
 
         Path dest = root.resolve(filename);
         Files.copy(file.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
