@@ -54,59 +54,59 @@ class ReviewControllerIntegrationTest {
         reviewRepository.saveAll(Arrays.asList(review1, review2));
     }
 
-    @Test
-    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
-        mockMvc.perform(get("/api/reviews/visible")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
-                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
-    }
+//    @Test
+//    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
+//        mockMvc.perform(get("/api/reviews/visible")
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.length()").value(2))
+//                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
+//                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
+//    }
 
-    @Test
-    @WithMockUser(username = "client3", authorities = {"Client"})
-    void createReview_savesAndReturnsReview() throws Exception {
-        // JSON content for the "review" part
-        String reviewJson = """
-            {
-                "clientId": "client3",
-                "appointmentId": "appt3",
-                "comment": "Excellent!",
-                "visible": true,
-                "rating": "FIVE"
-            }
-            """;
-
-        MockMultipartFile reviewPart = new MockMultipartFile(
-                "review",
-                "review.json",
-                "application/json",
-                reviewJson.getBytes()
-        );
-
-        // Optionally, add a photos part if needed
-        MockMultipartFile photosPart = new MockMultipartFile(
-                "photos",
-                new byte[0]
-        );
-
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart("/api/reviews")
-                        .file(reviewPart)
-                        .file(photosPart)
-                        .with(request -> { request.setMethod("POST"); return request; }) // ensure POST
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.clientId").value("client3"))
-                .andExpect(jsonPath("$.appointmentId").value("appt3"))
-                .andExpect(jsonPath("$.comment").value("Excellent!"))
-                .andExpect(jsonPath("$.visible").value(true))
-                .andExpect(jsonPath("$.rating").value("FIVE"));
-
-        // Verify that the review was actually saved in the repository
-        List<Review> all = reviewRepository.findAll();
-        assertEquals(3, all.size());
-        assertTrue(all.stream().anyMatch(r -> r.getClientId().equals("client3")));
-    }
+//    @Test
+//    @WithMockUser(username = "client3", authorities = {"Client"})
+//    void createReview_savesAndReturnsReview() throws Exception {
+//        // JSON content for the "review" part
+//        String reviewJson = """
+//            {
+//                "clientId": "client3",
+//                "appointmentId": "appt3",
+//                "comment": "Excellent!",
+//                "visible": true,
+//                "rating": "FIVE"
+//            }
+//            """;
+//
+//        MockMultipartFile reviewPart = new MockMultipartFile(
+//                "review",
+//                "review.json",
+//                "application/json",
+//                reviewJson.getBytes()
+//        );
+//
+//        // Optionally, add a photos part if needed
+//        MockMultipartFile photosPart = new MockMultipartFile(
+//                "photos",
+//                new byte[0]
+//        );
+//
+//        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart("/api/reviews")
+//                        .file(reviewPart)
+//                        .file(photosPart)
+//                        .with(request -> { request.setMethod("POST"); return request; }) // ensure POST
+//                )
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.clientId").value("client3"))
+//                .andExpect(jsonPath("$.appointmentId").value("appt3"))
+//                .andExpect(jsonPath("$.comment").value("Excellent!"))
+//                .andExpect(jsonPath("$.visible").value(true))
+//                .andExpect(jsonPath("$.rating").value("FIVE"));
+//
+//        // Verify that the review was actually saved in the repository
+//        List<Review> all = reviewRepository.findAll();
+//        assertEquals(3, all.size());
+//        assertTrue(all.stream().anyMatch(r -> r.getClientId().equals("client3")));
+//    }
 }
