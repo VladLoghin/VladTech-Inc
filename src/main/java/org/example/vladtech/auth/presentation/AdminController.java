@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
     //demo can delete
+    /*
     @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/dashboard")
     public String helloAdmin() {
         return "Hello, Admin User!";
     }
+
+     */
 }

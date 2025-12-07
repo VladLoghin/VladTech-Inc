@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
 
     //demo can delete
+    /*
     @PreAuthorize("hasAuthority('Client')")
     @GetMapping("/info")
     public String clientInfo() {
         return "Hello, Client User!";
     }
+
+     */
 }

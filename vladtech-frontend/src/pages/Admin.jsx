@@ -9,23 +9,7 @@ const Admin = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const callAdminEndpoint = async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      //console.log("Access Token:", token);
-
-      const response = await axios.get("http://localhost:8080/api/admin/dashboard", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setMessage(response.data);
-    } catch (error) {
-      console.error("Error calling admin endpoint:", error);
-      setMessage("You are not authorized or endpoint failed.");
-    }
-  };
+  
 
   const fetchProjects = async () => {
     try {
@@ -64,13 +48,6 @@ const Admin = () => {
   return (
     <div className="p-8 bg-white min-h-screen">
       <h1 className="text-4xl font-bold mb-8 tracking-tight">Admin Area — Only for Admin Role</h1>
-      <button 
-        onClick={callAdminEndpoint}
-        className="bg-black hover:bg-yellow-400 hover:text-black text-white px-8 py-3 rounded-lg transition-all font-semibold"
-      >
-        Call Admin Endpoint
-      </button>
-
       {message && (
         <p className="mt-5 text-lg bg-yellow-100 border-l-4 border-yellow-400 p-4">{message}</p>
       )}
