@@ -22,7 +22,11 @@ public class FileStorageService {
     }
 
     public String save(MultipartFile file) throws IOException {
-        String cleanName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
+        String originalName = file.getOriginalFilename();
+        if (originalName == null || originalName.contains("..") || originalName.contains("/") || originalName.contains("\\")) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+        String cleanName = originalName.replace(" ", "_");
         String filename = System.currentTimeMillis() + "_" + cleanName;
 
         Path dest = root.resolve(filename);
