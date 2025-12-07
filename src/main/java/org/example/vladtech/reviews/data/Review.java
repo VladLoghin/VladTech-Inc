@@ -21,7 +21,7 @@ public class Review {
     private String clientId;
     private String appointmentId;
     private String comment;
-    private Boolean visible = true;
+    private Boolean visible = true; // set to false when implementing moderation
     private Rating rating;
     private List<Photo> photos = new ArrayList<>();
 

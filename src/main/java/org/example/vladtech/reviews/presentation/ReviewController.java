@@ -47,7 +47,7 @@ public class ReviewController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('Client')")
     public ResponseEntity<ReviewResponseModel> createReview(
-        @RequestPart("review") ReviewRequestModel reviewRequest,
+        @Valid @RequestPart("review") ReviewRequestModel reviewRequest,
         @RequestPart(value = "photos", required = false) MultipartFile[] photos
         ) {
         reviewRequest.setVisible(true);

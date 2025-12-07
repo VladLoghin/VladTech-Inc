@@ -11,13 +11,12 @@ interface ReviewModalProps {
 
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
     const { getAccessTokenSilently } = useAuth0();
-
-    if (!open) return null;
-
     const [clientName, setClientName] = useState("");
     const [comment, setComment] = useState("");
     const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
     const [imageFile, setImageFile] = useState<File | null>(null);
+
+    if (!open) return null;
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -71,8 +70,8 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Leave a Review</h2>
                     <button onClick={onClose}><X className="w-6 h-6" /></button>
