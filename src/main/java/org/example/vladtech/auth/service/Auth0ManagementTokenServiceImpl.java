@@ -26,7 +26,9 @@ public class Auth0ManagementTokenServiceImpl implements Auth0ManagementTokenServ
     @Value("${auth0.mgmt.audience}")
     private String audience;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    //private final Auth0ManagementTokenService managementTokenService;
 
     @Override
     public String getManagementApiToken() {

@@ -1,6 +1,7 @@
 package org.example.vladtech.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -16,17 +17,15 @@ public class RoleAssignmentServiceImpl {
 
     private final Auth0ManagementTokenService managementTokenService;
 
+    private final RestTemplate restTemplate;
+
     @Value("${auth0.domain}")
     private String domain;
 
     @Value("${auth0.default.client.roleId}")
     private String clientRoleId;
 
-    private final RestTemplate restTemplate = new RestTemplate();
 
-    /**
-     * Assign the "Client" role (clientRoleId) to the given Auth0 user id, e.g. "auth0|69211..."
-     */
     public void assignClientRole(String auth0UserId) {
 
         String mgmtToken = managementTokenService.getManagementApiToken();
@@ -50,6 +49,6 @@ public class RoleAssignmentServiceImpl {
             throw new IllegalStateException("Failed to assign Client role: " + response.getStatusCode());
         }
 
-        System.out.println("✅ Client role assigned to " + auth0UserId);
+        System.out.println("Client role assigned to " + auth0UserId);
     }
 }
