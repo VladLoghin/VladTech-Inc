@@ -561,15 +561,17 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
         className="py-32 bg-black relative"
       >
         <div className="container mx-auto px-8">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
-            <button
-              onClick={() => onNavigate?.("portfolio")}
-              className="text-white hover:text-yellow-400 tracking-wider transition-colors"
-            >
-              VIEW ALL →
-            </button>
-          </div>
+            <div className="flex items-center justify-between mb-12">
+                <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
+                <button
+                    onClick={() => navigate("/reviews")}
+                    className="text-white hover:text-yellow-400 tracking-wider transition-colors"
+                >
+                    VIEW ALL →
+                </button>
+            </div>
+
+
 
           {/* Carousel - 3 Images Side by Side with Fade Animation */}
           <div className="relative max-w-7xl mx-auto h-[400px] md:h-[500px]">

@@ -1,0 +1,99 @@
+/* Container for each review card */
+.review-card {
+    background-color: #D9D9D9;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.3s ease;
+    max-width: 20rem;
+    margin: 10px;
+    overflow: hidden;
+}
+
+.review-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Review image as top horizontal bar with no padding/margin */
+.review-card img {
+    width: 100%;
+    height: 8rem;               /* adjust as needed */
+    object-fit: cover;
+    display: block;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+/* Wrapper for content below image */
+.review-card .content {
+    padding: 1rem; /* only content gets padding */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Client name */
+.review-card .client-name {
+    font-weight: 700;
+    font-size: larger;
+    color: #1f2937; /* Tailwind gray-900 */
+    margin-bottom: 0.5rem;
+}
+
+/* Comment */
+.review-card .comment {
+    font-style: italic;
+    color: #4b5563; /* Tailwind gray-700 */
+    margin-bottom: 0.5rem;
+}
+
+/* Stars container */
+.review-card .stars {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Stars styling */
+.review-card .stars svg {
+    font-size: 1.5rem;
+    color: #fbbf24;
+    filter: drop-shadow(0 0 1px black) drop-shadow(0 0 1px black);
+}
+
+/* Carousel overrides */
+.swiper {
+    padding: 1rem 0;
+}
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsive grid for all reviews */
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Carousel navigation arrows */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #fbbf24; /* Tailwind yellow-400 */
+}
+
+.swiper-pagination-bullet {
+    background-color: #fbbf24; /* Tailwind yellow-400 */
+}
+
+.title {
+    text-align: center;
+}
