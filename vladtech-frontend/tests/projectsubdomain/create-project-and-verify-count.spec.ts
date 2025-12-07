@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/fixtures';
+import { test, expect } from '../fixtures/fixtures.ts';
 
 test('admin creates project and verifies count on homepage', async ({ page, loginAs }) => {
   // Step 1: Login as admin using fixtures

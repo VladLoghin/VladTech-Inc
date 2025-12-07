@@ -52,11 +52,7 @@ public class SecurityConfig {
 
 
 
-    /**
-     * Tell Spring Security:
-     *  - Read authorities from your custom claim: https://vladtech.com/roles
-     *  - DO NOT force "ROLE_" prefix
-     */
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
@@ -76,7 +72,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173, http://localhost:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
 

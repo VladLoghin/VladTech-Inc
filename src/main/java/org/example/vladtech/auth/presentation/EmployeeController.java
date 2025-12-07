@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
 
     //demo can delete
+    /*
     @PreAuthorize("hasAuthority('Employee')")
     @RequestMapping("/info")
     public String employeeInfo() {
         return "Hello, Employee User!";
     }
+
+     */
 }

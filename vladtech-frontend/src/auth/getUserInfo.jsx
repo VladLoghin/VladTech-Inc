@@ -7,5 +7,5 @@ export async function getFreshUserInfo(getAccessTokenSilently) {
     }
   });
 
-  return res.json(); // returns full user with updated metadata
+  return res.json();
 }
