@@ -1,12 +1,12 @@
 package org.example.vladtech.reviews.mapperlayer;
 
 import org.example.vladtech.reviews.data.Review;
-import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import org.example.vladtech.reviews.data.Rating;
+import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ReviewRequestMapperTest {
 
@@ -14,24 +14,25 @@ class ReviewRequestMapperTest {
 
     @Test
     void requestModelToEntity_mapsFields_and_ignoresId() {
+        // Create a ReviewRequestModel with all fields
         ReviewRequestModel request = new ReviewRequestModel(
                 "clientA",
                 "appointmentA",
                 "nice job",
                 true,
-                Rating.FOUR,
-                null
+                Rating.FOUR
         );
 
+        // Map to entity
         Review entity = mapper.requestModelToEntity(request);
 
-        assertThat(entity).isNotNull();
-        assertThat(entity.getClientId()).isEqualTo("clientA");
-        assertThat(entity.getAppointmentId()).isEqualTo("appointmentA");
-        assertThat(entity.getComment()).isEqualTo("nice job");
-        assertThat(entity.getVisible()).isTrue();
-        assertThat(entity.getRating()).isEqualTo(Rating.FOUR);
-        // reviewId should be left null because mapping ignores it
-        assertThat(entity.getReviewId()).isNull();
+        // Assert all fields are correctly mapped
+        assertNotNull(entity, "Mapped entity should not be null");
+        assertEquals("clientA", entity.getClientId(), "ClientId should match");
+        assertEquals("appointmentA", entity.getAppointmentId(), "AppointmentId should match");
+        assertEquals("nice job", entity.getComment(), "Comment should match");
+        assertTrue(entity.getVisible(), "Visible should be true");
+        assertEquals(Rating.FOUR, entity.getRating(), "Rating should match");
+        assertNull(entity.getReviewId(), "reviewId should be null because it is ignored by mapper");
     }
 }

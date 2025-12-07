@@ -6,6 +6,7 @@ import ReviewCard from "./ReviewCard.jsx";
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+
 // @ts-ignore
 import "swiper/css";
 // @ts-ignore
@@ -17,7 +18,7 @@ interface Photo {
     clientId: string;
     filename: string;
     imageType: string;
-    data: number[] | null;
+    url: string;
 }
 
 interface Review {
@@ -35,13 +36,12 @@ const ReviewCarousel = () => {
 
     useEffect(() => {
         getAllVisibleReviews()
-            .then((data) => {
-                setReviews(data);
-            })
+            .then((data) => setReviews(data))
             .catch((err) => console.error("Failed to fetch reviews:", err));
     }, []);
 
-    if (!reviews.length) return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
+    if (!reviews.length)
+        return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
 
     return (
         <Swiper

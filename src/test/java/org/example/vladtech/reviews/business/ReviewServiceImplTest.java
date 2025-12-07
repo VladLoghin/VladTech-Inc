@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +53,9 @@ class ReviewServiceImplTest {
 
         List<ReviewResponseModel> result = reviewService.getAllVisibleReviews();
 
-        assertThat(result).containsExactly(m1, m2);
+        assertEquals(2, result.size());
+        assertEquals("r1", result.get(0).getReviewId());
+        assertEquals("r2", result.get(1).getReviewId());
 
         verify(reviewRepository).findByVisibleTrue();
         verify(responseMapper).entityListToResponseModelList(repoResult);
