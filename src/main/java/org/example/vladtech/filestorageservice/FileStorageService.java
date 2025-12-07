@@ -27,7 +27,7 @@ public class FileStorageService {
             throw new IllegalArgumentException("Invalid filename");
         }
         String cleanName = originalName.replace(" ", "_");
-        String filename = System.currentTimeMillis() + "_" + cleanName;
+        String filename = System.currentTimeMillis() + "_" + java.util.UUID.randomUUID() + "_" + cleanName;
 
         Path dest = root.resolve(filename);
         Files.copy(file.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
