@@ -1,31 +1,30 @@
 import { test, expect } from '../fixtures/fixtures';
 
 test('admin creates project and verifies count on homepage', async ({ page, loginAs }) => {
-  // Step 1: Login as admin
+  // Step 1: Login as admin using fixtures
   await loginAs('admin');
   console.log('✅ Step 1: Logged in as admin');
 
-  // Step 2: Navigate to Admin Panel
-  // Check if we're in mobile view
+  // Check if mobile view
   const viewportSize = page.viewportSize();
   const isMobile = viewportSize && viewportSize.width < 768;
-  
+
+  // Step 2: Navigate to Admin Panel
   if (isMobile) {
     // Mobile: Open hamburger menu and click ADMIN PANEL
     const hamburgerButton = page.locator('button svg').first();
     await hamburgerButton.click();
     await page.waitForTimeout(500);
-    await page.locator('button:has-text("ADMIN PANEL")').click();
+    await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
   } else {
     // Desktop: Click ADMIN PANEL in navbar
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
-  
   await page.waitForURL('http://localhost:5173/admin');
   console.log('✅ Step 2: Navigated to Admin Panel');
 
   // Step 3: Get current project count before creating new project
-  await page.waitForTimeout(2000); // Wait for projects to load
+  await page.waitForTimeout(1000);
   const projectCards = page.locator('.border-2.border-black.rounded-xl').filter({ hasText: /Project ID:|ID:/i });
   const initialCount = await projectCards.count();
   console.log(`📊 Initial project count: ${initialCount}`);
@@ -77,18 +76,26 @@ test('admin creates project and verifies count on homepage', async ({ page, logi
   expect(newCount).toBe(initialCount + 1);
   console.log('✅ Step 9: Verified new project appears in list');
 
-  // Step 10: Navigate back to homepage by clicking Home in navbar or going directly
+  // Step 10: Navigate back to homepage
   await page.goto('http://localhost:5173/');
   await page.waitForLoadState('networkidle');
   console.log('✅ Step 10: Back on homepage');
 
   // Step 11: Click "ABOUT" button in the navbar to scroll to About section
-  await page.getByRole('button', { name: /^about$/i }).click();
+  if (isMobile) {
+    // Mobile: Open hamburger menu and click ABOUT
+    const hamburgerButton = page.locator('button svg').first();
+    await hamburgerButton.click();
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'ABOUT' }).first().click();
+  } else {
+    // Desktop: Click ABOUT in navbar
+    await page.getByRole('button', { name: /^about$/i }).click();
+  }
   await page.waitForTimeout(1500); // Wait for smooth scroll
   console.log('✅ Step 11: Clicked ABOUT, scrolled to About section');
 
   // Step 12: Verify project count is displayed correctly in the About section
-  // Look for the stats section with "PROJECTS" text
   const projectsLabel = page.locator('text=/PROJECTS/i').first();
   await expect(projectsLabel).toBeVisible({ timeout: 5000 });
   

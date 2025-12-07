@@ -12,7 +12,7 @@ test('modal closes when hitting cancel', async ({ page, loginAs }) => {
     const hamburgerButton = page.locator('button svg').first();
     await hamburgerButton.click();
     await page.waitForTimeout(500);
-    await page.locator('button:has-text("ADMIN PANEL")').click();
+    await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
   } else {
     // Desktop: Click ADMIN PANEL in navbar
     await page.getByRole('button', { name: /admin panel/i }).click();
