@@ -39,7 +39,8 @@ const ReviewsPage = () => {
                 {isClient && (
                     <button
                         type="button"
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-4"
+                        style={{ backgroundColor: '#FCC700' }}
+                        className="px-4 py-2 text-black rounded hover:bg-yellow-500 mb-4"
                         onClick={handleOpenModal}
                         data-testid="add-review-button"
                     >

@@ -118,7 +118,8 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold"
+                        style={{ backgroundColor: '#FCC700' }}
+                        className="w-full text-black py-3 rounded-xl font-semibold"
                     >
                         Submit Review
                     </button>
