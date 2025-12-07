@@ -1,20 +1,18 @@
-import LoginButton from "../components/LoginButton";
-import Profile from "../components/Profile";
-import LogoutButton from "../components/LogoutButton";
-import useAssignClientRole from "../hooks/UseAssignClientRole";
+import { useState } from "react";
+import HomePage from "./HomePage";
 import ContactUs from "../components/ContactUs";
 
 const Home = () => {
-    useAssignClientRole();
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
-    <div>
-      <h1>Home Page</h1>
-      <LoginButton />
-      <LogoutButton />
-      <Profile />
-      <ContactUs />
-    </div>
+    <>
+      <HomePage onOpenContactModal={() => setIsContactModalOpen(true)} />
+      <ContactUs 
+        isOpen={isContactModalOpen} 
+        onClose={() => setIsContactModalOpen(false)} 
+      />
+    </>
   );
 };
 

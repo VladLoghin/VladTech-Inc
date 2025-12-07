@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -7,12 +7,24 @@ import Employee from "./pages/Employee";
 import Client from "./pages/Client";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import ReviewsPage from "./pages/Reviews.jsx";
+
+function Layout({ children }) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  return (
+    <>
+      {!isHomePage && <Navbar />}
+      {children}
+    </>
+  );
+}
 
 function App() {
   return (
       <Router>
-        <Navbar />
-
+        <Layout>
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<Home />} />
@@ -56,7 +68,12 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+            path="/reviews"
+            element={<ReviewsPage />}
+        />
       </Routes>
+        </Layout>
     </Router>
   );
 }

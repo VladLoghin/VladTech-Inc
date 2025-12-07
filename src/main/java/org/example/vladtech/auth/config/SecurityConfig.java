@@ -34,9 +34,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority("Admin")
+                        .requestMatchers("/api/projects/count").permitAll()
                         .requestMatchers("/api/employee/**").hasAnyAuthority("Employee", "Admin")
                         .requestMatchers("/api/client/**").hasAuthority("Client")
                         .requestMatchers("/api/role-assignment/**").permitAll()
+                        .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth

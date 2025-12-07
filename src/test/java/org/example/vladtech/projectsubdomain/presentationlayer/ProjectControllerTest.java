@@ -196,4 +196,16 @@ class ProjectControllerTest {
 
         verify(projectService, times(1)).deleteProjectPhoto("PROJ-1", "PHOTO-1");
     }
+    @Test
+    void getProjectCount_ShouldReturnOkWithCount() throws Exception {
+        // Arrange
+        when(projectService.getProjectCount()).thenReturn(7L);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/projects/count"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("7"));
+
+        verify(projectService, times(1)).getProjectCount();
+    }
 }
