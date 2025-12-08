@@ -13,44 +13,33 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration," +
-                        "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration"
-        }
-)
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ReviewControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private ReviewRepository reviewRepository; // mock repository
-
-    private Review review1;
-    private Review review2;
+    @Autowired
+    private ReviewRepository reviewRepository; // real repository
 
     @BeforeEach
     void setup() {
-        review1 = new Review("client1", "appt1", "Great service", true, Rating.FIVE, List.of());
-        review2 = new Review(
+        // Clean the database before each test
+        reviewRepository.deleteAll();
+
+        Review review1 = new Review("client1", "appt1", "Great service", true, Rating.FIVE, List.of());
+        Review review2 = new Review(
                 "client2",
                 "appt2",
                 "Okay experience",
@@ -59,9 +48,7 @@ class ReviewControllerIntegrationTest {
                 List.of(new Photo("client2", "photo.jpg", "image/jpeg", "/uploads/reviews/photo.jpg"))
         );
 
-        // Mock repository behavior
-        when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2));
-        when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        reviewRepository.saveAll(List.of(review1, review2));
     }
 
     @Test
@@ -111,8 +98,5 @@ class ReviewControllerIntegrationTest {
                 .andExpect(jsonPath("$.comment").value("Excellent!"))
                 .andExpect(jsonPath("$.visible").value(true))
                 .andExpect(jsonPath("$.rating").value("FIVE"));
-
-        // Verify save was called once
-        verify(reviewRepository, times(1)).save(any(Review.class));
     }
 }
