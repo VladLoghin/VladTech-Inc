@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -19,10 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -49,11 +49,10 @@ class ReviewControllerIntegrationTest {
                 List.of(new Photo("client2", "photo.jpg", "image/jpeg", "/uploads/reviews/photo.jpg"))
         );
 
-        // Mock the correct repository method
+        // Mock repository behavior
         when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2));
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
-
 
     @Test
     void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
@@ -103,7 +102,7 @@ class ReviewControllerIntegrationTest {
                 .andExpect(jsonPath("$.visible").value(true))
                 .andExpect(jsonPath("$.rating").value("FIVE"));
 
-        // Verify that the repository's save method was called
+        // Verify save was called once
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 }
