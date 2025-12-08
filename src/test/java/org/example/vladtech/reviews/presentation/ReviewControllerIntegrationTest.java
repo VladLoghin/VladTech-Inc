@@ -4,12 +4,11 @@ import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
-import org.example.vladtech.reviews.business.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,14 +24,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = ReviewController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class ReviewControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ReviewService reviewService;
+    private ReviewRepository reviewRepository; // mock repository
 
     private Review review1;
     private Review review2;
@@ -49,9 +49,9 @@ class ReviewControllerIntegrationTest {
                 List.of(new Photo("client2", "photo.jpg", "image/jpeg", "/uploads/reviews/photo.jpg"))
         );
 
-        // Mock the service methods that controller calls
-        when(reviewService.getAllVisibleReviews()).thenReturn((List<Review>) Arrays.asList(review1, review2));
-        when(reviewService.createReview(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        // Mock repository behavior
+        when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2));
+        when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
 //    @Test
@@ -102,6 +102,7 @@ class ReviewControllerIntegrationTest {
 //                .andExpect(jsonPath("$.visible").value(true))
 //                .andExpect(jsonPath("$.rating").value("FIVE"));
 //
-//        verify(reviewService, times(1)).createReview(any(), any());
+//        // Verify save was called once
+//        verify(reviewRepository, times(1)).save(any(Review.class));
 //    }
 }
