@@ -63,11 +63,6 @@ spring:
       database: vladtechdb
       auto-index-creation: true
 
-  mongodb:
-    embedded:
-      version: 7.0.7
-
-
   security:
     oauth2:
       resourceserver:
