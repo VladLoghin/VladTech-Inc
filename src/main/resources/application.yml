@@ -1,4 +1,3 @@
-# Default profile - for local development with embedded MongoDB
 spring:
   security:
     oauth2:
@@ -33,6 +32,12 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.7
+
 auth0:
   domain: dev-ljz84r2xvrlnftfv.ca.auth0.com
 
@@ -45,14 +50,8 @@ auth0:
     client:
       roleId: rol_gNdmo7yH2oEE4798
 
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 7.0.7
-
 ---
-# Test profile - for local testing with embedded MongoDB (default for tests)
+
 spring:
   config:
     activate:
@@ -60,9 +59,8 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/vladtechdb
-      database: vladtechdb
       auto-index-creation: true
+
 
   security:
     oauth2:

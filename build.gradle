@@ -106,5 +106,6 @@ test {
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
+	systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'test')
 }
 
