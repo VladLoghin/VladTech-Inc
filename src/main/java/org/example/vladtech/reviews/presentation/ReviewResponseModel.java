@@ -26,13 +26,4 @@ public class ReviewResponseModel {
     @NotNull
     private Rating rating;
     private List<Photo> photos;
-
-    public ReviewResponseModel(String clientId, String appointmentId, String comment, Boolean visible, Rating rating) {
-        this.clientId = clientId;
-        this.appointmentId = appointmentId;
-        this.comment = comment;
-        this.visible = visible;
-        this.rating = rating;
-    }
-
 }
