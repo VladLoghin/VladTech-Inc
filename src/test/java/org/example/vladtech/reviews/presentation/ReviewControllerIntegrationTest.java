@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -30,7 +31,7 @@ class ReviewControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
+    @MockitoBean
     private ReviewRepository reviewRepository;
 
     private Review review1;
