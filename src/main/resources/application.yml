@@ -72,7 +72,7 @@ spring:
           audience: ""
 
 ---
-# CI profile - for GitHub Actions with MongoDB container
+
 spring:
   config:
     activate:
@@ -98,3 +98,4 @@ spring:
         jwt:
           issuer-uri: ""
           audience: ""
+
