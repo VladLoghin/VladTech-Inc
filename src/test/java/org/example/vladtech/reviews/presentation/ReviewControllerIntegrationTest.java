@@ -27,8 +27,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureMockMvc(addFilters = false) // disables Spring Security filters
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration"
+        }
+)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class ReviewControllerIntegrationTest {
 
