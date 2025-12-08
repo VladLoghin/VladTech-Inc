@@ -57,55 +57,55 @@ class ReviewControllerIntegrationTest {
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
-//    @Test
-//    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
-//        mockMvc.perform(get("/api/reviews/visible")
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.length()").value(2))
-//                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
-//                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
-//    }
-//
-//    @Test
-//    @WithMockUser(username = "client3", authorities = {"Client"})
-//    void createReview_savesAndReturnsReview() throws Exception {
-//        String reviewJson = """
-//            {
-//                "clientId": "client3",
-//                "appointmentId": "appt3",
-//                "comment": "Excellent!",
-//                "visible": true,
-//                "rating": "FIVE"
-//            }
-//            """;
-//
-//        MockMultipartFile reviewPart = new MockMultipartFile(
-//                "review",
-//                "review.json",
-//                "application/json",
-//                reviewJson.getBytes()
-//        );
-//
-//        MockMultipartFile photosPart = new MockMultipartFile(
-//                "photos",
-//                new byte[0]
-//        );
-//
-//        mockMvc.perform(multipart("/api/reviews")
-//                        .file(reviewPart)
-//                        .file(photosPart)
-//                        .with(request -> { request.setMethod("POST"); return request; })
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.clientId").value("client3"))
-//                .andExpect(jsonPath("$.appointmentId").value("appt3"))
-//                .andExpect(jsonPath("$.comment").value("Excellent!"))
-//                .andExpect(jsonPath("$.visible").value(true))
-//                .andExpect(jsonPath("$.rating").value("FIVE"));
-//
-//        // Verify save was called once
-//        verify(reviewRepository, times(1)).save(any(Review.class));
-//    }
+    @Test
+    void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
+        mockMvc.perform(get("/api/reviews/visible")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
+                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
+    }
+
+    @Test
+    @WithMockUser(username = "client3", authorities = {"Client"})
+    void createReview_savesAndReturnsReview() throws Exception {
+        String reviewJson = """
+            {
+                "clientId": "client3",
+                "appointmentId": "appt3",
+                "comment": "Excellent!",
+                "visible": true,
+                "rating": "FIVE"
+            }
+            """;
+
+        MockMultipartFile reviewPart = new MockMultipartFile(
+                "review",
+                "review.json",
+                "application/json",
+                reviewJson.getBytes()
+        );
+
+        MockMultipartFile photosPart = new MockMultipartFile(
+                "photos",
+                new byte[0]
+        );
+
+        mockMvc.perform(multipart("/api/reviews")
+                        .file(reviewPart)
+                        .file(photosPart)
+                        .with(request -> { request.setMethod("POST"); return request; })
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.clientId").value("client3"))
+                .andExpect(jsonPath("$.appointmentId").value("appt3"))
+                .andExpect(jsonPath("$.comment").value("Excellent!"))
+                .andExpect(jsonPath("$.visible").value(true))
+                .andExpect(jsonPath("$.rating").value("FIVE"));
+
+        // Verify save was called once
+        verify(reviewRepository, times(1)).save(any(Review.class));
+    }
 }
