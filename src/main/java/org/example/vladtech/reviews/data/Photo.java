@@ -12,5 +12,5 @@ public class Photo {
     private String clientId;
     private String filename;
     private String imageType;
-    private byte[] data;
+    private String url;
 }

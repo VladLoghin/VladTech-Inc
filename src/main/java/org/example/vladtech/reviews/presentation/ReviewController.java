@@ -2,9 +2,12 @@ package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vladtech.reviews.business.ReviewService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-//import jakarta.validation.Valid;
+import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,14 +43,17 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseModel>> getReviewsByAppointment(@PathVariable String appointmentId) {
         return ResponseEntity.ok(reviewService.getReviewsByAppointment(appointmentId));
     }
-
-    @PostMapping
+*/
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('Client')")
     public ResponseEntity<ReviewResponseModel> createReview(
-            @Valid @RequestBody ReviewRequestModel reviewRequest
-    ) {
-        return ResponseEntity.ok(reviewService.createReview(reviewRequest));
+        @Valid @RequestPart("review") ReviewRequestModel reviewRequest,
+        @RequestPart(value = "photos", required = false) MultipartFile[] photos
+        ) {
+        reviewRequest.setVisible(true);
+        return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos));
     }
-
+/*
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseModel> updateReview(
             @PathVariable String reviewId,

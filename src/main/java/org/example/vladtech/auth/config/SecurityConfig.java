@@ -2,6 +2,7 @@ package org.example.vladtech.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,7 +39,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/employee/**").hasAnyAuthority("Employee", "Admin")
                         .requestMatchers("/api/client/**").hasAuthority("Client")
                         .requestMatchers("/api/role-assignment/**").permitAll()
-                        .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("Client")
                         .requestMatchers("/images/**").permitAll()
 
                         .anyRequest().authenticated()

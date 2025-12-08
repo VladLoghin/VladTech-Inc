@@ -27,6 +27,11 @@ spring:
           starttls:
             enable: false
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 de:
   flapdoodle:
     mongodb:
@@ -54,20 +59,17 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:0/testdb
-      database: testdb
       auto-index-creation: true
 
   mongodb:
     embedded:
       version: 7.0.7
 
-auth0:
-  domain: test-domain
-  mgmt:
-    clientId: test-client-id
-    clientSecret: test-client-secret
-    audience: test-audience
-  default:
-    client:
-      roleId: test-role-id
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+          audience: ""
+

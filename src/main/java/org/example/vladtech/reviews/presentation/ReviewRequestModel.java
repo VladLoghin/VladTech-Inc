@@ -13,15 +13,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewRequestModel {
+
     @NotNull
     private String clientId;
+
     @NotNull
     private String appointmentId;
+
     @NotNull
     private String comment;
+
     @NotNull
-    private Boolean visible = true; // set to false when implementing moderation
+    private Boolean visible = true;
+
     @NotNull
     private Rating rating;
-    private List<Photo> photos;
 }
+

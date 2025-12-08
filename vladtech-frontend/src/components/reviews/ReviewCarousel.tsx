@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
-import { getAllVisibleReviews } from "../../api/reviews/reviewsService.js";
 import "./Review.css";
 import ReviewCard from "./ReviewCard.jsx";
-
-// Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+
 // @ts-ignore
 import "swiper/css";
 // @ts-ignore
@@ -17,7 +14,7 @@ interface Photo {
     clientId: string;
     filename: string;
     imageType: string;
-    data: number[] | null;
+    url: string;
 }
 
 interface Review {
@@ -30,18 +27,13 @@ interface Review {
     rating?: string;
 }
 
-const ReviewCarousel = () => {
-    const [reviews, setReviews] = useState<Review[]>([]);
+interface ReviewCarouselProps {
+    reviews: Review[];
+}
 
-    useEffect(() => {
-        getAllVisibleReviews()
-            .then((data) => {
-                setReviews(data);
-            })
-            .catch((err) => console.error("Failed to fetch reviews:", err));
-    }, []);
-
-    if (!reviews.length) return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
+const ReviewCarousel = ({ reviews }: ReviewCarouselProps) => {
+    if (!reviews.length)
+        return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
 
     return (
         <Swiper

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,14 +16,14 @@ import java.util.List;
 @Document(collection = "reviews")
 public class Review {
     @Id
-    private String reviewId; // MongoDB will generate a unique ObjectId if this is null
+    private String reviewId;
 
     private String clientId;
     private String appointmentId;
     private String comment;
-    private Boolean visible;
+    private Boolean visible = true; // set to false when implementing moderation
     private Rating rating;
-    private List<Photo> photos;
+    private List<Photo> photos = new ArrayList<>();
 
     public Review(String clientId, String appointmentId, String comment, Boolean visible, Rating rating) {
         this.clientId = clientId;
@@ -38,6 +39,6 @@ public class Review {
         this.comment = comment;
         this.visible = visible;
         this.rating = rating;
-        this.photos = photos;
+        this.photos = photos != null ? photos : new ArrayList<>();
     }
 }
