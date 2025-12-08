@@ -59,6 +59,8 @@ spring:
 
   data:
     mongodb:
+      uri: mongodb://localhost:27017/vladtechdb
+      database: vladtechdb
       auto-index-creation: true
 
   mongodb:
