@@ -59,7 +59,6 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:0/testdb
       database: testdb
       auto-index-creation: true
 
