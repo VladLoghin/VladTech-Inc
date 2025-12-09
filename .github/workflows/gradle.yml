@@ -40,12 +40,14 @@ jobs:
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - name: Grant execute permission for Gradle Wrapper
+	working-directory: ./vladtech-backend
         run: chmod +x gradlew
 
       - name: Wait for MongoDB to start
         run: sleep 10
 
       - name: Build and run tests
+	working-directory: ./vladtech-backend
         run: ./gradlew clean test -Dspring.profiles.active=ci
 
   dependency-submission:
@@ -63,4 +65,5 @@ jobs:
           distribution: 'temurin'
 
       - name: Generate and submit dependency graph
+	working-directory: ./vladtech-backend
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
