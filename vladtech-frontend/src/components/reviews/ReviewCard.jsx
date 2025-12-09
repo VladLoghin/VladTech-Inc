@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import "./Review.css";
 
-const ReviewCard = ({ review }) => {
+const ReviewCard = ({ review, onClick }) => {
     const { clientId, comment, rating, photos } = review;
 
     const photo = photos?.[0];
@@ -34,7 +34,11 @@ const ReviewCard = ({ review }) => {
     );
 
     return (
-        <div className="review-card" data-testid="review-card">
+        <div className="review-card"
+             data-testid="review-card"
+             onClick={onClick}
+             style={{ cursor: onClick ? 'pointer' : 'default' }}
+        >
             <img
                 src={imgSrc}
                 alt={photo?.filename || clientId}

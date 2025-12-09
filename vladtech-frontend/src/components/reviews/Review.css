@@ -97,3 +97,139 @@
 .title {
     text-align: center;
 }
+
+/* Modal backdrop */
+.review-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+/* Modal content container */
+.review-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 1200px;
+    width: 95%;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Close button */
+.review-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+    z-index: 10;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-modal-close:hover {
+    color: #000;
+}
+
+/* Enlarged review card styles */
+.review-card.enlarged {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    max-width: 100%;
+    background-color: white;
+}
+
+.review-card.enlarged img {
+    max-height: 700px;
+    min-height: 400px;
+    width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    background-color: #f3f4f6;
+}
+
+.review-card.enlarged .client-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.review-card.enlarged .stars {
+    font-size: 2rem;
+    margin-bottom: 25px;
+    gap: 0.5rem;
+}
+
+.review-card.enlarged .stars svg {
+    font-size: 2rem;
+}
+
+.review-card.enlarged .comment {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: #4b5563;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: block;
+    text-align: left;
+    padding: 0 20px;
+}
+
+/* Hover effect for clickable cards */
+.review-card[style*="cursor: pointer"]:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .review-modal-content {
+        max-width: 95%;
+        width: 95%;
+        padding: 25px;
+    }
+
+    .review-card.enlarged img {
+        max-height: 500px;
+        min-height: 300px;
+    }
+
+    .review-card.enlarged .client-name {
+        font-size: 1.5rem;
+    }
+
+    .review-card.enlarged .stars {
+        font-size: 1.5rem;
+    }
+
+    .review-card.enlarged .stars svg {
+        font-size: 1.5rem;
+    }
+
+    .review-card.enlarged .comment {
+        font-size: 1.1rem;
+        padding: 0 10px;
+    }
+}
