@@ -61,10 +61,34 @@ spring:
     mongodb:
       auto-index-creation: true
 
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+          audience: ""
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: ci
+
+  autoconfigure:
+    exclude:
+      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/vladtechdb
+      database: vladtechdb
+      auto-index-creation: true
+
   mongodb:
     embedded:
-      version: 7.0.7
-
+      enabled: false
 
   security:
     oauth2:
