@@ -26,6 +26,10 @@ jobs:
           - 27017:27017
         options: --quiet
 
+    # Set default working directory for all steps in this job
+    defaults:
+      run:
+        working-directory: vladtech-backend
 
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +42,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        with:
+          build-root-directory: vladtech-backend
 
       - name: Grant execute permission for Gradle Wrapper
         run: chmod +x gradlew
@@ -64,3 +70,5 @@ jobs:
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        with:
+          build-root-directory: vladtech-backend
