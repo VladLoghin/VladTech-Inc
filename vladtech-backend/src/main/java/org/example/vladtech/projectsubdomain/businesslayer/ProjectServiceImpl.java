@@ -50,7 +50,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(savedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
     @Override
     public ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel) {
         Project existingProject = projectRepository.findByProjectIdentifier(projectIdentifier)
@@ -81,6 +80,7 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
     @Override
     public void deleteProject(String projectIdentifier) {
     }

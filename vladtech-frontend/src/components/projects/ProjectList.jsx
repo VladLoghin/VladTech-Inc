@@ -1,3 +1,5 @@
+import UpdateProjectModal from "./UpdateProjectModal.jsx";
+
 const ProjectList = ({ projects }) => {
   return (
     <div className="space-y-6">
@@ -10,6 +12,11 @@ const ProjectList = ({ projects }) => {
             {project.name}
           </h3>
 
+          <button className="float-right bg-black text-white text-sm px-10 py-2 rounded hover:bg-gray-800 transition"onClick={() => {
+            
+          }}>
+            Edit
+          </button>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <p>
               <strong className="text-black/60">ID:</strong>{" "}
