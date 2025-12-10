@@ -55,14 +55,20 @@ const Admin = () => {
   }, [projects, selectedDate]);
 
   const formatSelectedDate = (dateStr) => {
-    if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  if (!dateStr) return "";
+
+  // dateStr is "YYYY-MM-DD"
+  const [year, month, day] = dateStr.split("-");
+  const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 
   return (
     <div className="p-8 bg-white min-h-screen">
@@ -140,9 +146,7 @@ const Admin = () => {
                     </p>
                   )}
                 </div>
-                <button className="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg text-sm font-semibold shadow">
-                  Edit
-                </button>
+                
               </div>
             ))}
           </div>
@@ -232,11 +236,7 @@ const Admin = () => {
                 </p>
               )}
 
-              <div className="mt-3 flex justify-end">
-                <button className="bg-yellow-300 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-semibold shadow">
-                  Edit
-                </button>
-              </div>
+              
             </div>
           ))}
         </div>
