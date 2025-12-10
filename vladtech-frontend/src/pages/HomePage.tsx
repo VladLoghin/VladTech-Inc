@@ -60,12 +60,22 @@ const portfolioImages = [
 ];
 
 export default function HomePage({ onNavigate, onOpenContactModal }: HomePageProps) {
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isNavbarDark, setIsNavbarDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [token, setToken] = useState<string>("");
+  useEffect(() => {
+    if (isAuthenticated) {
+      getAccessTokenSilently().then(t => {
+        setToken(t);
+        console.log("Token:", t);
+      });
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   // Debug: Log user roles
   useEffect(() => {
