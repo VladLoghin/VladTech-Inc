@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:44.254Z" hostname="CUNNINGHAM" time="0.258">
+  <properties/>
+  <testcase name="deleteProjectPhoto_ShouldDoNothing()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.203"/>
+  <testcase name="createProject_ShouldCreateAndReturnProject()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.013"/>
+  <testcase name="getAllProjects_ShouldReturnListOfProjects()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.004"/>
+  <testcase name="getProjectByIdentifier_ShouldThrowException_WhenNotFound()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.005"/>
+  <testcase name="deleteProject_ShouldDoNothing()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.002"/>
+  <testcase name="addProjectPhoto_ShouldReturnNull()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.004"/>
+  <testcase name="assignEmployee_ShouldReturnNull()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.002"/>
+  <testcase name="getProjectByIdentifier_ShouldReturnProject_WhenFound()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.003"/>
+  <testcase name="getProjectPhotos_ShouldReturnNull()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.001"/>
+  <testcase name="updateProject_ShouldReturnNull()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.002"/>
+  <testcase name="getAllProjects_ShouldReturnEmptyList_WhenNoProjects()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.004"/>
+  <testcase name="getProjectCount_ShouldReturnRepositoryCount()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.002"/>
+  <testcase name="createProject_ShouldSetCorrectProjectIdentifier()" classname="org.example.vladtech.projectsubdomain.businesslayer.ProjectServiceImplTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

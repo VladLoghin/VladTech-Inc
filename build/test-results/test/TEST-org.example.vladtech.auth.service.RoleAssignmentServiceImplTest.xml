@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.auth.service.RoleAssignmentServiceImplTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:39.126Z" hostname="CUNNINGHAM" time="0.324">
+  <properties/>
+  <testcase name="assignClientRole_throwsException_whenApiReturnsError()" classname="org.example.vladtech.auth.service.RoleAssignmentServiceImplTest" time="0.198"/>
+  <testcase name="assignClientRole_success()" classname="org.example.vladtech.auth.service.RoleAssignmentServiceImplTest" time="0.125"/>
+  <system-out><![CDATA[Client role assigned to user123
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

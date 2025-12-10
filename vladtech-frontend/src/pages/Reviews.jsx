@@ -4,11 +4,14 @@ import SecondaryNavbar from "../components/SecondaryNavbar";
 import { getAllVisibleReviews } from "../api/reviews/reviewsService";
 import "../components/reviews/Review.css";
 import ReviewModal from "../components/reviews/ReviewModal";
+import ReviewDetailModal from "../components/reviews/ReviewDetailModal";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const ReviewsPage = () => {
     const [reviews, setReviews] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedReview, setSelectedReview] = useState(null);
     const [roles, setRoles] = useState([]);
 
     const { user } = useAuth0();
@@ -29,6 +32,15 @@ const ReviewsPage = () => {
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
+    const handleReviewClick = (review) => {
+        setSelectedReview(review);
+        setShowDetailModal(true);
+    };
+
+    const handleCloseDetailModal = () => {
+        setShowDetailModal(false);
+        setSelectedReview(null);
+    };
     const isClient = roles.includes("Client");
 
     return (
@@ -50,7 +62,10 @@ const ReviewsPage = () => {
 
                 <section className="mb-10" data-testid="reviews-carousel-section">
                     <h2 className="title">Customer Highlights</h2>
-                    <ReviewCarousel reviews={reviews} />
+                    <ReviewCarousel
+                        reviews={reviews}
+                        onReviewClick={handleReviewClick}
+                    />
                 </section>
             </div>
 
@@ -61,6 +76,12 @@ const ReviewsPage = () => {
                     setReviews((prev) => [newReview, ...prev]); // auto-refresh
                     handleCloseModal();
                 }}
+            />
+
+            <ReviewDetailModal
+                review={selectedReview}
+                open={showDetailModal}
+                onClose={handleCloseDetailModal}
             />
         </div>
     );

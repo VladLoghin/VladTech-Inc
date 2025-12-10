@@ -12,7 +12,9 @@ import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestMod
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
 import org.springframework.stereotype.Service;
-
+import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
+import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,5 +111,33 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.count();
     }
 
+    @Override
+    public List<ProjectCalendarEntryResponseModel> getProjectsForCalendar() {
+        List<Project> projects = projectRepository.findAll();
 
+        return projects.stream()
+                .map(this::mapToCalendarEntry)
+                .collect(Collectors.toList());
+    }
+
+    private ProjectCalendarEntryResponseModel mapToCalendarEntry(Project project) {
+        Address address = project.getAddress();
+
+        String locationSummary = null;
+        if (address != null) {
+            // keep it simple for now, you can tweak later
+            // example: "Montreal, QC" or "123 Main St, Montreal"
+            locationSummary = String.format("%s, %s",
+                    address.getCity(),
+                    address.getProvince());
+        }
+
+        return new ProjectCalendarEntryResponseModel(
+                project.getProjectIdentifier(),
+                project.getName(),
+                locationSummary,
+                project.getStartDate(),
+                project.getDueDate()
+        );
+    }
 }

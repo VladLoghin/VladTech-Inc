@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Auth0ManagementTokenServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VladTech</a> &gt; <a href="index.source.html" class="el_package">org.example.vladtech.auth.service</a> &gt; <span class="el_source">Auth0ManagementTokenServiceImpl.java</span></div><h1>Auth0ManagementTokenServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.vladtech.auth.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
+
+//do not delete
+
+@Service
+@RequiredArgsConstructor
+public class Auth0ManagementTokenServiceImpl implements Auth0ManagementTokenService {
+
+    @Value(&quot;${auth0.domain}&quot;)
+    private String domain;
+
+    @Value(&quot;${auth0.mgmt.clientId}&quot;)
+    private String clientId;
+
+    @Value(&quot;${auth0.mgmt.clientSecret}&quot;)
+    private String clientSecret;
+
+    @Value(&quot;${auth0.mgmt.audience}&quot;)
+    private String audience;
+
+    private final RestTemplate restTemplate;
+
+    //private final Auth0ManagementTokenService managementTokenService;
+
+    @Override
+    public String getManagementApiToken() {
+
+<span class="fc" id="L36">        String url = &quot;https://&quot; + domain + &quot;/oauth/token&quot;;</span>
+
+<span class="fc" id="L38">        Map&lt;String, String&gt; body = Map.of(</span>
+                &quot;client_id&quot;, clientId,
+                &quot;client_secret&quot;, clientSecret,
+                &quot;audience&quot;, audience,
+                &quot;grant_type&quot;, &quot;client_credentials&quot;
+        );
+
+<span class="fc" id="L45">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L46">        headers.setContentType(MediaType.APPLICATION_JSON);</span>
+
+<span class="fc" id="L48">        HttpEntity&lt;Map&lt;String, String&gt;&gt; entity = new HttpEntity&lt;&gt;(body, headers);</span>
+
+<span class="fc" id="L50">        ResponseEntity&lt;Map&gt; response =</span>
+<span class="fc" id="L51">                restTemplate.postForEntity(url, entity, Map.class);</span>
+
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (!response.getStatusCode().is2xxSuccessful()) {</span>
+<span class="nc" id="L54">            throw new IllegalStateException(&quot;Failed to get management token: &quot; + response.getStatusCode());</span>
+        }
+
+<span class="fc" id="L57">        Object token = response.getBody().get(&quot;access_token&quot;);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (token == null) {</span>
+<span class="fc" id="L59">            throw new IllegalStateException(&quot;No access_token in management token response&quot;);</span>
+        }
+
+<span class="fc" id="L62">        return token.toString();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
