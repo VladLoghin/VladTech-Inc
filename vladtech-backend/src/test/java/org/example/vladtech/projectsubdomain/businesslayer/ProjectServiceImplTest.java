@@ -170,12 +170,23 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void updateProject_ShouldReturnNull() {
+    void updateProject_ShouldUpdateAndReturnProject() {
+        // Arrange
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+                .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project))
+                .thenReturn(responseModel);
+
         // Act
         ProjectResponseModel result = projectService.updateProject("PROJ-1", requestModel);
 
         // Assert
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals("Test Project", result.getName());
+        verify(projectRepository, times(1)).findByProjectIdentifier("PROJ-1");
+        verify(projectRepository, times(1)).save(any(Project.class));
     }
 
     @Test
