@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import NewProjectModal from "../components/NewProjectModal";
+import NewProjectModal from "../components/projects/NewProjectModal";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
