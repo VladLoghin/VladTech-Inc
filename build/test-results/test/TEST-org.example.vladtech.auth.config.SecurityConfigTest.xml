@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.auth.config.SecurityConfigTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:35.436Z" hostname="CUNNINGHAM" time="2.352">
+  <properties/>
+  <testcase name="jwtAuthenticationConverter_returnsConfiguredConverter()" classname="org.example.vladtech.auth.config.SecurityConfigTest" time="2.352"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

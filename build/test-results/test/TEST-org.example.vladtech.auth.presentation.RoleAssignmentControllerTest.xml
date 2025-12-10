@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.auth.presentation.RoleAssignmentControllerTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:37.889Z" hostname="CUNNINGHAM" time="0.11">
+  <properties/>
+  <testcase name="assignClientRole_throwsException_whenServiceFails()" classname="org.example.vladtech.auth.presentation.RoleAssignmentControllerTest" time="0.097"/>
+  <testcase name="assignClientRole_returnsSuccessMessage_whenRoleIsAssigned()" classname="org.example.vladtech.auth.presentation.RoleAssignmentControllerTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
