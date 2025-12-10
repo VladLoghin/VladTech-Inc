@@ -19,6 +19,7 @@ const Auth0ProviderWithConfig = ({ children, navigate }) => {
         scope: "openid profile email"
       }}
       onRedirectCallback={onRedirectCallback}
+      cacheLocation="localstorage"
     >
       {children}
     </Auth0Provider>
