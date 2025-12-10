@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContactServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VladTech</a> &gt; <a href="index.source.html" class="el_package">org.example.vladtech.contact.businesslayer</a> &gt; <span class="el_source">ContactServiceImpl.java</span></div><h1>ContactServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.vladtech.contact.businesslayer;
+
+import org.example.vladtech.contact.datamapperlayer.ContactEmailMapper;
+import org.example.vladtech.contact.dataaccesslayer.ContactEmailSender;
+import org.example.vladtech.contact.domain.ContactEmail;
+import org.example.vladtech.contact.presentationlayer.ContactRequestDto;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ContactServiceImpl implements ContactService {
+
+    private final ContactEmailMapper mapper;
+    private final ContactEmailSender emailSender;
+
+    public ContactServiceImpl(ContactEmailMapper mapper,
+<span class="fc" id="L16">                              ContactEmailSender emailSender) {</span>
+<span class="fc" id="L17">        this.mapper = mapper;</span>
+<span class="fc" id="L18">        this.emailSender = emailSender;</span>
+<span class="fc" id="L19">    }</span>
+
+    @Override
+    public void sendContactMessage(ContactRequestDto requestDto) {
+        // 1. Convert DTO (what frontend sends) â†’ domain object
+<span class="fc" id="L24">        ContactEmail contactEmail = mapper.toContactEmail(requestDto);</span>
+
+        // 2. Ask data access layer to send the email (MailHog)
+<span class="fc" id="L27">        emailSender.send(contactEmail);</span>
+<span class="fc" id="L28">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:44.523Z" hostname="CUNNINGHAM" time="0.014">
+  <properties/>
+  <testcase name="entityToResponseModel_ShouldHandleNullPhotos()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.003"/>
+  <testcase name="entityToResponseModel_ShouldHandleNullAddress()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.001"/>
+  <testcase name="entityToResponseModel_ShouldHandleNullProjectType()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityToResponseModel_ShouldMapPhotosCorrectly()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityListToResponseModelList_ShouldHandleEmptyList()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.002"/>
+  <testcase name="entityToResponseModel_ShouldMapAppointmentType()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityToResponseModel_ShouldHandleProjectTypeWithNullEnum()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityToResponseModel_ShouldMapAllFields()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityToResponseModel_ShouldReturnNull_WhenInputIsNull()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityListToResponseModelList_ShouldReturnNull_WhenInputIsNull()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.0"/>
+  <testcase name="entityListToResponseModelList_ShouldMapAllProjects()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapperTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

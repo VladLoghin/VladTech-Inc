@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 
 import java.util.List;
 
@@ -84,4 +85,11 @@ public class ProjectController {
     public long getProjectCount() {
         return projectService.getProjectCount();
     }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @GetMapping("/calendar")
+    public ResponseEntity<List<ProjectCalendarEntryResponseModel>> getProjectsForCalendar() {
+        return ResponseEntity.ok(projectService.getProjectsForCalendar());
+    }
+
 }
