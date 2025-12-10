@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import NewProjectModal from "../components/NewProjectModal";
-import AdminProjectCalendar from "../components/AdminProjectCalendar";
+import NewProjectModal from "../components/projects/NewProjectModal.jsx";
+import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
