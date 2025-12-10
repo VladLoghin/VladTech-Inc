@@ -84,7 +84,7 @@ const Admin = () => {
       )}
 
       {/* Top bar title + New Project button */}
-      <div className="mt-10 flex items-center justify-between mb-6">
+      {/* <div className="mt-10 flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Admin Calendar</h2>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -92,7 +92,7 @@ const Admin = () => {
         >
           New Project
         </button>
-      </div>
+      </div> */}
 
       {/* New project modal */}
       <NewProjectModal

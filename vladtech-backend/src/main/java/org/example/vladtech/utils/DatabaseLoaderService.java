@@ -110,8 +110,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 "Kitchen Renovation",
                 "123 Main St", "Montreal", "Quebec", "Canada", "H1A 1A1",
                 "Complete kitchen remodel including cabinets and countertops",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
+                LocalDate.of(2026, 1, 15),
+                LocalDate.of(2026, 3, 30),
                 ProjectType.ProjectTypeEnum.SCHEDULED
         );
 
@@ -120,8 +120,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 "Bathroom Repair",
                 "456 Oak Ave", "Montreal", "Quebec", "Canada", "H2B 2B2",
                 "Emergency plumbing repair and tile replacement",
-                LocalDate.of(2025, 2, 1),
-                LocalDate.of(2025, 2, 15),
+                LocalDate.of(2026, 2, 1),
+                LocalDate.of(2026, 2, 15),
                 ProjectType.ProjectTypeEnum.APPOINTMENT
         );
 

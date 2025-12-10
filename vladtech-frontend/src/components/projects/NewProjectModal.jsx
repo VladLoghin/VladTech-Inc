@@ -218,7 +218,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
               type="submit"
               className="px-8 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold shadow-lg"
             >
-              Save
+              Create
             </button>
           </div>
         </form>
