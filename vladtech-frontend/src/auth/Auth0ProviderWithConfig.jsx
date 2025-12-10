@@ -6,7 +6,7 @@ const Auth0ProviderWithConfig = ({ children, navigate }) => {
   const audience = "https://vladtech/api";
 
   const onRedirectCallback = (appState) => {
-      navigate(appState?.returnTo || window.location.pathname);
+      navigate(appState?.returnTo || '/');
   };
 
   return (
