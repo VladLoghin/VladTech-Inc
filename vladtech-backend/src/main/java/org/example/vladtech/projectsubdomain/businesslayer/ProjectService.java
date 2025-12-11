@@ -1,5 +1,6 @@
 package org.example.vladtech.projectsubdomain.businesslayer;
 
+import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
@@ -29,5 +30,7 @@ public interface ProjectService {
     long getProjectCount();
 
     List<ProjectCalendarEntryResponseModel> getProjectsForCalendar();
+
+    void sendEmailNotificationAsync(Project project, String operation);
 
 }

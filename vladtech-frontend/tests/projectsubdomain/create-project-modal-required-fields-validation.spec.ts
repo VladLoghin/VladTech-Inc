@@ -18,9 +18,9 @@ test('validation errors appear for required fields', async ({ page, loginAs }) =
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
   
-  await page.getByRole('button', { name: 'New Project' }).click();
+  await page.getByRole('button', { name: 'ADD' }).click();
 
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Create' }).click();
 
   await expect(page.getByText('Project name is required')).toBeVisible();
   await expect(page.getByText('City is required')).toBeVisible();

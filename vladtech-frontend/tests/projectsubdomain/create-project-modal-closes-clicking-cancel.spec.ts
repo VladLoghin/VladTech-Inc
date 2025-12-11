@@ -18,7 +18,7 @@ test('modal closes when hitting cancel', async ({ page, loginAs }) => {
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
   
-  await page.getByRole('button', { name: 'New Project' }).click();
+  await page.getByRole('button', { name: 'ADD' }).click();
 
   await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.getByRole('heading', { name: 'New Project' })).not.toBeVisible();
