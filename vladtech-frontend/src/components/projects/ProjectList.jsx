@@ -14,6 +14,14 @@ const ProjectList = ({ projects }) => {
           key={project.projectIdentifier}
           className="border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow"
         >
+          <button
+            type="button"
+            onClick={() => { }}
+            className="float-right px-8 py-3 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold"
+          >
+            Edit
+          </button>
+
           <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
