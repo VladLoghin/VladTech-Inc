@@ -385,4 +385,91 @@ class ProjectServiceImplTest {
         assertEquals("Bathroom Remodel", e2.getName());
         assertNull(e2.getLocationSummary());
     }
+
+    @Test
+    void updateProject_shouldReplaceAssignedEmployeeIds_whenRequestHasList() {
+        // given
+        String projectId = "PROJ-1";
+
+        // existing project with OLD employees
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(
+                new ArrayList<>(List.of("auth0|old-1", "auth0|old-2"))
+        );
+
+        // request with NEW employees
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setAssignedEmployeeIds(
+                List.of("auth0|new-1", "auth0|new-2")
+        );
+
+        Project saved = new Project();
+        saved.setProjectIdentifier(projectId);
+        saved.setAssignedEmployeeIds(
+                new ArrayList<>(List.of("auth0|new-1", "auth0|new-2"))
+        );
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+
+        // we also assert inside the stub that the list was replaced correctly
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> {
+                    Project toSave = invocation.getArgument(0);
+                    assertEquals(
+                            List.of("auth0|new-1", "auth0|new-2"),
+                            toSave.getAssignedEmployeeIds()
+                    );
+                    return saved;
+                });
+
+        when(projectResponseMapper.entityToResponseModel(saved))
+                .thenReturn(new ProjectResponseModel());
+
+        // when
+        ProjectResponseModel result =
+                projectService.updateProject(projectId, updateRequest);
+
+        // then
+        assertNotNull(result);
+        // existing object in memory should also now have the NEW list
+        assertEquals(
+                List.of("auth0|new-1", "auth0|new-2"),
+                existing.getAssignedEmployeeIds()
+        );
+        verify(projectRepository).findByProjectIdentifier(projectId);
+        verify(projectRepository).save(any(Project.class));
+    }
+
+    @Test
+    void updateProject_shouldKeepAssignedEmployeeIds_whenRequestHasNullList() {
+        String projectId = "PROJ-1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(
+                new ArrayList<>(List.of("auth0|keep-me"))
+        );
+
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setAssignedEmployeeIds(null); // important
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any()))
+                .thenReturn(new ProjectResponseModel());
+
+        ProjectResponseModel result =
+                projectService.updateProject(projectId, updateRequest);
+
+        assertNotNull(result);
+        assertEquals(
+                List.of("auth0|keep-me"),
+                existing.getAssignedEmployeeIds()
+        );
+    }
+
 }
