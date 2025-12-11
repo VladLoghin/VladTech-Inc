@@ -12,4 +12,5 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/images/**") // matches /images/filename
                 .addResourceLocations("file:uploads/reviews/"); // maps to VladTech-Inc/uploads/reviews/
     }
-}
+    }
+
