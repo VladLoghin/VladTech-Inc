@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import ClientFinderModal from "./ClientFinderModal.jsx";
+import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
 
 const EMPTY_FORM = {
   name: "",
@@ -12,6 +13,7 @@ const EMPTY_FORM = {
   clientId: "",
   clientName: "",
   clientEmail: "",
+  assignedEmployeeIds: [],
   address: {
     streetAddress: "",
     city: "",
@@ -34,6 +36,8 @@ const ProjectModal = ({
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState([]);
 
   const isEdit = mode === "edit";
 
@@ -45,6 +49,7 @@ const ProjectModal = ({
         clientId: initialData.clientId || "",
         clientName: initialData.clientName || "",
         clientEmail: initialData.clientEmail || "",
+        assignedEmployeeIds: initialData.assignedEmployeeIds || [],
         address: {
           streetAddress: initialData.address?.streetAddress || "",
           city: initialData.address?.city || "",
@@ -66,7 +71,7 @@ const ProjectModal = ({
       }));
     }
   }, [defaultDate, isEdit]);
-
+  
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Project name is required";
@@ -136,6 +141,40 @@ const ProjectModal = ({
       clientEmail: "",
     }));
   };
+
+const handleSelectEmployee = (employee) => {
+  setSelectedEmployee((prev) => {
+    const exists = prev.some((e) => e.id === employee.id);
+    let updated;
+
+    if (exists) {
+     
+      updated = prev.filter((e) => e.id !== employee.id);
+    } else {
+      
+      updated = [...prev, employee];
+    }
+
+    setFormData((prevForm) => ({
+      ...prevForm,
+      assignedEmployeeIds: updated.map((e) => e.id),
+      
+      assignedEmployeeEmails: updated.map((e) => e.email),
+    }));
+
+    return updated;
+  });
+};
+
+const handleClearEmployee = () => {
+  setSelectedEmployee([]);
+  setFormData((prev) => ({
+    ...prev,
+    assignedEmployeeIds: [],
+    assignedEmployeeEmails: [],
+  }));
+};
+
 
   const handleClose = () => {
     setFormData(EMPTY_FORM);
@@ -207,6 +246,41 @@ const ProjectModal = ({
                 )}
               </div>
             </div>
+
+                        {/* Employee picker */}
+<div className="mb-5">
+  <label className="block text-sm font-semibold text-black mb-2">
+    Employee
+  </label>
+  <div className="flex gap-2">
+    <button
+      type="button"
+      onClick={() => setIsEmployeeModalOpen(true)}
+      className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
+    >
+      {selectedEmployee.length > 0 ? (
+  <div className="text-sm text-black/80">
+    {selectedEmployee.map((e) => e.email).join(", ")}
+  </div>
+) : (
+  "Select employees"
+)}
+
+    </button>
+
+    {formData.assignedEmployeeIds?.length > 0 && (
+      <button
+        type="button"
+        onClick={handleClearEmployee}
+        className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+</div>
+
+
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
@@ -320,6 +394,12 @@ const ProjectModal = ({
         onSelectClient={handleSelectClient}
         selectedClientId={formData.clientId}
       />
+      <EmployeeFinderModal
+  isOpen={isEmployeeModalOpen}
+  onClose={() => setIsEmployeeModalOpen(false)}
+  selectedEmployeeIds={formData.assignedEmployeeIds}
+  onToggleEmployee={handleSelectEmployee}
+/>
     </>
   );
 };

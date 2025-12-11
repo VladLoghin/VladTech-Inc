@@ -28,5 +28,6 @@ public class Project {
     private LocalDate dueDate;
     private ProjectType projectType;
     private List<String> assignedEmployeeIds = new ArrayList<>();
+    private List<String> assignedEmployeeEmails = new ArrayList<>();
     private List<ProjectPhoto> photos = new ArrayList<>();
 }

@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Lazy;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
+
 
 @Slf4j
 @Service
@@ -110,6 +112,10 @@ public class ProjectServiceImpl implements ProjectService {
             existingProject.setProjectType(projectType);
         }
 
+        if (projectRequestModel.getAssignedEmployeeIds() != null) {
+            existingProject.setAssignedEmployeeIds(projectRequestModel.getAssignedEmployeeIds());
+        }
+
         Project updatedProject = projectRepository.save(existingProject);
 
         self.sendEmailNotificationAsync(updatedProject, "Updated");
@@ -142,8 +148,25 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId) {
-        return null;
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new IllegalArgumentException("employeeId cannot be null or blank");
+        }
+
+        if (project.getAssignedEmployeeIds() == null) {
+            project.setAssignedEmployeeIds(new ArrayList<>());
+        }
+
+        if (!project.getAssignedEmployeeIds().contains(employeeId)) {
+            project.getAssignedEmployeeIds().add(employeeId);
+            project = projectRepository.save(project);
+        }
+
+        return projectResponseMapper.entityToResponseModel(project);
     }
+
 
     @Override
     public List<PhotoResponseModel> getProjectPhotos(String projectIdentifier) {

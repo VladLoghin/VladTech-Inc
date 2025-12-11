@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,5 +24,6 @@ public class ProjectResponseModel {
     private LocalDate dueDate;
     private String projectType;
     private List<String> assignedEmployeeIds;
+    private List<String> assignedEmployeeEmails = new ArrayList<>();
     private List<PhotoResponseModel> photos;
 }
