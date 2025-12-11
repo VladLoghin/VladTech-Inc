@@ -1,13 +1,14 @@
 package org.example.vladtech.projectsubdomain.businesslayer;
 
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
+import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
+import org.example.vladtech.projectsubdomain.mappinglayer.ProjectEmailMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapper;
 import org.example.vladtech.projectsubdomain.presentationlayer.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,7 +31,15 @@ class ProjectServiceImplTest {
     @Mock
     private ProjectResponseMapper projectResponseMapper;
 
-    @InjectMocks
+    @Mock
+    private ProjectEmailMapper projectEmailMapper;
+
+    @Mock
+    private ProjectEmailSender projectEmailSender;
+
+    @Mock
+    private ProjectService projectServiceMock;
+
     private ProjectServiceImpl projectService;
 
     private Project project;
@@ -39,6 +48,15 @@ class ProjectServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        projectService = new ProjectServiceImpl(
+                projectRepository,
+                projectRequestMapper,
+                projectResponseMapper,
+                projectEmailMapper,
+                projectEmailSender
+        );
+        projectService.self = projectServiceMock;
+
         project = new Project();
         project.setId("1");
         project.setProjectIdentifier("PROJ-1");
@@ -157,6 +175,7 @@ class ProjectServiceImplTest {
         verify(projectRequestMapper, times(1)).requestModelToEntity(requestModel);
         verify(projectRepository, times(1)).save(any(Project.class));
         verify(projectResponseMapper, times(1)).entityToResponseModel(project);
+        verify(projectServiceMock, times(1)).sendEmailNotificationAsync(any(Project.class), eq("Created"));
     }
 
     @Test
@@ -179,6 +198,18 @@ class ProjectServiceImplTest {
     }
 
     @Test
+    void createProject_ShouldSendEmailNotification_WhenClientEmailPresent() {
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+
+        projectService.createProject(requestModel);
+
+        verify(projectServiceMock, times(1)).sendEmailNotificationAsync(project, "Created");
+    }
+
+    @Test
     void updateProject_ShouldUpdateAndReturnProject() {
         // Arrange
         when(projectRepository.findByProjectIdentifier("PROJ-1"))
@@ -196,6 +227,73 @@ class ProjectServiceImplTest {
         assertEquals("Test Project", result.getName());
         verify(projectRepository, times(1)).findByProjectIdentifier("PROJ-1");
         verify(projectRepository, times(1)).save(any(Project.class));
+        verify(projectServiceMock, times(1)).sendEmailNotificationAsync(any(Project.class), eq("Updated"));
+    }
+
+    @Test
+    void updateProject_ShouldSendEmailNotification_WhenClientEmailPresent() {
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+                .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project))
+                .thenReturn(responseModel);
+
+        projectService.updateProject("PROJ-1", requestModel);
+
+        verify(projectServiceMock, times(1)).sendEmailNotificationAsync(project, "Updated");
+    }
+
+    @Test
+    void sendEmailNotificationAsync_ShouldSendEmail_WhenClientEmailPresent() {
+        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+        when(projectEmailMapper.toProjectNotificationEmail(project, "Created")).thenReturn(email);
+
+        projectService.sendEmailNotificationAsync(project, "Created");
+
+        verify(projectEmailMapper, times(1)).toProjectNotificationEmail(project, "Created");
+        verify(projectEmailSender, times(1)).send(email);
+    }
+
+    @Test
+    void sendEmailNotificationAsync_ShouldNotSendEmail_WhenClientEmailIsNull() {
+        project.setClientEmail(null);
+
+        projectService.sendEmailNotificationAsync(project, "Created");
+
+        verify(projectEmailMapper, never()).toProjectNotificationEmail(any(), any());
+        verify(projectEmailSender, never()).send(any());
+    }
+
+    @Test
+    void sendEmailNotificationAsync_ShouldNotSendEmail_WhenClientEmailIsBlank() {
+        project.setClientEmail("   ");
+
+        projectService.sendEmailNotificationAsync(project, "Created");
+
+        verify(projectEmailMapper, never()).toProjectNotificationEmail(any(), any());
+        verify(projectEmailSender, never()).send(any());
+    }
+
+    @Test
+    void sendEmailNotificationAsync_ShouldHandleException_WhenEmailSendingFails() {
+        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+        when(projectEmailMapper.toProjectNotificationEmail(project, "Created")).thenReturn(email);
+        doThrow(new RuntimeException("Email sending failed")).when(projectEmailSender).send(email);
+
+        assertDoesNotThrow(() -> projectService.sendEmailNotificationAsync(project, "Created"));
+
+        verify(projectEmailSender, times(1)).send(email);
+    }
+
+    @Test
+    void sendEmailNotificationAsync_ShouldNotSendEmail_WhenMapperReturnsNull() {
+        when(projectEmailMapper.toProjectNotificationEmail(project, "Created")).thenReturn(null);
+
+        projectService.sendEmailNotificationAsync(project, "Created");
+
+        verify(projectEmailMapper, times(1)).toProjectNotificationEmail(project, "Created");
+        verify(projectEmailSender, never()).send(any());
     }
 
     @Test

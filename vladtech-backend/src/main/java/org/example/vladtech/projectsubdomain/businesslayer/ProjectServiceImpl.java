@@ -37,7 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Lazy
     @Autowired
-    private ProjectService self;
+    ProjectService self;
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
