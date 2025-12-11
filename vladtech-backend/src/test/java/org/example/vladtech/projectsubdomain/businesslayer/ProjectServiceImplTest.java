@@ -206,14 +206,43 @@ class ProjectServiceImplTest {
         assertDoesNotThrow(() -> projectService.deleteProject("PROJ-1"));
     }
 
-    /*@Test
-    void assignEmployee_ShouldReturnNull() {
+    @Test
+    void assignEmployee_shouldAddEmployeeAndReturnMappedResponse() {
+        // Arrange
+        String projectId = "PROJ-1";
+        String employeeId = "EMP-123";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>());
+
+        Project savedProject = new Project();
+        savedProject.setProjectIdentifier(projectId);
+        savedProject.setAssignedEmployeeIds(List.of(employeeId));
+
+        ProjectResponseModel mapped = new ProjectResponseModel();
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(existing))
+                .thenReturn(savedProject);
+        when(projectResponseMapper.entityToResponseModel(savedProject))
+                .thenReturn(mapped);
+
         // Act
-        ProjectResponseModel result = projectService.assignEmployee("PROJ-1", "EMP-1");
+        ProjectResponseModel result =
+                projectService.assignEmployee(projectId, employeeId);
 
         // Assert
-        assertNull(result);
-    }*/
+        assertSame(mapped, result);
+        assertEquals(1, existing.getAssignedEmployeeIds().size());
+        assertEquals(employeeId, existing.getAssignedEmployeeIds().get(0));
+
+        verify(projectRepository).findByProjectIdentifier(projectId);
+        verify(projectRepository).save(existing);
+        verify(projectResponseMapper).entityToResponseModel(savedProject);
+    }
+
 
     @Test
     void getProjectPhotos_ShouldReturnNull() {
