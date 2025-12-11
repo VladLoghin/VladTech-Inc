@@ -1,7 +1,6 @@
 package org.example.vladtech.portfolio.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.vladtech.portfolio.data.PortfolioComment;
 import org.example.vladtech.portfolio.data.PortfolioItem;
 import org.example.vladtech.portfolio.data.PortfolioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +51,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_AsClient_ShouldAddCommentSuccessfully() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("Great work on this project!");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("Great work on this project!");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .with(jwt()
@@ -74,7 +72,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_AsAdmin_ShouldAddCommentSuccessfully() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("Admin feedback here!");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("Admin feedback here!");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .with(jwt()
@@ -92,7 +91,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_AsEmployee_ShouldBeForbidden() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("This should fail!");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("This should fail!");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .with(jwt()
@@ -108,7 +108,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_WithoutAuthentication_ShouldBeUnauthorized() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("This should fail!");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("This should fail!");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +119,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_WithEmptyText_ShouldReturnBadRequest() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .with(jwt()
@@ -134,7 +136,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_ToNonExistentPortfolio_ShouldReturnError() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("Comment on non-existent item");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("Comment on non-existent item");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", "nonexistent-id")
                         .with(jwt()
@@ -150,7 +153,8 @@ class PortfolioCommentControllerTest {
 
     @Test
     void addComment_WithNoNameInToken_ShouldUseFallbackName() throws Exception {
-        AddCommentRequestDto request = new AddCommentRequestDto("Comment without name");
+        AddCommentRequestDto request = new AddCommentRequestDto();
+        request.setText("Comment without name");
 
         mockMvc.perform(post("/api/portfolio/{portfolioId}/comments", testPortfolioItem.getPortfolioId())
                         .with(jwt()
@@ -166,4 +170,3 @@ class PortfolioCommentControllerTest {
                 .andExpect(jsonPath("$.text", is("Comment without name")));
     }
 }
-

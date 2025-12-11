@@ -11,5 +11,7 @@ import lombok.NoArgsConstructor;
 public class AddCommentRequestDto {
     @NotBlank(message = "Comment text cannot be empty")
     private String text;
+    
+    private String authorName; // Optional: nickname/name from frontend
 }
 

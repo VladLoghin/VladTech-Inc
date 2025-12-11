@@ -47,15 +47,26 @@ public class PortfolioController {
         // Extract user info from JWT token
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String userId = jwt.getSubject();
-        String userName = jwt.getClaimAsString("name");
-
-        // If name is not available, try email or use "Anonymous"
-        if (userName == null || userName.isEmpty()) {
-            userName = jwt.getClaimAsString("email");
+        
+        // Use authorName from request if provided, otherwise extract from JWT
+        String userName = request.getAuthorName();
+        
+        if (userName == null || userName.trim().isEmpty()) {
+            // Fallback: Try to get username from JWT claims
+            userName = jwt.getClaimAsString("nickname");
+            
             if (userName == null || userName.isEmpty()) {
-                userName = "Anonymous User";
+                userName = jwt.getClaimAsString("name");
+                if (userName == null || userName.isEmpty()) {
+                    userName = jwt.getClaimAsString("email");
+                    if (userName == null || userName.isEmpty()) {
+                        userName = "Anonymous User";
+                    }
+                }
             }
         }
+        
+        log.info("Comment author: {} (userId: {})", userName, userId);
 
         PortfolioCommentDto comment = portfolioService.addComment(
                 portfolioId,
