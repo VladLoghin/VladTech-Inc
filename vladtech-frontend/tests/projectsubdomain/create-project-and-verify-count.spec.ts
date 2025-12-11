@@ -25,12 +25,12 @@ test('admin creates project and verifies count on homepage', async ({ page, logi
 
   // Step 3: Get current project count before creating new project
   await page.waitForTimeout(1000);
-  const projectCards = page.locator('.border-2.border-black.rounded-xl').filter({ hasText: /Project ID:|ID:/i });
-  const initialCount = await projectCards.count();
+  const projectListRows = page.locator('div.border.border-black\\/10.rounded-lg.p-4');
+  const initialCount = await projectListRows.count();
   console.log(`📊 Initial project count: ${initialCount}`);
 
   // Step 4: Click yellow "New Project" button (top right)
-  await page.getByRole('button', { name: /new project/i }).click();
+  await page.getByRole('button', { name: /add/i }).click();
   await page.waitForTimeout(500);
   console.log('✅ Step 4: Clicked New Project button');
 
@@ -60,17 +60,17 @@ test('admin creates project and verifies count on homepage', async ({ page, logi
   console.log(`✅ Step 6: Filled project form with name: ${projectName}`);
 
   // Step 7: Click yellow "Save" button
-  await page.getByRole('button', { name: /^save$/i }).click();
+  await page.getByRole('button', { name: /^create$/i }).click();
   console.log('✅ Step 7: Clicked Save button');
 
   // Wait for modal to close
-  await expect(page.getByRole('heading', { name: /new project/i })).not.toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: /add/i })).not.toBeVisible({ timeout: 10000 });
   console.log('✅ Step 8: Modal closed, project saved');
 
   // Step 9: Verify new project appears in the list
   await page.waitForTimeout(2000); // Give time for UI to update
-  const updatedProjectCards = page.locator('.border-2.border-black.rounded-xl').filter({ hasText: /Project ID:|ID:/i });
-  const newCount = await updatedProjectCards.count();
+  const updatedRows = page.locator('div.border.border-black\\/10.rounded-lg.p-4');
+  const newCount = await updatedRows.count();
   console.log(`📊 New project count: ${newCount}`);
   
   expect(newCount).toBe(initialCount + 1);

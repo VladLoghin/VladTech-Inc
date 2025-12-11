@@ -26,11 +26,25 @@ spring:
           auth: false
           starttls:
             enable: false
+#  mail: #REAL CONFIG (USE THIS OR ANOTHER SIMILAR SETUP ON DEPLOY!!!!)
+#    host: mail.smtp2go.com
+#    port: 587
+#    username:
+#    password:
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
 
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+email:
+  noreply: noreply@cle4rwater.ca
 
 de:
   flapdoodle:
@@ -101,4 +115,3 @@ spring:
         jwt:
           issuer-uri: ""
           audience: ""
-
