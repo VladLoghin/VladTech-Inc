@@ -29,8 +29,8 @@ spring:
 #  mail: #REAL CONFIG (USE THIS OR ANOTHER SIMILAR SETUP ON DEPLOY!!!!)
 #    host: mail.smtp2go.com
 #    port: 587
-#    username: cle4rwaterTest
-#    password: dM --- fill it out later
+#    username:
+#    password:
 #    properties:
 #      mail:
 #        smtp:
