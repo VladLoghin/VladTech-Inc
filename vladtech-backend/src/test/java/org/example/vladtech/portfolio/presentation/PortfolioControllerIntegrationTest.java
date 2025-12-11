@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -36,14 +37,16 @@ class PortfolioControllerIntegrationTest {
         // Clean the database before each test
         portfolioRepository.deleteAll();
 
+        Instant now = Instant.now();
+
         // Create test portfolio items
         portfolioItem1 = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
                 List.of(
-                        new PortfolioComment("Sarah M.", "S", "3 hours ago", "Beautiful countertop!"),
-                        new PortfolioComment("John D.", "J", "1 hour ago", "Love the modern design.")
+                        new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!"),
+                        new PortfolioComment("John D.", "auth0|user2", now.minusSeconds(3600), "Love the modern design.")
                 )
         );
 
@@ -52,7 +55,7 @@ class PortfolioControllerIntegrationTest {
                 "/uploads/portfolio/kitchenremodel.jpg",
                 5.0,
                 List.of(
-                        new PortfolioComment("Emma L.", "E", "5 hours ago", "Amazing transformation!")
+                        new PortfolioComment("Emma L.", "auth0|user3", now.minusSeconds(18000), "Amazing transformation!")
                 )
         );
 
@@ -61,7 +64,7 @@ class PortfolioControllerIntegrationTest {
                 "/uploads/portfolio/newbathroom.jpg",
                 4.8,
                 List.of(
-                        new PortfolioComment("Lisa K.", "L", "4 hours ago", "Stunning bathroom design.")
+                        new PortfolioComment("Lisa K.", "auth0|user4", now.minusSeconds(14400), "Stunning bathroom design.")
                 )
         );
 
@@ -103,8 +106,7 @@ class PortfolioControllerIntegrationTest {
                 .andExpect(jsonPath("$.rating", is(4.9)))
                 .andExpect(jsonPath("$.comments", hasSize(2)))
                 .andExpect(jsonPath("$.comments[0].authorName", is("Sarah M.")))
-                .andExpect(jsonPath("$.comments[0].authorInitial", is("S")))
-                .andExpect(jsonPath("$.comments[0].timeAgo", is("3 hours ago")))
+                .andExpect(jsonPath("$.comments[0].timestamp").exists())
                 .andExpect(jsonPath("$.comments[0].text", is("Beautiful countertop!")))
                 .andExpect(jsonPath("$.comments[1].authorName", is("John D.")));
     }
@@ -115,9 +117,7 @@ class PortfolioControllerIntegrationTest {
         mockMvc.perform(get("/api/portfolio"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].comments[0].authorName", is("Sarah M.")))
-                .andExpect(jsonPath("$[0].comments[0].authorInitial", is("S")))
-                .andExpect(jsonPath("$[0].comments[1].authorName", is("John D.")))
-                .andExpect(jsonPath("$[0].comments[1].authorInitial", is("J")));
+                .andExpect(jsonPath("$[0].comments[1].authorName", is("John D.")));
     }
 
     @Test

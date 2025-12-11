@@ -7,6 +7,7 @@ import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,10 @@ class PortfolioMapperTest {
     @Test
     void entityToResponseDto_WithValidItem_ShouldMapCorrectly() {
         // Arrange
+        Instant now = Instant.now();
         List<PortfolioComment> comments = List.of(
-                new PortfolioComment("Sarah M.", "S", "3 hours ago", "Beautiful countertop!"),
-                new PortfolioComment("John D.", "J", "1 hour ago", "Love the modern design.")
+                new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!"),
+                new PortfolioComment("John D.", "auth0|user2", now.minusSeconds(3600), "Love the modern design.")
         );
 
         PortfolioItem portfolioItem = new PortfolioItem(
@@ -48,8 +50,7 @@ class PortfolioMapperTest {
         assertThat(result.getRating()).isEqualTo(4.9);
         assertThat(result.getComments()).hasSize(2);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Sarah M.");
-        assertThat(result.getComments().get(0).getAuthorInitial()).isEqualTo("S");
-        assertThat(result.getComments().get(0).getTimeAgo()).isEqualTo("3 hours ago");
+        assertThat(result.getComments().get(0).getTimestamp()).isNotNull();
         assertThat(result.getComments().get(0).getText()).isEqualTo("Beautiful countertop!");
     }
 
@@ -88,10 +89,11 @@ class PortfolioMapperTest {
     @Test
     void entityToResponseDto_WithMultipleComments_ShouldMapAllComments() {
         // Arrange
+        Instant now = Instant.now();
         List<PortfolioComment> comments = List.of(
-                new PortfolioComment("Alice W.", "A", "2 days ago", "Fantastic work!"),
-                new PortfolioComment("Bob K.", "B", "1 day ago", "Very impressed."),
-                new PortfolioComment("Carol T.", "C", "5 hours ago", "Outstanding quality.")
+                new PortfolioComment("Alice W.", "auth0|user3", now.minusSeconds(172800), "Fantastic work!"),
+                new PortfolioComment("Bob K.", "auth0|user4", now.minusSeconds(86400), "Very impressed."),
+                new PortfolioComment("Carol T.", "auth0|user5", now.minusSeconds(18000), "Outstanding quality.")
         );
 
         PortfolioItem portfolioItem = new PortfolioItem(
@@ -110,10 +112,8 @@ class PortfolioMapperTest {
         assertThat(result.getComments()).hasSize(3);
         assertThat(result.getComments()).extracting(PortfolioCommentDto::getAuthorName)
                 .containsExactly("Alice W.", "Bob K.", "Carol T.");
-        assertThat(result.getComments()).extracting(PortfolioCommentDto::getAuthorInitial)
-                .containsExactly("A", "B", "C");
-        assertThat(result.getComments()).extracting(PortfolioCommentDto::getTimeAgo)
-                .containsExactly("2 days ago", "1 day ago", "5 hours ago");
+        assertThat(result.getComments()).extracting(PortfolioCommentDto::getTimestamp)
+                .isNotNull();
         assertThat(result.getComments()).extracting(PortfolioCommentDto::getText)
                 .containsExactly("Fantastic work!", "Very impressed.", "Outstanding quality.");
     }
@@ -160,10 +160,11 @@ class PortfolioMapperTest {
     @Test
     void entityToResponseDto_ShouldPreserveAllFields() {
         // Arrange
+        Instant now = Instant.now();
         PortfolioComment comment = new PortfolioComment(
                 "Test User",
-                "T",
-                "just now",
+                "auth0|testuser",
+                now,
                 "Test comment text"
         );
 
@@ -185,8 +186,7 @@ class PortfolioMapperTest {
         assertThat(result.getRating()).isEqualTo(4.7);
         assertThat(result.getComments()).hasSize(1);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Test User");
-        assertThat(result.getComments().get(0).getAuthorInitial()).isEqualTo("T");
-        assertThat(result.getComments().get(0).getTimeAgo()).isEqualTo("just now");
+        assertThat(result.getComments().get(0).getTimestamp()).isNotNull();
         assertThat(result.getComments().get(0).getText()).isEqualTo("Test comment text");
     }
 }

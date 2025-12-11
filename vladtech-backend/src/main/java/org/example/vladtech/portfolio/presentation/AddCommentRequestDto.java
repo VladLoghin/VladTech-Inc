@@ -1,18 +1,15 @@
 package org.example.vladtech.portfolio.presentation;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PortfolioCommentDto {
-    private String authorName;
-    private String authorUserId;
-    private Instant timestamp;
+public class AddCommentRequestDto {
+    @NotBlank(message = "Comment text cannot be empty")
     private String text;
 }
 

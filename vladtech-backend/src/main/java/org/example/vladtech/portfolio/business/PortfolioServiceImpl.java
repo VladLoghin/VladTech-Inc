@@ -2,12 +2,15 @@ package org.example.vladtech.portfolio.business;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.vladtech.portfolio.data.PortfolioComment;
 import org.example.vladtech.portfolio.data.PortfolioItem;
 import org.example.vladtech.portfolio.data.PortfolioRepository;
 import org.example.vladtech.portfolio.mapperlayer.PortfolioMapper;
+import org.example.vladtech.portfolio.presentation.PortfolioCommentDto;
 import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,37 @@ public class PortfolioServiceImpl implements PortfolioService {
         PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new RuntimeException("Portfolio item not found with id: " + portfolioId));
         return portfolioMapper.entityToResponseDto(portfolioItem);
+    }
+
+    @Override
+    public PortfolioCommentDto addComment(String portfolioId, String commentText, String userId, String userName) {
+        log.info("Adding comment to portfolio item {} by user {}", portfolioId, userName);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
+
+        // Create new comment
+        PortfolioComment comment = new PortfolioComment();
+        comment.setAuthorName(userName);
+        comment.setAuthorUserId(userId);
+        comment.setTimestamp(Instant.now());
+        comment.setText(commentText);
+
+        // Add comment to portfolio item
+        portfolioItem.getComments().add(comment);
+
+        // Save updated portfolio item
+        portfolioRepository.save(portfolioItem);
+
+        log.info("Comment added successfully to portfolio item {}", portfolioId);
+
+        // Return the newly created comment as DTO
+        return new PortfolioCommentDto(
+                comment.getAuthorName(),
+                comment.getAuthorUserId(),
+                comment.getTimestamp(),
+                comment.getText()
+        );
     }
 }
 

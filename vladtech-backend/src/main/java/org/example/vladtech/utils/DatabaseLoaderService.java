@@ -7,6 +7,7 @@ import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import org.example.vladtech.reviews.data.Photo;
@@ -168,40 +169,42 @@ public class DatabaseLoaderService implements CommandLineRunner {
         ////////////////////////////////////////////////// add Portfolio subdomain sample data
         log.info("Appending sample portfolio data to MongoDB...");
 
+        Instant now = Instant.now();
+
         createPortfolioItem("Modern Kitchen Counter", "/images/Reno1.jpg", 4.9,
                 List.of(
-                        new PortfolioComment("Sarah M.", "S", "3 hours ago", "Beautiful countertop! The finish is perfect."),
-                        new PortfolioComment("John D.", "J", "1 hour ago", "Love the modern design and clean look.")
+                        new PortfolioComment("Sarah M.", "sample-user-1", now.minusSeconds(10800), "Beautiful countertop! The finish is perfect."),
+                        new PortfolioComment("John D.", "sample-user-2", now.minusSeconds(3600), "Love the modern design and clean look.")
                 ));
 
         createPortfolioItem("Complete Kitchen Remodel", "/images/Reno2.jpg", 5.0,
                 List.of(
-                        new PortfolioComment("Emma L.", "E", "5 hours ago", "Amazing transformation! Best kitchen renovation I've seen."),
-                        new PortfolioComment("Michael R.", "M", "2 hours ago", "The attention to detail is outstanding.")
+                        new PortfolioComment("Emma L.", "sample-user-3", now.minusSeconds(18000), "Amazing transformation! Best kitchen renovation I've seen."),
+                        new PortfolioComment("Michael R.", "sample-user-4", now.minusSeconds(7200), "The attention to detail is outstanding.")
                 ));
 
         createPortfolioItem("Luxury Bathroom Renovation", "/images/Reno3.jpg", 4.8,
                 List.of(
-                        new PortfolioComment("Lisa K.", "L", "4 hours ago", "Stunning bathroom design. Very elegant!"),
-                        new PortfolioComment("David P.", "D", "6 hours ago", "The tile work is absolutely beautiful.")
+                        new PortfolioComment("Lisa K.", "sample-user-5", now.minusSeconds(14400), "Stunning bathroom design. Very elegant!"),
+                        new PortfolioComment("David P.", "sample-user-6", now.minusSeconds(21600), "The tile work is absolutely beautiful.")
                 ));
 
         createPortfolioItem("Contemporary Office Space", "/images/Reno4.jpg", 4.7,
                 List.of(
-                        new PortfolioComment("Anna S.", "A", "3 hours ago", "Great use of space and natural lighting."),
-                        new PortfolioComment("Tom W.", "T", "8 hours ago", "Very professional and modern office design.")
+                        new PortfolioComment("Anna S.", "sample-user-7", now.minusSeconds(10800), "Great use of space and natural lighting."),
+                        new PortfolioComment("Tom W.", "sample-user-8", now.minusSeconds(28800), "Very professional and modern office design.")
                 ));
 
         createPortfolioItem("Custom Shower Installation", "/images/Reno5.jpg", 4.9,
                 List.of(
-                        new PortfolioComment("Rachel B.", "R", "1 day ago", "Perfect execution! Love the glass work."),
-                        new PortfolioComment("Chris M.", "C", "12 hours ago", "High-quality shower installation.")
+                        new PortfolioComment("Rachel B.", "sample-user-9", now.minusSeconds(86400), "Perfect execution! Love the glass work."),
+                        new PortfolioComment("Chris M.", "sample-user-10", now.minusSeconds(43200), "High-quality shower installation.")
                 ));
 
         createPortfolioItem("Entertainment Center & TV Setup", "/images/Reno1.jpg", 4.6,
                 List.of(
-                        new PortfolioComment("Mark H.", "M", "2 days ago", "Clean TV mounting and cable management."),
-                        new PortfolioComment("Jennifer L.", "J", "5 hours ago", "Great entertainment center design!")
+                        new PortfolioComment("Mark H.", "sample-user-11", now.minusSeconds(172800), "Clean TV mounting and cable management."),
+                        new PortfolioComment("Jennifer L.", "sample-user-12", now.minusSeconds(18000), "Great entertainment center design!")
                 ));
 
         log.info("Sample portfolio data appended successfully. Total portfolio items: {}", portfolioRepository.count());

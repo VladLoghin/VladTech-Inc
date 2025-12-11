@@ -1,9 +1,14 @@
 package org.example.vladtech.portfolio.presentation;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.portfolio.business.PortfolioService;
+import org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +34,42 @@ public class PortfolioController {
         log.info("GET request to /api/portfolio/{} - Fetching portfolio item", portfolioId);
         PortfolioResponseDto portfolioItem = portfolioService.getPortfolioItemById(portfolioId);
         return ResponseEntity.ok(portfolioItem);
+    }
+
+    @PostMapping("/{portfolioId}/comments")
+    public ResponseEntity<PortfolioCommentDto> addComment(
+            @PathVariable String portfolioId,
+            @Valid @RequestBody AddCommentRequestDto request,
+            Authentication authentication) {
+
+        log.info("POST request to /api/portfolio/{}/comments - Adding comment", portfolioId);
+
+        // Extract user info from JWT token
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String userId = jwt.getSubject();
+        String userName = jwt.getClaimAsString("name");
+
+        // If name is not available, try email or use "Anonymous"
+        if (userName == null || userName.isEmpty()) {
+            userName = jwt.getClaimAsString("email");
+            if (userName == null || userName.isEmpty()) {
+                userName = "Anonymous User";
+            }
+        }
+
+        PortfolioCommentDto comment = portfolioService.addComment(
+                portfolioId,
+                request.getText(),
+                userId,
+                userName
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
+    }
+
+    @ExceptionHandler(PortfolioNotFoundException.class)
+    public ResponseEntity<String> handlePortfolioNotFound(PortfolioNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
 
