@@ -397,8 +397,8 @@ const handleClearEmployee = () => {
       <EmployeeFinderModal
   isOpen={isEmployeeModalOpen}
   onClose={() => setIsEmployeeModalOpen(false)}
-  onSelectEmployee={handleSelectEmployee}
-  selectedEmployeeId={formData.assignedEmployeeIds?.[0] || ""}
+  selectedEmployeeIds={formData.assignedEmployeeIds}
+  onToggleEmployee={handleSelectEmployee}
 />
     </>
   );

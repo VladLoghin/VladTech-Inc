@@ -6,12 +6,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 const EmployeeFinderModal = ({
   isOpen,
   onClose,
-  onSelectEmployee,
-  selectedEmployeeId,
+  selectedEmployeeIds = [],
+  onToggleEmployee,
 }) => {
   const { getAccessTokenSilently } = useAuth0();
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -20,6 +19,7 @@ const EmployeeFinderModal = ({
   const [activeQuery, setActiveQuery] = useState("");
 
   const perPage = 25;
+
 
   const fetchEmployees = async (page, query = "") => {
     setLoading(true);
@@ -50,40 +50,22 @@ const EmployeeFinderModal = ({
     }
   };
 
-  const fetchSelectedEmployee = async () => {
-    if (!selectedEmployeeId) return;
+  useEffect(() => {
+  if (isOpen) {
+    setCurrentPage(0);
+    setActiveQuery("");
+    setSearchQuery("");
+    fetchEmployees(0);
+  }
+}, [isOpen]);
 
-    try {
-      const token = await getAccessTokenSilently();
-      const response = await axios.get(
-        `http://localhost:8080/api/users/${encodeURIComponent(
-          selectedEmployeeId
-        )}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setSelectedEmployee(response.data);
-    } catch (err) {
-      console.error("Error fetching selected employee:", err);
-    }
-  };
 
   useEffect(() => {
-    if (isOpen) {
-      setCurrentPage(0);
-      setActiveQuery("");
-      setSearchQuery("");
-      fetchEmployees(0);
-      fetchSelectedEmployee();
-    }
-  }, [isOpen, selectedEmployeeId]);
+  if (isOpen && currentPage > 0) {
+    fetchEmployees(currentPage, activeQuery);
+  }
+}, [currentPage, isOpen, activeQuery]);
 
-  useEffect(() => {
-    if (isOpen && currentPage > 0) {
-      fetchEmployees(currentPage, activeQuery);
-    }
-  }, [currentPage]);
 
   const totalPages = Math.ceil(totalEmployees / perPage);
 
@@ -102,24 +84,17 @@ const EmployeeFinderModal = ({
   };
 
   const handleSelectEmployee = (employee) => {
-    onSelectEmployee({
+    onToggleEmployee({
       id: employee.user_id,
       name: employee.name || employee.email,
       email: employee.email,
     });
-    onClose();
-  };
-
-  const getDisplayEmployees = () => {
-    if (!selectedEmployee) return employees;
-
-    const filtered = employees.filter((e) => e.user_id !== selectedEmployeeId);
-    return [selectedEmployee, ...filtered];
   };
 
   if (!isOpen) return null;
 
-  const displayEmployees = getDisplayEmployees();
+  const isEmployeeSelected = (userId) =>
+  selectedEmployeeIds?.includes(userId);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -172,7 +147,7 @@ const EmployeeFinderModal = ({
           </form>
         </div>
 
-        {/* List */}
+                {/* List */}
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -188,14 +163,14 @@ const EmployeeFinderModal = ({
                 Try again
               </button>
             </div>
-          ) : displayEmployees.length === 0 ? (
+          ) : employees.length === 0 ? (
             <div className="text-center py-12 text-black/60">
               No employees found
             </div>
           ) : (
             <div className="space-y-3">
-              {displayEmployees.map((emp, index) => {
-                const isSelected = emp.user_id === selectedEmployeeId;
+              {employees.map((emp, index) => {
+                const isSelected = isEmployeeSelected(emp.user_id);
                 return (
                   <button
                     key={emp.user_id || index}
@@ -214,7 +189,7 @@ const EmployeeFinderModal = ({
                           </p>
                           {isSelected && (
                             <span className="text-xs bg-yellow-400 px-2 py-1 rounded font-semibold">
-                              Currently Selected
+                              Selected
                             </span>
                           )}
                         </div>
@@ -223,6 +198,7 @@ const EmployeeFinderModal = ({
                           ID: {encodeURIComponent(emp.user_id)}
                         </p>
                       </div>
+
                       {emp.picture && (
                         <img
                           src={emp.picture}
@@ -238,30 +214,45 @@ const EmployeeFinderModal = ({
           )}
         </div>
 
-        {/* Pagination */}
-        <div className="border-t border-black/10 p-6 flex items-center justify-between">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 0 || loading}
-            className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Previous
-          </button>
 
-          <div className="text-sm text-black/60">
-            Page {currentPage + 1} of {totalPages || 1}
-          </div>
+        {/* Pagination + Confirm */}
+<div className="border-t border-black/10 p-6 flex items-center justify-between">
+  
+  {/* Previous */}
+  <button
+    onClick={() => setCurrentPage(currentPage - 1)}
+    disabled={currentPage === 0 || loading}
+    className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
+  >
+    <ChevronLeft className="h-4 w-4" />
+    Previous
+  </button>
 
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage >= totalPages - 1 || loading}
-            className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+  {/* Page info */}
+  <div className="text-sm text-black/60">
+    Page {currentPage + 1} of {totalPages || 1}
+  </div>
+
+  {/* Next */}
+  <button
+    onClick={() => setCurrentPage(currentPage + 1)}
+    disabled={currentPage >= totalPages - 1 || loading}
+    className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
+  >
+    Next
+    <ChevronRight className="h-4 w-4" />
+  </button>
+
+  {/* Confirm Selection */}
+  <button
+    onClick={onClose}
+    className="ml-4 px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-semibold shadow"
+  >
+    Confirm
+  </button>
+
+</div>
+
       </div>
     </div>
   );
