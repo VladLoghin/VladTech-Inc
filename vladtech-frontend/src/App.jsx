@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, useLocation, useNavigate} from "react-router-dom";
+import Auth0ProviderWithConfig from "./auth/Auth0ProviderWithConfig";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -15,12 +16,13 @@ function Layout({ children }) {
   const isHomePage = location.pathname === "/";
   const isPortfolioPage = location.pathname === "/portfolio";
   const isReviewsPage = location.pathname === "/reviews";
+  const navigate = useNavigate();
 
   return (
-    <>
+      <Auth0ProviderWithConfig navigate={navigate}>
       {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
       {children}
-    </>
+      </Auth0ProviderWithConfig>
   );
 }
 
