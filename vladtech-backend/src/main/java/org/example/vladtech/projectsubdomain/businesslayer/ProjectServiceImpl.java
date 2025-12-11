@@ -83,6 +83,10 @@ public class ProjectServiceImpl implements ProjectService {
             existingProject.setProjectType(projectType);
         }
 
+        if (projectRequestModel.getAssignedEmployeeIds() != null) {
+            existingProject.setAssignedEmployeeIds(projectRequestModel.getAssignedEmployeeIds());
+        }
+
         Project updatedProject = projectRepository.save(existingProject);
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }

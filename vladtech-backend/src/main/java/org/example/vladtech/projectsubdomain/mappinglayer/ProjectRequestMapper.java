@@ -25,7 +25,8 @@ public class ProjectRequestMapper {
         project.setStartDate(requestModel.getStartDate());
         project.setDueDate(requestModel.getDueDate());
         project.setProjectType(mapProjectType(requestModel.getProjectType()));
-
+        project.setAssignedEmployeeIds(requestModel.getAssignedEmployeeIds());
+        project.setAssignedEmployeeEmails(requestModel.getAssignedEmployeeEmails());
         return project;
     }
 
