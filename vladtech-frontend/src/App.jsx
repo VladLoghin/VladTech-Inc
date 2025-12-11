@@ -8,14 +8,17 @@ import Client from "./pages/Client";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import ReviewsPage from "./pages/Reviews.jsx";
+import PortfolioGallery from "./pages/PortfolioGallery";
 
 function Layout({ children }) {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const isPortfolioPage = location.pathname === "/portfolio";
+  const isReviewsPage = location.pathname === "/reviews";
 
   return (
     <>
-      {!isHomePage && <Navbar />}
+      {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
       {children}
     </>
   );
@@ -71,6 +74,10 @@ function App() {
         <Route
             path="/reviews"
             element={<ReviewsPage />}
+        />
+        <Route
+            path="/portfolio"
+            element={<PortfolioGallery />}
         />
       </Routes>
         </Layout>
