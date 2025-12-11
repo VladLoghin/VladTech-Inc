@@ -30,7 +30,7 @@ spring:
 #    host: mail.smtp2go.com
 #    port: 587
 #    username: cle4rwaterTest
-#    password: dM7Us9V2FKkogOZ3
+#    password: dM --- fill it out later
 #    properties:
 #      mail:
 #        smtp:
