@@ -6,7 +6,11 @@ const LoginButton = () => {
 
   return (
     <button 
-      onClick={() => loginWithRedirect()}
+      onClick={() =>
+          loginWithRedirect({
+            appState: { returnTo: window.location.pathname },
+      })
+    }
       className="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 text-black font-medium tracking-wide hover:bg-yellow-500 transition-colors rounded"
     >
       <LogIn className="h-5 w-5" />
