@@ -1,4 +1,20 @@
-const ProjectList = ({ projects, onEdit }) => {
+const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex) => {
+  if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) {
+    return "None";
+  }
+
+  return assignedEmployeeIds
+    .map((id) => {
+      const emp = employeeIndex?.[id];
+      if (!emp) {
+        return id;
+      }
+      return emp.email || emp.name || id;
+    })
+    .join(", ");
+};
+
+const ProjectList = ({ projects, onEdit, employeeIndex }) => {
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
       {projects.length === 0 && (
@@ -73,13 +89,12 @@ const ProjectList = ({ projects, onEdit }) => {
             </p>
           )}
 
-          {project.assignedEmployeeIds?.length > 0 && (
-            <p className="mt-2 text-sm">
-              <strong className="text-black/60">Assigned Employees:</strong>{" "}
-              {project.assignedEmployeeIds.join(", ")}
-            </p>
-          )}
-
+          {project.assignedEmployeeIds && project.assignedEmployeeIds.length > 0 && (
+  <p className="mt-2 text-sm">
+    <strong className="text-black/60">Assigned Employees:</strong>{" "}
+    {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex)}
+  </p>
+)}
           {project.photos?.length > 0 && (
             <p className="mt-2 text-sm">
               <strong className="text-black/60">Photos:</strong>{" "}
@@ -89,6 +104,7 @@ const ProjectList = ({ projects, onEdit }) => {
         </div>
       ))}
     </div>
+    
   );
 };
 
