@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContactEmail.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VladTech</a> &gt; <a href="index.source.html" class="el_package">org.example.vladtech.contact.domain</a> &gt; <span class="el_source">ContactEmail.java</span></div><h1>ContactEmail.java</h1><pre class="source lang-java linenums">package org.example.vladtech.contact.domain;
+
+import java.time.LocalDateTime;
+
+public class ContactEmail {
+
+    private String destinary;      // who receives the email (admin address)
+    private String title;          // subject
+    private String templateName;   // example &quot;CONTACT_US&quot;
+    private String header;
+    private String body;
+    private String footer;
+    private String senderName;
+    private String clientEmail;    // actual email of the client
+    private LocalDateTime sentDate;
+
+    public ContactEmail(String destinary,
+                        String title,
+                        String templateName,
+                        String header,
+                        String body,
+                        String footer,
+                        String senderName,
+                        String clientEmail,
+<span class="fc" id="L25">                        LocalDateTime sentDate) {</span>
+<span class="fc" id="L26">        this.destinary = destinary;</span>
+<span class="fc" id="L27">        this.title = title;</span>
+<span class="fc" id="L28">        this.templateName = templateName;</span>
+<span class="fc" id="L29">        this.header = header;</span>
+<span class="fc" id="L30">        this.body = body;</span>
+<span class="fc" id="L31">        this.footer = footer;</span>
+<span class="fc" id="L32">        this.senderName = senderName;</span>
+<span class="fc" id="L33">        this.clientEmail = clientEmail;</span>
+<span class="fc" id="L34">        this.sentDate = sentDate;</span>
+<span class="fc" id="L35">    }</span>
+
+    public String getDestinary() {
+<span class="fc" id="L38">        return destinary;</span>
+    }
+
+    public String getTitle() {
+<span class="fc" id="L42">        return title;</span>
+    }
+
+    public String getTemplateName() {
+<span class="fc" id="L46">        return templateName;</span>
+    }
+
+    public String getHeader() {
+<span class="fc" id="L50">        return header;</span>
+    }
+
+    public String getBody() {
+<span class="fc" id="L54">        return body;</span>
+    }
+
+    public String getFooter() {
+<span class="fc" id="L58">        return footer;</span>
+    }
+
+    public String getSenderName() {
+<span class="fc" id="L62">        return senderName;</span>
+    }
+
+    public String getClientEmail() {
+<span class="fc" id="L66">        return clientEmail;</span>
+    }
+
+    public LocalDateTime getSentDate() {
+<span class="fc" id="L70">        return sentDate;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

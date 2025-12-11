@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:44.515Z" hostname="CUNNINGHAM" time="0.006">
+  <properties/>
+  <testcase name="requestModelToEntity_ShouldReturnNull_WhenInputIsNull()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.001"/>
+  <testcase name="requestModelToEntity_ShouldHandleNullProjectType()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.0"/>
+  <testcase name="requestModelToEntity_ShouldMapAddressWithAllFields()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.001"/>
+  <testcase name="requestModelToEntity_ShouldMapAppointmentType()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.001"/>
+  <testcase name="requestModelToEntity_ShouldHandleNullAddress()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.001"/>
+  <testcase name="requestModelToEntity_ShouldHandleLowercaseProjectType()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.0"/>
+  <testcase name="requestModelToEntity_ShouldMapAllFields()" classname="org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapperTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

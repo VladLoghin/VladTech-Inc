@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleAssignmentServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VladTech</a> &gt; <a href="index.source.html" class="el_package">org.example.vladtech.auth.service</a> &gt; <span class="el_source">RoleAssignmentServiceImpl.java</span></div><h1>RoleAssignmentServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.vladtech.auth.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
+//do not delete
+@Service
+@RequiredArgsConstructor
+public class RoleAssignmentServiceImpl {
+
+    private final Auth0ManagementTokenService managementTokenService;
+
+    private final RestTemplate restTemplate;
+
+    @Value(&quot;${auth0.domain}&quot;)
+    private String domain;
+
+    @Value(&quot;${auth0.default.client.roleId}&quot;)
+    private String clientRoleId;
+
+
+    public void assignClientRole(String auth0UserId) {
+
+<span class="fc" id="L31">        String mgmtToken = managementTokenService.getManagementApiToken();</span>
+
+<span class="fc" id="L33">        String url = &quot;https://&quot; + domain + &quot;/api/v2/roles/&quot; + clientRoleId + &quot;/users&quot;;</span>
+
+<span class="fc" id="L35">        Map&lt;String, Object&gt; body = Map.of(</span>
+<span class="fc" id="L36">                &quot;users&quot;, List.of(auth0UserId)</span>
+        );
+
+<span class="fc" id="L39">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L40">        headers.setBearerAuth(mgmtToken);</span>
+<span class="fc" id="L41">        headers.setContentType(MediaType.APPLICATION_JSON);</span>
+
+<span class="fc" id="L43">        HttpEntity&lt;Map&lt;String, Object&gt;&gt; entity = new HttpEntity&lt;&gt;(body, headers);</span>
+
+<span class="fc" id="L45">        ResponseEntity&lt;Void&gt; response =</span>
+<span class="fc" id="L46">                restTemplate.postForEntity(url, entity, Void.class);</span>
+
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (!response.getStatusCode().is2xxSuccessful()) {</span>
+<span class="nc" id="L49">            throw new IllegalStateException(&quot;Failed to assign Client role: &quot; + response.getStatusCode());</span>
+        }
+
+<span class="fc" id="L52">        System.out.println(&quot;Client role assigned to &quot; + auth0UserId);</span>
+<span class="fc" id="L53">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

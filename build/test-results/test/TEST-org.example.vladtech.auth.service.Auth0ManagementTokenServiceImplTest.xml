@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.vladtech.auth.service.Auth0ManagementTokenServiceImplTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-12-09T14:14:38.007Z" hostname="CUNNINGHAM" time="1.115">
+  <properties/>
+  <testcase name="getManagementApiToken_throwsException_whenResponseStatusIsNot2xx()" classname="org.example.vladtech.auth.service.Auth0ManagementTokenServiceImplTest" time="1.027"/>
+  <testcase name="getManagementApiToken_throwsException_whenAccessTokenIsMissing()" classname="org.example.vladtech.auth.service.Auth0ManagementTokenServiceImplTest" time="0.078"/>
+  <testcase name="getManagementApiToken_returnsToken_whenResponseIsSuccessful()" classname="org.example.vladtech.auth.service.Auth0ManagementTokenServiceImplTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
