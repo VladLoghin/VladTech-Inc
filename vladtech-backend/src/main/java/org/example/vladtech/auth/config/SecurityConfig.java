@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/role-assignment/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("Client")
+                        .requestMatchers(HttpMethod.GET, "/api/portfolio/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
 
                         .anyRequest().authenticated()

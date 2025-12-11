@@ -534,7 +534,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
           >
             <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
               <Button
-                onClick={() => onNavigate?.("calendar")}
+                onClick={() => navigate("/portfolio")}
                 className="bg-black text-white hover:bg-yellow-400 hover:text-black px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
                 PORTFOLIO
@@ -564,7 +564,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
             <div className="flex items-center justify-between mb-12">
                 <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
                 <button
-                    onClick={() => navigate("/reviews")}
+                    onClick={() => navigate("/portfolio")}
                     className="text-white hover:text-yellow-400 tracking-wider transition-colors"
                 >
                     VIEW ALL →
