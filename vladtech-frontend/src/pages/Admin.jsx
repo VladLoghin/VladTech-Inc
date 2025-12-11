@@ -6,6 +6,7 @@ import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
 import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
 import ProjectModal from "../components/projects/ProjectModal.jsx";
+import AssignEmployeeButton from "../components/AssignEmployeeButton";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
