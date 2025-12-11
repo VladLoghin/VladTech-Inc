@@ -60,20 +60,31 @@ const portfolioImages = [
 ];
 
 export default function HomePage({ onNavigate, onOpenContactModal }: HomePageProps) {
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
   const [isNavbarDark, setIsNavbarDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Debug: Log user roles
+  // Debug: Log user roles and JWT token
   useEffect(() => {
-    if (user) {
-      console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
-      console.log("👤 Full user object:", user);
-    }
-  }, [user]);
+    const logTokenInfo = async () => {
+      if (user) {
+        console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
+        console.log("👤 Full user object:", user);
+        
+        try {
+          const token = await getAccessTokenSilently();
+          console.log("🔑 JWT Token:", token);
+        } catch (error) {
+          console.error("Failed to get access token:", error);
+        }
+      }
+    };
+    
+    logTokenInfo();
+  }, [user, getAccessTokenSilently]);
 
   // NEW: dynamic stats
   const [projectCount, setProjectCount] = useState<number | null>(null);
