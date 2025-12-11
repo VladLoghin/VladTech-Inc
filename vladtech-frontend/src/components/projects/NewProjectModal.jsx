@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
+const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
     name: "",
@@ -20,6 +20,13 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    if (defaultDate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData(prev => ({ ...prev, startDate: defaultDate, dueDate: defaultDate }));
+    }
+  }, [defaultDate]);
 
   const validateForm = () => {
     const newErrors = {};

@@ -17,6 +17,9 @@ public class ProjectRequestMapper {
 
         Project project = new Project();
         project.setName(requestModel.getName());
+        project.setClientId(requestModel.getClientId());
+        project.setClientName(requestModel.getClientName());
+        project.setClientEmail(requestModel.getClientEmail());
         project.setAddress(mapAddress(requestModel.getAddress()));
         project.setDescription(requestModel.getDescription());
         project.setStartDate(requestModel.getStartDate());

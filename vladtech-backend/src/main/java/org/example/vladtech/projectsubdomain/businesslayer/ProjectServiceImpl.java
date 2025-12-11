@@ -58,6 +58,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
 
         existingProject.setName(projectRequestModel.getName());
+        existingProject.setClientId(projectRequestModel.getClientId());
+        existingProject.setClientName(projectRequestModel.getClientName());
+        existingProject.setClientEmail(projectRequestModel.getClientEmail());
         existingProject.setDescription(projectRequestModel.getDescription());
         existingProject.setStartDate(projectRequestModel.getStartDate());
         existingProject.setDueDate(projectRequestModel.getDueDate());

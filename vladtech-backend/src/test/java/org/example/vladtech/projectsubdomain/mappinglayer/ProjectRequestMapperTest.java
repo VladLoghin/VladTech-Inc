@@ -23,6 +23,9 @@ class ProjectRequestMapperTest {
 
         requestModel = new ProjectRequestModel();
         requestModel.setName("Test Project");
+        requestModel.setClientId("CLIENT-123");
+        requestModel.setClientName("John Doe");
+        requestModel.setClientEmail("john.doe@example.com");
         requestModel.setDescription("Test Description");
         requestModel.setStartDate(LocalDate.of(2025, 1, 15));
         requestModel.setDueDate(LocalDate.of(2025, 3, 30));
@@ -39,12 +42,13 @@ class ProjectRequestMapperTest {
 
     @Test
     void requestModelToEntity_ShouldMapAllFields() {
-        // Act
         Project project = mapper.requestModelToEntity(requestModel);
 
-        // Assert
         assertNotNull(project);
         assertEquals("Test Project", project.getName());
+        assertEquals("CLIENT-123", project.getClientId());
+        assertEquals("John Doe", project.getClientName());
+        assertEquals("john.doe@example.com", project.getClientEmail());
         assertEquals("Test Description", project.getDescription());
         assertEquals(LocalDate.of(2025, 1, 15), project.getStartDate());
         assertEquals(LocalDate.of(2025, 3, 30), project.getDueDate());

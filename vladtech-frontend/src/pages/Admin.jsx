@@ -1,16 +1,26 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import NewProjectModal from "../components/projects/NewProjectModal.jsx";
+// import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
+import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
+import ProjectModal from "../components/projects/ProjectModal.jsx";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [message, setMessage] = useState("");
   const [projects, setProjects] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+  const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
+  const [editProject, setEditProject] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  const handleEditProject = (project) => {
+    setEditProject(project);
+    setIsProjectModalOpen(true);
+  };
 
   const fetchProjects = async () => {
     try {
@@ -56,32 +66,45 @@ const Admin = () => {
   }, [projects, selectedDate]);
 
   const formatSelectedDate = (dateStr) => {
-  if (!dateStr) return "";
+    if (!dateStr) return "";
 
-  // dateStr is "YYYY-MM-DD"
-  const [year, month, day] = dateStr.split("-");
-  const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
+    // dateStr is "YYYY-MM-DD"
+    const [year, month, day] = dateStr.split("-");
+    const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
 
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="p-8 bg-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 tracking-tight">
-        Admin Area - Only for Admin Role
-      </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold tracking-tight">
+          Admin Area - Only for Admin Role
+        </h1>
+
+        <button
+          onClick={() => setIsRoleFinderModalOpen(true)}
+          className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+        >
+          Role Finder
+        </button>
+      </div>
 
       {message && (
         <p className="mt-5 text-lg bg-yellow-100 border-l-4 border-yellow-400 p-4">
           {message}
         </p>
       )}
+
+      <RoleFinderModal
+        isOpen={isRoleFinderModalOpen}
+        onClose={() => setIsRoleFinderModalOpen(false)}
+      />
 
       {/* Top bar title + New Project button */}
       {/* <div className="mt-10 flex items-center justify-between mb-6">
@@ -95,10 +118,16 @@ const Admin = () => {
       </div> */}
 
       {/* New project modal */}
-      <NewProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onProjectCreated={fetchProjects}
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => {
+          setIsProjectModalOpen(false);
+          setEditProject(null);
+        }}
+        mode={editProject ? "edit" : "create"}
+        initialData={editProject}
+        onSubmitSuccess={fetchProjects}
+        defaultDate={selectedDate}
       />
 
       {/* TOP: calendar (left) + selected-date projects (right) */}
@@ -147,14 +176,13 @@ const Admin = () => {
                     </p>
                   )}
                 </div>
-                
               </div>
             ))}
           </div>
 
           <button
             className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsProjectModalOpen(true)}
           >
             ADD
           </button>
@@ -163,11 +191,9 @@ const Admin = () => {
 
       {/* BOTTOM: All projects scrollable list with full fields */}
       <section className="mt-10">
-        <h2 className="text-2xl font-bold mb-4 tracking-tight">
-          All Projects
-        </h2>
+        <h2 className="text-2xl font-bold mb-4 tracking-tight">All Projects</h2>
 
-        <ProjectList projects={projects} />
+        <ProjectList projects={projects} onEdit={handleEditProject} />
       </section>
     </div>
   );

@@ -46,6 +46,11 @@ auth0:
     clientSecret: gYK_qYkeWOMEComw24BiuG0d9PWQfDP-FcAsJGbGh_67zhnav_RBUeWCJ0FRSkcX
     audience: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/api/v2/
 
+  roles:
+    client: rol_gNdmo7yH2oEE4798
+    employee: rol_dDfbZ0mc3vJjN0bR
+    admin: rol_gdBXmIIoaesVnEBl
+
   default:
     client:
       roleId: rol_gNdmo7yH2oEE4798
