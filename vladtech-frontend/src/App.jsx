@@ -21,7 +21,6 @@ function Layout({ children }) {
   return (
       <Auth0ProviderWithConfig navigate={navigate}>
       {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
-      {!isHomePage && <Navbar />}
       {children}
       </Auth0ProviderWithConfig>
   );
