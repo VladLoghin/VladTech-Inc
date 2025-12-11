@@ -14,6 +14,7 @@ const ReviewsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedReview, setSelectedReview] = useState(null);
+    const [roles, setRoles] = useState([]);
 
     const { user, isAuthenticated } = useAuth0();
 
@@ -41,9 +42,7 @@ const ReviewsPage = () => {
             .catch((err) => console.error("Failed to fetch reviews:", err));
     };
 
-    useEffect(() => {
-        fetchReviews();
-    }, []);
+;
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
