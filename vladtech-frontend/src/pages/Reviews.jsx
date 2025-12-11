@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReviewCarousel from "../components/reviews/ReviewCarousel";
-import { getAllVisibleReviews } from "../api/reviews/reviewsService";
+import SecondaryNavbar from "../components/SecondaryNavbar";
+import { getAllVisibleReviews, getAllReviews } from "../api/reviews/reviewsService";
 import "../components/reviews/Review.css";
 import ReviewModal from "../components/reviews/ReviewModal";
 import ReviewDetailModal from "../components/reviews/ReviewDetailModal";
@@ -13,22 +14,39 @@ const ReviewsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedReview, setSelectedReview] = useState(null);
+    const [roles, setRoles] = useState([]);
 
-    const { user } = useAuth0();
-    const roles = user?.["https://vladtech.com/roles"] || [];
+    const { user, isAuthenticated } = useAuth0();
+
+    const isStaff =
+        isAuthenticated &&
+        Array.isArray(user?.["https://vladtech.com/roles"]) &&
+        user["https://vladtech.com/roles"].some(
+            (r) => r === "Admin" || r === "Employee"
+        );
+
+    useEffect(() => {
+        if (user) {
+            const userRoles = user["https://vladtech.com/roles"] || [];
+            setRoles(userRoles);
+        }
+
+        fetchReviews();
+    }, [user]);
 
     const fetchReviews = () => {
-        getAllVisibleReviews()
+        const fetchFn = isStaff ? getAllReviews : getAllVisibleReviews;
+
+        fetchFn()
             .then((data) => setReviews(data))
             .catch((err) => console.error("Failed to fetch reviews:", err));
     };
 
-    useEffect(() => {
-        fetchReviews();
-    }, []);
+;
 
     const handleOpenModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
+
     const handleReviewClick = (review) => {
         setSelectedReview(review);
         setShowDetailModal(true);
@@ -38,6 +56,7 @@ const ReviewsPage = () => {
         setShowDetailModal(false);
         setSelectedReview(null);
     };
+
     const isClient = roles.includes("Client");
     return (
         <div className="reviews-page" data-testid="reviews-page">
@@ -94,7 +113,7 @@ const ReviewsPage = () => {
                 open={showModal}
                 onClose={handleCloseModal}
                 onSubmitSuccess={(newReview) => {
-                    setReviews((prev) => [newReview, ...prev]); // auto-refresh
+                    setReviews((prev) => [newReview, ...prev]); 
                     handleCloseModal();
                 }}
             />

@@ -10,13 +10,19 @@ public interface ReviewService {
 
     // Create a new review
     ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos);
-/*
-    // Get a review by its ID
-    ReviewResponseModel getReviewById(String reviewId);
 
-    // Get all reviews
     List<ReviewResponseModel> getAllReviews();
-*/
+
+    ReviewResponseModel updateReviewVisibility(String reviewId, boolean visible);
+
+    ReviewResponseModel GetReviewById(String reviewId);
+    /*
+        // Get a review by its ID
+        ReviewResponseModel getReviewById(String reviewId);
+
+        // Get all reviews
+        List<ReviewResponseModel> getAllReviews();
+    */
     // Get all visible reviews
     List<ReviewResponseModel> getAllVisibleReviews();
 /*
@@ -33,3 +39,4 @@ public interface ReviewService {
     void deleteReview(String reviewId);
     */
 }
+
