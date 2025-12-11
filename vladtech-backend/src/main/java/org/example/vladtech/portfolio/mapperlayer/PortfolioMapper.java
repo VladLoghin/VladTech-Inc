@@ -37,8 +37,8 @@ public class PortfolioMapper {
 
         return new PortfolioCommentDto(
                 comment.getAuthorName(),
-                comment.getAuthorInitial(),
-                comment.getTimeAgo(),
+                comment.getAuthorUserId(),
+                comment.getTimestamp(),
                 comment.getText()
         );
     }

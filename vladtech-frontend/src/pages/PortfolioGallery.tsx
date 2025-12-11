@@ -4,6 +4,8 @@ import { Button } from "../components/button";
 import { Textarea } from "../components/textarea";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { addComment } from "../api/portfolio/portfolioService";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -15,17 +17,39 @@ interface PortfolioItem {
 
 interface PortfolioComment {
   authorName: string;
-  authorInitial: string;
-  timeAgo: string;
+  authorUserId: string;
+  timestamp: string;
   text: string;
 }
 
 export default function PortfolioGallery() {
   const navigate = useNavigate();
+  const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0();
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Helper function to calculate time ago
+  const getTimeAgo = (timestamp: string): string => {
+    const now = new Date();
+    const commentTime = new Date(timestamp);
+    const diffInMs = now.getTime() - commentTime.getTime();
+    const diffInMinutes = Math.floor(diffInMs / 60000);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  };
+
+  // Helper function to get author initial
+  const getAuthorInitial = (authorName: string): string => {
+    return authorName.charAt(0).toUpperCase();
+  };
 
   // Fetch portfolio items from backend
   useEffect(() => {
@@ -49,23 +73,68 @@ export default function PortfolioGallery() {
     fetchPortfolioItems();
   }, []);
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem || !newComment.trim()) return;
 
-    const newCommentObj: PortfolioComment = {
-      authorName: "You",
-      authorInitial: "Y",
-      timeAgo: "Just now",
-      text: newComment,
-    };
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      loginWithRedirect({
+        appState: { returnTo: window.location.pathname }
+      });
+      return;
+    }
 
-    setSelectedItem({
-      ...selectedItem,
-      comments: [...selectedItem.comments, newCommentObj],
-    });
+    setIsSubmitting(true);
 
-    setNewComment("");
+    try {
+      // Get access token
+      const accessToken = await getAccessTokenSilently();
+
+      // Get user's nickname or name
+      const authorName = user?.nickname || user?.name || user?.email || "Anonymous User";
+
+      // Call API to add comment
+      const newCommentDto = await addComment(
+        selectedItem.portfolioId,
+        newComment.trim(),
+        authorName,
+        accessToken
+      );
+
+      // Update the selected item with the new comment
+      const updatedItem = {
+        ...selectedItem,
+        comments: [...selectedItem.comments, newCommentDto],
+      };
+
+      setSelectedItem(updatedItem);
+
+      // Update the portfolio items list
+      setPortfolioItems((items) =>
+        items.map((item) =>
+          item.portfolioId === selectedItem.portfolioId ? updatedItem : item
+        )
+      );
+
+      setNewComment("");
+    } catch (error: any) {
+      console.error("Error adding comment:", error);
+      
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        loginWithRedirect({
+          appState: { returnTo: window.location.pathname }
+        });
+      } else if (error.response?.status === 403) {
+        alert("You don't have permission to comment. Only clients and admins can comment on portfolio items.");
+      } else {
+        alert("Failed to add comment. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -191,12 +260,12 @@ export default function PortfolioGallery() {
                     selectedItem.comments.map((comment, idx) => (
                       <div key={idx} className="flex gap-3">
                         <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-black font-bold text-sm">{comment.authorInitial}</span>
+                          <span className="text-black font-bold text-sm">{getAuthorInitial(comment.authorName)}</span>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-white tracking-wide">{comment.authorName}</span>
-                            <span className="text-gray-500 text-sm">{comment.timeAgo}</span>
+                            <span className="text-gray-500 text-sm">{getTimeAgo(comment.timestamp)}</span>
                           </div>
                           <p className="text-gray-300">{comment.text}</p>
                         </div>
@@ -206,24 +275,41 @@ export default function PortfolioGallery() {
                 </div>
 
                 {/* Comment Input */}
-                <form onSubmit={handleAddComment} className="p-6 border-t border-yellow-400/20">
-                  <div className="flex gap-3">
-                    <Textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment..."
-                      className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
-                      rows={2}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!newComment.trim()}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-black h-auto px-6 disabled:opacity-50"
-                    >
-                      <Send className="h-5 w-5" />
-                    </Button>
+                {isAuthenticated ? (
+                  <form onSubmit={handleAddComment} className="p-6 border-t border-yellow-400/20">
+                    <div className="flex gap-3">
+                      <Textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
+                        rows={2}
+                        disabled={isSubmitting}
+                      />
+                      <Button
+                        type="submit"
+                        disabled={!newComment.trim() || isSubmitting}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-black h-auto px-6 disabled:opacity-50"
+                      >
+                        <Send className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="p-6 border-t border-yellow-400/20">
+                    <div className="text-center">
+                      <p className="text-gray-400 mb-3">Sign in to leave a comment</p>
+                      <Button
+                        onClick={() => loginWithRedirect({
+                          appState: { returnTo: window.location.pathname }
+                        })}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-black px-6"
+                      >
+                        Sign In
+                      </Button>
+                    </div>
                   </div>
-                </form>
+                )}
               </div>
             </motion.div>
           </motion.div>

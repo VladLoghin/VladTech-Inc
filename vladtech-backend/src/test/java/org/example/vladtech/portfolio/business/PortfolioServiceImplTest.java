@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,12 +40,14 @@ class PortfolioServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Instant now = Instant.now();
+
         portfolioItem1 = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
                 List.of(
-                        new PortfolioComment("Sarah M.", "S", "3 hours ago", "Beautiful countertop!")
+                        new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!")
                 )
         );
         portfolioItem1.setPortfolioId("portfolio-id-1");
@@ -54,7 +57,7 @@ class PortfolioServiceImplTest {
                 "/uploads/portfolio/kitchenremodel.jpg",
                 5.0,
                 List.of(
-                        new PortfolioComment("Emma L.", "E", "5 hours ago", "Amazing transformation!")
+                        new PortfolioComment("Emma L.", "auth0|user2", now.minusSeconds(18000), "Amazing transformation!")
                 )
         );
         portfolioItem2.setPortfolioId("portfolio-id-2");

@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PortfolioComment {
     private String authorName;
-    private String authorInitial; // For avatar display (e.g., "S" for Sarah)
-    private String timeAgo; // e.g., "3 hours ago"
+    private String authorUserId; // Auth0 user ID
+    private Instant timestamp; // Actual timestamp for sorting and calculating "timeAgo"
     private String text;
 }
 

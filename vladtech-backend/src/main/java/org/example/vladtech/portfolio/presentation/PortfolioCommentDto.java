@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PortfolioCommentDto {
     private String authorName;
-    private String authorInitial;
-    private String timeAgo;
+    private String authorUserId;
+    private Instant timestamp;
     private String text;
 }
 

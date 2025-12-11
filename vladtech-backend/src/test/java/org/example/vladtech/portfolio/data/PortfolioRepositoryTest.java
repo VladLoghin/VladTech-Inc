@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +25,12 @@ class PortfolioRepositoryTest {
     @Test
     void save_ShouldPersistPortfolioItem() {
         // Arrange
+        Instant now = Instant.now();
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
-                List.of(new PortfolioComment("Sarah M.", "S", "3 hours ago", "Beautiful!"))
+                List.of(new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful!"))
         );
 
         // Act
@@ -145,9 +147,10 @@ class PortfolioRepositoryTest {
     @Test
     void save_WithComments_ShouldPersistComments() {
         // Arrange
+        Instant now = Instant.now();
         List<PortfolioComment> comments = List.of(
-                new PortfolioComment("Alice W.", "A", "2 days ago", "Great work!"),
-                new PortfolioComment("Bob K.", "B", "1 day ago", "Excellent!")
+                new PortfolioComment("Alice W.", "auth0|user3", now.minusSeconds(172800), "Great work!"),
+                new PortfolioComment("Bob K.", "auth0|user4", now.minusSeconds(86400), "Excellent!")
         );
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Premium Kitchen",

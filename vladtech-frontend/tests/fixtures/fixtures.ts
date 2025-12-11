@@ -1,6 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 
-type UserRole = 'admin' | 'employee' | 'client';
+type UserRole = 'admin' | 'employee' | 'client' | 'realClient' | 'realAdmin';
 
 const USERS: Record<UserRole, { email: string; password: string }> = {
   admin: {
@@ -14,6 +14,14 @@ const USERS: Record<UserRole, { email: string; password: string }> = {
   client: {
     email: 'client.vladtech@cle4rwater.ca',
     password: 'Oshawott24!'
+  },
+  realClient: {
+    email: 'hitswave@gmail.com',
+    password: '30_BoomBap_30'
+  },
+  realAdmin: {
+    email: '30boombap300@gmail.com',
+    password: '30_BoomBap_30'
   }
 };
 
