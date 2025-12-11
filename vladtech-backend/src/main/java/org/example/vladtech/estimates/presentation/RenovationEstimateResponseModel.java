@@ -1,4 +1,4 @@
-package org.example.vladtech.estimates.data;
+package org.example.vladtech.estimates.presentation;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,9 +9,9 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RenovationProject {
+public class RenovationEstimateResponseModel {
 
-    // Inputs
+    // Echo inputs
     private BigDecimal squareFeet;
     private BigDecimal laborRate;
     private BigDecimal materialCostPerSqFt;
@@ -20,7 +20,7 @@ public class RenovationProject {
     private BigDecimal locationFactor;
     private BigDecimal taxRate;
 
-    // Derived values
+    // Calculated outputs
     private BigDecimal estimatePrice;
     private BigDecimal taxAmount;
     private BigDecimal totalPrice;
