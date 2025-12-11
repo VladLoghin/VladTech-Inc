@@ -23,6 +23,9 @@ public class ProjectResponseMapper {
         ProjectResponseModel responseModel = new ProjectResponseModel();
         responseModel.setProjectIdentifier(project.getProjectIdentifier());
         responseModel.setName(project.getName());
+        responseModel.setClientId(project.getClientId());
+        responseModel.setClientName(project.getClientName());
+        responseModel.setClientEmail(project.getClientEmail());
         responseModel.setAddress(mapAddress(project.getAddress()));
         responseModel.setDescription(project.getDescription());
         responseModel.setStartDate(project.getStartDate());

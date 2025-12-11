@@ -26,6 +26,9 @@ class ProjectResponseMapperTest {
         project.setId("1");
         project.setProjectIdentifier("PROJ-1");
         project.setName("Test Project");
+        project.setClientId("CLIENT-123");
+        project.setClientName("John Doe");
+        project.setClientEmail("john.doe@example.com");
         project.setDescription("Test Description");
         project.setStartDate(LocalDate.of(2025, 1, 15));
         project.setDueDate(LocalDate.of(2025, 3, 30));
@@ -60,6 +63,9 @@ class ProjectResponseMapperTest {
         assertNotNull(response);
         assertEquals("PROJ-1", response.getProjectIdentifier());
         assertEquals("Test Project", response.getName());
+        assertEquals("CLIENT-123", response.getClientId());
+        assertEquals("John Doe", response.getClientName());
+        assertEquals("john.doe@example.com", response.getClientEmail());
         assertEquals("Test Description", response.getDescription());
         assertEquals(LocalDate.of(2025, 1, 15), response.getStartDate());
         assertEquals(LocalDate.of(2025, 3, 30), response.getDueDate());

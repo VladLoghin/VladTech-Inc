@@ -12,6 +12,9 @@ import java.time.LocalDate;
 public class ProjectRequestModel {
 
     private String name;
+    private String clientId;
+    private String clientName;
+    private String clientEmail;
     private AddressRequestModel address;
     private String description;
     private LocalDate startDate;

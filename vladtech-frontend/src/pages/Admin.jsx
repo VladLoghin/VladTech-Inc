@@ -1,15 +1,26 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import NewProjectModal from "../components/NewProjectModal";
-import AdminProjectCalendar from "../components/AdminProjectCalendar";
+// import NewProjectModal from "../components/projects/NewProjectModal.jsx";
+import ProjectList from "../components/projects/ProjectList.jsx";
+import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
+import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
+import ProjectModal from "../components/projects/ProjectModal.jsx";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [message, setMessage] = useState("");
   const [projects, setProjects] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+  const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
+  const [editProject, setEditProject] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  const handleEditProject = (project) => {
+    setEditProject(project);
+    setIsProjectModalOpen(true);
+  };
 
   const fetchProjects = async () => {
     try {
@@ -55,26 +66,34 @@ const Admin = () => {
   }, [projects, selectedDate]);
 
   const formatSelectedDate = (dateStr) => {
-  if (!dateStr) return "";
+    if (!dateStr) return "";
 
-  // dateStr is "YYYY-MM-DD"
-  const [year, month, day] = dateStr.split("-");
-  const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
+    // dateStr is "YYYY-MM-DD"
+    const [year, month, day] = dateStr.split("-");
+    const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
 
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="p-8 bg-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 tracking-tight">
-        Admin Area - Only for Admin Role
-      </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold tracking-tight">
+          Admin Area - Only for Admin Role
+        </h1>
+
+        <button
+          onClick={() => setIsRoleFinderModalOpen(true)}
+          className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+        >
+          Role Finder
+        </button>
+      </div>
 
       {message && (
         <p className="mt-5 text-lg bg-yellow-100 border-l-4 border-yellow-400 p-4">
@@ -82,8 +101,13 @@ const Admin = () => {
         </p>
       )}
 
+      <RoleFinderModal
+        isOpen={isRoleFinderModalOpen}
+        onClose={() => setIsRoleFinderModalOpen(false)}
+      />
+
       {/* Top bar title + New Project button */}
-      <div className="mt-10 flex items-center justify-between mb-6">
+      {/* <div className="mt-10 flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Admin Calendar</h2>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -91,13 +115,19 @@ const Admin = () => {
         >
           New Project
         </button>
-      </div>
+      </div> */}
 
       {/* New project modal */}
-      <NewProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onProjectCreated={fetchProjects}
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => {
+          setIsProjectModalOpen(false);
+          setEditProject(null);
+        }}
+        mode={editProject ? "edit" : "create"}
+        initialData={editProject}
+        onSubmitSuccess={fetchProjects}
+        defaultDate={selectedDate}
       />
 
       {/* TOP: calendar (left) + selected-date projects (right) */}
@@ -146,14 +176,13 @@ const Admin = () => {
                     </p>
                   )}
                 </div>
-                
               </div>
             ))}
           </div>
 
           <button
             className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsProjectModalOpen(true)}
           >
             ADD
           </button>
@@ -162,84 +191,9 @@ const Admin = () => {
 
       {/* BOTTOM: All projects scrollable list with full fields */}
       <section className="mt-10">
-        <h2 className="text-2xl font-bold mb-4 tracking-tight">
-          All Projects
-        </h2>
+        <h2 className="text-2xl font-bold mb-4 tracking-tight">All Projects</h2>
 
-        <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
-          {projects.length === 0 && (
-            <p className="text-black/60 text-center py-8">
-              No projects found.
-            </p>
-          )}
-
-          {projects.map((project) => (
-            <div
-              key={project.projectIdentifier}
-              className="border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                <p>
-                  <strong className="text-black/60">ID:</strong>{" "}
-                  <span className="font-mono">
-                    {project.projectIdentifier}
-                  </span>
-                </p>
-                <p>
-                  <strong className="text-black/60">Type:</strong>{" "}
-                  <span className="bg-yellow-100 px-2 py-1 rounded">
-                    {project.projectType}
-                  </span>
-                </p>
-                <p>
-                  <strong className="text-black/60">Start Date:</strong>{" "}
-                  {project.startDate}
-                </p>
-                <p>
-                  <strong className="text-black/60">Due Date:</strong>{" "}
-                  {project.dueDate}
-                </p>
-              </div>
-
-              {project.description && (
-                <p className="mt-2 text-sm">
-                  <strong className="text-black/60">Description:</strong>{" "}
-                  {project.description}
-                </p>
-              )}
-
-              {project.address && (
-                <p className="mt-2 text-sm">
-                  <strong className="text-black/60">Address:</strong>{" "}
-                  {project.address.streetAddress}, {project.address.city},{" "}
-                  {project.address.province}, {project.address.country}{" "}
-                  {project.address.postalCode}
-                </p>
-              )}
-
-              {project.assignedEmployeeIds &&
-                project.assignedEmployeeIds.length > 0 && (
-                  <p className="mt-2 text-sm">
-                    <strong className="text-black/60">
-                      Assigned Employees:
-                    </strong>{" "}
-                    {project.assignedEmployeeIds.join(", ")}
-                  </p>
-                )}
-
-              {project.photos && project.photos.length > 0 && (
-                <p className="mt-2 text-sm">
-                  <strong className="text-black/60">Photos:</strong>{" "}
-                  {project.photos.length}
-                </p>
-              )}
-
-              
-            </div>
-          ))}
-        </div>
+        <ProjectList projects={projects} onEdit={handleEditProject} />
       </section>
     </div>
   );

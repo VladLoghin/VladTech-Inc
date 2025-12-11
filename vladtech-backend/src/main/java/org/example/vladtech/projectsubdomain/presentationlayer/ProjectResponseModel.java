@@ -14,6 +14,9 @@ public class ProjectResponseModel {
 
     private String projectIdentifier;
     private String name;
+    private String clientId;
+    private String clientName;
+    private String clientEmail;
     private AddressResponseModel address;
     private String description;
     private LocalDate startDate;

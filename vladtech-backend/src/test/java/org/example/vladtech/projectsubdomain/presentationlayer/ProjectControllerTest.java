@@ -43,6 +43,9 @@ class ProjectControllerTest {
         responseModel = new ProjectResponseModel();
         responseModel.setProjectIdentifier("PROJ-1");
         responseModel.setName("Test Project");
+        responseModel.setClientId("CLIENT-123");
+        responseModel.setClientName("John Doe");
+        responseModel.setClientEmail("john.doe@example.com");
         responseModel.setDescription("Test Description");
         responseModel.setStartDate(LocalDate.now());
         responseModel.setDueDate(LocalDate.now().plusDays(30));
@@ -55,6 +58,9 @@ class ProjectControllerTest {
 
         requestModel = new ProjectRequestModel();
         requestModel.setName("Test Project");
+        requestModel.setClientId("CLIENT-123");
+        requestModel.setClientName("John Doe");
+        requestModel.setClientEmail("john.doe@example.com");
         requestModel.setDescription("Test Description");
         requestModel.setStartDate(LocalDate.now());
         requestModel.setDueDate(LocalDate.now().plusDays(30));
@@ -75,7 +81,10 @@ class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"))
-                .andExpect(jsonPath("$[0].name").value("Test Project"));
+                .andExpect(jsonPath("$[0].name").value("Test Project"))
+                .andExpect(jsonPath("$[0].clientId").value("CLIENT-123"))
+                .andExpect(jsonPath("$[0].clientName").value("John Doe"))
+                .andExpect(jsonPath("$[0].clientEmail").value("john.doe@example.com"));
 
         verify(projectService, times(1)).getAllProjects();
     }
@@ -90,7 +99,10 @@ class ProjectControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"))
-                .andExpect(jsonPath("$.name").value("Test Project"));
+                .andExpect(jsonPath("$.name").value("Test Project"))
+                .andExpect(jsonPath("$.clientId").value("CLIENT-123"))
+                .andExpect(jsonPath("$.clientName").value("John Doe"))
+                .andExpect(jsonPath("$.clientEmail").value("john.doe@example.com"));
 
         verify(projectService, times(1)).getProjectByIdentifier("PROJ-1");
     }

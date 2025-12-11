@@ -43,6 +43,9 @@ class ProjectServiceImplTest {
         project.setId("1");
         project.setProjectIdentifier("PROJ-1");
         project.setName("Test Project");
+        project.setClientId("CLIENT-123");
+        project.setClientName("John Doe");
+        project.setClientEmail("john.doe@example.com");
         project.setDescription("Test Description");
         project.setStartDate(LocalDate.now());
         project.setDueDate(LocalDate.now().plusDays(30));
@@ -56,6 +59,9 @@ class ProjectServiceImplTest {
 
         requestModel = new ProjectRequestModel();
         requestModel.setName("Test Project");
+        requestModel.setClientId("CLIENT-123");
+        requestModel.setClientName("John Doe");
+        requestModel.setClientEmail("john.doe@example.com");
         requestModel.setDescription("Test Description");
         requestModel.setStartDate(LocalDate.now());
         requestModel.setDueDate(LocalDate.now().plusDays(30));
@@ -67,6 +73,9 @@ class ProjectServiceImplTest {
         responseModel = new ProjectResponseModel();
         responseModel.setProjectIdentifier("PROJ-1");
         responseModel.setName("Test Project");
+        responseModel.setClientId("CLIENT-123");
+        responseModel.setClientName("John Doe");
+        responseModel.setClientEmail("john.doe@example.com");
         responseModel.setDescription("Test Description");
     }
 
@@ -170,12 +179,23 @@ class ProjectServiceImplTest {
     }
 
     @Test
-    void updateProject_ShouldReturnNull() {
+    void updateProject_ShouldUpdateAndReturnProject() {
+        // Arrange
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+                .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+                .thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project))
+                .thenReturn(responseModel);
+
         // Act
         ProjectResponseModel result = projectService.updateProject("PROJ-1", requestModel);
 
         // Assert
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals("Test Project", result.getName());
+        verify(projectRepository, times(1)).findByProjectIdentifier("PROJ-1");
+        verify(projectRepository, times(1)).save(any(Project.class));
     }
 
     @Test
