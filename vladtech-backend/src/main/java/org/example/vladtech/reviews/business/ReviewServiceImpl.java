@@ -29,6 +29,12 @@ public class ReviewServiceImpl implements ReviewService {
     private final FileStorageService fileStorageService;
 
     @Override
+    public List<ReviewResponseModel> getAllReviews() {
+        return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
+    }
+
+
+    @Override
     public ReviewResponseModel createReview(ReviewRequestModel reviewRequest, MultipartFile[] photos) {
         Review review = requestMapper.requestModelToEntity(reviewRequest);
 
@@ -52,21 +58,36 @@ public class ReviewServiceImpl implements ReviewService {
         return responseMapper.entityToResponseModel(saved);
     }
 
-
-
-/*
     @Override
-    public ReviewResponseModel getReviewById(String reviewId) {
+    public ReviewResponseModel updateReviewVisibility(String reviewId, boolean visible) {
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        existing.setVisible(visible);
+        return responseMapper.entityToResponseModel(reviewRepository.save(existing));
+    }
+
+
+
+    @Override
+    public ReviewResponseModel GetReviewById(String reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
         return responseMapper.entityToResponseModel(review);
     }
 
-    @Override
-    public List<ReviewResponseModel> getAllReviews() {
-        return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
-    }
-*/
+    /*
+        @Override
+        public ReviewResponseModel getReviewById(String reviewId) {
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+            return responseMapper.entityToResponseModel(review);
+        }
+
+        @Override
+        public List<ReviewResponseModel> getAllReviews() {
+            return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
+        }
+    */
     @Override
     public List<ReviewResponseModel> getAllVisibleReviews() {
         return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
@@ -106,3 +127,4 @@ public class ReviewServiceImpl implements ReviewService {
     }
  */
 }
+
