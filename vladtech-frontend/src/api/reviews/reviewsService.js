@@ -10,3 +10,12 @@ export const getAllVisibleReviews = async () => {
         throw err;
     }
 };
+
+export const getAllReviews = async () => {
+    try {
+        const res = await axios.get(`${API_BASE}`);
+        return res.data;
+    } catch (err) {
+        throw err;
+    }
+};

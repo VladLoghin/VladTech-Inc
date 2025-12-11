@@ -24,7 +24,7 @@ public class ReviewRequestModel {
     private String comment;
 
     @NotNull
-    private Boolean visible = true;
+    private Boolean visible = false;
 
     @NotNull
     private Rating rating;

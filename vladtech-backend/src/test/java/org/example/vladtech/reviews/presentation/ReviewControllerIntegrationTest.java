@@ -1,5 +1,7 @@
 package org.example.vladtech.reviews.presentation;
 
+import org.example.vladtech.reviews.business.ReviewService;
+import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
@@ -10,10 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -31,6 +38,9 @@ class ReviewControllerIntegrationTest {
 
     @Autowired
     private ReviewRepository reviewRepository; // real repository
+
+    @Autowired
+    private ReviewServiceImpl reviewService;
 
     @BeforeEach
     void setup() {
@@ -97,5 +107,23 @@ class ReviewControllerIntegrationTest {
                 .andExpect(jsonPath("$.comment").value("Excellent!"))
                 .andExpect(jsonPath("$.visible").value(true))
                 .andExpect(jsonPath("$.rating").value("FIVE"));
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<ReviewResponseModel>> getAllReviews() {
+        return ResponseEntity.ok(reviewService.getAllReviews());
+    }
+
+
+
+    //@PreAuthorize("hasAuthority('Admin')")
+    @PatchMapping("/{reviewId}/visibility")
+    public ResponseEntity<ReviewResponseModel> patchReviewVisibility(
+            @PathVariable String reviewId,
+            @RequestBody ReviewRequestModel reviewRequestModel
+    ) {
+        return ResponseEntity.ok(
+                reviewService.updateReviewVisibility(reviewId, reviewRequestModel.getVisible())
+        );
     }
 }
