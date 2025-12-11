@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, useLocation, useNavigate} from "react-router-dom";
+import Auth0ProviderWithConfig from "./auth/Auth0ProviderWithConfig";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -8,16 +9,20 @@ import Client from "./pages/Client";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import ReviewsPage from "./pages/Reviews.jsx";
+import PortfolioGallery from "./pages/PortfolioGallery";
 
 function Layout({ children }) {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const isPortfolioPage = location.pathname === "/portfolio";
+  const isReviewsPage = location.pathname === "/reviews";
+  const navigate = useNavigate();
 
   return (
-    <>
-      {!isHomePage && <Navbar />}
+      <Auth0ProviderWithConfig navigate={navigate}>
+      {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
       {children}
-    </>
+      </Auth0ProviderWithConfig>
   );
 }
 
@@ -71,6 +76,10 @@ function App() {
         <Route
             path="/reviews"
             element={<ReviewsPage />}
+        />
+        <Route
+            path="/portfolio"
+            element={<PortfolioGallery />}
         />
       </Routes>
         </Layout>

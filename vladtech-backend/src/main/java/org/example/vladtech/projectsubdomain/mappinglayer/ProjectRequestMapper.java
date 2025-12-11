@@ -17,12 +17,16 @@ public class ProjectRequestMapper {
 
         Project project = new Project();
         project.setName(requestModel.getName());
+        project.setClientId(requestModel.getClientId());
+        project.setClientName(requestModel.getClientName());
+        project.setClientEmail(requestModel.getClientEmail());
         project.setAddress(mapAddress(requestModel.getAddress()));
         project.setDescription(requestModel.getDescription());
         project.setStartDate(requestModel.getStartDate());
         project.setDueDate(requestModel.getDueDate());
         project.setProjectType(mapProjectType(requestModel.getProjectType()));
-
+        project.setAssignedEmployeeIds(requestModel.getAssignedEmployeeIds());
+        project.setAssignedEmployeeEmails(requestModel.getAssignedEmployeeEmails());
         return project;
     }
 

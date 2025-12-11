@@ -19,11 +19,15 @@ public class Project {
 
     private String projectIdentifier;
     private String name;
+    private String clientId;
+    private String clientName;
+    private String clientEmail;
     private Address address;
     private String description;
     private LocalDate startDate;
     private LocalDate dueDate;
     private ProjectType projectType;
     private List<String> assignedEmployeeIds = new ArrayList<>();
+    private List<String> assignedEmployeeEmails = new ArrayList<>();
     private List<ProjectPhoto> photos = new ArrayList<>();
 }

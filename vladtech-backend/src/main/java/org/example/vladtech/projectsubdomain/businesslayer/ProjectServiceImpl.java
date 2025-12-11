@@ -2,8 +2,10 @@ package org.example.vladtech.projectsubdomain.businesslayer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectRepository;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapper;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestModel;
@@ -15,6 +17,8 @@ import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEn
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
+
 
 @Slf4j
 @Service
@@ -50,20 +54,69 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(savedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
     @Override
     public ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel) {
-        return null;
+        Project existingProject = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+
+        existingProject.setName(projectRequestModel.getName());
+        existingProject.setClientId(projectRequestModel.getClientId());
+        existingProject.setClientName(projectRequestModel.getClientName());
+        existingProject.setClientEmail(projectRequestModel.getClientEmail());
+        existingProject.setDescription(projectRequestModel.getDescription());
+        existingProject.setStartDate(projectRequestModel.getStartDate());
+        existingProject.setDueDate(projectRequestModel.getDueDate());
+
+        if (projectRequestModel.getAddress() != null) {
+            existingProject.setAddress(new Address(
+                    projectRequestModel.getAddress().getStreetAddress(),
+                    projectRequestModel.getAddress().getCity(),
+                    projectRequestModel.getAddress().getProvince(),
+                    projectRequestModel.getAddress().getCountry(),
+                    projectRequestModel.getAddress().getPostalCode()
+            ));
+        }
+
+        if (projectRequestModel.getProjectType() != null) {
+            ProjectType projectType = new ProjectType();
+            projectType.setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
+            existingProject.setProjectType(projectType);
+        }
+
+        if (projectRequestModel.getAssignedEmployeeIds() != null) {
+            existingProject.setAssignedEmployeeIds(projectRequestModel.getAssignedEmployeeIds());
+        }
+
+        Project updatedProject = projectRepository.save(existingProject);
+        return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
     @Override
     public void deleteProject(String projectIdentifier) {
     }
 
     @Override
     public ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId) {
-        return null;
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new IllegalArgumentException("employeeId cannot be null or blank");
+        }
+
+        if (project.getAssignedEmployeeIds() == null) {
+            project.setAssignedEmployeeIds(new ArrayList<>());
+        }
+
+        if (!project.getAssignedEmployeeIds().contains(employeeId)) {
+            project.getAssignedEmployeeIds().add(employeeId);
+            project = projectRepository.save(project);
+        }
+
+        return projectResponseMapper.entityToResponseModel(project);
     }
+
 
     @Override
     public List<PhotoResponseModel> getProjectPhotos(String projectIdentifier) {

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -12,9 +14,14 @@ import java.time.LocalDate;
 public class ProjectRequestModel {
 
     private String name;
+    private String clientId;
+    private String clientName;
+    private String clientEmail;
     private AddressRequestModel address;
     private String description;
     private LocalDate startDate;
     private LocalDate dueDate;
     private String projectType;
+    private List<String> assignedEmployeeIds;
+    private List<String> assignedEmployeeEmails = new ArrayList<>();
 }

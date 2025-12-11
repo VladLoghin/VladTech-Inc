@@ -9,7 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**") // matches /images/filename
-                .addResourceLocations("file:uploads/reviews/"); // maps to VladTech-Inc/uploads/reviews/
+        // Handle /images/** for backward compatibility (reviews)
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:uploads/reviews/");
+
+        // Handle /uploads/** for both reviews and portfolio
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
-}
+    }
+
