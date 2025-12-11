@@ -14,8 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -204,14 +206,14 @@ class ProjectServiceImplTest {
         assertDoesNotThrow(() -> projectService.deleteProject("PROJ-1"));
     }
 
-    @Test
+    /*@Test
     void assignEmployee_ShouldReturnNull() {
         // Act
         ProjectResponseModel result = projectService.assignEmployee("PROJ-1", "EMP-1");
 
         // Assert
         assertNull(result);
-    }
+    }*/
 
     @Test
     void getProjectPhotos_ShouldReturnNull() {
@@ -252,4 +254,135 @@ class ProjectServiceImplTest {
         verify(projectRepository, times(1)).count();
     }
 
+    @Test
+    void assignEmployee_addsNewEmployeeAndSaves() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp-1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(
+                new ArrayList<>(List.of("auth0|old-emp"))
+        );
+
+        Project saved = new Project();
+        saved.setProjectIdentifier(projectId);
+        saved.setAssignedEmployeeIds(
+                new ArrayList<>(List.of("auth0|old-emp", employeeId))
+        );
+
+        ProjectResponseModel mapped = new ProjectResponseModel();
+
+        given(projectRepository.findByProjectIdentifier(projectId))
+                .willReturn(Optional.of(existing));
+        given(projectRepository.save(existing)).willReturn(saved);
+        given(projectResponseMapper.entityToResponseModel(saved))
+                .willReturn(mapped);
+
+        ProjectResponseModel result =
+                projectService.assignEmployee(projectId, employeeId);
+
+        assertThat(result).isSameAs(mapped);
+        verify(projectRepository).save(existing);
+        assertThat(existing.getAssignedEmployeeIds())
+                .containsExactlyInAnyOrder("auth0|old-emp", employeeId);
+    }
+
+    @Test
+    void assignEmployee_doesNotDuplicateExistingEmployee() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp-1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+
+        ProjectResponseModel mapped = new ProjectResponseModel();
+
+        given(projectRepository.findByProjectIdentifier(projectId))
+                .willReturn(Optional.of(existing));
+        // no need to stub save, it should NOT be called in this scenario
+        given(projectResponseMapper.entityToResponseModel(existing))
+                .willReturn(mapped);
+
+        // when
+        ProjectResponseModel result = projectService.assignEmployee(projectId, employeeId);
+
+        // then
+        assertThat(result).isSameAs(mapped);
+        assertThat(existing.getAssignedEmployeeIds())
+                .containsExactly(employeeId);  // still only one instance
+        verify(projectRepository, never()).save(any(Project.class));
+    }
+
+    @Test
+    void assignEmployee_blankEmployeeIdThrows() {
+        String projectId = "PROJ-1";
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>());
+
+        given(projectRepository.findByProjectIdentifier(projectId))
+                .willReturn(Optional.of(existing));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> projectService.assignEmployee(projectId, "   "));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void assignEmployee_projectNotFoundThrows() {
+        String projectId = "PROJ-404";
+        given(projectRepository.findByProjectIdentifier(projectId))
+                .willReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+                () -> projectService.assignEmployee(projectId, "auth0|emp-1"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    // ---------- getProjectsForCalendar / mapToCalendarEntry tests ----------
+
+    @Test
+    void getProjectsForCalendar_mapsProjectsToCalendarEntries_withLocation() {
+        Project p1 = new Project();
+        p1.setProjectIdentifier("PROJ-1");
+        p1.setName("Kitchen Renovation");
+        p1.setStartDate(LocalDate.of(2026, 1, 15));
+        p1.setDueDate(LocalDate.of(2026, 3, 30));
+        p1.setAddress(new Address(
+                "123 Main St",
+                "Montreal",
+                "Quebec",
+                "Canada",
+                "H1A 1A1"
+        ));
+
+        Project p2 = new Project();
+        p2.setProjectIdentifier("PROJ-2");
+        p2.setName("Bathroom Remodel");
+        p2.setStartDate(LocalDate.of(2026, 2, 1));
+        p2.setDueDate(LocalDate.of(2026, 2, 28));
+        // address left null on purpose
+        p2.setAddress(null);
+
+        given(projectRepository.findAll()).willReturn(List.of(p1, p2));
+
+        List<ProjectCalendarEntryResponseModel> result =
+                projectService.getProjectsForCalendar();
+
+        assertEquals(2, result.size());
+
+        ProjectCalendarEntryResponseModel e1 = result.get(0);
+        assertEquals("PROJ-1", e1.getProjectIdentifier());
+        assertEquals("Kitchen Renovation", e1.getName());
+        assertEquals(LocalDate.of(2026, 1, 15), e1.getStartDate());
+        assertEquals(LocalDate.of(2026, 3, 30), e1.getDueDate());
+        assertEquals("Montreal, Quebec", e1.getLocationSummary());
+
+        ProjectCalendarEntryResponseModel e2 = result.get(1);
+        assertEquals("PROJ-2", e2.getProjectIdentifier());
+        assertEquals("Bathroom Remodel", e2.getName());
+        assertNull(e2.getLocationSummary());
+    }
 }
