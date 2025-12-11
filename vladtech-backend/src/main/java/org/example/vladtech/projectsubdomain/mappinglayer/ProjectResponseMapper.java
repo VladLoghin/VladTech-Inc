@@ -33,7 +33,7 @@ public class ProjectResponseMapper {
         responseModel.setProjectType(mapProjectType(project.getProjectType()));
         responseModel.setAssignedEmployeeIds(project.getAssignedEmployeeIds());
         responseModel.setPhotos(mapPhotos(project.getPhotos()));
-
+        responseModel.setAssignedEmployeeEmails(project.getAssignedEmployeeEmails());
         return responseModel;
     }
 

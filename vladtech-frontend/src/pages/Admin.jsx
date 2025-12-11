@@ -16,6 +16,7 @@ const Admin = () => {
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
   const [editProject, setEditProject] = useState(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [employeeIndex, setEmployeeIndex] = useState({});
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -36,6 +37,32 @@ const Admin = () => {
       setMessage("Failed to fetch projects.");
     }
   };
+
+  useEffect(() => {
+  const loadEmployees = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      const res = await axios.get("http://localhost:8080/api/employee/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const index = {};
+      (res.data || []).forEach((emp) => {
+        index[emp.userId] = {
+          name: emp.name,
+          email: emp.email,
+        };
+      });
+
+      setEmployeeIndex(index);
+    } catch (err) {
+      console.error("Error fetching employees for index", err);
+    }
+  };
+
+  loadEmployees();
+}, [getAccessTokenSilently]);
+
 
   useEffect(() => {
     const loadInitialProjects = async () => {
@@ -193,7 +220,7 @@ const Admin = () => {
       <section className="mt-10">
         <h2 className="text-2xl font-bold mb-4 tracking-tight">All Projects</h2>
 
-        <ProjectList projects={projects} onEdit={handleEditProject} />
+        <ProjectList projects={projects} onEdit={handleEditProject} employeeIndex={employeeIndex}/>
       </section>
     </div>
   );

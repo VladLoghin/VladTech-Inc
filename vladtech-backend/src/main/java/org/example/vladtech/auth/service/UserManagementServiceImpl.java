@@ -7,7 +7,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import org.example.vladtech.auth.presentation.EmployeeSummaryResponseModel;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -257,5 +257,22 @@ public class UserManagementServiceImpl implements UserManagementService {
         result.put("perPage", perPage);
 
         return result;
+    }
+
+    @Override
+    public List<EmployeeSummaryResponseModel> getAllEmployees(int page, int perPage) {
+        Map<String, Object> raw = getUsersByRole(employeeRoleId, page, perPage);
+
+        List<Map<String, Object>> users =
+                (List<Map<String, Object>>) raw.getOrDefault("users", List.of());
+
+        return users.stream()
+                .map(u -> {
+                    String userId = (String) u.get("user_id");
+                    String name = (String) u.getOrDefault("name", u.get("nickname"));
+                    String email = (String) u.get("email");
+                    return new EmployeeSummaryResponseModel(userId, name, email);
+                })
+                .toList();
     }
 }
