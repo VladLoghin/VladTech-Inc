@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Estimate.css";
 
-const EstimateInputModal = ({ onSubmit, onClose, presets = [], isOpen }) => {
+const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const [selectedPreset, setSelectedPreset] = useState(null);
     const [formData, setFormData] = useState({});
     const [result, setResult] = useState(null); // State to store the result
@@ -112,16 +112,25 @@ const EstimateInputModal = ({ onSubmit, onClose, presets = [], isOpen }) => {
 
             {/* Result Modal */}
             {isResultModalOpen && result && (
-                <div className="modal" role="dialog" aria-modal="true" onClick={(e) => {
-                    if (e.target === e.currentTarget) {
-                        handleCloseResultModal(); // Close both modals
-                    }
-                }}>
+                <div
+                    className="modal"
+                    role="dialog"
+                    aria-modal="true"
+                    data-testid="estimate-result-modal"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            handleCloseResultModal(); // Close both modals
+                        }
+                    }}>
                     <div className="modal-content">
                         <h2>Estimate Result</h2>
                         <p><strong>Estimated Total:</strong> ${result.totalPrice}</p>
                         <div className="modal-actions">
-                            <button type="button" onClick={handleCloseResultModal}>
+                            <button
+                                type="button"
+                                onClick={handleCloseResultModal}
+                                data-testid="estimate-result-close"
+                            >
                                 Close
                             </button>
                         </div>
