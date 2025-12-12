@@ -69,5 +69,32 @@ public class PortfolioServiceImpl implements PortfolioService {
                 comment.getText()
         );
     }
+
+    @Override
+    public PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating) {
+        log.info("Creating new portfolio item with title: {}", title);
+
+        PortfolioItem portfolioItem = new PortfolioItem();
+        portfolioItem.setTitle(title);
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setRating(rating);
+        portfolioItem.setComments(new java.util.ArrayList<>());
+
+        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+        log.info("Portfolio item created successfully with id: {}", savedItem.getPortfolioId());
+
+        return portfolioMapper.entityToResponseDto(savedItem);
+    }
+
+    @Override
+    public void deletePortfolioItem(String portfolioId) {
+        log.info("Deleting portfolio item with id: {}", portfolioId);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
+
+        portfolioRepository.delete(portfolioItem);
+        log.info("Portfolio item deleted successfully with id: {}", portfolioId);
+    }
 }
 

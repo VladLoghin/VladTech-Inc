@@ -10,8 +10,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -21,6 +30,43 @@ import java.util.List;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
+    private static final String UPLOAD_DIR = "uploads/portfolio/";
+
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        log.info("POST request to /api/portfolio/upload - Uploading image: {}", file.getOriginalFilename());
+
+        try {
+            // Create upload directory if it doesn't exist
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                    : "";
+            String filename = UUID.randomUUID().toString() + extension;
+
+            // Save file
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Return the relative path
+            String imageUrl = "/" + UPLOAD_DIR + filename;
+            Map<String, String> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+
+            log.info("Image uploaded successfully: {}", imageUrl);
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            log.error("Failed to upload image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @GetMapping
     public ResponseEntity<List<PortfolioResponseDto>> getAllPortfolioItems() {
@@ -34,6 +80,27 @@ public class PortfolioController {
         log.info("GET request to /api/portfolio/{} - Fetching portfolio item", portfolioId);
         PortfolioResponseDto portfolioItem = portfolioService.getPortfolioItemById(portfolioId);
         return ResponseEntity.ok(portfolioItem);
+    }
+
+    @PostMapping
+    public ResponseEntity<PortfolioResponseDto> createPortfolioItem(
+            @Valid @RequestBody PortfolioResponseDto request) {
+        log.info("POST request to /api/portfolio - Creating new portfolio item: {}", request.getTitle());
+
+        PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
+                request.getTitle(),
+                request.getImageUrl(),
+                request.getRating()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    }
+
+    @DeleteMapping("/{portfolioId}")
+    public ResponseEntity<Void> deletePortfolioItem(@PathVariable String portfolioId) {
+        log.info("DELETE request to /api/portfolio/{} - Deleting portfolio item", portfolioId);
+        portfolioService.deletePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{portfolioId}/comments")

@@ -42,8 +42,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("Client")
                         .requestMatchers(HttpMethod.GET, "/api/portfolio/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/portfolio/upload").hasAuthority("Admin")
+                        .requestMatchers(HttpMethod.POST, "/api/portfolio").hasAuthority("Admin")
+                        .requestMatchers(HttpMethod.DELETE, "/api/portfolio/*").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.POST, "/api/portfolio/*/comments").hasAnyAuthority("Client", "Admin")
                         .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

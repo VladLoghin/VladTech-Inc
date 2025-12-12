@@ -9,5 +9,7 @@ public interface PortfolioService {
     List<PortfolioResponseDto> getAllPortfolioItems();
     PortfolioResponseDto getPortfolioItemById(String portfolioId);
     PortfolioCommentDto addComment(String portfolioId, String commentText, String userId, String userName);
+    PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating);
+    void deletePortfolioItem(String portfolioId);
 }
 
