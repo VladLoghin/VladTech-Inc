@@ -7,6 +7,7 @@ import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
 import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
 import ProjectModal from "../components/projects/ProjectModal.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
+import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -19,6 +20,7 @@ const Admin = () => {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [employeeIndex, setEmployeeIndex] = useState({});
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
+  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -124,6 +126,12 @@ const Admin = () => {
             Create Portfolio
           </button>
           <button
+            onClick={() => setIsDeletePortfolioModalOpen(true)}
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+          >
+            Delete Portfolio
+          </button>
+          <button
             onClick={() => setIsRoleFinderModalOpen(true)}
             className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
           >
@@ -147,6 +155,12 @@ const Admin = () => {
         isOpen={isPortfolioModalOpen}
         onClose={() => setIsPortfolioModalOpen(false)}
         onSuccess={() => setMessage("Portfolio item created successfully!")}
+      />
+
+      <DeletePortfolioModal
+        isOpen={isDeletePortfolioModalOpen}
+        onClose={() => setIsDeletePortfolioModalOpen(false)}
+        onSuccess={() => setMessage("Portfolio item deleted successfully!")}
       />
 
       {/* Top bar title + New Project button */}

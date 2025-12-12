@@ -87,3 +87,19 @@ export const createPortfolioItem = async (
     throw error;
   }
 };
+
+export const deletePortfolioItem = async (
+  portfolioId: string,
+  accessToken: string
+) => {
+  try {
+    await axios.delete(`${API_BASE}/${portfolioId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting portfolio item:", error);
+    throw error;
+  }
+};

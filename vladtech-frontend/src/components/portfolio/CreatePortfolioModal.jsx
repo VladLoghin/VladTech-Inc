@@ -1,17 +1,32 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
     title: "",
-    imageUrl: "",
+    imageFile: null,
     rating: 5.0,
   });
+  const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, imageFile: file });
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,15 +35,36 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
     try {
       const token = await getAccessTokenSilently();
+      
+      // Upload image first
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', formData.imageFile);
+      
+      const uploadResponse = await fetch('http://localhost:8080/api/portfolio/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formDataUpload
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const { imageUrl } = await uploadResponse.json();
+      
+      // Create portfolio item with uploaded image path
       await createPortfolioItem(
         formData.title,
-        formData.imageUrl,
+        imageUrl,
         formData.rating,
         token
       );
 
       // Reset form and close
-      setFormData({ title: "", imageUrl: "", rating: 5.0 });
+      setFormData({ title: "", imageFile: null, rating: 5.0 });
+      setImagePreview(null);
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -77,21 +113,40 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Image URL <span className="text-red-500">*</span>
+              Image <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={formData.imageUrl}
-              onChange={(e) =>
-                setFormData({ ...formData, imageUrl: e.target.value })
-              }
-              placeholder="/uploads/portfolio/example.jpg"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Use format: /uploads/portfolio/filename.jpg
-            </p>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-yellow-400 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                id="image-upload"
+                required
+              />
+              <label
+                htmlFor="image-upload"
+                className="cursor-pointer flex flex-col items-center"
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-h-48 rounded-lg mb-2"
+                  />
+                ) : (
+                  <>
+                    <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">
+                      Click to upload image
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      PNG, JPG up to 10MB
+                    </span>
+                  </>
+                )}
+              </label>
+            </div>
           </div>
 
           <div>

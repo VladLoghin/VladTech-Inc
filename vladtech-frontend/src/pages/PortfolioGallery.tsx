@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { X, Star, Send } from "lucide-react";
-import { Button } from "../components/button";
-import { Textarea } from "../components/textarea";
+import { Button } from "../components/button.js";
+import { Textarea } from "../components/textarea.js";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { addComment } from "../api/portfolio/portfolioService";
+import { addComment } from "../api/portfolio/portfolioService.js";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -49,6 +49,11 @@ export default function PortfolioGallery() {
   // Helper function to get author initial
   const getAuthorInitial = (authorName: string): string => {
     return authorName.charAt(0).toUpperCase();
+  };
+
+  // Helper function to handle image URLs - only use uploaded files from backend
+  const getImageUrl = (url: string): string => {
+    return `http://localhost:8080${url}`;
   };
 
   // Fetch portfolio items from backend
@@ -175,36 +180,34 @@ export default function PortfolioGallery() {
       </nav>
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
-      <div className="pt-[88px] h-screen overflow-hidden">
-        <div className="h-[calc(100vh-88px)] overflow-x-auto overflow-y-hidden">
-          <div className="inline-grid grid-rows-3 grid-flow-col gap-0 h-full" style={{ gridAutoColumns: '33.333vw' }}>
-            {portfolioItems.map((item, index) => (
-              <motion.div
-                key={item.portfolioId}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
-                onClick={() => setSelectedItem(item)}
-                className="cursor-pointer overflow-hidden aspect-square relative group"
-              >
-                <img
-                  src={`http://localhost:8080${item.imageUrl}`}
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                      <span className="text-yellow-400">{item.rating}</span>
-                    </div>
+      <div className="pt-[88px] h-screen overflow-y-auto">
+        <div className="grid grid-cols-3 gap-0">
+          {portfolioItems.map((item, index) => (
+            <motion.div
+              key={item.portfolioId}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
+              onClick={() => setSelectedItem(item)}
+              className="cursor-pointer overflow-hidden aspect-square relative group"
+            >
+              <img
+                src={getImageUrl(item.imageUrl)}
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                    <span className="text-yellow-400">{item.rating}</span>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
 
@@ -229,7 +232,7 @@ export default function PortfolioGallery() {
               {/* Image Side */}
               <div className="relative bg-black">
                 <img
-                  src={`http://localhost:8080${selectedItem.imageUrl}`}
+                  src={getImageUrl(selectedItem.imageUrl)}
                   alt={selectedItem.title}
                   className="w-full h-full object-cover"
                 />
@@ -282,7 +285,7 @@ export default function PortfolioGallery() {
                     <div className="flex gap-3">
                       <Textarea
                         value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
                         className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
                         rows={2}
