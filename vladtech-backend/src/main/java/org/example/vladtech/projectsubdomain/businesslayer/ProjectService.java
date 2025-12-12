@@ -33,4 +33,6 @@ public interface ProjectService {
 
     void sendEmailNotificationAsync(Project project, String operation);
 
+    List<ProjectResponseModel> getProjectsForEmployee(String employeeId);
+
 }

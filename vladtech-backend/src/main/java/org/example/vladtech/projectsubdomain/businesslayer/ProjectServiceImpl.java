@@ -216,4 +216,13 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getDueDate()
         );
     }
+
+    @Override
+    public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
+        List<Project> projects =
+                projectRepository.findByAssignedEmployeeIdsContains(employeeId);
+
+        return projectResponseMapper.entityListToResponseModelList(projects);
+    }
+
 }
