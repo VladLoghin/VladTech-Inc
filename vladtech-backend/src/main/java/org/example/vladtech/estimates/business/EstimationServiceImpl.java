@@ -25,7 +25,7 @@ public class EstimationServiceImpl implements EstimationService {
     @Value("${renovation.rates.contingency:0.10}")
     private BigDecimal contingencyRate;
 
-    @Value("0.15")
+    @Value("${renovation.rates.tax:0.15}")
     private BigDecimal taxRate;
 
     @Override

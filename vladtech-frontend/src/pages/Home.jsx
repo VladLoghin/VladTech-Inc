@@ -15,8 +15,7 @@ const Home = () => {
   return (
     <>
       <HomePage onOpenContactModal={() => setIsContactModalOpen(true)}
-                onOpenEstimateModal={() => {console.log("Opening Estimate Modal");
-                                                    setIsEstimateModalOpen(true)}}
+                onOpenEstimateModal={() => setIsEstimateModalOpen(true)}
       />
       <ContactUs 
         isOpen={isContactModalOpen} 

@@ -131,10 +131,10 @@ spring:
           audience: ""
 
 renovation:
-   rates:
-     labor: 50.00
-     overhead: 0.15
-     contingency: 0.10
-     tax: 0.13
+  rates:
+    labor: 50.00
+    overhead: 0.15
+    contingency: 0.10
+    tax: 0.13
 
 

@@ -4,38 +4,62 @@ import org.example.vladtech.estimates.business.EstimationService;
 import org.example.vladtech.estimates.data.RenovationProject;
 import org.example.vladtech.estimates.mapperlayer.RenovationEstimateResponseMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureMockMvc
 class RenovationEstimateControllerTest {
 
-    private final EstimationService estimationService = mock(EstimationService.class);
-    private final RenovationEstimateResponseMapper responseMapper = mock(RenovationEstimateResponseMapper.class);
-    private final RenovationEstimateController controller = new RenovationEstimateController(estimationService, responseMapper);
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private EstimationService estimationService;
+
+    @MockitoBean
+    private RenovationEstimateResponseMapper responseMapper;
 
     @Test
-    void calculateEstimate_ShouldReturnResponse() {
-        RenovationProject project = new RenovationProject();
+    void calculateEstimate_ShouldReturnResponse() throws Exception {
         RenovationProject calculatedProject = new RenovationProject();
         RenovationEstimateResponseModel responseModel = new RenovationEstimateResponseModel();
+        responseModel.setTotalPrice(BigDecimal.valueOf(12075.00));
 
         when(estimationService.calculateEstimate(any())).thenReturn(calculatedProject);
         when(responseMapper.toResponse(calculatedProject)).thenReturn(responseModel);
 
-        ResponseEntity<RenovationEstimateResponseModel> response = controller.calculateEstimate(
-                BigDecimal.valueOf(100),
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(1.2),
-                BigDecimal.valueOf(0.15)
-        );
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("squareFeet", "100")
+                        .param("materialCostPerSqFt", "20")
+                        .param("locationFactor", "1.2")
+                        .param("taxRate", "0.15")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalPrice").value(12075.00));
+    }
 
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(responseModel, response.getBody());
+    @Test
+    void calculateEstimate_ShouldReturnBadRequest_WhenValidationFails() throws Exception {
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("squareFeet", "-100") // Invalid value
+                        .param("materialCostPerSqFt", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT"));
     }
 }

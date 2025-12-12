@@ -4,8 +4,9 @@ import "./Estimate.css";
 const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const [selectedPreset, setSelectedPreset] = useState(null);
     const [formData, setFormData] = useState({});
-    const [result, setResult] = useState(null); // State to store the result
-    const [isResultModalOpen, setIsResultModalOpen] = useState(false); // State to manage result modal visibility
+    const [result, setResult] = useState(null);
+    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         if (isOpen && presets.length > 0) {
@@ -14,6 +15,13 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             setFormData(defaultPreset.defaultValues || {});
         }
     }, [isOpen, presets]);
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     const handlePresetSelect = (presetName) => {
         const preset = presets.find((p) => p.name === presetName);
@@ -41,18 +49,21 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             }
 
             const result = await response.json();
-            setResult(result); // Store the result
-            setIsResultModalOpen(true); // Open the result modal
+            setResult(result);
+            setIsResultModalOpen(true);
         } catch (error) {
             console.error("Error submitting estimate:", error);
-            alert("Failed to submit estimate. Please try again.");
+            setToast({
+                type: "error",
+                message: error.message || "Failed to submit estimate. Please try again."
+            });
         }
     };
 
     const handleCloseResultModal = () => {
         setIsResultModalOpen(false);
         setResult(null);
-        onClose(); // Close the main modal as well
+        onClose();
     };
 
     if (!isOpen) return null;
@@ -96,6 +107,17 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                         value={formData[field.name] || ""}
                                         onChange={handleChange}
                                         required={field.required}
+                                        min={field.type === "number" ? "0" : undefined}
+                                        onInvalid={(e) => {
+                                            if (e.target.validity.valueMissing) {
+                                                e.target.setCustomValidity(`${field.label} is required`);
+                                            } else if (e.target.validity.rangeUnderflow) {
+                                                e.target.setCustomValidity(`${field.label} must be greater than 0`);
+                                            } else if (e.target.validity.typeMismatch) {
+                                                e.target.setCustomValidity(`${field.label} must be a valid number`);
+                                            }
+                                        }}
+                                        onInput={(e) => e.target.setCustomValidity("")}
                                     />
                                 </div>
                             ))}
@@ -119,7 +141,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                     data-testid="estimate-result-modal"
                     onClick={(e) => {
                         if (e.target === e.currentTarget) {
-                            handleCloseResultModal(); // Close both modals
+                            handleCloseResultModal();
                         }
                     }}>
                     <div className="modal-content">
@@ -135,6 +157,17 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <div
+                    className={`toast toast-${toast.type}`}
+                    role="alert"
+                    data-testid="estimate-toast"
+                >
+                    {toast.message}
                 </div>
             )}
         </>
