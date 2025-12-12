@@ -36,6 +36,20 @@ public class PortfolioController {
         return ResponseEntity.ok(portfolioItem);
     }
 
+    @PostMapping
+    public ResponseEntity<PortfolioResponseDto> createPortfolioItem(
+            @Valid @RequestBody PortfolioResponseDto request) {
+        log.info("POST request to /api/portfolio - Creating new portfolio item: {}", request.getTitle());
+
+        PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
+                request.getTitle(),
+                request.getImageUrl(),
+                request.getRating()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    }
+
     @PostMapping("/{portfolioId}/comments")
     public ResponseEntity<PortfolioCommentDto> addComment(
             @PathVariable String portfolioId,
