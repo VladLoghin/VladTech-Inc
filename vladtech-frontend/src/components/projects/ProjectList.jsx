@@ -14,13 +14,11 @@ const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex) => {
     .join(", ");
 };
 
-const ProjectList = ({ projects, onEdit, employeeIndex }) => {
+const ProjectList = ({ projects, onEdit, employeeIndex, showEdit = true }) => {
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
       {projects.length === 0 && (
-        <p className="text-black/60 text-center py-8">
-          No projects found.
-        </p>
+        <p className="text-black/60 text-center py-8">No projects found.</p>
       )}
 
       {projects.map((project) => (
@@ -28,15 +26,17 @@ const ProjectList = ({ projects, onEdit, employeeIndex }) => {
           key={project.projectIdentifier}
           className="border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative"
         >
-          <button
-            type="button"
-            onClick={() => onEdit(project)}
-            className="absolute right-4 top-4 px-5 py-2 border-2 border-black 
-                       text-black rounded-lg hover:bg-black hover:text-white 
-                       transition-all font-semibold"
-          >
-            Edit
-          </button>
+          {showEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit?.(project)}
+              className="absolute right-4 top-4 px-5 py-2 border-2 border-black 
+                         text-black rounded-lg hover:bg-black hover:text-white 
+                         transition-all font-semibold"
+            >
+              Edit
+            </button>
+          )}
 
           <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
 
