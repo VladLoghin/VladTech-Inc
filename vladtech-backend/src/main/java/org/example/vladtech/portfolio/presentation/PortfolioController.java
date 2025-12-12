@@ -50,6 +50,13 @@ public class PortfolioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }
 
+    @DeleteMapping("/{portfolioId}")
+    public ResponseEntity<Void> deletePortfolioItem(@PathVariable String portfolioId) {
+        log.info("DELETE request to /api/portfolio/{} - Deleting portfolio item", portfolioId);
+        portfolioService.deletePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{portfolioId}/comments")
     public ResponseEntity<PortfolioCommentDto> addComment(
             @PathVariable String portfolioId,

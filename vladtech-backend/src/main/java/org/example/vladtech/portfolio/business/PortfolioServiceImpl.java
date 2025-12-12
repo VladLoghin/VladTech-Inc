@@ -85,5 +85,16 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         return portfolioMapper.entityToResponseDto(savedItem);
     }
+
+    @Override
+    public void deletePortfolioItem(String portfolioId) {
+        log.info("Deleting portfolio item with id: {}", portfolioId);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
+
+        portfolioRepository.delete(portfolioItem);
+        log.info("Portfolio item deleted successfully with id: {}", portfolioId);
+    }
 }
 

@@ -59,3 +59,31 @@ export const getPortfolioItemById = async (portfolioId: string) => {
     throw error;
   }
 };
+
+export const createPortfolioItem = async (
+  title: string,
+  imageUrl: string,
+  rating: number,
+  accessToken: string
+) => {
+  try {
+    const response = await axios.post(
+      API_BASE,
+      {
+        title,
+        imageUrl,
+        rating,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating portfolio item:", error);
+    throw error;
+  }
+};
