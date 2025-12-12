@@ -25,6 +25,9 @@ public class EstimationServiceImpl implements EstimationService {
     @Value("${renovation.rates.contingency:0.10}")
     private BigDecimal contingencyRate;
 
+    @Value("0.15")
+    private BigDecimal taxRate;
+
     @Override
     public RenovationProject calculateEstimate(RenovationProject project) {
         if (project == null) {
@@ -34,12 +37,12 @@ public class EstimationServiceImpl implements EstimationService {
         BigDecimal squareFeet         = ns(project.getSquareFeet());
         BigDecimal materialPerSqFt    = ns(project.getMaterialCostPerSqFt());
         BigDecimal locationFactor     = ns(project.getLocationFactor(), ONE);
-        BigDecimal taxRate            = ns(project.getTaxRate());
 
         // Set configured rates
         project.setLaborRate(laborRate);
         project.setOverheadRate(overheadRate);
         project.setContingencyRate(contingencyRate);
+        project.setTaxRate(taxRate);
 
         BigDecimal laborCost      = squareFeet.multiply(laborRate);
         BigDecimal materialCost   = squareFeet.multiply(materialPerSqFt);

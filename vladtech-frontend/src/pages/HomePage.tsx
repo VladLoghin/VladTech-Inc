@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 interface HomePageProps {
   onNavigate?: (page: string) => void;
   onOpenContactModal?: () => void;
+  onOpenEstimateModal?: () => void;
 }
 
 const portfolioImages = [
@@ -59,7 +60,7 @@ const portfolioImages = [
   },
 ];
 
-export default function HomePage({ onNavigate, onOpenContactModal }: HomePageProps) {
+export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimateModal }: HomePageProps) {
   const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -563,7 +564,7 @@ export default function HomePage({ onNavigate, onOpenContactModal }: HomePagePro
             </motion.div>
             <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
               <Button
-                onClick={() => onNavigate?.("estimations")}
+                onClick={onOpenEstimateModal}
                 className="bg-yellow-400 text-black hover:bg-black hover:text-white px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
                 CREATE ESTIMATE

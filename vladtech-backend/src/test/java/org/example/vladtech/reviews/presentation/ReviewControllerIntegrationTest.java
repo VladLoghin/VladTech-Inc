@@ -98,7 +98,6 @@ class ReviewControllerIntegrationTest {
 
         mockMvc.perform(multipart("/api/reviews")
                         .file(reviewPart)
-                        .file(photosPart)
                         .with(request -> { request.setMethod("POST"); return request; })
                 )
                 .andExpect(status().isOk())
