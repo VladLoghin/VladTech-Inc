@@ -28,50 +28,35 @@ const ReviewsPage = () => {
     const [showMine, setShowMine] = useState(false);
 
     const roles = user?.["https://vladtech.com/roles"] || [];
-
     const isClient = isAuthenticated && roles.includes("Client");
-
-    const isStaff =
-        isAuthenticated &&
-        roles.some((r) => r === "Admin" || r === "Employee");
+    const isStaff = isAuthenticated && roles.some(r => r === "Admin" || r === "Employee");
 
     const fetchReviews = useCallback(async () => {
         try {
             if (isStaff) {
                 const token = await getAccessTokenSilently({
-                    authorizationParams: {
-                        audience: "https://vladtech/api",
-                    },
+                    authorizationParams: { audience: "https://vladtech/api" },
                 });
-
-                const data = await getAllReviews(token);
-                setReviews(data);
+                setReviews(await getAllReviews(token));
                 return;
             }
 
             if (isClient && showMine) {
                 const token = await getAccessTokenSilently({
-                    authorizationParams: {
-                        audience: "https://vladtech/api",
-                    },
+                    authorizationParams: { audience: "https://vladtech/api" },
                 });
-
-                const data = await getMyReviews(token);
-                setReviews(data);
+                setReviews(await getMyReviews(token));
                 return;
             }
 
-            const data = await getAllVisibleReviews();
-            setReviews(data);
-
+            setReviews(await getAllVisibleReviews());
         } catch (err) {
             console.error("Failed to fetch reviews:", err);
         }
     }, [isClient, isStaff, showMine, getAccessTokenSilently]);
 
     useEffect(() => {
-        if (isLoading) return;
-        fetchReviews();
+        if (!isLoading) fetchReviews();
     }, [isLoading, fetchReviews]);
 
     return (
@@ -104,32 +89,44 @@ const ReviewsPage = () => {
 
             <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
                 {isClient && (
-                    <>
+                    <div className="flex items-center justify-between mb-6">
                         <button
                             onClick={() => setShowModal(true)}
-                            className="px-4 py-2 mb-4 bg-yellow-400 text-black rounded"
+                            className="px-4 py-2 bg-yellow-400 text-black rounded font-semibold"
                         >
                             Add Review
                         </button>
 
-                        <div className="flex items-center gap-2 mb-4">
-                            <input
-                                type="checkbox"
-                                checked={showMine}
-                                onChange={(e) =>
-                                    setShowMine(e.target.checked)
-                                }
-                                className="accent-yellow-500"
-                            />
-                            <label className="text-white text-sm">
-                                Show only my reviews
-                            </label>
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={showMine}
+                                onClick={() => setShowMine(prev => !prev)}
+                                className={`
+                                    relative inline-flex h-7 w-14 items-center rounded-full
+                                    transition-colors duration-300
+                                    ${showMine ? "bg-yellow-400" : "bg-black"}
+                                `}
+                            >
+                                <span
+                                    className={`
+                                        inline-block h-5 w-5 transform rounded-full bg-white
+                                        transition-transform duration-300
+                                        ${showMine ? "translate-x-7" : "translate-x-1"}
+                                    `}
+                                />
+                            </button>
+
+                            <span className="text-sm font-semibold tracking-wide text-black select-none">
+                            Show only my reviews
+                            </span>
                         </div>
-                    </>
+                    </div>
                 )}
 
                 <section>
-                    <h2 className="title">Customer Highlights</h2>
+                    <h2 className="title text-4xl font-extrabold tracking-wide text-black mb-6">Customer Highlights</h2>
 
                     <ReviewCarousel
                         reviews={reviews}
@@ -138,10 +135,8 @@ const ReviewsPage = () => {
                             setShowDetailModal(true);
                         }}
                         onDelete={(deletedId) => {
-                            setReviews((prev) =>
-                                prev.filter(
-                                    (r) => (r.id ?? r.reviewId) !== deletedId
-                                )
+                            setReviews(prev =>
+                                prev.filter(r => (r.id ?? r.reviewId) !== deletedId)
                             );
                         }}
                     />
