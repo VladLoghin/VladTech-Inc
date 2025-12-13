@@ -6,7 +6,7 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
 
     if (!open || !review) return null;
 
-    const { clientId, comment, rating, photos } = review;
+    const { clientId, clientName, comment, rating, photos } = review;
     const photo = photos?.[0];
     const [imgSrc, setImgSrc] = useState(
         photo?.filename ? `http://localhost:8080/images/${photo.filename}` : "/images/placeholder.png"
@@ -60,13 +60,13 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
                 <div className="review-card enlarged">
                     <img
                         src={imgSrc}
-                        alt={photo?.filename || clientId}
+                        alt={photo?.filename}
                         onError={handleError}
                         data-testid="review-detail-image"
                     />
 
                     <p className="client-name" data-testid="review-detail-client">
-                        {clientId}
+                        {clientName}
                     </p>
 
                     <div className="stars enlarged" data-testid="review-detail-stars">

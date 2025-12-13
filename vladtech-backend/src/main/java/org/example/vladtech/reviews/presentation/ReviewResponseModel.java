@@ -20,6 +20,8 @@ public class ReviewResponseModel {
     @NotNull
     private String appointmentId;
     @NotNull
+    private String clientName;
+    @NotNull
     private String comment;
     @NotNull
     private Boolean visible;

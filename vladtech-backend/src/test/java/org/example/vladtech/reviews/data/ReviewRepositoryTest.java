@@ -20,8 +20,8 @@ class ReviewRepositoryTest {
 
     @Test
     void findByVisibleTrue_returnsOnlyVisibleReviews() {
-        Review visibleReview = new Review("c1", "a1", "visible comment", true, Rating.FIVE);
-        Review hiddenReview = new Review("c2", "a2", "hidden comment", false, Rating.ONE);
+        Review visibleReview = new Review("c1", "a1", "Ronnie", "visible comment", true, Rating.FIVE);
+        Review hiddenReview = new Review("c2", "a2", "James", "hidden comment", false, Rating.ONE);
 
         when(reviewRepository.findByVisibleTrue()).thenReturn(List.of(visibleReview));
 

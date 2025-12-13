@@ -3,38 +3,14 @@ import ReviewCard from "./ReviewCard.jsx";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 
-// @ts-ignore
 import "swiper/css";
-// @ts-ignore
 import "swiper/css/navigation";
-// @ts-ignore
 import "swiper/css/pagination";
 
-interface Photo {
-    clientId: string;
-    filename: string;
-    imageType: string;
-    url: string;
-}
-
-interface Review {
-    reviewId: string;
-    clientId: string;
-    appointmentId: string;
-    comment: string;
-    visible: boolean;
-    photos?: Photo[];
-    rating?: string;
-}
-
-interface ReviewCarouselProps {
-    reviews: Review[];
-    onReviewClick?: (review: Review) => void;
-}
-
-const ReviewCarousel = ({ reviews, onReviewClick}: ReviewCarouselProps) => {
-    if (!reviews.length)
-        return <p className="text-center" data-testid="no-reviews">No reviews available</p>;
+const ReviewCarousel = ({ reviews, onReviewClick, onDelete }) => {
+    if (!reviews.length) {
+        return <p className="text-center">No reviews available</p>;
+    }
 
     return (
         <Swiper
@@ -42,20 +18,24 @@ const ReviewCarousel = ({ reviews, onReviewClick}: ReviewCarouselProps) => {
             spaceBetween={20}
             slidesPerView={1}
             breakpoints={{
-                640: { slidesPerView: 2, spaceBetween: 20 },
-                768: { slidesPerView: 3, spaceBetween: 30 },
-                1024: { slidesPerView: 4, spaceBetween: 40 },
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
             }}
-            autoplay={{ delay: 10000, disableOnInteraction: false }}
+            autoplay={{ delay: 10000 }}
             navigation
             pagination={{ clickable: true }}
-            data-testid="review-carousel"
         >
             {reviews.map((review) => (
-                <SwiperSlide key={review.reviewId} data-testid="review-slide">
+                <SwiperSlide key={review.id ?? review.reviewId}>
                     <ReviewCard
                         review={review}
-                        onClick={onReviewClick ? () => onReviewClick(review) : undefined}
+                        onClick={
+                            onReviewClick
+                                ? () => onReviewClick(review)
+                                : undefined
+                        }
+                        onDelete={onDelete}
                     />
                 </SwiperSlide>
             ))}

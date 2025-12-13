@@ -17,7 +17,7 @@ class ReviewResponseMapperTest {
 
     @Test
     void entityToResponseModel_mapsFields() {
-        Review review = new Review("clientX", "apptX", "fine", true, Rating.THREE);
+        Review review = new Review("clientX", "apptX", "apptX", "fine", true, Rating.THREE);
         review.setReviewId("rev123");
 
         ReviewResponseModel resp = mapper.entityToResponseModel(review);
@@ -33,9 +33,9 @@ class ReviewResponseMapperTest {
 
     @Test
     void entityListToResponseModelList_mapsList() {
-        Review a = new Review("c1", "a1", "c1", true, Rating.FIVE);
+        Review a = new Review("c1", "a1", "Johnny", "c1", true, Rating.FIVE);
         a.setReviewId("r1");
-        Review b = new Review("c2", "a2", "c2", true, Rating.TWO);
+        Review b = new Review("c2", "a2", "Lenny", "c2", true, Rating.TWO);
         b.setReviewId("r2");
 
         List<Review> reviews = Arrays.asList(a, b);

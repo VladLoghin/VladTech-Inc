@@ -21,6 +21,9 @@ public class ReviewRequestModel {
     private String appointmentId;
 
     @NotNull
+    private String clientName;
+
+    @NotNull
     private String comment;
 
     @NotNull

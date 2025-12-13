@@ -1,85 +1,100 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ReviewCarousel from "../components/reviews/ReviewCarousel";
-import SecondaryNavbar from "../components/SecondaryNavbar";
-import { getAllVisibleReviews, getAllReviews } from "../api/reviews/reviewsService";
-import "../components/reviews/Review.css";
 import ReviewModal from "../components/reviews/ReviewModal";
 import ReviewDetailModal from "../components/reviews/ReviewDetailModal";
+import {
+    getAllVisibleReviews,
+    getAllReviews,
+    getMyReviews,
+} from "../api/reviews/reviewsService";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import "../components/reviews/Review.css";
 
 const ReviewsPage = () => {
     const navigate = useNavigate();
+
+    const {
+        user,
+        isAuthenticated,
+        isLoading,
+        getAccessTokenSilently,
+    } = useAuth0();
+
     const [reviews, setReviews] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedReview, setSelectedReview] = useState(null);
-    const [roles, setRoles] = useState([]);
+    const [showMine, setShowMine] = useState(false);
 
-    const { user, isAuthenticated } = useAuth0();
+    const roles = user?.["https://vladtech.com/roles"] || [];
+
+    const isClient = isAuthenticated && roles.includes("Client");
 
     const isStaff =
         isAuthenticated &&
-        Array.isArray(user?.["https://vladtech.com/roles"]) &&
-        user["https://vladtech.com/roles"].some(
-            (r) => r === "Admin" || r === "Employee"
-        );
+        roles.some((r) => r === "Admin" || r === "Employee");
+
+    const fetchReviews = useCallback(async () => {
+        try {
+            if (isStaff) {
+                const token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: "https://vladtech/api",
+                    },
+                });
+
+                const data = await getAllReviews(token);
+                setReviews(data);
+                return;
+            }
+
+            if (isClient && showMine) {
+                const token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: "https://vladtech/api",
+                    },
+                });
+
+                const data = await getMyReviews(token);
+                setReviews(data);
+                return;
+            }
+
+            const data = await getAllVisibleReviews();
+            setReviews(data);
+
+        } catch (err) {
+            console.error("Failed to fetch reviews:", err);
+        }
+    }, [isClient, isStaff, showMine, getAccessTokenSilently]);
 
     useEffect(() => {
-        if (user) {
-            const userRoles = user["https://vladtech.com/roles"] || [];
-            setRoles(userRoles);
-        }
-
+        if (isLoading) return;
         fetchReviews();
-    }, [user]);
+    }, [isLoading, fetchReviews]);
 
-    const fetchReviews = () => {
-        const fetchFn = isStaff ? getAllReviews : getAllVisibleReviews;
-
-        fetchFn()
-            .then((data) => setReviews(data))
-            .catch((err) => console.error("Failed to fetch reviews:", err));
-    };
-
-;
-
-    const handleOpenModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
-
-    const handleReviewClick = (review) => {
-        setSelectedReview(review);
-        setShowDetailModal(true);
-    };
-
-    const handleCloseDetailModal = () => {
-        setShowDetailModal(false);
-        setSelectedReview(null);
-    };
-
-    const isClient = roles.includes("Client");
     return (
         <div className="reviews-page" data-testid="reviews-page">
-            {/* Glossy Navigation Bar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-yellow-400/20 shadow-2xl">
-                <div className="container mx-auto px-8 py-6 flex items-center justify-between">
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-yellow-400/20">
+                <div className="container mx-auto px-8 py-6 flex justify-between">
                     <button
                         onClick={() => navigate("/")}
-                        className="text-2xl text-white tracking-widest hover:text-yellow-400 transition-colors"
+                        className="text-2xl text-white hover:text-yellow-400"
                     >
                         VLADTECH
                     </button>
 
-                    <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-12">
+                    <div className="flex gap-12">
                         <button
                             onClick={() => navigate("/portfolio")}
-                            className="text-white/40 hover:text-yellow-400 transition-colors tracking-wider text-sm"
+                            className="text-white/40 hover:text-yellow-400"
                         >
                             PORTFOLIO
                         </button>
                         <button
                             onClick={() => navigate("/reviews")}
-                            className="text-white hover:text-yellow-400 transition-colors tracking-wider text-sm border-b-2 border-yellow-400"
+                            className="text-white border-b-2 border-yellow-400"
                         >
                             REVIEWS
                         </button>
@@ -87,41 +102,68 @@ const ReviewsPage = () => {
                 </div>
             </nav>
 
-            <div className="container mx-auto p-4" style={{ marginTop: "100px" }}>
+            <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
                 {isClient && (
-                    <button
-                        type="button"
-                        style={{ backgroundColor: '#FCC700' }}
-                        className="px-4 py-2 text-black rounded hover:bg-yellow-500 mb-4"
-                        onClick={handleOpenModal}
-                        data-testid="add-review-button"
-                    >
-                        Add Review
-                    </button>
+                    <>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="px-4 py-2 mb-4 bg-yellow-400 text-black rounded"
+                        >
+                            Add Review
+                        </button>
+
+                        <div className="flex items-center gap-2 mb-4">
+                            <input
+                                type="checkbox"
+                                checked={showMine}
+                                onChange={(e) =>
+                                    setShowMine(e.target.checked)
+                                }
+                                className="accent-yellow-500"
+                            />
+                            <label className="text-white text-sm">
+                                Show only my reviews
+                            </label>
+                        </div>
+                    </>
                 )}
 
-                <section className="mb-10" data-testid="reviews-carousel-section">
+                <section>
                     <h2 className="title">Customer Highlights</h2>
+
                     <ReviewCarousel
                         reviews={reviews}
-                        onReviewClick={handleReviewClick}
+                        onReviewClick={(review) => {
+                            setSelectedReview(review);
+                            setShowDetailModal(true);
+                        }}
+                        onDelete={(deletedId) => {
+                            setReviews((prev) =>
+                                prev.filter(
+                                    (r) => (r.id ?? r.reviewId) !== deletedId
+                                )
+                            );
+                        }}
                     />
                 </section>
             </div>
 
             <ReviewModal
                 open={showModal}
-                onClose={handleCloseModal}
-                onSubmitSuccess={(newReview) => {
-                    setReviews((prev) => [newReview, ...prev]); 
-                    handleCloseModal();
+                onClose={() => setShowModal(false)}
+                onSubmitSuccess={async () => {
+                    setShowModal(false);
+                    await fetchReviews();
                 }}
             />
 
             <ReviewDetailModal
-                review={selectedReview}
                 open={showDetailModal}
-                onClose={handleCloseDetailModal}
+                review={selectedReview}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedReview(null);
+                }}
             />
         </div>
     );

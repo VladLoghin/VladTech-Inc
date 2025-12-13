@@ -20,22 +20,26 @@ public class Review {
 
     private String clientId;
     private String appointmentId;
+    private String clientName;
     private String comment;
-    private Boolean visible = true; // set to false when implementing moderation
+    private Boolean visible = false;
     private Rating rating;
     private List<Photo> photos = new ArrayList<>();
+    private String ownerAuth0Id;
 
-    public Review(String clientId, String appointmentId, String comment, Boolean visible, Rating rating) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
+        this.clientName = clientName;
         this.comment = comment;
         this.visible = visible;
         this.rating = rating;
     }
 
-    public Review(String clientId, String appointmentId, String comment, Boolean visible, Rating rating, List<Photo> photos) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
+        this.clientName = clientName;
         this.comment = comment;
         this.visible = visible;
         this.rating = rating;

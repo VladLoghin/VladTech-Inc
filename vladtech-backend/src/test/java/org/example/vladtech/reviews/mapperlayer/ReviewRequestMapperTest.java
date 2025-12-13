@@ -18,6 +18,7 @@ class ReviewRequestMapperTest {
         ReviewRequestModel request = new ReviewRequestModel(
                 "clientA",
                 "appointmentA",
+                "Alissa",
                 "nice job",
                 true,
                 Rating.FOUR

@@ -8,6 +8,7 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     // Get all visible reviews
     List<Review> findByVisibleTrue();
 
+    List<Review> findByOwnerAuth0Id(String ownerAuth0Id);
 
 //
 //    // Get reviews by client ID

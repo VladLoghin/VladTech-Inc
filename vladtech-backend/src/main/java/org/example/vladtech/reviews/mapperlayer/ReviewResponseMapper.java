@@ -12,6 +12,7 @@ public interface ReviewResponseMapper {
 
     // Map from entity → response DTO
     @Mapping(expression = "java(review.getReviewId())", target = "reviewId")
+    //@Mapping(target = "ownerAuth0Id", ignore = true)
     ReviewResponseModel entityToResponseModel(Review review);
 
     List<ReviewResponseModel> entityListToResponseModelList(List<Review> reviews);

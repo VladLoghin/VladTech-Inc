@@ -9,34 +9,19 @@ import java.util.List;
 public interface ReviewService {
 
     // Create a new review
-    ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos);
+    ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos, String OwnerAuth0Id);
 
     List<ReviewResponseModel> getAllReviews();
 
     ReviewResponseModel updateReviewVisibility(String reviewId, boolean visible);
 
     ReviewResponseModel GetReviewById(String reviewId);
-    /*
-        // Get a review by its ID
-        ReviewResponseModel getReviewById(String reviewId);
 
-        // Get all reviews
-        List<ReviewResponseModel> getAllReviews();
-    */
-    // Get all visible reviews
+    ReviewResponseModel deleteReviewAsClient(String reviewId, String clientId);
+
     List<ReviewResponseModel> getAllVisibleReviews();
-/*
-    // Get reviews for a specific client
-    List<ReviewResponseModel> getReviewsByClient(String clientId);
 
-    // Get reviews for a specific appointment
-    List<ReviewResponseModel> getReviewsByAppointment(String appointmentId);
+    List<ReviewResponseModel> getReviewsByOwnerAuth0Id(String ownerAuth0Id);
 
-    // Update an existing review
-    ReviewResponseModel updateReview(String reviewId, ReviewRequestModel reviewRequest);
-
-    // Delete a review by ID
-    void deleteReview(String reviewId);
-    */
 }
 
