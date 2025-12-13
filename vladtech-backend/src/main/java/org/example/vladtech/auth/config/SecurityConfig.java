@@ -46,8 +46,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/portfolio").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.DELETE, "/api/portfolio/*").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.POST, "/api/portfolio/*/comments").hasAnyAuthority("Client", "Admin")
+                        .requestMatchers("/api/estimates/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+
+
 
                         .anyRequest().authenticated()
                 )
