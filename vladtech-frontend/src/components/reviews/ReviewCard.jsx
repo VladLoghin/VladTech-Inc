@@ -139,6 +139,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         gap: "8px",
                         marginTop: "12px",
                     }}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <input
                         type="checkbox"
