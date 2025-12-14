@@ -52,8 +52,6 @@ jobs:
         run: sleep 10
 
       - name: Build and run tests
-        env:
-          SPRING_PROFILES_ACTIVE: ci
         run: ./gradlew clean test
 
 
