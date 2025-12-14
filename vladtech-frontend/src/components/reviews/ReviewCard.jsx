@@ -1,16 +1,24 @@
 import React, { useState } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
+import { deleteReview } from "../../api/reviews/reviewsService.js";
 import "./Review.css";
 
-const ReviewCard = ({ review, onClick }) => {
-    const { clientId, comment, rating, photos } = review;
-    const reviewId = review.id ?? review.reviewId;
-    const initialVisible = review.visible ?? true;
-
+const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
-    // Determine if user is Admin or Employee
+    const { clientId, clientName, comment, rating, photos } = review;
+    const reviewId = review.id ?? review.reviewId;
+    const initialVisible = review.visible ?? false;
+    const roles = user?.["https://vladtech.com/roles"] || [];
+    const isClient = isAuthenticated && roles.includes("Client");
+
+    const isOwner = isAuthenticated && user?.sub && review?.clientId === user.sub;
+
+    const canDelete = isClient && isOwner;
+
+    const [deleting, setDeleting] = useState(false);
+
     const canToggleVisibility =
         isAuthenticated &&
         Array.isArray(user?.["https://vladtech.com/roles"]) &&
@@ -22,7 +30,6 @@ const ReviewCard = ({ review, onClick }) => {
     const [isVisible, setIsVisible] = useState(initialVisible);
     const [saving, setSaving] = useState(false);
 
-    // Image handling
     const photo = photos?.[0];
     const [imgSrc, setImgSrc] = useState(
         photo?.filename
@@ -38,7 +45,6 @@ const ReviewCard = ({ review, onClick }) => {
         }
     };
 
-    // Convert rating enum → number
     const ratingMap = {
         ONE: 1,
         TWO: 2,
@@ -56,7 +62,6 @@ const ReviewCard = ({ review, onClick }) => {
         )
     );
 
-    // Toggle review visibility for Admin/Employee
     const handleVisibilityToggle = async () => {
         if (!reviewId) {
             console.error("Missing reviewId; cannot update visibility.");
@@ -92,6 +97,33 @@ const ReviewCard = ({ review, onClick }) => {
         }
     };
 
+    const handleDelete = async (e) => {
+        e.stopPropagation();
+        if (!reviewId) return;
+
+        try {
+            setDeleting(true);
+
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
+
+            const res = await deleteReview(reviewId, token);
+
+            if(!res.ok) {
+                throw new Error(`Delete failed with status ${res.status}`);
+            }
+
+            onDelete?.(reviewId);
+        } catch (err) {
+            console.error("Failed to delete review:", err);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
         <div
             className="review-card"
@@ -107,6 +139,7 @@ const ReviewCard = ({ review, onClick }) => {
                         gap: "8px",
                         marginTop: "12px",
                     }}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <input
                         type="checkbox"
@@ -132,13 +165,13 @@ const ReviewCard = ({ review, onClick }) => {
 
             <img
                 src={imgSrc}
-                alt={photo?.filename || clientId}
+                alt={photo?.filename}
                 onError={handleError}
                 data-testid="review-image"
             />
 
             <p className="client-name" data-testid="review-client">
-                {clientId}
+                {clientName}
             </p>
 
             <div className="stars" data-testid="review-stars">
@@ -159,7 +192,28 @@ const ReviewCard = ({ review, onClick }) => {
                 {comment}
             </p>
 
-            
+            {canDelete && (
+    <button
+        type="button"
+        onClick={handleDelete}
+        disabled={deleting}
+        style={{
+            backgroundColor: "#dc2626",
+            color: "white",
+            padding: "8px 10px",
+            borderRadius: "8px",
+            marginTop: "10px",
+            width: "100%",
+            fontWeight: 700,
+            cursor: deleting ? "not-allowed" : "pointer",
+            opacity: deleting ? 0.7 : 1,
+        }}
+        data-testid="review-delete-button"
+    >
+        {deleting ? "Deleting..." : "Delete"}
+    </button>
+)}
+
         </div>
     );
 };

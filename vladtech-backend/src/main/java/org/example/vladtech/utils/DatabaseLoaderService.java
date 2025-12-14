@@ -134,34 +134,34 @@ public class DatabaseLoaderService implements CommandLineRunner {
         ////////////////////////////////////////////////// add Reviews subdomain sample data
         log.info("Appending sample review data to MongoDB...");
 
-        createReview("client-001", "appointment-001", "Amazing service! Highly recommend.", true, Rating.FIVE,
+        createReview("client-001", "appointment-001", "Roger",  "Amazing service! Highly recommend.", true, Rating.FIVE,
                 List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", "/uploads/reviews/Reno1.jpg")));
 
-        createReview("client-002", "appointment-002", "Good, but could be faster.", true, Rating.FOUR,
+        createReview("client-002", "appointment-002", "Karen", "Good, but could be faster.", true, Rating.FOUR,
                 List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", "/uploads/reviews/Reno2.jpg")));
 
-        createReview("client-003", "appointment-003", "Not satisfied with the quality.", false, Rating.TWO,
+        createReview("client-003", "appointment-003", "Josh", "Not satisfied with the quality.", false, Rating.TWO,
                 List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", "/uploads/reviews/Reno3.jpg")));
 
-        createReview("client-004", "appointment-004", "Fantastic experience, will definitely come back!", true, Rating.FIVE,
+        createReview("client-004", "appointment-004", "Reed Richards","Fantastic experience, will definitely come back!", true, Rating.FIVE,
                 List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", "/uploads/reviews/Reno4.jpg")));
 
-        createReview("client-005", "appointment-005", "Pretty good, but room for improvement.", true, Rating.FOUR,
+        createReview("client-005", "appointment-005", "Raymond","Pretty good, but room for improvement.", true, Rating.FOUR,
                 List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", "/uploads/reviews/Reno5.jpg")));
 
-        createReview("client-006", "appointment-006", "Average service, nothing special.", false, Rating.THREE,
+        createReview("client-006", "appointment-006", "John", "Average service, nothing special.", false, Rating.THREE,
                 List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", "/uploads/reviews/Reno1.jpg")));
 
-        createReview("client-007", "appointment-007", "Excellent staff and quick service!", true, Rating.FIVE,
+        createReview("client-007", "appointment-007", "Isabelle","Excellent staff and quick service!", true, Rating.FIVE,
                 List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", "/uploads/reviews/Reno2.jpg")));
 
-        createReview("client-008", "appointment-008", "Decent service, but a bit slow.", true, Rating.FOUR,
+        createReview("client-008", "appointment-008", "Joshua","Decent service, but a bit slow.", true, Rating.FOUR,
                 List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", "/uploads/reviews/Reno3.jpg")));
 
-        createReview("client-009", "appointment-009", "Very disappointed, would not recommend.", false, Rating.ONE,
+        createReview("client-009", "appointment-009", "Peter","Very disappointed, would not recommend.", false, Rating.ONE,
                 List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", "/uploads/reviews/Reno4.jpg")));
 
-        createReview("client-010", "appointment-010", "Loved the experience! Highly professional.", true, Rating.FIVE,
+        createReview("client-010", "appointment-010", "Simon","Loved the experience! Highly professional.", true, Rating.FIVE,
                 List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", "/uploads/reviews/Reno5.jpg")));
 
         log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
@@ -257,12 +257,13 @@ public class DatabaseLoaderService implements CommandLineRunner {
     // ///////////////////////////////////////////////////////////
     private void createReview(String clientId,
                               String appointmentId,
+                              String clientName,
                               String comment,
                               Boolean visible,
                               Rating rating,
                               List<Photo> photos) {
         try {
-            Review review = new Review(clientId, appointmentId, comment, visible, rating, photos);
+            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos);
             reviewRepository.save(review);
             log.debug("Created review for clientId: {} and appointmentId: {}", clientId, appointmentId);
         } catch (Exception e) {

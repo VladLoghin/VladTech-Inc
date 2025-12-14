@@ -10,6 +10,7 @@ import org.example.vladtech.reviews.mapperlayer.ReviewRequestMapper;
 import org.example.vladtech.reviews.mapperlayer.ReviewResponseMapper;
 import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import org.example.vladtech.reviews.presentation.ReviewResponseModel;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,8 +36,16 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public ReviewResponseModel createReview(ReviewRequestModel reviewRequest, MultipartFile[] photos) {
+    public ReviewResponseModel createReview(ReviewRequestModel reviewRequest, MultipartFile[] photos, String OwnerAuth0Id) {
         Review review = requestMapper.requestModelToEntity(reviewRequest);
+
+        review.setOwnerAuth0Id(OwnerAuth0Id);
+
+        review.setClientId(reviewRequest.getClientId());
+        review.setClientName(reviewRequest.getClientName());
+        review.setVisible(reviewRequest.getVisible());
+        review.setRating(reviewRequest.getRating());
+        review.setOwnerAuth0Id(OwnerAuth0Id);
 
         if (photos != null) {
             List<Photo> photoList = Arrays.stream(photos)
@@ -75,56 +84,29 @@ public class ReviewServiceImpl implements ReviewService {
         return responseMapper.entityToResponseModel(review);
     }
 
-    /*
-        @Override
-        public ReviewResponseModel getReviewById(String reviewId) {
-            Review review = reviewRepository.findById(reviewId)
-                    .orElseThrow(() -> new RuntimeException("Review not found"));
-            return responseMapper.entityToResponseModel(review);
-        }
 
-        @Override
-        public List<ReviewResponseModel> getAllReviews() {
-            return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
-        }
-    */
     @Override
     public List<ReviewResponseModel> getAllVisibleReviews() {
         return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
     }
-/*
-    @Override
-    public List<ReviewResponseModel> getReviewsByClient(String clientId) {
-        return responseMapper.entityListToResponseModelList(reviewRepository.findByClientId(clientId));
-    }
 
+    @PreAuthorize("hasAuthority('Client')")
     @Override
-    public List<ReviewResponseModel> getReviewsByAppointment(String appointmentId) {
-        return responseMapper.entityListToResponseModelList(reviewRepository.findByAppointmentId(appointmentId));
-    }
-
-    @Override
-    public ReviewResponseModel updateReview(String reviewId, ReviewRequestModel reviewRequest) {
+    public ReviewResponseModel deleteReviewAsClient(String reviewId, String clientId) {
         Review existing = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
+        System.out.println("Delete reviewId = " + reviewId);
+        if (!existing.getClientId().equals(clientId)) {
+            throw new RuntimeException("Unauthorized to delete this review");
+        }
 
-        // map fields from request to existing entity
-        // copy non-ID fields
-        existing.setClientId(reviewRequest.getClientId());
-        existing.setAppointmentId(reviewRequest.getAppointmentId());
-        existing.setComment(reviewRequest.getComment());
-        existing.setVisible(reviewRequest.getVisible());
-        existing.setRating(reviewRequest.getRating());
-        existing.setPhotos(reviewRequest.getPhotos());
-
-        Review updated = reviewRepository.save(existing);
-        return responseMapper.entityToResponseModel(updated);
+        reviewRepository.delete(existing);
+        return responseMapper.entityToResponseModel(existing);
     }
 
     @Override
-    public void deleteReview(String reviewId) {
-        reviewRepository.deleteById(reviewId);
+    public List<ReviewResponseModel> getReviewsByOwnerAuth0Id(String ownerAuth0Id) {
+        return responseMapper.entityListToResponseModelList(reviewRepository.findByOwnerAuth0Id(ownerAuth0Id));
     }
- */
 }
 

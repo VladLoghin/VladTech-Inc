@@ -10,7 +10,11 @@ interface ReviewModalProps {
 }
 
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
-    const { getAccessTokenSilently } = useAuth0();
+
+    const { getAccessTokenSilently, user } = useAuth0();
+    
+    const clientId = user?.sub;
+
     const [clientName, setClientName] = useState("");
     const [comment, setComment] = useState("");
     const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
@@ -21,18 +25,24 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        const formData = new FormData();
+        const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
+
         const reviewPayload = {
-            clientId: clientName,
+            clientId,                
+            clientName,              
             appointmentId: appointmentId || "temp-appointment",
             comment,
-            visible: true,
-            rating: stars - 1, // backend enum [0..4]
+            visible: false,
+            rating: ratingEnum
         };
 
+        const formData = new FormData();
         formData.append(
-            "review",
-            new Blob([JSON.stringify(reviewPayload)], { type: "application/json" })
+        "review",
+        new Blob(
+            [JSON.stringify(reviewPayload)],
+            { type: "application/json;charset=UTF-8" }
+        )
         );
 
         if (imageFile) {
@@ -54,9 +64,9 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                 return;
             }
 
-            const createdReview = await res.json(); // get created review from backend
-
-            if (onSubmitSuccess) onSubmitSuccess(createdReview);
+            const createdReview = await res.json();
+            console.log("Review submitted successfully:", createdReview);
+            onSubmitSuccess?.(createdReview);
             onClose();
 
             // Reset form
@@ -64,6 +74,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             setComment("");
             setStars(5);
             setImageFile(null);
+
         } catch (err) {
             console.error("Error submitting review:", err);
         }
@@ -86,6 +97,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         className="w-full border border-gray-300 rounded-xl p-3"
                         required
                     />
+
                     <textarea
                         placeholder="Your message"
                         value={comment}
@@ -93,6 +105,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         className="w-full border border-gray-300 rounded-xl p-3 h-24"
                         required
                     />
+
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((s) => (
                             <button
@@ -106,6 +119,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             </button>
                         ))}
                     </div>
+
                     <div>
                         <label className="block mb-1 font-medium">Upload Photo</label>
                         <input
@@ -115,6 +129,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             className="w-full border border-gray-300 rounded-xl p-2"
                         />
                     </div>
+
                     <button
                         type="submit"
                         style={{ backgroundColor: '#FCC700' }}
