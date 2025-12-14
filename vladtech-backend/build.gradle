@@ -15,10 +15,10 @@ java {
 	}
 }
 
-ext{
-    mapstructVersion = "1.6.3"
-    lombokVersion = "1.18.36"
-    lombokMapstructBindingVersion = "0.2.0"
+ext {
+	mapstructVersion = "1.6.3"
+	lombokVersion = "1.18.36"
+	lombokMapstructBindingVersion = "0.2.0"
 }
 
 configurations {
@@ -32,36 +32,50 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	/* ---------------- CORE SPRING ---------------- */
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.12.3"
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	/* ---------------- SECURITY ---------------- */
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	/* ---------------- DATABASE ---------------- */
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+	/* ---------------- UTIL ---------------- */
 	implementation 'org.apache.commons:commons-lang3:3.18.0'
-	compileOnly 'org.projectlombok:lombok'
+
+	/* ---------------- LOMBOK ---------------- */
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+	/* ---------------- MAPSTRUCT ---------------- */
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+
+	/* ---------------- DEV ---------------- */
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
+
+	/* ---------------- TEST ---------------- */
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.12.3"
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
-    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
-
 }
 
-tasks.named('test') {
+tasks.test {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+	systemProperty 'spring.profiles.active',
+			System.getProperty('spring.profiles.active', 'test')
 }
 
 jacoco {
@@ -69,8 +83,7 @@ jacoco {
 }
 
 jacocoTestReport {
-	dependsOn test  // Tests are required to run before generating the report
-
+	dependsOn test
 	reports {
 		xml.required = true
 		html.required = true
@@ -88,24 +101,3 @@ jacocoTestReport {
 		}))
 	}
 }
-
-jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			limit {
-				//minimum = 0.60
-			}
-		}
-	}
-}
-
-test.finalizedBy jacocoTestReport
-
-test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
-	systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'test')
-}
-

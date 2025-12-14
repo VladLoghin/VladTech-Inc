@@ -1,0 +1,26 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test.auth0.local/
+
+auth0:
+  domain: test.auth0.local
+
+  mgmt:
+    clientId: test-client-id
+    clientSecret: test-client-secret
+    audience: test-audience
+
+  roles:
+    admin: ROLE_ADMIN_TEST
+    employee: ROLE_EMPLOYEE_TEST
+    client: ROLE_CLIENT_TEST
+
+  default:
+    client:
+      roleId: ROLE_CLIENT_TEST
+
+file:
+  upload-dir: build/test-uploads
