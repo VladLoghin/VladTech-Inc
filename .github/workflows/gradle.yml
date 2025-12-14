@@ -53,7 +53,7 @@ jobs:
 
       - name: Build and run tests
         env:
-          SPRING_PROFILES_ACTIVE: test
+          SPRING_PROFILES_ACTIVE: ci
         run: ./gradlew clean test
 
 
