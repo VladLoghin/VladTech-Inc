@@ -1,0 +1,20 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/vladtech-ci
+
+auth0:
+  domain: dummy.auth0.com
+  audience: https://dummy.api
+  client-id: dummy
+  client-secret: dummy
+  roles:
+    admin: ROLE_ADMIN_ID
+    employee: ROLE_EMPLOYEE_ID
+    client: ROLE_CLIENT_ID
+  default:
+    client:
+      roleId: ROLE_CLIENT_ID
+
+file:
+  upload-dir: /tmp/vladtech/uploads
