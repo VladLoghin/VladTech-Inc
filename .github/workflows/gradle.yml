@@ -52,6 +52,8 @@ jobs:
         run: sleep 10
 
       - name: Build and run tests
+        env:
+          MONGO_URI: mongodb://mongodb:27017/vladtech-test
         run: ./gradlew clean test
 
 
