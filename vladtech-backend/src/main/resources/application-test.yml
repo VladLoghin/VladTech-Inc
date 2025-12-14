@@ -5,6 +5,11 @@ spring:
         jwt:
           issuer-uri: https://test.auth0.local/
 
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/vladtech-test
+
+
 auth0:
   domain: test.auth0.local
 
