@@ -7,7 +7,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/vladtech-test
+      uri: ${MONGO_URI:mongodb://localhost:27017/vladtech-test}
 
 
 auth0:
