@@ -179,6 +179,18 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
     return portfolioImages.slice(startIndex, startIndex + 3);
   };
 
+  // Normalize roles and compute flags
+  const rawRoles = user?.["https://vladtech.com/roles"];
+  const roles: string[] = Array.isArray(rawRoles)
+    ? rawRoles
+    : typeof rawRoles === "string"
+      ? [rawRoles]
+      : [];
+
+  const isAdmin = roles.includes("Admin");
+  const isEmployee = roles.includes("Employee");
+  const isClient = roles.includes("Client");
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar - Changes to dark on scroll */}
@@ -276,6 +288,33 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               >
                 DASHBOARD
               </button>
+            )}
+
+{/* Role badge */}
+            {isAuthenticated && (isAdmin || isEmployee || isClient) && (
+              <span
+                className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-full ${
+                  isNavbarDark ? "border-yellow-400 text-yellow-300" : "border-black/30 text-black/70"
+                }`}
+              >
+                { [
+                  isAdmin ? "Admin" : null,
+                  isEmployee ? "Employee" : null,
+                  isClient ? "Client" : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            )}
+
+            {isAuthenticated && (
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-400">
+                {user?.picture ? (
+                  <img src={user.picture} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-yellow-400/20" />
+                )}
+              </div>
             )}
 
             {!isAuthenticated ? (
