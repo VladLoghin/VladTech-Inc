@@ -7,7 +7,7 @@ spring:
 
   data:
     mongodb:
-      # CRITICAL: Clear the URI so tests use Embedded DB
+      # Explicitly unset URI to force Embedded Mongo for local tests
       uri:
       auto-index-creation: true
 
