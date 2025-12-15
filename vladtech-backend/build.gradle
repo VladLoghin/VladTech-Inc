@@ -58,6 +58,9 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 
+	/* ---------------- CONFIGURATION PROCESSOR (ADD THIS) ---------------- */
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
 	/* ---------------- DEV ---------------- */
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
