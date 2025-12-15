@@ -127,8 +127,26 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ""
-          audience: ""
+          issuer-uri: https://test.auth0.local/
+          audience: test-audience
+
+# Add these Auth0 test values that were missing
+auth0:
+  domain: test.auth0.local
+
+  mgmt:
+    clientId: test-client-id
+    clientSecret: test-client-secret
+    audience: test-audience
+
+  roles:
+    client: ROLE_CLIENT_TEST
+    employee: ROLE_EMPLOYEE_TEST
+    admin: ROLE_ADMIN_TEST
+
+  default:
+    client:
+      roleId: ROLE_CLIENT_TEST
 
 renovation:
   rates:
@@ -138,5 +156,4 @@ renovation:
     tax: 0.13
 
 file:
-  upload:
-    dir: /data/uploads
+  upload-dir: build/test-uploads
