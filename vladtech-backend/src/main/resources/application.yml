@@ -109,44 +109,17 @@ spring:
     activate:
       on-profile: ci
 
-  autoconfigure:
-    exclude:
-      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
-
   data:
     mongodb:
-      uri: mongodb://localhost:27017/vladtechdb
-      database: vladtechdb
       auto-index-creation: true
 
-  mongodb:
-    embedded:
-      enabled: false
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://test.auth0.local/
-          audience: test-audience
-
-# Add these Auth0 test values that were missing
-auth0:
-  domain: test.auth0.local
-
-  mgmt:
-    clientId: test-client-id
-    clientSecret: test-client-secret
-    audience: test-audience
-
-  roles:
-    client: ROLE_CLIENT_TEST
-    employee: ROLE_EMPLOYEE_TEST
-    admin: ROLE_ADMIN_TEST
-
-  default:
-    client:
-      roleId: ROLE_CLIENT_TEST
+          issuer-uri: ""
+          audience: ""
 
 renovation:
   rates:
@@ -154,6 +127,3 @@ renovation:
     overhead: 0.15
     contingency: 0.10
     tax: 0.13
-
-file:
-  upload-dir: build/test-uploads
