@@ -11,7 +11,7 @@ spring:
       database: vladtechdb
       auto-index-creation: true
 
-  # Default embedded version for local tests
+  # Default embedded version for local development
   mongodb:
     embedded:
       version: 6.0.8
@@ -67,7 +67,8 @@ spring:
     activate:
       on-profile: test
 
-  # Local tests: Use Embedded DB (URI is empty)
+  # Local Tests (./gradlew test):
+  # Clear URI to force the Embedded DB to start automatically
   data:
     mongodb:
       uri:
@@ -94,8 +95,13 @@ spring:
       on-profile: ci
 
   # CI Environment (GitHub Actions):
-  # 1. Use the REAL Mongo service from gradle.yml (mapped to localhost)
-  # 2. DISABLE embedded mongo completely to avoid version errors
+  # 1. Use the REAL Mongo service from gradle.yml (localhost:27017)
+  # 2. EXCLUDE Embedded Mongo completely to prevent startup errors
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
+      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+
   data:
     mongodb:
       uri: mongodb://localhost:27017/vladtechdb
@@ -120,5 +126,5 @@ renovation:
     tax: 0.13
 
 file:
-  # Safe relative path for CI permissions
+  # Safe relative path for CI file permissions
   upload-dir: build/ci-uploads
