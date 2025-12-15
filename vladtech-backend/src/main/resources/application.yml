@@ -109,19 +109,14 @@ spring:
     activate:
       on-profile: ci
 
-  autoconfigure:
-    exclude:
-      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+  # REMOVE the 'autoconfigure: exclude' section completely.
+  # We WANT the embedded mongo to run.
 
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/vladtechdb
-      database: vladtechdb
-      auto-index-creation: true
+  # REMOVE the 'data: mongodb: uri' section.
+  # Do not point to localhost:27017.
 
-  mongodb:
-    embedded:
-      enabled: false
+  # REMOVE 'mongodb: embedded: enabled: false'.
+  # We want it set to true (which is the default).
 
   security:
     oauth2:
@@ -138,5 +133,5 @@ renovation:
     tax: 0.13
 
 file:
-  # ✅ FIX: Use a relative path so the CI runner has permission to write here
+  # Keep this! This is the fix for the permission error.
   upload-dir: build/ci-uploads
