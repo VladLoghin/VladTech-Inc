@@ -57,8 +57,8 @@ export const test = base.extend<{
       
       // Fill Auth0 login form
       await page.getByLabel('Email').fill(user.email);
-      await page.getByLabel('Password').fill(user.password);
-      await page.getByRole('button', { name: 'Log In' }).click();
+      await page.locator('input[type="password"]').fill(user.password);
+      await page.getByRole('button', { name: 'Continue' }).click();
       
       // Wait for redirect back to app
       await page.waitForURL('http://localhost:5173/', { timeout: 10000 });
