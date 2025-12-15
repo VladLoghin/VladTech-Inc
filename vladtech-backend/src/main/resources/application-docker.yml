@@ -8,4 +8,5 @@ spring:
       enabled: false
 
 file:
-  upload-dir: /app/uploads
+  upload:
+    dir: /app/uploads

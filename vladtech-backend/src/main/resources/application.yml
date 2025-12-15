@@ -138,4 +138,5 @@ renovation:
     tax: 0.13
 
 file:
-  upload-dir: /data/uploads
+  upload:
+    dir: /data/uploads

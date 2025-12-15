@@ -28,4 +28,5 @@ auth0:
       roleId: ROLE_CLIENT_TEST
 
 file:
-  upload-dir: build/test-uploads
+  upload:
+    dir: build/test-uploads
