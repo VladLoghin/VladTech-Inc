@@ -77,8 +77,11 @@ tasks.test {
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
-	systemProperty 'spring.profiles.active',
-			System.getProperty('spring.profiles.active', 'test')
+
+	// Pass spring.profiles.active from command line to tests
+	if (System.getProperty('spring.profiles.active')) {
+		systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active')
+	}
 }
 
 jacoco {
