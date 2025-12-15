@@ -1,9 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle, spin up MongoDB, and run integration tests.
-
 name: Java CI with Gradle
 
 on:
@@ -18,7 +12,6 @@ jobs:
     permissions:
       contents: read
 
-    # MongoDB service for integration tests
     services:
       mongodb:
         image: mongo:7.0.7
@@ -26,7 +19,6 @@ jobs:
           - 27017:27017
         options: --quiet
 
-    # Set default working directory for all steps in this job
     defaults:
       run:
         working-directory: vladtech-backend
@@ -41,7 +33,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
         with:
           build-root-directory: vladtech-backend
 
@@ -52,7 +44,7 @@ jobs:
         run: sleep 10
 
       - name: Build and run tests
-        run: ./gradlew clean test -Dspring.profiles.active=ci
+        run: ./gradlew clean test -Dspring.profiles.active=test
 
   dependency-submission:
     runs-on: ubuntu-latest
@@ -69,6 +61,6 @@ jobs:
           distribution: 'temurin'
 
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
         with:
           build-root-directory: vladtech-backend
