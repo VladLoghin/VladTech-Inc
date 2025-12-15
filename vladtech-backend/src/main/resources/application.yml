@@ -138,4 +138,5 @@ renovation:
     tax: 0.13
 
 file:
-  upload-dir: /data/uploads
+  # ✅ FIX: Use a relative path so the CI runner has permission to write here
+  upload-dir: build/ci-uploads

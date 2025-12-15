@@ -8,5 +8,4 @@ spring:
       enabled: false
 
 file:
-#  upload-dir: /app/uploads
-  upload-dir: build/test-uploads
+  upload-dir: /app/uploads
