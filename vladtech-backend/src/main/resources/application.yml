@@ -95,13 +95,9 @@ spring:
       on-profile: ci
 
   # CI Environment (GitHub Actions):
-  # 1. Use the REAL Mongo service from gradle.yml (localhost:27017)
-  # 2. EXCLUDE Embedded Mongo completely to prevent startup errors
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
-      - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
-
+  # 1. Point to the REAL Mongo service (localhost:27017)
+  # 2. Provide a safe version (6.0.8) so if Embedded tries to check metadata, it doesn't crash.
+  # 3. Do NOT manually exclude/disable; Spring will detect the URI and assume we want the Real DB.
   data:
     mongodb:
       uri: mongodb://localhost:27017/vladtechdb
@@ -109,7 +105,7 @@ spring:
 
   mongodb:
     embedded:
-      enabled: false
+      version: 6.0.8
 
   security:
     oauth2:
