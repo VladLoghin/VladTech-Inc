@@ -11,6 +11,7 @@ spring:
       database: vladtechdb
       auto-index-creation: true
 
+  # Force the compatible version globally
   mongodb:
     embedded:
       version: 6.0.8
@@ -26,17 +27,6 @@ spring:
           auth: false
           starttls:
             enable: false
-  #  mail: #REAL CONFIG (USE THIS OR ANOTHER SIMILAR SETUP ON DEPLOY!!!!)
-  #    host: mail.smtp2go.com
-  #    port: 587
-  #    username:
-  #    password:
-  #    properties:
-  #      mail:
-  #        smtp:
-  #          auth: true
-  #          starttls:
-  #            enable: true
 
   servlet:
     multipart:
@@ -77,10 +67,11 @@ spring:
     activate:
       on-profile: test
 
+  # CRITICAL: Clear the URI so tests use Embedded DB
   data:
     mongodb:
+      uri:
       auto-index-creation: true
-
 
   security:
     oauth2:
@@ -102,14 +93,11 @@ spring:
     activate:
       on-profile: ci
 
-  # REMOVE the 'autoconfigure: exclude' section completely.
-  # We WANT the embedded mongo to run.
-
-  # REMOVE the 'data: mongodb: uri' section.
-  # Do not point to localhost:27017.
-
-  # REMOVE 'mongodb: embedded: enabled: false'.
-  # We want it set to true (which is the default).
+  # CRITICAL: Clear the URI so CI uses Embedded DB
+  data:
+    mongodb:
+      uri:
+      auto-index-creation: true
 
   security:
     oauth2:
