@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getAllPortfolioItems, deletePortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Trash2, AlertTriangle } from "lucide-react";
+import getImageUrl from "../../utils/getImageUrl.js";
 
 export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -97,7 +98,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
                     className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                   >
                     <img
-                      src={`http://localhost:8080${item.imageUrl}`}
+                      src={getImageUrl(item.imageUrl)}
                       alt={item.title}
                       className="w-20 h-20 object-cover rounded"
                     />

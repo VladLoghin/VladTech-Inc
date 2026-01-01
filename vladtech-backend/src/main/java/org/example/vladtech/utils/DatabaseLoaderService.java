@@ -18,6 +18,11 @@ import org.example.vladtech.portfolio.data.PortfolioComment;
 import org.example.vladtech.portfolio.data.PortfolioItem;
 import org.example.vladtech.portfolio.data.PortfolioRepository;
 
+import org.example.vladtech.filestorageservice.FileStorageService;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import org.springframework.web.multipart.MultipartFile;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ReviewRepository reviewRepository;
     private final PortfolioRepository portfolioRepository;
+    private final FileStorageService fileStorageService; // added injection for file service
 
     @Override
     public void run(String... args) throws Exception {
@@ -118,7 +124,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 "Complete kitchen remodel including cabinets and countertops",
                 LocalDate.of(2026, 1, 15),
                 LocalDate.of(2026, 3, 30),
-                ProjectType.ProjectTypeEnum.SCHEDULED
+                ProjectType.ProjectTypeEnum.SCHEDULED,
+                null
         );
 
         createProject(
@@ -128,41 +135,83 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 "Emergency plumbing repair and tile replacement",
                 LocalDate.of(2026, 2, 1),
                 LocalDate.of(2026, 2, 15),
-                ProjectType.ProjectTypeEnum.APPOINTMENT
+                ProjectType.ProjectTypeEnum.APPOINTMENT,
+                null
+        );
+
+        createProject(
+                "PROJ-3",
+                "Office Remodel",
+                "789 Elm St", "Montreal", "Quebec", "Canada", "H3C 3C3",
+                "Full office remodel with open-plan layout",
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 6, 30),
+                ProjectType.ProjectTypeEnum.SCHEDULED,
+                List.of(new ProjectPhoto(null, "Reno1.jpg", "Main office view"))
         );
 
         ////////////////////////////////////////////////// add Reviews subdomain sample data
         log.info("Appending sample review data to MongoDB...");
 
+        // helper that stores a local sample image into GridFS (using FileStorageService.save(MultipartFile))
+        // and returns a public URL using the returned id. Falls back to the original static path if storage fails.
+        java.util.function.Function<String, String> storeAndUrl = (filename) -> {
+            try {
+                Path path = Path.of(System.getProperty("user.dir"), "uploads", "reviews", filename);
+                if (!Files.exists(path)) {
+                    return "/uploads/reviews/" + filename;
+                }
+                String contentType = Files.probeContentType(path);
+                byte[] data = Files.readAllBytes(path);
+
+                MultipartFile multipart = new MultipartFile() {
+                    @Override public String getName() { return filename; }
+                    @Override public String getOriginalFilename() { return filename; }
+                    @Override public String getContentType() { return contentType; }
+                    @Override public boolean isEmpty() { return data == null || data.length == 0; }
+                    @Override public long getSize() { return data == null ? 0 : data.length; }
+                    @Override public byte[] getBytes() { return data; }
+                    @Override public java.io.InputStream getInputStream() { return new java.io.ByteArrayInputStream(data); }
+                    @Override public void transferTo(java.io.File dest) throws java.io.IOException, java.lang.IllegalStateException { java.nio.file.Files.write(dest.toPath(), data); }
+                };
+
+                String id = fileStorageService.save(multipart);
+                return "/uploads/reviews/" + id;
+            } catch (Exception e) {
+                log.warn("Could not store sample image {} into file service ({}). Falling back to static path.", filename, e.getMessage());
+                return "/uploads/reviews/" + filename;
+            }
+        };
+
         createReview("client-001", "appointment-001", "Roger",  "Amazing service! Highly recommend.", true, Rating.FIVE,
-                List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", "/uploads/reviews/Reno1.jpg")));
+                List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
 
         createReview("client-002", "appointment-002", "Karen", "Good, but could be faster.", true, Rating.FOUR,
-                List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", "/uploads/reviews/Reno2.jpg")));
+                List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
 
         createReview("client-003", "appointment-003", "Josh", "Not satisfied with the quality.", false, Rating.TWO,
-                List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", "/uploads/reviews/Reno3.jpg")));
+                List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
 
         createReview("client-004", "appointment-004", "Reed Richards","Fantastic experience, will definitely come back!", true, Rating.FIVE,
-                List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", "/uploads/reviews/Reno4.jpg")));
+                List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
 
         createReview("client-005", "appointment-005", "Raymond","Pretty good, but room for improvement.", true, Rating.FOUR,
-                List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", "/uploads/reviews/Reno5.jpg")));
+                List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
 
         createReview("client-006", "appointment-006", "John", "Average service, nothing special.", false, Rating.THREE,
-                List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", "/uploads/reviews/Reno1.jpg")));
+                List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
 
         createReview("client-007", "appointment-007", "Isabelle","Excellent staff and quick service!", true, Rating.FIVE,
-                List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", "/uploads/reviews/Reno2.jpg")));
+                List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
 
         createReview("client-008", "appointment-008", "Joshua","Decent service, but a bit slow.", true, Rating.FOUR,
-                List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", "/uploads/reviews/Reno3.jpg")));
+                List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
 
         createReview("client-009", "appointment-009", "Peter","Very disappointed, would not recommend.", false, Rating.ONE,
-                List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", "/uploads/reviews/Reno4.jpg")));
+                List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
 
         createReview("client-010", "appointment-010", "Simon","Loved the experience! Highly professional.", true, Rating.FIVE,
-                List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", "/uploads/reviews/Reno5.jpg")));
+                List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
 
         log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
 
@@ -171,37 +220,37 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         Instant now = Instant.now();
 
-        createPortfolioItem("Modern Kitchen Counter", "/images/Reno1.jpg", 4.9,
+        createPortfolioItem("Modern Kitchen Counter", storeAndUrl.apply("Reno1.jpg"), 4.9,
                 List.of(
                         new PortfolioComment("Sarah M.", "sample-user-1", now.minusSeconds(10800), "Beautiful countertop! The finish is perfect."),
                         new PortfolioComment("John D.", "sample-user-2", now.minusSeconds(3600), "Love the modern design and clean look.")
                 ));
 
-        createPortfolioItem("Complete Kitchen Remodel", "/images/Reno2.jpg", 5.0,
+        createPortfolioItem("Complete Kitchen Remodel", storeAndUrl.apply("Reno2.jpg"), 5.0,
                 List.of(
                         new PortfolioComment("Emma L.", "sample-user-3", now.minusSeconds(18000), "Amazing transformation! Best kitchen renovation I've seen."),
                         new PortfolioComment("Michael R.", "sample-user-4", now.minusSeconds(7200), "The attention to detail is outstanding.")
                 ));
 
-        createPortfolioItem("Luxury Bathroom Renovation", "/images/Reno3.jpg", 4.8,
+        createPortfolioItem("Luxury Bathroom Renovation", storeAndUrl.apply("Reno3.jpg"), 4.8,
                 List.of(
                         new PortfolioComment("Lisa K.", "sample-user-5", now.minusSeconds(14400), "Stunning bathroom design. Very elegant!"),
                         new PortfolioComment("David P.", "sample-user-6", now.minusSeconds(21600), "The tile work is absolutely beautiful.")
                 ));
 
-        createPortfolioItem("Contemporary Office Space", "/images/Reno4.jpg", 4.7,
+        createPortfolioItem("Contemporary Office Space", storeAndUrl.apply("Reno4.jpg"), 4.7,
                 List.of(
                         new PortfolioComment("Anna S.", "sample-user-7", now.minusSeconds(10800), "Great use of space and natural lighting."),
                         new PortfolioComment("Tom W.", "sample-user-8", now.minusSeconds(28800), "Very professional and modern office design.")
                 ));
 
-        createPortfolioItem("Custom Shower Installation", "/images/Reno5.jpg", 4.9,
+        createPortfolioItem("Custom Shower Installation", storeAndUrl.apply("Reno5.jpg"), 4.9,
                 List.of(
                         new PortfolioComment("Rachel B.", "sample-user-9", now.minusSeconds(86400), "Perfect execution! Love the glass work."),
                         new PortfolioComment("Chris M.", "sample-user-10", now.minusSeconds(43200), "High-quality shower installation.")
                 ));
 
-        createPortfolioItem("Entertainment Center & TV Setup", "/images/Reno1.jpg", 4.6,
+        createPortfolioItem("Entertainment Center & TV Setup", storeAndUrl.apply("Reno1.jpg"), 4.6,
                 List.of(
                         new PortfolioComment("Mark H.", "sample-user-11", now.minusSeconds(172800), "Clean TV mounting and cable management."),
                         new PortfolioComment("Jennifer L.", "sample-user-12", now.minusSeconds(18000), "Great entertainment center design!")
@@ -227,13 +276,65 @@ public class DatabaseLoaderService implements CommandLineRunner {
             String description,
             LocalDate startDate,
             LocalDate dueDate,
-            ProjectType.ProjectTypeEnum projectTypeEnum) {
+            ProjectType.ProjectTypeEnum projectTypeEnum,
+            List<ProjectPhoto> photos) {
 
         try {
             Address address = new Address(streetAddress, city, province, country, postalCode);
 
             ProjectType projectType = new ProjectType();
             projectType.setType(projectTypeEnum);
+
+            // If photos provided, attempt to store local files into GridFS and update URLs
+            if (photos != null && !photos.isEmpty()) {
+                for (ProjectPhoto photo : photos) {
+                    try {
+                        String originalUrl = photo.getPhotoUrl();
+                        if (originalUrl == null) continue;
+
+                        // derive filename from the provided URL/path
+                        String filename = originalUrl.contains("/")
+                                ? originalUrl.substring(originalUrl.lastIndexOf('/') + 1)
+                                : originalUrl;
+
+                        java.nio.file.Path candidate = Path.of(System.getProperty("user.dir"), "uploads", "projects", filename);
+                        if (!Files.exists(candidate)) {
+                            // fallback locations similar to reviews loader
+                            candidate = Path.of(System.getProperty("user.dir"), "uploads", "reviews", filename);
+                        }
+                        if (!Files.exists(candidate)) {
+                            candidate = Path.of(System.getProperty("user.dir"), "images", filename);
+                        }
+
+                        if (Files.exists(candidate)) {
+                            String contentType = Files.probeContentType(candidate);
+                            byte[] data = Files.readAllBytes(candidate);
+
+                            MultipartFile multipart = new MultipartFile() {
+                                @Override public String getName() { return filename; }
+                                @Override public String getOriginalFilename() { return filename; }
+                                @Override public String getContentType() { return contentType; }
+                                @Override public boolean isEmpty() { return data == null || data.length == 0; }
+                                @Override public long getSize() { return data == null ? 0 : data.length; }
+                                @Override public byte[] getBytes() { return data; }
+                                @Override public java.io.InputStream getInputStream() { return new java.io.ByteArrayInputStream(data); }
+                                @Override public void transferTo(java.io.File dest) throws java.io.IOException, java.lang.IllegalStateException { java.nio.file.Files.write(dest.toPath(), data); }
+                            };
+
+                            String id = fileStorageService.save(multipart);
+                            photo.setPhotoId(id);
+                            // Use the existing file controller route for served files
+                            photo.setPhotoUrl("/uploads/reviews/" + id);
+                        } else {
+                            // keep original URL if no local file found
+                            photo.setPhotoUrl(originalUrl);
+                        }
+                    } catch (Exception ex) {
+                        log.warn("Could not store project photo {}: {}", photo, ex.getMessage());
+                        // leave the original URL in place on failure
+                    }
+                }
+            }
 
             Project project = new Project();
             project.setProjectIdentifier(projectIdentifier);
@@ -243,6 +344,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
             project.setStartDate(startDate);
             project.setDueDate(dueDate);
             project.setProjectType(projectType);
+            if (photos != null) {
+                project.setPhotos(photos);
+            }
 
             projectRepository.save(project);
             log.debug("Created project with identifier: {}", project.getProjectIdentifier());
