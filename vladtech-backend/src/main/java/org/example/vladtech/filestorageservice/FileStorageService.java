@@ -65,7 +65,7 @@ public class FileStorageService {
 
         // Validate and sanitize filename
         String originalName = file.getOriginalFilename();
-        log.info("save: original filename='{}', size={}, contentType={}", originalName, file.getSize(), file.getContentType());
+        log.debug("Processing file upload: contentType={}", file.getContentType());
         if (originalName == null || originalName.isBlank()) {
             throw new IllegalArgumentException("Filename is required");
         }
@@ -100,15 +100,15 @@ public class FileStorageService {
         try {
             ObjectId id = gridFsTemplate.store(file.getInputStream(), cleanName, contentType, metadata);
             if (id == null) {
-                log.error("GridFsTemplate returned null id when storing file: {}", cleanName);
+                log.error("GridFsTemplate returned null id when storing file");
                 throw new IOException("Failed to save file: null id from storage");
             }
-            log.info("File saved successfully: id={}, filename={}, size={}",
-                    id.toHexString(), cleanName, file.getSize());
+            log.info("File saved successfully: id={}", id.toHexString());
+            log.debug("File details: id={}, size={}", id.toHexString(), file.getSize());
             return id.toHexString();
         } catch (Exception e) {
             // Wrap any exception as IOException to keep the API contract for callers/tests
-            log.error("Failed to save file: {}", originalName, e);
+            log.error("Failed to save file", e);
             throw new IOException("Failed to save file: " + e.getMessage(), e);
         }
     }
@@ -135,13 +135,13 @@ public class FileStorageService {
         if (gridFsResource == null) {
             try {
                 gridFsResource = gridFsOperations.getResource(gridFsFile);
-                log.info("Second attempt to get GridFsResource for file {} returned {}", id, gridFsResource);
+                log.debug("Second attempt to get GridFsResource for file {} succeeded", id);
             } catch (Exception e) {
                 log.warn("Could not get GridFsResource for file {} on second attempt: {}", id, e.getMessage());
             }
         }
         Document metadata = gridFsFile.getMetadata();
-        log.info("loadResourceWithMetadata: gridFsFile={}, resource={}, metadata={}", gridFsFile, gridFsResource, metadata);
+        log.debug("Loading resource with metadata for file id={}", id);
 
         String contentType;
         if (metadata != null && metadata.containsKey("contentType")) {
@@ -159,7 +159,7 @@ public class FileStorageService {
 
         Resource resource = (gridFsResource != null) ? gridFsResource : new ByteArrayResource(new byte[0]);
         FileResourceWithMetadata result = new FileResourceWithMetadata(resource, metadata, contentType);
-        log.info("loadResourceWithMetadata returning: {} (resource={}, metadata={}, contentType={})", result, resource, metadata, contentType);
+        log.debug("Resource loaded successfully with contentType={}", contentType);
         return result;
     }
 
@@ -187,7 +187,7 @@ public class FileStorageService {
         if (direct == null) {
             try {
                 direct = gridFsOperations.getResource(gridFsFile);
-                log.info("Second attempt to get GridFsResource for file {} returned {}", id, direct);
+                log.debug("Second attempt to get GridFsResource for file {} succeeded", id);
             } catch (Exception e) {
                 log.warn("Could not get GridFsResource for file {} on second attempt: {}", id, e.getMessage());
             }
