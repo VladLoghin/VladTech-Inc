@@ -517,28 +517,28 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className="flex whitespace-nowrap"
                 animate={{ x: ["0%", "-50%"] }}
                 transition={{
-                  duration: 20,
+                  duration: 90,
                   ease: "linear",
                   repeat: Infinity,
                 }}
               >
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
 
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40">
                   VLADTECH
                 </h1>
               </motion.div>
@@ -549,7 +549,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              transition={{ delay: 0.5, duration: 1.6 }}
               className="relative z-10"
             >
               <div className="w-64 h-80 md:w-80 md:h-96 relative">
