@@ -65,7 +65,7 @@ public class FileStorageService {
 
         // Validate and sanitize filename
         String originalName = file.getOriginalFilename();
-        log.debug("Processing file upload: contentType={}", file.getContentType());
+        log.debug("Processing file upload");
         if (originalName == null || originalName.isBlank()) {
             throw new IllegalArgumentException("Filename is required");
         }
@@ -104,7 +104,6 @@ public class FileStorageService {
                 throw new IOException("Failed to save file: null id from storage");
             }
             log.info("File saved successfully: id={}", id.toHexString());
-            log.debug("File details: id={}, size={}", id.toHexString(), file.getSize());
             return id.toHexString();
         } catch (Exception e) {
             // Wrap any exception as IOException to keep the API contract for callers/tests
