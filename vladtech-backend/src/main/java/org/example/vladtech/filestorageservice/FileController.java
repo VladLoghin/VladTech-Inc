@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.bson.Document; // explicit import to use Document type
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class FileController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> getReviewImage(
+    public ResponseEntity<StreamingResponseBody> getReviewImage(
             @PathVariable String id,
             @RequestParam(value = "download", defaultValue = "false") boolean forceDownload) {
 
@@ -62,7 +64,7 @@ public class FileController {
                     fileStorageService.loadResourceWithMetadata(id);
 
             Resource resource = fileData.getResource();
-            org.bson.Document metadata = fileData.getMetadata();
+            Document metadata = fileData.getMetadata();
             String contentType = fileData.getContentType();
 
             // Get original filename from metadata or fallback to resource filename
@@ -73,11 +75,12 @@ public class FileController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
 
-            // Set content length
+            // Try to set content length if available — but keep it optional.
             try {
                 long contentLength = resource.contentLength();
                 headers.setContentLength(contentLength);
             } catch (IOException e) {
+                // Don't propagate; content length may not be determinable for GridFS streams.
                 log.warn("Could not determine content length for file: {}", id, e);
             }
 
@@ -90,7 +93,22 @@ public class FileController {
             headers.setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic());
 
             log.debug("Serving file: id={}, filename={}, contentType={}", id, originalFilename, contentType);
-            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+
+            // Use StreamingResponseBody to stream the resource content directly. This avoids
+            // the default message converters trying to re-query content length (which may
+            // throw IOException for GridFsResource) and causing a 500.
+            StreamingResponseBody body = outputStream -> {
+                try (var in = resource.getInputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = in.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.flush();
+                }
+            };
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
 
         } catch (IllegalArgumentException e) {
             log.warn("Invalid file ID requested: {}", id);
@@ -130,7 +148,7 @@ public class FileController {
     @GetMapping("/{id}/metadata")
     public ResponseEntity<?> getFileMetadata(@PathVariable String id) {
         try {
-            org.bson.Document metadata = fileStorageService.getMetadata(id);
+            Document metadata = fileStorageService.getMetadata(id);
 
             Map<String, Object> response = new HashMap<>();
             if (metadata != null) {
