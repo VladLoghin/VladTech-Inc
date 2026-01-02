@@ -310,8 +310,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               <button
                 onClick={() => loginWithRedirect()}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogIn className="h-4 w-4" />
@@ -321,8 +321,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               <button
                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogOut className="h-4 w-4" />
@@ -435,8 +435,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   setIsMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogIn className="h-4 w-4" />
@@ -449,8 +449,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   setIsMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogOut className="h-4 w-4" />
@@ -512,10 +512,10 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         <div className="container mx-auto px-8 relative">
           <div className="relative flex items-center justify-center">
             {/* Sliding VLADTECH Text - Continuous Marquee */}
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none">
               <motion.div
                 className="flex whitespace-nowrap"
-                animate={{ x: ["0%", "-50%"] }}
+                animate={{ x: ["0%", "50%"] }}
                 transition={{
                   duration: 90,
                   ease: "linear",
@@ -543,6 +543,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 </h1>
               </motion.div>
             </div>
+
 
 
             {/* Overlaid Image */}
