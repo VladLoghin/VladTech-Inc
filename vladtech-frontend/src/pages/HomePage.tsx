@@ -84,7 +84,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
       if (user) {
         console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
         console.log("👤 Full user object:", user);
-        
+
         try {
           const token = await getAccessTokenSilently();
           console.log("🔑 JWT Token:", token);
@@ -93,7 +93,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         }
       }
     };
-    
+
     logTokenInfo();
   }, [user, getAccessTokenSilently]);
 
@@ -116,7 +116,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         setProjectCount(0); // Fallback to 0 if fetch fails
       }
     };
-    
+
     fetchProjectCount();
   }, []);
 
@@ -195,25 +195,22 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
     <div className="min-h-screen bg-white">
       {/* Navigation Bar - Changes to dark on scroll */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-all duration-300 ${
-          isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-all duration-300 ${isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
+          }`}
       >
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
           <div
-            className={`tracking-widest transition-colors ${
-              isNavbarDark ? "text-white" : "text-black"
-            }`}
+            className={`tracking-widest transition-colors ${isNavbarDark ? "text-white" : "text-black"
+              }`}
           >
             VLADTECH
           </div>
-          
+
           {/* Hamburger Menu Button - Mobile Only */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`md:hidden transition-colors ${
-              isNavbarDark ? "text-white" : "text-black"
-            }`}
+            className={`md:hidden transition-colors ${isNavbarDark ? "text-white" : "text-black"
+              }`}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -222,25 +219,22 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
           <div className="hidden md:flex gap-12 items-center">
             <button
               onClick={() => scrollToSection("portfolio")}
-              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
+              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
             >
               PORTFOLIO
             </button>
             <button
               onClick={() => scrollToSection("about")}
-              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
+              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
             >
               ABOUT
             </button>
             <button
               onClick={() => scrollToSection("contact")}
-              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
+              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
             >
               CONTACT
             </button>
@@ -249,9 +243,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Admin") && (
               <button
                 onClick={() => navigate("/admin")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
                 ADMIN PANEL
               </button>
@@ -260,9 +253,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Employee") && (
               <button
                 onClick={() => navigate("/employee")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
                 EMPLOYEE TOOLS
               </button>
@@ -271,9 +263,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
               <button
                 onClick={() => navigate("/client")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
                 CLIENT AREA
               </button>
@@ -282,22 +273,20 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
               <button
                 onClick={() => navigate("/dashboard")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
                 DASHBOARD
               </button>
             )}
 
-{/* Role badge */}
+            {/* Role badge */}
             {isAuthenticated && (isAdmin || isEmployee || isClient) && (
               <span
-                className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-full ${
-                  isNavbarDark ? "border-yellow-400 text-yellow-300" : "border-black/30 text-black/70"
-                }`}
+                className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-full ${isNavbarDark ? "border-yellow-400 text-yellow-300" : "border-black/30 text-black/70"
+                  }`}
               >
-                { [
+                {[
                   isAdmin ? "Admin" : null,
                   isEmployee ? "Employee" : null,
                   isClient ? "Client" : null,
@@ -320,11 +309,10 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {!isAuthenticated ? (
               <button
                 onClick={() => loginWithRedirect()}
-                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
-                  isNavbarDark
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
                     ? "bg-white text-black hover:bg-yellow-400"
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
-                }`}
+                  }`}
               >
                 <LogIn className="h-4 w-4" />
                 LOGIN
@@ -332,11 +320,10 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             ) : (
               <button
                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${
-                  isNavbarDark
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
                     ? "bg-white text-black hover:bg-yellow-400"
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
-                }`}
+                  }`}
               >
                 <LogOut className="h-4 w-4" />
                 LOGOUT
@@ -348,140 +335,130 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         {/* Mobile Menu Dropdown */}
         <motion.div
           initial={{ opacity: 0, height: 0 }}
-          animate={{ 
-            opacity: isMobileMenuOpen ? 1 : 0, 
-            height: isMobileMenuOpen ? "auto" : 0 
+          animate={{
+            opacity: isMobileMenuOpen ? 1 : 0,
+            height: isMobileMenuOpen ? "auto" : 0
           }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className={`md:hidden border-t overflow-hidden ${
-            isNavbarDark ? "border-white/10 bg-black/95" : "border-black/10 bg-white/95"
-          } backdrop-blur-sm`}
+          className={`md:hidden border-t overflow-hidden ${isNavbarDark ? "border-white/10 bg-black/95" : "border-black/10 bg-white/95"
+            } backdrop-blur-sm`}
         >
-            <div className="container mx-auto px-8 py-4 flex flex-col gap-4">
+          <div className="container mx-auto px-8 py-4 flex flex-col gap-4">
+            <button
+              onClick={() => {
+                scrollToSection("portfolio");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
+            >
+              PORTFOLIO
+            </button>
+            <button
+              onClick={() => {
+                scrollToSection("about");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
+            >
+              ABOUT
+            </button>
+            <button
+              onClick={() => {
+                scrollToSection("contact");
+                setIsMobileMenuOpen(false);
+              }}
+              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                }`}
+            >
+              CONTACT
+            </button>
+
+            {/* Role-based navigation - Mobile */}
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Admin") && (
               <button
                 onClick={() => {
-                  scrollToSection("portfolio");
+                  navigate("/admin");
                   setIsMobileMenuOpen(false);
                 }}
-                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
-                PORTFOLIO
+                ADMIN PANEL
               </button>
+            )}
+
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Employee") && (
               <button
                 onClick={() => {
-                  scrollToSection("about");
+                  navigate("/employee");
                   setIsMobileMenuOpen(false);
                 }}
-                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
-                ABOUT
+                EMPLOYEE TOOLS
               </button>
+            )}
+
+            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
               <button
                 onClick={() => {
-                  scrollToSection("contact");
+                  navigate("/client");
                   setIsMobileMenuOpen(false);
                 }}
-                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+                  }`}
               >
-                CONTACT
+                CLIENT AREA
               </button>
+            )}
 
-              {/* Role-based navigation - Mobile */}
-              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Admin") && (
-                <button
-                  onClick={() => {
-                    navigate("/admin");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
+            {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
+              <button
+                onClick={() => {
+                  navigate("/dashboard");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
-                >
-                  ADMIN PANEL
-                </button>
-              )}
+              >
+                DASHBOARD
+              </button>
+            )}
 
-              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Employee") && (
-                <button
-                  onClick={() => {
-                    navigate("/employee");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
+            {!isAuthenticated ? (
+              <button
+                onClick={() => {
+                  loginWithRedirect();
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
+                    ? "bg-white text-black hover:bg-yellow-400"
+                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
-                >
-                  EMPLOYEE TOOLS
-                </button>
-              )}
-
-              {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
-                <button
-                  onClick={() => {
-                    navigate("/client");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
+              >
+                <LogIn className="h-4 w-4" />
+                LOGIN
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  logout({ logoutParams: { returnTo: window.location.origin } });
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
+                    ? "bg-white text-black hover:bg-yellow-400"
+                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
-                >
-                  CLIENT AREA
-                </button>
-              )}
-
-              {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
-                <button
-                  onClick={() => {
-                    navigate("/dashboard");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
-                  }`}
-                >
-                  DASHBOARD
-                </button>
-              )}
-
-              {!isAuthenticated ? (
-                <button
-                  onClick={() => {
-                    loginWithRedirect();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${
-                    isNavbarDark
-                      ? "bg-white text-black hover:bg-yellow-400"
-                      : "bg-black text-white hover:bg-yellow-400 hover:text-black"
-                  }`}
-                >
-                  <LogIn className="h-4 w-4" />
-                  LOGIN
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    logout({ logoutParams: { returnTo: window.location.origin } });
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${
-                    isNavbarDark
-                      ? "bg-white text-black hover:bg-yellow-400"
-                      : "bg-black text-white hover:bg-yellow-400 hover:text-black"
-                  }`}
-                >
-                  <LogOut className="h-4 w-4" />
-                  LOGOUT
-                </button>
-              )}
-            </div>
-          </motion.div>
+              >
+                <LogOut className="h-4 w-4" />
+                LOGOUT
+              </button>
+            )}
+          </div>
+        </motion.div>
       </nav>
 
       {/* Hero Section - Editorial Style */}
@@ -537,25 +514,36 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             {/* Sliding VLADTECH Text - Continuous Marquee */}
             <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
               <motion.div
-                animate={{ x: ["-100%", "0%"] }}
+                className="flex whitespace-nowrap"
+                animate={{ x: ["0%", "-50%"] }}
                 transition={{
                   duration: 20,
-                  repeat: Infinity,
                   ease: "linear",
+                  repeat: Infinity,
                 }}
-                className="flex whitespace-nowrap"
               >
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 select-none leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 select-none leading-none mr-20">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
                   VLADTECH
                 </h1>
-                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 select-none leading-none">
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                  VLADTECH
+                </h1>
+
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                  VLADTECH
+                </h1>
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
+                  VLADTECH
+                </h1>
+                <h1 className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-20">
                   VLADTECH
                 </h1>
               </motion.div>
             </div>
+
 
             {/* Overlaid Image */}
             <motion.div
@@ -622,15 +610,15 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         className="py-32 bg-black relative"
       >
         <div className="container mx-auto px-8">
-            <div className="flex items-center justify-between mb-12">
-                <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
-                <button
-                    onClick={() => navigate("/portfolio")}
-                    className="text-white hover:text-yellow-400 tracking-wider transition-colors"
-                >
-                    VIEW ALL →
-                </button>
-            </div>
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
+            <button
+              onClick={() => navigate("/portfolio")}
+              className="text-white hover:text-yellow-400 tracking-wider transition-colors"
+            >
+              VIEW ALL →
+            </button>
+          </div>
 
 
 
@@ -665,9 +653,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    currentSlide === index ? "bg-yellow-400 w-8" : "bg-white/40"
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${currentSlide === index ? "bg-yellow-400 w-8" : "bg-white/40"
+                    }`}
                 />
               ))}
             </div>
