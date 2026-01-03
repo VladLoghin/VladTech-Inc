@@ -1,0 +1,47 @@
+services:
+  mongodb:
+    image: mongo:7.0.7
+    container_name: vladtech-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - vladtech-network
+
+  backend:
+    build:
+      context: ./vladtech-backend
+      dockerfile: Dockerfile
+    container_name: vladtech-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/vladtechdb
+    depends_on:
+      - mongodb
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - vladtech-network
+
+  frontend:
+    build:
+      context: ./vladtech-frontend
+      dockerfile: Dockerfile
+    container_name: vladtech-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - vladtech-network
+
+volumes:
+  mongodb_data:
+  backend_uploads:
+
+networks:
+  vladtech-network:
+    driver: bridge

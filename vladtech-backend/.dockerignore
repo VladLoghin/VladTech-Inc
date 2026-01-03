@@ -1,0 +1,9 @@
+.git
+.gitignore
+.gradle
+.idea
+build
+*.md
+*.log
+node_modules
+test-results
