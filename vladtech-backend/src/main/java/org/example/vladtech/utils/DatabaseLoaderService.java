@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 //import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +34,15 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final PortfolioRepository portfolioRepository;
     private final FileStorageService fileStorageService; // added injection for file service
 
+    @Value("${app.seed-db:true}")
+    private boolean seedDb;
+
     @Override
     public void run(String... args) throws Exception {
+        if (!seedDb) {
+            log.info("app.seed-db is false — skipping DatabaseLoaderService seeding");
+            return;
+        }
         log.info("Loading sample data into MongoDB...");
 
         // Check if data already exists
