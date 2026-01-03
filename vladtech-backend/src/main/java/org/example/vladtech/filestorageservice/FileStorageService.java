@@ -171,40 +171,17 @@ public class FileStorageService {
             throw new IllegalArgumentException("Invalid id format");
         }
 
-        // Single direct lookup: return the GridFsResource or throw
         GridFSFile gridFsFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(objectId)));
         if (gridFsFile == null) {
             throw new FileNotFoundException("File not found: " + id);
         }
-        GridFsResource direct = null;
-        try {
-            direct = gridFsOperations.getResource(gridFsFile);
-        } catch (Exception e) {
-            log.warn("Could not get GridFsResource for file {} on first attempt: {}", id, e.getMessage());
+
+        GridFsResource resource = gridFsOperations.getResource(gridFsFile);
+        if (resource == null) {
+            throw new FileNotFoundException("Resource not available for file: " + id);
         }
 
-        // Retry once if null (helps against flaky mock interactions when tests run together)
-        if (direct == null) {
-            try {
-                direct = gridFsOperations.getResource(gridFsFile);
-                log.info("Second attempt to get GridFsResource for file {} returned {}", id, direct);
-            } catch (Exception e) {
-                log.warn("Could not get GridFsResource for file {} on second attempt: {}", id, e.getMessage());
-            }
-        }
-
-        if (direct != null) return direct;
-
-        // Fallback: try metadata-based path and cast if possible
-        try {
-            FileResourceWithMetadata fm = loadResourceWithMetadata(id);
-            GridFsResource casted = toGridFsResource(fm);
-            if (casted != null) return casted;
-        } catch (FileNotFoundException e) {
-            // ignore, we'll rethrow below
-        }
-
-        throw new FileNotFoundException("Resource not available for file: " + id);
+        return resource;
     }
 
     public Document getMetadata(String id) throws FileNotFoundException {
