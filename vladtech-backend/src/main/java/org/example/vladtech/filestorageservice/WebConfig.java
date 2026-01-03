@@ -9,13 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Handle /images/** for backward compatibility (reviews)
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:uploads/reviews/");
 
-        // Handle /uploads/** for both reviews and portfolio
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:/app/uploads/reviews/");
+
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+                .addResourceLocations("file:/app/uploads/");
     }
-    }
+}
+
 

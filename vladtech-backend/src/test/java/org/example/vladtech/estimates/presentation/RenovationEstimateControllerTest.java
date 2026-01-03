@@ -21,8 +21,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureMockMvc
+@WebMvcTest(RenovationEstimateController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class RenovationEstimateControllerTest {
 
     @Autowired
@@ -56,7 +56,7 @@ class RenovationEstimateControllerTest {
     @Test
     void calculateEstimate_ShouldReturnBadRequest_WhenValidationFails() throws Exception {
         mockMvc.perform(get("/api/estimates/calculate")
-                        .param("squareFeet", "-100") // Invalid value
+                        .param("squareFeet", "-100")
                         .param("materialCostPerSqFt", "20")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

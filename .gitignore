@@ -68,3 +68,6 @@ bin/
 
 # Miscellaneous
 HELP.md
+
+# Environment files
+.env

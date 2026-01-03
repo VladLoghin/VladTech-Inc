@@ -3,8 +3,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/
-          audience: https://vladtech/api
+          issuer-uri: ${AUTH0_ISSUER_URI}
+          audience: ${AUTH0_AUDIENCE}
   data:
     mongodb:
       uri: mongodb://localhost:27017/vladtechdb
@@ -53,21 +53,21 @@ de:
         version: 7.0.7
 
 auth0:
-  domain: dev-ljz84r2xvrlnftfv.ca.auth0.com
+  domain: ${AUTH0_DOMAIN}
 
   mgmt:
-    clientId: Go2EtdDcs46rt6k03FvgEyRHSjMLw5Yh
-    clientSecret: gYK_qYkeWOMEComw24BiuG0d9PWQfDP-FcAsJGbGh_67zhnav_RBUeWCJ0FRSkcX
-    audience: https://dev-ljz84r2xvrlnftfv.ca.auth0.com/api/v2/
+    clientId: ${AUTH0_MGMT_CLIENT_ID}
+    clientSecret: ${AUTH0_MGMT_CLIENT_SECRET}
+    audience: ${AUTH0_MGMT_AUDIENCE}
 
   roles:
-    client: rol_gNdmo7yH2oEE4798
-    employee: rol_dDfbZ0mc3vJjN0bR
-    admin: rol_gdBXmIIoaesVnEBl
+    client: ${AUTH0_ROLE_CLIENT}
+    employee: ${AUTH0_ROLE_EMPLOYEE}
+    admin: ${AUTH0_ROLE_ADMIN}
 
   default:
     client:
-      roleId: rol_gNdmo7yH2oEE4798
+      roleId: ${AUTH0_ROLE_DEFAULT}
 
 renovation:
   rates:
@@ -137,4 +137,5 @@ renovation:
     contingency: 0.10
     tax: 0.13
 
-
+file:
+  upload-dir: /data/uploads
