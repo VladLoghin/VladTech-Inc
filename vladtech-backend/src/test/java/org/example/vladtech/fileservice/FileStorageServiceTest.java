@@ -433,9 +433,14 @@ class FileStorageServiceTest {
     void loadAsResource_WithValidId_ShouldReturnResource() throws FileNotFoundException {
         // Arrange
         Document metadata = new Document();
-        doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
-        doReturn(gridFsResource).when(gridFsOperations).getResource(any(GridFSFile.class));
-        when(gridFSFile.getMetadata()).thenReturn(metadata);
+        // The service calls findOne which returns gridFSFile, then getResource with
+        // that exact object
+        // Use eq() matcher for gridFSFile to ensure the stub matches the specific mock
+        // object
+        lenient().doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
+        lenient().doReturn(gridFsResource).when(gridFsOperations).getResource(eq(gridFSFile));
+        lenient().doReturn(metadata).when(gridFSFile).getMetadata();
+        lenient().doReturn(true).when(gridFsResource).exists();
 
         // Act
         GridFsResource result = fileStorageService.loadAsResource(testFileId);
