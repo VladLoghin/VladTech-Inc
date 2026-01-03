@@ -3,16 +3,12 @@ package org.example.vladtech.fileservice;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.example.vladtech.filestorageservice.FileStorageService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FileControllerTest {
 
     @Autowired
@@ -46,15 +43,19 @@ class FileControllerTest {
 
     @BeforeEach
     void setUp() {
+        clearInvocations(fileStorageService, gridFsResource);
+
         testFileId = new ObjectId().toHexString();
         testMetadata = new Document();
         testMetadata.put("originalFilename", "test.jpg");
         testMetadata.put("contentType", "image/jpeg");
         testMetadata.put("size", 1024L);
         testMetadata.put("uploadedAt", System.currentTimeMillis());
+
     }
 
     @Test
+    @Order(1)
     void uploadReviewImage_WithValidFile_ShouldReturnCreated() throws Exception {
         // Arrange
         MockMultipartFile file = new MockMultipartFile(
@@ -79,6 +80,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(2)
     void uploadReviewImage_WithInvalidFile_ShouldReturnBadRequest() throws Exception {
         // Arrange
         MockMultipartFile file = new MockMultipartFile(
@@ -99,6 +101,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(3)
     void uploadReviewImage_WhenIOExceptionOccurs_ShouldReturnInternalServerError() throws Exception {
         // Arrange
         MockMultipartFile file = new MockMultipartFile(
@@ -119,6 +122,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(4)
     void getReviewImage_WithValidId_ShouldReturnImage() throws Exception {
         // Arrange
         byte[] content = "test image content".getBytes();
@@ -145,6 +149,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(5)
     void getReviewImage_WithDownloadParameter_ShouldReturnAsAttachment() throws Exception {
         // Arrange
         byte[] content = "test image content".getBytes();
@@ -166,6 +171,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(6)
     void getReviewImage_WithoutMetadata_ShouldUseFallbackFilename() throws Exception {
         // Arrange
         byte[] content = "test image content".getBytes();
@@ -187,6 +193,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(7)
     void getReviewImage_WhenContentLengthThrowsIOException_ShouldStillReturnImage() throws Exception {
         // Arrange
         byte[] content = "test image content".getBytes();
@@ -207,6 +214,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(8)
     void getReviewImage_WithInvalidId_ShouldReturnBadRequest() throws Exception {
         // Arrange
         when(fileStorageService.loadResourceWithMetadata(anyString()))
@@ -219,6 +227,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(9)
     void getReviewImage_WithNonExistentId_ShouldReturnNotFound() throws Exception {
         // Arrange
         when(fileStorageService.loadResourceWithMetadata(anyString()))
@@ -231,6 +240,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(10)
     void getReviewImage_WhenUnexpectedExceptionOccurs_ShouldReturnInternalServerError() throws Exception {
         // Arrange
         when(fileStorageService.loadResourceWithMetadata(anyString()))
@@ -243,6 +253,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(11)
     void deleteReviewImage_WithValidId_ShouldReturnNoContent() throws Exception {
         // Arrange
         doNothing().when(fileStorageService).delete(testFileId);
@@ -256,6 +267,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(12)
     void deleteReviewImage_WithInvalidId_ShouldReturnBadRequest() throws Exception {
         // Arrange
         doThrow(new IllegalArgumentException("Invalid id format"))
@@ -268,6 +280,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(13)
     void deleteReviewImage_WithNonExistentId_ShouldReturnNotFound() throws Exception {
         // Arrange
         doThrow(new FileNotFoundException("File not found"))
@@ -280,6 +293,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(14)
     void deleteReviewImage_WhenUnexpectedExceptionOccurs_ShouldReturnInternalServerError() throws Exception {
         // Arrange
         doThrow(new RuntimeException("Unexpected error"))
@@ -292,6 +306,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(15)
     void getFileMetadata_WithValidId_ShouldReturnMetadata() throws Exception {
         // Arrange
         when(fileStorageService.getMetadata(testFileId)).thenReturn(testMetadata);
@@ -310,6 +325,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(16)
     void getFileMetadata_WithNullMetadata_ShouldReturnOnlyId() throws Exception {
         // Arrange
         when(fileStorageService.getMetadata(testFileId)).thenReturn(null);
@@ -323,6 +339,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(17)
     void getFileMetadata_WithInvalidId_ShouldReturnBadRequest() throws Exception {
         // Arrange
         when(fileStorageService.getMetadata(anyString()))
@@ -335,6 +352,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(18)
     void getFileMetadata_WithNonExistentId_ShouldReturnNotFound() throws Exception {
         // Arrange
         when(fileStorageService.getMetadata(anyString()))
@@ -347,6 +365,7 @@ class FileControllerTest {
     }
 
     @Test
+    @Order(19)
     void getFileMetadata_WhenUnexpectedExceptionOccurs_ShouldReturnInternalServerError() throws Exception {
         // Arrange
         when(fileStorageService.getMetadata(anyString()))
