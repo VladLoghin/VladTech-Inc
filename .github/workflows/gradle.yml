@@ -19,12 +19,12 @@ jobs:
       contents: read
 
     # MongoDB service for integration tests
-    #services:
-    #  mongodb:
-    #    image: mongo:7.0.7
-    #    ports:
-    #      - 27017:27017
-    #    options: --quiet
+    services:
+      mongodb:
+        image: mongo:7.0.7
+        ports:
+          - 27017:27017
+        options: --quiet
 
     # Set default working directory for all steps in this job
     defaults:
@@ -52,9 +52,7 @@ jobs:
       #  run: sleep 10
 
       - name: Build and run tests
-        #env:
-        #  MONGO_URI: mongodb://mongodb:27017/vladtech-test
-        run: ./gradlew clean test
+        run: ./gradlew clean test -Dspring.profiles.active=ci
 
 
   dependency-submission:
