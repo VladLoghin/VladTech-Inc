@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -86,17 +87,13 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "client3", authorities = {"Client"})
     void createReview_savesAndReturnsReview() throws Exception {
         // Mock the Jwt object
         Jwt jwt = mock(Jwt.class);
         when(jwt.getClaim("sub")).thenReturn("client3");
         when(jwt.getClaim("scope")).thenReturn("review:write");
 
-        // Inject the mocked Jwt into the security context with the required authority
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(jwt, Collections.singletonList(() -> "Client"))
-        );
+        // We'll attach the mocked Jwt to the request using the jwt() post-processor below
 
         String reviewJson = """
         {
@@ -116,15 +113,10 @@ class ReviewControllerIntegrationTest {
                 reviewJson.getBytes()
         );
 
-        MockMultipartFile photosPart = new MockMultipartFile(
-                "photos",
-                new byte[0]
-        );
-
         mockMvc.perform(multipart("/api/reviews")
                         .file(reviewPart)
-                        .file(photosPart)
                         .with(request -> { request.setMethod("POST"); return request; })
+                        .with(jwt().jwt(jwt).authorities(new SimpleGrantedAuthority("Client")))
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.clientId").value("client3"))

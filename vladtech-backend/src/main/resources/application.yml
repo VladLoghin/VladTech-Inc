@@ -102,6 +102,9 @@ renovation:
     contingency: 0.10
     tax: 0.13
 
+app:
+  seed-db: false
+
 ---
 
 spring:
@@ -137,4 +140,5 @@ renovation:
     contingency: 0.10
     tax: 0.13
 
-
+app:
+  seed-db: false
