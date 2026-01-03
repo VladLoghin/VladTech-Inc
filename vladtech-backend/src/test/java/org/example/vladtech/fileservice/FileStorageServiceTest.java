@@ -434,9 +434,9 @@ class FileStorageServiceTest {
         // Arrange
         reset(gridFsTemplate, gridFsOperations, gridFSFile, gridFsResource);
         Document metadata = new Document();
-        lenient().when(gridFsTemplate.findOne(any(Query.class))).thenAnswer(inv -> gridFSFile);
-        lenient().when(gridFsOperations.getResource(any(GridFSFile.class))).thenAnswer(inv -> gridFsResource);
-        lenient().when(gridFSFile.getMetadata()).thenReturn(metadata);
+        when(gridFsTemplate.findOne(any(Query.class))).thenAnswer(inv -> gridFSFile);
+        when(gridFsOperations.getResource(any(GridFSFile.class))).thenAnswer(inv -> gridFsResource);
+        when(gridFSFile.getMetadata()).thenReturn(metadata);
 
         // Act
         GridFsResource result = fileStorageService.loadAsResource(testFileId);
