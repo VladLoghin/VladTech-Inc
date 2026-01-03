@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
 import { deleteReview } from "../../api/reviews/reviewsService.js";
+import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
@@ -32,8 +33,8 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const photo = photos?.[0];
     const [imgSrc, setImgSrc] = useState(
-        photo?.filename
-            ? `http://localhost:8080/images/${photo.filename}`
+        photo?.url
+            ? getImageUrl(photo.url)
             : "/images/placeholder.png"
     );
     const [errored, setErrored] = useState(false);
