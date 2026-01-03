@@ -57,7 +57,8 @@ class FileStorageServiceTest {
         testObjectId = new ObjectId();
         testFileId = testObjectId.toHexString();
         ReflectionTestUtils.setField(fileStorageService, "bucket", "reviews");
-        // Clear any leftover stubs/interactions from other tests, then set deterministic defaults.
+        // Clear any leftover stubs/interactions from other tests, then set
+        // deterministic defaults.
         reset(gridFsTemplate, gridFsOperations, gridFSFile, gridFsResource);
         doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
         doReturn(gridFsResource).when(gridFsOperations).getResource(any(GridFSFile.class));
@@ -71,8 +72,7 @@ class FileStorageServiceTest {
                 "file",
                 "test-image.jpg",
                 "image/jpeg",
-                content
-        );
+                content);
 
         when(gridFsTemplate.store(any(InputStream.class), anyString(), anyString(), any(Document.class)))
                 .thenReturn(testObjectId);
@@ -83,7 +83,8 @@ class FileStorageServiceTest {
         // Assert
         assertNotNull(fileId);
         assertEquals(testFileId, fileId);
-        verify(gridFsTemplate).store(any(InputStream.class), eq("test-image.jpg"), eq("image/jpeg"), any(Document.class));
+        verify(gridFsTemplate).store(any(InputStream.class), eq("test-image.jpg"), eq("image/jpeg"),
+                any(Document.class));
     }
 
     @Test
@@ -94,8 +95,7 @@ class FileStorageServiceTest {
                 "file",
                 "test image file.jpg",
                 "image/jpeg",
-                content
-        );
+                content);
 
         when(gridFsTemplate.store(any(InputStream.class), anyString(), anyString(), any(Document.class)))
                 .thenReturn(testObjectId);
@@ -105,7 +105,8 @@ class FileStorageServiceTest {
 
         // Assert
         assertNotNull(fileId);
-        verify(gridFsTemplate).store(any(InputStream.class), eq("test_image_file.jpg"), eq("image/jpeg"), any(Document.class));
+        verify(gridFsTemplate).store(any(InputStream.class), eq("test_image_file.jpg"), eq("image/jpeg"),
+                any(Document.class));
     }
 
     @Test
@@ -115,8 +116,7 @@ class FileStorageServiceTest {
                 "file",
                 "test.jpg",
                 "image/jpeg",
-                new byte[0]
-        );
+                new byte[0]);
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -133,8 +133,7 @@ class FileStorageServiceTest {
                 "file",
                 "large.jpg",
                 "image/jpeg",
-                largeContent
-        );
+                largeContent);
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -150,8 +149,7 @@ class FileStorageServiceTest {
                 "file",
                 "test.txt",
                 "text/plain",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -167,8 +165,7 @@ class FileStorageServiceTest {
                 "file",
                 "test.jpg",
                 null,
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -184,8 +181,7 @@ class FileStorageServiceTest {
                 "file",
                 null,
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -201,8 +197,7 @@ class FileStorageServiceTest {
                 "file",
                 "   ",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -218,8 +213,7 @@ class FileStorageServiceTest {
                 "file",
                 "../test.jpg",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -235,8 +229,7 @@ class FileStorageServiceTest {
                 "file",
                 "test/file.jpg",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -252,8 +245,7 @@ class FileStorageServiceTest {
                 "file",
                 "test\\file.jpg",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -270,8 +262,7 @@ class FileStorageServiceTest {
                 "file",
                 longFilename,
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -287,8 +278,7 @@ class FileStorageServiceTest {
                 "file",
                 "test@#$%file.jpg",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         when(gridFsTemplate.store(any(InputStream.class), anyString(), anyString(), any(Document.class)))
                 .thenReturn(testObjectId);
@@ -308,11 +298,11 @@ class FileStorageServiceTest {
                 "file",
                 "test.jpg",
                 "image/jpeg",
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         when(gridFsTemplate.store(any(InputStream.class), anyString(), anyString(), any(Document.class)))
-                // GridFsTemplate.store does not declare checked IOException, so mock a runtime exception
+                // GridFsTemplate.store does not declare checked IOException, so mock a runtime
+                // exception
                 .thenThrow(new RuntimeException("Storage error"));
 
         // Act & Assert
@@ -339,8 +329,7 @@ class FileStorageServiceTest {
                 "file",
                 "test.jpg",
                 contentType,
-                "test content".getBytes()
-        );
+                "test content".getBytes());
 
         when(gridFsTemplate.store(any(InputStream.class), anyString(), anyString(), any(Document.class)))
                 .thenReturn(testObjectId);
@@ -406,15 +395,16 @@ class FileStorageServiceTest {
 
         // Assert
         assertNotNull(result.getContentType());
-        // Accept either the resource-provided content type or the default octet-stream in case the resource isn't available
+        // Accept either the resource-provided content type or the default octet-stream
+        // in case the resource isn't available
         assertTrue(
                 "image/png".equals(result.getContentType()) ||
-                MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(result.getContentType())
-        );
+                        MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(result.getContentType()));
     }
 
     @Test
-    void loadResourceWithMetadata_WithNullContentTypeInMetadataAndResource_ShouldUseDefault() throws FileNotFoundException {
+    void loadResourceWithMetadata_WithNullContentTypeInMetadataAndResource_ShouldUseDefault()
+            throws FileNotFoundException {
         // Arrange
         Document metadata = new Document();
         when(gridFsTemplate.findOne(any(Query.class))).thenReturn(gridFSFile);
@@ -435,8 +425,7 @@ class FileStorageServiceTest {
         reset(gridFsTemplate, gridFsOperations, gridFSFile, gridFsResource);
         Document metadata = new Document();
         doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
-        // Use any() with explicit cast to resolve method overload ambiguity
-        doReturn(gridFsResource).when(gridFsOperations).getResource((GridFSFile) any());
+        doReturn(gridFsResource).when(gridFsOperations).getResource(any(GridFSFile.class));
         doReturn(metadata).when(gridFSFile).getMetadata();
 
         // Act
@@ -507,8 +496,8 @@ class FileStorageServiceTest {
         String contentType = "image/jpeg";
 
         // Act
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, metadata, contentType);
+        FileStorageService.FileResourceWithMetadata fileData = new FileStorageService.FileResourceWithMetadata(
+                gridFsResource, metadata, contentType);
 
         // Assert
         assertEquals(gridFsResource, fileData.getResource());
