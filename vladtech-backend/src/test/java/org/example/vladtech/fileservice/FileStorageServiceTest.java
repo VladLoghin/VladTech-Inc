@@ -434,10 +434,9 @@ class FileStorageServiceTest {
         // Arrange
         reset(gridFsTemplate, gridFsOperations, gridFSFile, gridFsResource);
         Document metadata = new Document();
-        doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
-        // Use any() with explicit cast to resolve method overload ambiguity
-        doReturn(gridFsResource).when(gridFsOperations).getResource((GridFSFile) any());
-        doReturn(metadata).when(gridFSFile).getMetadata();
+        when(gridFsTemplate.findOne(any(Query.class))).thenAnswer(inv -> gridFSFile);
+        when(gridFsOperations.getResource(any(GridFSFile.class))).thenAnswer(inv -> gridFsResource);
+        when(gridFSFile.getMetadata()).thenReturn(metadata);
 
         // Act
         GridFsResource result = fileStorageService.loadAsResource(testFileId);
