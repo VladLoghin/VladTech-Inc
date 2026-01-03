@@ -52,9 +52,7 @@ jobs:
       #  run: sleep 10
 
       - name: Build and run tests
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-        run: ./gradlew clean test
+        run: ./gradlew clean test -Dspring.profiles.active=ci
 
 
   dependency-submission:
