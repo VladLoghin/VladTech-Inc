@@ -107,5 +107,7 @@ test {
 		events "passed", "skipped", "failed"
 	}
 	systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'test')
-}
 
+	// Run tests serially to avoid concurrent access to shared Spring context / mocks
+	maxParallelForks = 1
+}
