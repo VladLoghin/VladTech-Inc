@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addComment } from "../api/portfolio/portfolioService.js";
+import getImageUrl from "../utils/getImageUrl.js";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -49,11 +50,6 @@ export default function PortfolioGallery() {
   // Helper function to get author initial
   const getAuthorInitial = (authorName: string): string => {
     return authorName.charAt(0).toUpperCase();
-  };
-
-  // Helper function to handle image URLs - only use uploaded files from backend
-  const getImageUrl = (url: string): string => {
-    return `http://localhost:8080${url}`;
   };
 
   // Fetch portfolio items from backend

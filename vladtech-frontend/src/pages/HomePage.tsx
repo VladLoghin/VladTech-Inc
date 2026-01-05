@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Button } from "../components/button";
+import { Button } from "../components/button.js";
 // Removed Input, Textarea, Label imports - not needed for button-only contact section
 import { Send, LogIn, LogOut, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import getImageUrl from "../utils/getImageUrl.js";
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -650,7 +651,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   .map((image) => (
                     <div key={image.id} className="relative group overflow-hidden">
                       <img
-                        src={image.url}
+                        src={getImageUrl(image.url)}
                         alt={image.title}
                         className="w-full h-full object-cover"
                       />
