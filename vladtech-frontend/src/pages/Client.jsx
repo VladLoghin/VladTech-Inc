@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 const Client = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -9,7 +10,7 @@ const Client = () => {
 
   const callClientEndpoint = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
 
       const response = await axios.get(`${API_BASE_URL}/api/client/info`, {
         headers: {

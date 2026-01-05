@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 const EmployeeFinderModal = ({
   isOpen,
@@ -26,7 +27,7 @@ const EmployeeFinderModal = ({
     setLoading(true);
     setError("");
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       let url;
 
       if (query.trim()) {
@@ -177,8 +178,8 @@ const EmployeeFinderModal = ({
                     key={emp.user_id || index}
                     onClick={() => handleSelectEmployee(emp)}
                     className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
-                        ? "bg-yellow-100 border-yellow-400 border-2"
-                        : "border-black/10"
+                      ? "bg-yellow-100 border-yellow-400 border-2"
+                      : "border-black/10"
                       }`}
                   >
                     <div className="flex items-start justify-between">

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -45,7 +46,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     if (!validateForm()) return;
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       await axios.post(`${API_BASE_URL}/api/projects`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,

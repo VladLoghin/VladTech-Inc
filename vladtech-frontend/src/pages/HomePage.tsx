@@ -7,6 +7,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import getImageUrl from "../utils/getImageUrl.js";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -73,7 +74,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
   const [token, setToken] = useState<string>("");
   useEffect(() => {
     if (isAuthenticated) {
-      getAccessTokenSilently().then(t => {
+      getAccessTokenSilently(authOptions).then(t => {
         setToken(t);
         console.log("Token:", t);
       });
@@ -88,7 +89,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         console.log("👤 Full user object:", user);
 
         try {
-          const token = await getAccessTokenSilently();
+          const token = await getAccessTokenSilently(authOptions);
           console.log("🔑 JWT Token:", token);
         } catch (error) {
           console.error("Failed to get access token:", error);
@@ -312,8 +313,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               <button
                 onClick={() => loginWithRedirect()}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogIn className="h-4 w-4" />
@@ -323,8 +324,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               <button
                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogOut className="h-4 w-4" />
@@ -437,8 +438,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   setIsMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogIn className="h-4 w-4" />
@@ -451,8 +452,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   setIsMobileMenuOpen(false);
                 }}
                 className={`flex items-center gap-2 transition-all px-6 py-2 tracking-wider text-sm justify-center ${isNavbarDark
-                    ? "bg-white text-black hover:bg-yellow-400"
-                    : "bg-black text-white hover:bg-yellow-400 hover:text-black"
+                  ? "bg-white text-black hover:bg-yellow-400"
+                  : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                   }`}
               >
                 <LogOut className="h-4 w-4" />

@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -21,7 +22,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
     setLoading(true);
     setError("");
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       let url;
 
       if (query.trim()) {
@@ -48,7 +49,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
     if (!selectedClientId) return;
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       const response = await axios.get(
         `${API_BASE_URL}/api/users/${encodeURIComponent(selectedClientId)}`,
         {
@@ -189,8 +190,8 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                     key={client.user_id || index}
                     onClick={() => handleSelectClient(client)}
                     className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
-                        ? "bg-yellow-100 border-yellow-400 border-2"
-                        : "border-black/10"
+                      ? "bg-yellow-100 border-yellow-400 border-2"
+                      : "border-black/10"
                       }`}
                   >
                     <div className="flex items-start justify-between">

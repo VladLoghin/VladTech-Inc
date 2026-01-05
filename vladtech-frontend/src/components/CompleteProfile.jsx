@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 export default function CompleteProfile({ onComplete }) {
   const { user, getAccessTokenSilently } = useAuth0();
@@ -17,7 +18,7 @@ export default function CompleteProfile({ onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently(authOptions);
 
     await axios.patch(
       `${API_BASE_URL}/api/user-profile/${user.sub}`,

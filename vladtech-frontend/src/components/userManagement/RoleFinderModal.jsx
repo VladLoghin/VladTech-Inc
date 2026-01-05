@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 const RoleFinderModal = ({ isOpen, onClose }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -33,7 +34,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setError("");
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       let url;
 
       if (query.trim()) {
@@ -121,8 +122,8 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             <button
               onClick={() => setSelectedRole("clients")}
               className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "clients"
-                  ? "bg-green-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
+                ? "bg-green-400 text-black"
+                : "bg-black/5 hover:bg-black/10"
                 }`}
             >
               Clients
@@ -130,8 +131,8 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             <button
               onClick={() => setSelectedRole("employees")}
               className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "employees"
-                  ? "bg-blue-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
+                ? "bg-blue-400 text-black"
+                : "bg-black/5 hover:bg-black/10"
                 }`}
             >
               Employees
@@ -139,8 +140,8 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             <button
               onClick={() => setSelectedRole("admins")}
               className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "admins"
-                  ? "bg-red-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
+                ? "bg-red-400 text-black"
+                : "bg-black/5 hover:bg-black/10"
                 }`}
             >
               Admins

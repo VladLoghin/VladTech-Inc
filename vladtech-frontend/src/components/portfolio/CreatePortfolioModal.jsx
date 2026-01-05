@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Upload } from "lucide-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -35,7 +36,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     setIsSubmitting(true);
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
 
       // Upload image first
       const formDataUpload = new FormData();

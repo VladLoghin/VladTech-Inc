@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 import ProjectList from "../components/projects/ProjectList.jsx";
 
 const Employee = () => {
@@ -13,7 +14,7 @@ const Employee = () => {
 
   const callEmployeeEndpoint = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
 
       const response = await axios.get(`${API_BASE_URL}/api/employee/info`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -31,7 +32,7 @@ const Employee = () => {
     setProjectsError("");
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
 
       const response = await axios.get(`${API_BASE_URL}/api/employee/projects`, {
         headers: { Authorization: `Bearer ${token}` },

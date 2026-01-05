@@ -8,6 +8,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { addComment } from "../api/portfolio/portfolioService.js";
 import getImageUrl from "../utils/getImageUrl.js";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -91,7 +92,7 @@ export default function PortfolioGallery() {
 
     try {
       // Get access token
-      const accessToken = await getAccessTokenSilently();
+      const accessToken = await getAccessTokenSilently(authOptions);
 
       // Get user's nickname or name
       const authorName = user?.nickname || user?.name || user?.email || "Anonymous User";

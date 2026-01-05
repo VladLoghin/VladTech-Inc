@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 export default function useAssignClientRole() {
   const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
@@ -15,7 +16,7 @@ export default function useAssignClientRole() {
 
     const assign = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently(authOptions);
         console.log("Token:", token);
 
         const res = await axios.patch(

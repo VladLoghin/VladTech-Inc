@@ -1,12 +1,13 @@
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 
 const CallApiButton = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   const callApi = async () => {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently(authOptions);
 
     const res = await axios.get(`${API_BASE_URL}/api/private`, {
       headers: {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 
 interface ReviewModalProps {
     open: boolean;
@@ -51,7 +52,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         }
 
         try {
-            const token = await getAccessTokenSilently();
+            const token = await getAccessTokenSilently(authOptions);
             const res = await fetch(`${API_BASE_URL}/api/reviews`, {
                 method: "POST",
                 body: formData,

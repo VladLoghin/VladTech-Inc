@@ -4,6 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { deleteReview } from "../../api/reviews/reviewsService.js";
 import getImageUrl from "../../utils/getImageUrl.js";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 import "./Review.css";
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
@@ -75,7 +76,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         setSaving(true);
 
         try {
-            const token = await getAccessTokenSilently();
+            const token = await getAccessTokenSilently(authOptions);
             const res = await fetch(
                 `${API_BASE_URL}/api/reviews/${reviewId}/visibility`,
                 {

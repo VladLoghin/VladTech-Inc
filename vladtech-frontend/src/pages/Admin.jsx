@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api.js";
+import { authOptions } from "../config/auth.js";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
@@ -30,7 +31,7 @@ const Admin = () => {
 
   const fetchProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       const response = await axios.get(`${API_BASE_URL}/api/projects`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,7 +47,7 @@ const Admin = () => {
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently(authOptions);
         const res = await axios.get(`${API_BASE_URL}/api/employee/list`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -72,7 +73,7 @@ const Admin = () => {
   useEffect(() => {
     const loadInitialProjects = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently(authOptions);
         const response = await axios.get(`${API_BASE_URL}/api/projects`, {
           headers: {
             Authorization: `Bearer ${token}`,

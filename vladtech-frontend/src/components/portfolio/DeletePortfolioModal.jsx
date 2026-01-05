@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { getAllPortfolioItems, deletePortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Trash2, AlertTriangle } from "lucide-react";
 import getImageUrl from "../../utils/getImageUrl.js";
+import { authOptions } from "../../config/auth.js";
 
 export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -45,9 +46,9 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
     setConfirmDelete(null);
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
       await deletePortfolioItem(portfolioId, token);
-      
+
       // Remove from local state
       setPortfolioItems(portfolioItems.filter(item => item.portfolioId !== portfolioId));
       onSuccess?.();
@@ -146,7 +147,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
                   <p className="text-sm text-gray-500">This action cannot be undone</p>
                 </div>
               </div>
-              
+
               <p className="text-gray-700 mb-6">
                 Are you sure you want to delete <span className="font-semibold">"{confirmDelete.title}"</span>?
               </p>

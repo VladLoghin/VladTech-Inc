@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { API_BASE_URL } from "../../config/api.js";
+import { authOptions } from "../../config/auth.js";
 import ClientFinderModal from "./ClientFinderModal.jsx";
 import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
 
@@ -89,7 +90,7 @@ const ProjectModal = ({
     if (!validateForm()) return;
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently(authOptions);
 
       if (isEdit) {
         await axios.put(
