@@ -9,6 +9,15 @@ services:
     networks:
       - vladtech-network
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: vladtech-mailhog
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"   # SMTP server
+      - "${MAILHOG_UI_PORT:-8025}:8025"     # Web UI
+    networks:
+      - vladtech-network
+
   backend:
     build:
       context: ./vladtech-backend
@@ -19,8 +28,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/${MONGO_DATABASE:-vladtechdb}
+      - SPRING_MAIL_HOST=mailhog
+      - SPRING_MAIL_PORT=1025
     depends_on:
       - mongodb
+      - mailhog
     volumes:
       - backend_uploads:/app/uploads
     networks:
