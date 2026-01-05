@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 const EmployeeFinderModal = ({
   isOpen,
@@ -29,11 +30,11 @@ const EmployeeFinderModal = ({
       let url;
 
       if (query.trim()) {
-        url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(
+        url = `${API_BASE_URL}/api/users/search?query=${encodeURIComponent(
           query
         )}&role=employees&page=${page}&perPage=${perPage}`;
       } else {
-        url = `http://localhost:8080/api/users/employees?page=${page}&perPage=${perPage}`;
+        url = `${API_BASE_URL}/api/users/employees?page=${page}&perPage=${perPage}`;
       }
 
       const response = await axios.get(url, {
@@ -51,20 +52,20 @@ const EmployeeFinderModal = ({
   };
 
   useEffect(() => {
-  if (isOpen) {
-    setCurrentPage(0);
-    setActiveQuery("");
-    setSearchQuery("");
-    fetchEmployees(0);
-  }
-}, [isOpen]);
+    if (isOpen) {
+      setCurrentPage(0);
+      setActiveQuery("");
+      setSearchQuery("");
+      fetchEmployees(0);
+    }
+  }, [isOpen]);
 
 
   useEffect(() => {
-  if (isOpen && currentPage > 0) {
-    fetchEmployees(currentPage, activeQuery);
-  }
-}, [currentPage, isOpen, activeQuery]);
+    if (isOpen && currentPage > 0) {
+      fetchEmployees(currentPage, activeQuery);
+    }
+  }, [currentPage, isOpen, activeQuery]);
 
 
   const totalPages = Math.ceil(totalEmployees / perPage);
@@ -94,7 +95,7 @@ const EmployeeFinderModal = ({
   if (!isOpen) return null;
 
   const isEmployeeSelected = (userId) =>
-  selectedEmployeeIds?.includes(userId);
+    selectedEmployeeIds?.includes(userId);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -147,7 +148,7 @@ const EmployeeFinderModal = ({
           </form>
         </div>
 
-                {/* List */}
+        {/* List */}
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -175,11 +176,10 @@ const EmployeeFinderModal = ({
                   <button
                     key={emp.user_id || index}
                     onClick={() => handleSelectEmployee(emp)}
-                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${
-                      isSelected
+                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
                         ? "bg-yellow-100 border-yellow-400 border-2"
                         : "border-black/10"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -216,42 +216,42 @@ const EmployeeFinderModal = ({
 
 
         {/* Pagination + Confirm */}
-<div className="border-t border-black/10 p-6 flex items-center justify-between">
-  
-  {/* Previous */}
-  <button
-    onClick={() => setCurrentPage(currentPage - 1)}
-    disabled={currentPage === 0 || loading}
-    className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
-  >
-    <ChevronLeft className="h-4 w-4" />
-    Previous
-  </button>
+        <div className="border-t border-black/10 p-6 flex items-center justify-between">
 
-  {/* Page info */}
-  <div className="text-sm text-black/60">
-    Page {currentPage + 1} of {totalPages || 1}
-  </div>
+          {/* Previous */}
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 0 || loading}
+            className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </button>
 
-  {/* Next */}
-  <button
-    onClick={() => setCurrentPage(currentPage + 1)}
-    disabled={currentPage >= totalPages - 1 || loading}
-    className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
-  >
-    Next
-    <ChevronRight className="h-4 w-4" />
-  </button>
+          {/* Page info */}
+          <div className="text-sm text-black/60">
+            Page {currentPage + 1} of {totalPages || 1}
+          </div>
 
-  {/* Confirm Selection */}
-  <button
-    onClick={onClose}
-    className="ml-4 px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-semibold shadow"
-  >
-    Confirm
-  </button>
+          {/* Next */}
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1 || loading}
+            className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </button>
 
-</div>
+          {/* Confirm Selection */}
+          <button
+            onClick={onClose}
+            className="ml-4 px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-semibold shadow"
+          >
+            Confirm
+          </button>
+
+        </div>
 
       </div>
     </div>

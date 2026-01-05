@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../config/api.js";
 
 export default function useAssignClientRole() {
   const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
@@ -18,7 +19,7 @@ export default function useAssignClientRole() {
         console.log("Token:", token);
 
         const res = await axios.patch(
-          `http://localhost:8080/api/role-assignment/users/${user.sub}/roles/client`,
+          `${API_BASE_URL}/api/role-assignment/users/${user.sub}/roles/client`,
           {},
           {
             headers: {

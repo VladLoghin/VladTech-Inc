@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.js";
 import ProjectList from "../components/projects/ProjectList.jsx";
 
 const Employee = () => {
@@ -14,7 +15,7 @@ const Employee = () => {
     try {
       const token = await getAccessTokenSilently();
 
-      const response = await axios.get("http://localhost:8080/api/employee/info", {
+      const response = await axios.get(`${API_BASE_URL}/api/employee/info`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -32,7 +33,7 @@ const Employee = () => {
     try {
       const token = await getAccessTokenSilently();
 
-      const response = await axios.get("http://localhost:8080/api/employee/projects", {
+      const response = await axios.get(`${API_BASE_URL}/api/employee/projects`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -41,7 +42,7 @@ const Employee = () => {
       console.error("Error loading employee projects:", error);
       setProjectsError(
         error.response?.data?.message ||
-          `Failed to load projects (status: ${error.response?.status || "unknown"})`
+        `Failed to load projects (status: ${error.response?.status || "unknown"})`
       );
       setProjects([]);
     } finally {

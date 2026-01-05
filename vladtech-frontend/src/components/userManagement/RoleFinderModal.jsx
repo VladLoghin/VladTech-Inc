@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 const RoleFinderModal = ({ isOpen, onClose }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -29,31 +30,31 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   };
 
   const fetchUsers = async (page, query = "") => {
-  setLoading(true);
-  setError("");
-  try {
-    const token = await getAccessTokenSilently();
-    let url;
+    setLoading(true);
+    setError("");
+    try {
+      const token = await getAccessTokenSilently();
+      let url;
 
-    if (query.trim()) {
-      url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(query)}&role=${selectedRole}&page=${page}&perPage=${perPage}`;
-    } else {
-      url = `http://localhost:8080${roleEndpoints[selectedRole]}?page=${page}&perPage=${perPage}`;
+      if (query.trim()) {
+        url = `${API_BASE_URL}/api/users/search?query=${encodeURIComponent(query)}&role=${selectedRole}&page=${page}&perPage=${perPage}`;
+      } else {
+        url = `${API_BASE_URL}${roleEndpoints[selectedRole]}?page=${page}&perPage=${perPage}`;
+      }
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUsers(response.data.users || []);
+      setTotalUsers(response.data.total || 0);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Failed to load users");
+    } finally {
+      setLoading(false);
     }
-
-    const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    setUsers(response.data.users || []);
-    setTotalUsers(response.data.total || 0);
-  } catch (err) {
-    console.error("Error fetching users:", err);
-    setError("Failed to load users");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -119,31 +120,28 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedRole("clients")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "clients"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "clients"
                   ? "bg-green-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               Clients
             </button>
             <button
               onClick={() => setSelectedRole("employees")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "employees"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "employees"
                   ? "bg-blue-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               Employees
             </button>
             <button
               onClick={() => setSelectedRole("admins")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "admins"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "admins"
                   ? "bg-red-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               Admins
             </button>

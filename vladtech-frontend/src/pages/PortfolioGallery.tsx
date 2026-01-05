@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addComment } from "../api/portfolio/portfolioService.js";
 import getImageUrl from "../utils/getImageUrl.js";
+import { API_BASE_URL } from "../config/api.js";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -56,7 +57,7 @@ export default function PortfolioGallery() {
   useEffect(() => {
     const fetchPortfolioItems = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/portfolio");
+        const response = await fetch(`${API_BASE_URL}/api/portfolio`);
         if (response.ok) {
           const data = await response.json();
           console.log("Portfolio data:", data);
@@ -121,7 +122,7 @@ export default function PortfolioGallery() {
       setNewComment("");
     } catch (error: any) {
       console.error("Error adding comment:", error);
-      
+
       // Handle specific error cases
       if (error.response?.status === 401) {
         alert("Your session has expired. Please log in again.");
@@ -281,7 +282,7 @@ export default function PortfolioGallery() {
                     <div className="flex gap-3">
                       <Textarea
                         value={newComment}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
                         className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
                         rows={2}

@@ -3,6 +3,7 @@ import { FaStar, FaRegStar } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
 import { deleteReview } from "../../api/reviews/reviewsService.js";
 import getImageUrl from "../../utils/getImageUrl.js";
+import { API_BASE_URL } from "../../config/api.js";
 import "./Review.css";
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
@@ -76,7 +77,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
-                `http://localhost:8080/api/reviews/${reviewId}/visibility`,
+                `${API_BASE_URL}/api/reviews/${reviewId}/visibility`,
                 {
                     method: "PATCH",
                     headers: {
@@ -113,7 +114,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
             const res = await deleteReview(reviewId, token);
 
-            if(!res.ok) {
+            if (!res.ok) {
                 throw new Error(`Delete failed with status ${res.status}`);
             }
 
@@ -194,26 +195,26 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             </p>
 
             {canDelete && (
-    <button
-        type="button"
-        onClick={handleDelete}
-        disabled={deleting}
-        style={{
-            backgroundColor: "#dc2626",
-            color: "white",
-            padding: "8px 10px",
-            borderRadius: "8px",
-            marginTop: "10px",
-            width: "100%",
-            fontWeight: 700,
-            cursor: deleting ? "not-allowed" : "pointer",
-            opacity: deleting ? 0.7 : 1,
-        }}
-        data-testid="review-delete-button"
-    >
-        {deleting ? "Deleting..." : "Delete"}
-    </button>
-)}
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    style={{
+                        backgroundColor: "#dc2626",
+                        color: "white",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        marginTop: "10px",
+                        width: "100%",
+                        fontWeight: 700,
+                        cursor: deleting ? "not-allowed" : "pointer",
+                        opacity: deleting ? 0.7 : 1,
+                    }}
+                    data-testid="review-delete-button"
+                >
+                    {deleting ? "Deleting..." : "Delete"}
+                </button>
+            )}
 
         </div>
     );

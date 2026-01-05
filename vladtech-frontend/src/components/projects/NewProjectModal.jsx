@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -34,7 +35,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     if (!formData.dueDate) newErrors.dueDate = "Due date is required";
     if (!formData.projectType) newErrors.projectType = "Project type is required";
     if (!formData.address.city.trim()) newErrors.city = "City is required";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -45,7 +46,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
 
     try {
       const token = await getAccessTokenSilently();
-      await axios.post("http://localhost:8080/api/projects", formData, {
+      await axios.post(`${API_BASE_URL}/api/projects`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

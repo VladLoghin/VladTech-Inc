@@ -3,7 +3,7 @@ services:
     image: mongo:7.0.7
     container_name: vladtech-mongodb
     ports:
-      - "27017:27017"
+      - "${MONGODB_PORT:-27017}:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -15,10 +15,10 @@ services:
       dockerfile: Dockerfile
     container_name: vladtech-backend
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/vladtechdb
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/${MONGO_DATABASE:-vladtechdb}
     depends_on:
       - mongodb
     volumes:
@@ -32,7 +32,7 @@ services:
       dockerfile: Dockerfile
     container_name: vladtech-frontend
     ports:
-      - "5173:80"
+      - "${FRONTEND_PORT:-5173}:80"
     depends_on:
       - backend
     networks:

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 interface ReviewModalProps {
     open: boolean;
@@ -12,7 +13,7 @@ interface ReviewModalProps {
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
 
     const { getAccessTokenSilently, user } = useAuth0();
-    
+
     const clientId = user?.sub;
 
     const [clientName, setClientName] = useState("");
@@ -28,8 +29,8 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
 
         const reviewPayload = {
-            clientId,                
-            clientName,              
+            clientId,
+            clientName,
             appointmentId: appointmentId || "temp-appointment",
             comment,
             visible: false,
@@ -38,11 +39,11 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
 
         const formData = new FormData();
         formData.append(
-        "review",
-        new Blob(
-            [JSON.stringify(reviewPayload)],
-            { type: "application/json;charset=UTF-8" }
-        )
+            "review",
+            new Blob(
+                [JSON.stringify(reviewPayload)],
+                { type: "application/json;charset=UTF-8" }
+            )
         );
 
         if (imageFile) {
@@ -51,7 +52,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
 
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch("http://localhost:8080/api/reviews", {
+            const res = await fetch(`${API_BASE_URL}/api/reviews`, {
                 method: "POST",
                 body: formData,
                 headers: {

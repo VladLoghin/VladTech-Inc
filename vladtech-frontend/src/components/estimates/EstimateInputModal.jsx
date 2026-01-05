@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config/api.js";
 import "./Estimate.css";
 
 const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
@@ -40,7 +41,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         const queryParams = new URLSearchParams(formData).toString();
 
         try {
-            const response = await fetch(`http://localhost:8080/api/estimates/calculate?${queryParams}`, {
+            const response = await fetch(`${API_BASE_URL}/api/estimates/calculate?${queryParams}`, {
                 method: "GET",
             });
 

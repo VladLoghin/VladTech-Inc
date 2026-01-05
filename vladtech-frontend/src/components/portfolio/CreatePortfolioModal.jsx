@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Upload } from "lucide-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -18,7 +19,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     const file = e.target.files[0];
     if (file) {
       setFormData({ ...formData, imageFile: file });
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -35,25 +36,25 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
     try {
       const token = await getAccessTokenSilently();
-      
+
       // Upload image first
       const formDataUpload = new FormData();
       formDataUpload.append('file', formData.imageFile);
-      
-      const uploadResponse = await fetch('http://localhost:8080/api/portfolio/upload', {
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/portfolio/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
         },
         body: formDataUpload
       });
-      
+
       if (!uploadResponse.ok) {
         throw new Error('Failed to upload image');
       }
-      
+
       const { imageUrl } = await uploadResponse.json();
-      
+
       // Create portfolio item with uploaded image path
       await createPortfolioItem(
         formData.title,

@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../../config/api.js";
 
-const API_BASE = "http://localhost:8080/api/portfolio";
+const API_BASE = `${API_BASE_URL}/api/portfolio`;
 
 export interface AddCommentRequest {
   text: string;
@@ -22,9 +23,9 @@ export const addComment = async (
   try {
     const response = await axios.post(
       `${API_BASE}/${portfolioId}/comments`,
-      { 
+      {
         text: commentText,
-        authorName: authorName 
+        authorName: authorName
       },
       {
         headers: {

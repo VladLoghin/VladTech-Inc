@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { API_BASE_URL } from "../../config/api.js";
 
 const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -17,39 +18,39 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   const perPage = 25;
 
   const fetchClients = async (page, query = "") => {
-  setLoading(true);
-  setError("");
-  try {
-    const token = await getAccessTokenSilently();
-    let url;
+    setLoading(true);
+    setError("");
+    try {
+      const token = await getAccessTokenSilently();
+      let url;
 
-    if (query.trim()) {
-      url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(query)}&role=clients&page=${page}&perPage=${perPage}`;
-    } else {
-      url = `http://localhost:8080/api/users/clients?page=${page}&perPage=${perPage}`;
+      if (query.trim()) {
+        url = `${API_BASE_URL}/api/users/search?query=${encodeURIComponent(query)}&role=clients&page=${page}&perPage=${perPage}`;
+      } else {
+        url = `${API_BASE_URL}/api/users/clients?page=${page}&perPage=${perPage}`;
+      }
+
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setClients(response.data.users || []);
+      setTotalClients(response.data.total || 0);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      setError("Failed to load clients");
+    } finally {
+      setLoading(false);
     }
-
-    const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    setClients(response.data.users || []);
-    setTotalClients(response.data.total || 0);
-  } catch (err) {
-    console.error("Error fetching clients:", err);
-    setError("Failed to load clients");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const fetchSelectedClient = async () => {
     if (!selectedClientId) return;
-    
+
     try {
       const token = await getAccessTokenSilently();
       const response = await axios.get(
-        `http://localhost:8080/api/users/${encodeURIComponent(selectedClientId)}`,
+        `${API_BASE_URL}/api/users/${encodeURIComponent(selectedClientId)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -103,7 +104,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
 
   const getDisplayClients = () => {
     if (!selectedClient) return clients;
-    
+
     const filteredClients = clients.filter(c => c.user_id !== selectedClientId);
     return [selectedClient, ...filteredClients];
   };
@@ -187,11 +188,10 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                   <button
                     key={client.user_id || index}
                     onClick={() => handleSelectClient(client)}
-                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${
-                      isSelected 
-                        ? "bg-yellow-100 border-yellow-400 border-2" 
+                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
+                        ? "bg-yellow-100 border-yellow-400 border-2"
                         : "border-black/10"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

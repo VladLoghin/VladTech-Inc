@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../../config/api";
 
-const API_BASE = "http://localhost:8080/api/reviews";
+const API_BASE = `${API_BASE_URL}/api/reviews`;
 
 export const getAllVisibleReviews = async () => {
     try {
@@ -35,7 +36,7 @@ export const getMyReviews = async (token) => {
 };
 
 export const deleteReview = async (reviewId, token) => {
-    return fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+    return fetch(`${API_BASE}/${reviewId}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,

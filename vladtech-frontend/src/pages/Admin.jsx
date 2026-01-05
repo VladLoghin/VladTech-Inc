@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.js";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
@@ -30,7 +31,7 @@ const Admin = () => {
   const fetchProjects = async () => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await axios.get("http://localhost:8080/api/projects", {
+      const response = await axios.get(`${API_BASE_URL}/api/projects`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,36 +44,36 @@ const Admin = () => {
   };
 
   useEffect(() => {
-  const loadEmployees = async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      const res = await axios.get("http://localhost:8080/api/employee/list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const loadEmployees = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const res = await axios.get(`${API_BASE_URL}/api/employee/list`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const index = {};
-      (res.data || []).forEach((emp) => {
-        index[emp.userId] = {
-          name: emp.name,
-          email: emp.email,
-        };
-      });
+        const index = {};
+        (res.data || []).forEach((emp) => {
+          index[emp.userId] = {
+            name: emp.name,
+            email: emp.email,
+          };
+        });
 
-      setEmployeeIndex(index);
-    } catch (err) {
-      console.error("Error fetching employees for index", err);
-    }
-  };
+        setEmployeeIndex(index);
+      } catch (err) {
+        console.error("Error fetching employees for index", err);
+      }
+    };
 
-  loadEmployees();
-}, [getAccessTokenSilently]);
+    loadEmployees();
+  }, [getAccessTokenSilently]);
 
 
   useEffect(() => {
     const loadInitialProjects = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const response = await axios.get("http://localhost:8080/api/projects", {
+        const response = await axios.get(`${API_BASE_URL}/api/projects`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -250,7 +251,7 @@ const Admin = () => {
       <section className="mt-10">
         <h2 className="text-2xl font-bold mb-4 tracking-tight">All Projects</h2>
 
-        <ProjectList projects={projects} onEdit={handleEditProject} employeeIndex={employeeIndex}/>
+        <ProjectList projects={projects} onEdit={handleEditProject} employeeIndex={employeeIndex} />
       </section>
     </div>
   );

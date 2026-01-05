@@ -5,6 +5,7 @@ import { Input } from "./input"
 import { Textarea } from "./textarea"
 import { Button } from "./button"
 import { Send, X } from "lucide-react"
+import { API_BASE_URL } from "../config/api.js"
 
 function ContactUs({ isOpen, onClose }) {
   const [subject, setSubject] = useState("")
@@ -53,7 +54,7 @@ function ContactUs({ isOpen, onClose }) {
         email: user?.email || "",
       }
 
-      const response = await fetch("http://localhost:8080/api/contact", {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +86,7 @@ function ContactUs({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/0 backdrop-blur-0 animate-in fade-in duration-300"
       onClick={onClose}
       style={{
@@ -116,7 +117,7 @@ function ContactUs({ isOpen, onClose }) {
           }
         `}
       </style>
-      <div 
+      <div
         className="relative w-full max-w-2xl mx-4 bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-3xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         style={{

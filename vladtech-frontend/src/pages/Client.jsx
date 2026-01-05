@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.js";
 
 const Client = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -10,7 +11,7 @@ const Client = () => {
     try {
       const token = await getAccessTokenSilently();
 
-      const response = await axios.get("http://localhost:8080/api/client/info", {
+      const response = await axios.get(`${API_BASE_URL}/api/client/info`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
