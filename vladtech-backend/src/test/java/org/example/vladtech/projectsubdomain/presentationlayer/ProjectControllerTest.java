@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProjectController.class)
-@AutoConfigureMockMvc(addFilters = false)  // <-- This disables Spring Security for tests
+@AutoConfigureMockMvc(addFilters = false) // <-- This disables Spring Security for tests
 class ProjectControllerTest {
 
     @Autowired
@@ -53,7 +53,8 @@ class ProjectControllerTest {
         responseModel.setAssignedEmployeeIds(Collections.emptyList());
         responseModel.setPhotos(Collections.emptyList());
 
-        AddressResponseModel address = new AddressResponseModel("123 Main St", "Montreal", "Quebec", "Canada", "H1A1A1");
+        AddressResponseModel address = new AddressResponseModel("123 Main St", "Montreal", "Quebec", "Canada",
+                "H1A1A1");
         responseModel.setAddress(address);
 
         requestModel = new ProjectRequestModel();
@@ -66,7 +67,8 @@ class ProjectControllerTest {
         requestModel.setDueDate(LocalDate.now().plusDays(30));
         requestModel.setProjectType("SCHEDULED");
 
-        AddressRequestModel addressRequest = new AddressRequestModel("123 Main St", "Montreal", "Quebec", "Canada", "H1A1A1");
+        AddressRequestModel addressRequest = new AddressRequestModel("123 Main St", "Montreal", "Quebec", "Canada",
+                "H1A1A1");
         requestModel.setAddress(addressRequest);
     }
 
@@ -114,8 +116,8 @@ class ProjectControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/projects")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestModel)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestModel)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"));
@@ -130,8 +132,8 @@ class ProjectControllerTest {
 
         // Act & Assert
         mockMvc.perform(put("/api/projects/PROJ-1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestModel)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestModel)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"));
@@ -189,8 +191,8 @@ class ProjectControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/projects/PROJ-1/photos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(photo)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(photo)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
@@ -208,6 +210,7 @@ class ProjectControllerTest {
 
         verify(projectService, times(1)).deleteProjectPhoto("PROJ-1", "PHOTO-1");
     }
+
     @Test
     void getProjectCount_ShouldReturnOkWithCount() throws Exception {
         // Arrange
@@ -219,5 +222,57 @@ class ProjectControllerTest {
                 .andExpect(content().string("7"));
 
         verify(projectService, times(1)).getProjectCount();
+    }
+
+    // ---------- Archive Feature Tests ----------
+
+    @Test
+    void completeProject_ShouldReturnOkWithCompletedProject() throws Exception {
+        // Arrange
+        responseModel.setState("COMPLETE");
+        when(projectService.completeProject("PROJ-1")).thenReturn(responseModel);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/projects/PROJ-1/complete"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"))
+                .andExpect(jsonPath("$.state").value("COMPLETE"));
+
+        verify(projectService, times(1)).completeProject("PROJ-1");
+    }
+
+    @Test
+    void getActiveProjects_ShouldReturnOkWithActiveProjectList() throws Exception {
+        // Arrange
+        responseModel.setState("ACTIVE");
+        List<ProjectResponseModel> activeProjects = Arrays.asList(responseModel);
+        when(projectService.getActiveProjects()).thenReturn(activeProjects);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/projects/active"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"))
+                .andExpect(jsonPath("$[0].state").value("ACTIVE"));
+
+        verify(projectService, times(1)).getActiveProjects();
+    }
+
+    @Test
+    void getArchivedProjects_ShouldReturnOkWithArchivedProjectList() throws Exception {
+        // Arrange
+        responseModel.setState("COMPLETE");
+        List<ProjectResponseModel> archivedProjects = Arrays.asList(responseModel);
+        when(projectService.getArchivedProjects()).thenReturn(archivedProjects);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/projects/archived"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"))
+                .andExpect(jsonPath("$[0].state").value("COMPLETE"));
+
+        verify(projectService, times(1)).getArchivedProjects();
     }
 }

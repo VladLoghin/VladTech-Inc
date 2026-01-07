@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,4 +31,6 @@ public class Project {
     private List<String> assignedEmployeeIds = new ArrayList<>();
     private List<String> assignedEmployeeEmails = new ArrayList<>();
     private List<ProjectPhoto> photos = new ArrayList<>();
+    private ProjectState state = ProjectState.ACTIVE;
+    private LocalDateTime archivedAt;
 }

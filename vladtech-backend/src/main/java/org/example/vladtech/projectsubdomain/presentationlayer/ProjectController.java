@@ -69,7 +69,8 @@ public class ProjectController {
     public ResponseEntity<ProjectResponseModel> addProjectPhoto(
             @PathVariable String projectIdentifier,
             @RequestBody PhotoResponseModel photoResponseModel) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.addProjectPhoto(projectIdentifier, photoResponseModel));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(projectService.addProjectPhoto(projectIdentifier, photoResponseModel));
     }
 
     @PreAuthorize("hasAuthority('Admin')")
@@ -90,6 +91,24 @@ public class ProjectController {
     @GetMapping("/calendar")
     public ResponseEntity<List<ProjectCalendarEntryResponseModel>> getProjectsForCalendar() {
         return ResponseEntity.ok(projectService.getProjectsForCalendar());
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @PutMapping("/{projectIdentifier}/complete")
+    public ResponseEntity<ProjectResponseModel> completeProject(@PathVariable String projectIdentifier) {
+        return ResponseEntity.ok(projectService.completeProject(projectIdentifier));
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @GetMapping("/active")
+    public ResponseEntity<List<ProjectResponseModel>> getActiveProjects() {
+        return ResponseEntity.ok(projectService.getActiveProjects());
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @GetMapping("/archived")
+    public ResponseEntity<List<ProjectResponseModel>> getArchivedProjects() {
+        return ResponseEntity.ok(projectService.getArchivedProjects());
     }
 
 }
