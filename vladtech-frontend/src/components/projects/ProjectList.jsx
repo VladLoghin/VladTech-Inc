@@ -30,9 +30,11 @@ const ProjectList = ({
   projects,
   onEdit,
   onComplete,
+  onReactivate,
   employeeIndex,
   showEdit = true,
   showComplete = false,
+  showReactivate = false,
 }) => {
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
@@ -50,6 +52,16 @@ const ProjectList = ({
               }`}
           >
             <div className="absolute right-4 top-4 flex gap-2">
+              {showReactivate && isArchived && (
+                <button
+                  type="button"
+                  onClick={() => onReactivate?.(project)}
+                  className="px-5 py-2 bg-blue-500 text-white rounded-lg 
+                             hover:bg-blue-600 transition-all font-semibold"
+                >
+                  Reactivate
+                </button>
+              )}
               {showComplete && !isArchived && (
                 <button
                   type="button"
@@ -73,13 +85,14 @@ const ProjectList = ({
               )}
             </div>
 
+
             <div className="flex items-center gap-2 mb-2">
               <h3 className="text-lg font-semibold">{project.name}</h3>
               {project.state && (
                 <span
                   className={`text-xs px-2 py-1 rounded font-medium ${isArchived
-                      ? "bg-gray-200 text-gray-700"
-                      : "bg-green-100 text-green-700"
+                    ? "bg-gray-200 text-gray-700"
+                    : "bg-green-100 text-green-700"
                     }`}
                 >
                   {isArchived ? "ARCHIVED" : "ACTIVE"}

@@ -247,6 +247,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ProjectResponseModel reactivateProject(String projectIdentifier) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        project.setState(ProjectState.ACTIVE);
+        project.setArchivedAt(null);
+
+        Project savedProject = projectRepository.save(project);
+        return projectResponseMapper.entityToResponseModel(savedProject);
+    }
+
+    @Override
     public List<ProjectResponseModel> getActiveProjects() {
         List<Project> allProjects = projectRepository.findAll();
         List<Project> activeProjects = allProjects.stream()

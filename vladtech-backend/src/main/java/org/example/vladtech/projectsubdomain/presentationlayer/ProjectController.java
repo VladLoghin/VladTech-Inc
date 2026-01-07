@@ -100,6 +100,12 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasAuthority('Admin')")
+    @PutMapping("/{projectIdentifier}/reactivate")
+    public ResponseEntity<ProjectResponseModel> reactivateProject(@PathVariable String projectIdentifier) {
+        return ResponseEntity.ok(projectService.reactivateProject(projectIdentifier));
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/active")
     public ResponseEntity<List<ProjectResponseModel>> getActiveProjects() {
         return ResponseEntity.ok(projectService.getActiveProjects());

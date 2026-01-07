@@ -12,6 +12,7 @@ import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.j
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [message, setMessage] = useState("");
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
   const [activeTab, setActiveTab] = useState("active"); // "active" or "archived"
@@ -72,14 +73,6 @@ const Admin = () => {
   };
 
   const handleCompleteProject = async (project) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to mark "${project.name}" as complete? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
     try {
       const token = await getAccessTokenSilently();
       await axios.put(
@@ -98,6 +91,38 @@ const Admin = () => {
       setMessage("Failed to complete project.");
     }
   };
+
+  const handleReactivateProject = async (project) => {
+    try {
+      const token = await getAccessTokenSilently();
+      await axios.put(
+        `http://localhost:8080/api/projects/${project.projectIdentifier}/reactivate`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMessage(`Project "${project.name}" has been reactivated.`);
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error reactivating project:", error);
+      setMessage("Failed to reactivate project.");
+    }
+  };
+
+  // Auto-dismiss message after 5 seconds with fade out
+  useEffect(() => {
+    if (message) {
+      setIsMessageVisible(true);
+      const timer = setTimeout(() => {
+        setIsMessageVisible(false);
+        setTimeout(() => setMessage(""), 300); // Wait for fade out animation
+      }, 4700);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -187,10 +212,30 @@ const Admin = () => {
       </div>
 
       {message && (
-        <p className="mt-5 text-lg bg-yellow-100 border-l-4 border-yellow-400 p-4">
-          {message}
-        </p>
+        <div
+          className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+        >
+          <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
+            <span className="text-lg font-medium">{message}</span>
+            <button
+              onClick={() => {
+                setIsMessageVisible(false);
+                setTimeout(() => setMessage(""), 300);
+              }}
+              className="ml-4 text-yellow-600 hover:text-yellow-800 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
+
+      <style>{`
+        .animate-bounce-in {
+          animation: bounce-in 0.4s ease-out forwards;
+        }
+      `}</style>
 
       <RoleFinderModal
         isOpen={isRoleFinderModalOpen}
@@ -291,8 +336,8 @@ const Admin = () => {
             <button
               onClick={() => setActiveTab("active")}
               className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
+                ? "bg-black text-white"
+                : "bg-white text-black hover:bg-gray-100"
                 }`}
             >
               Active ({projects.length})
@@ -300,8 +345,8 @@ const Admin = () => {
             <button
               onClick={() => setActiveTab("archived")}
               className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
+                ? "bg-black text-white"
+                : "bg-white text-black hover:bg-gray-100"
                 }`}
             >
               Archived ({archivedProjects.length})
@@ -321,9 +366,11 @@ const Admin = () => {
         ) : (
           <ProjectList
             projects={archivedProjects}
+            onReactivate={handleReactivateProject}
             employeeIndex={employeeIndex}
             showEdit={false}
             showComplete={false}
+            showReactivate={true}
           />
         )}
       </section>

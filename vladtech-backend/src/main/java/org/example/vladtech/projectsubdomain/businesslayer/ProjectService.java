@@ -37,6 +37,8 @@ public interface ProjectService {
 
     ProjectResponseModel completeProject(String projectIdentifier);
 
+    ProjectResponseModel reactivateProject(String projectIdentifier);
+
     List<ProjectResponseModel> getActiveProjects();
 
     List<ProjectResponseModel> getArchivedProjects();
