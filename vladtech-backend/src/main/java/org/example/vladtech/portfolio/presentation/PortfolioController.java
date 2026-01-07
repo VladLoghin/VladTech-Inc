@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.portfolio.business.PortfolioService;
 import org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException;
+import org.example.vladtech.filestorageservice.FileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,14 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /** Permissions need to be overhauled*/
 
@@ -33,41 +29,37 @@ import java.util.UUID;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
-    private static final String UPLOAD_DIR = "uploads/portfolio/";
+    private final FileStorageService fileStorageService; // use GridFS for all uploads
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
         log.info("POST request to /api/portfolio/upload - Uploading image: {}", file.getOriginalFilename());
 
         try {
-            // Create upload directory if it doesn't exist
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            // Save file into GridFS via FileStorageService
+            String id = fileStorageService.save(file);
 
-            // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".")
-                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                    : "";
-            String filename = UUID.randomUUID().toString() + extension;
-
-            // Save file
-            Path filePath = uploadPath.resolve(filename);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Return the relative path
-            String imageUrl = "/" + UPLOAD_DIR + filename;
+            // Return the GridFS-backed URL under /uploads/portfolio/{id} so front-end can request it
+            String imageUrl = "/uploads/portfolio/" + id;
             Map<String, String> response = new HashMap<>();
             response.put("imageUrl", imageUrl);
+            response.put("id", id);
+            response.put("filename", file.getOriginalFilename());
 
-            log.info("Image uploaded successfully: {}", imageUrl);
+            log.info("Image uploaded successfully to GridFS: {} -> {}", file.getOriginalFilename(), imageUrl);
             return ResponseEntity.ok(response);
 
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid upload request: {}", e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+
         } catch (IOException e) {
-            log.error("Failed to upload image", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Failed to upload image to GridFS", e);
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Failed to upload image");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 
