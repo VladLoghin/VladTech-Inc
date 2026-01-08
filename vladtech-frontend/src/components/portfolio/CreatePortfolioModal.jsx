@@ -34,7 +34,11 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     setIsSubmitting(true);
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       
       // Upload image first
       const formDataUpload = new FormData();

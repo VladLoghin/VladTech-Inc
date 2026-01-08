@@ -50,7 +50,11 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         }
 
         try {
-            const token = await getAccessTokenSilently();
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech-api"
+                }
+            });
             const res = await fetch("http://localhost:8080/api/reviews", {
                 method: "POST",
                 body: formData,

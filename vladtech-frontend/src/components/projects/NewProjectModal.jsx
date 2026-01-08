@@ -44,7 +44,11 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     if (!validateForm()) return;
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       await axios.post("http://localhost:8080/api/projects", formData, {
         headers: {
           Authorization: `Bearer ${token}`,

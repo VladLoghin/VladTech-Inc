@@ -45,7 +45,11 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
     setConfirmDelete(null);
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       await deletePortfolioItem(portfolioId, token);
       
       // Remove from local state

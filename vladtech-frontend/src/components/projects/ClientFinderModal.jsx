@@ -20,7 +20,11 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   setLoading(true);
   setError("");
   try {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
     let url;
 
     if (query.trim()) {
@@ -47,7 +51,11 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
     if (!selectedClientId) return;
     
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       const response = await axios.get(
         `http://localhost:8080/api/users/${encodeURIComponent(selectedClientId)}`,
         {

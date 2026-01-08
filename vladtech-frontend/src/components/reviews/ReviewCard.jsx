@@ -63,6 +63,9 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         )
     );
 
+    console.log("ReviewCard rendered with review:", review);
+
+
     const handleVisibilityToggle = async () => {
         if (!reviewId) {
             console.error("Missing reviewId; cannot update visibility.");
@@ -74,7 +77,11 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         setSaving(true);
 
         try {
-            const token = await getAccessTokenSilently();
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
             const res = await fetch(
                 `http://localhost:8080/api/reviews/${reviewId}/visibility`,
                 {
@@ -214,9 +221,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         {deleting ? "Deleting..." : "Delete"}
     </button>
 )}
-
         </div>
     );
 };
-
 export default ReviewCard;

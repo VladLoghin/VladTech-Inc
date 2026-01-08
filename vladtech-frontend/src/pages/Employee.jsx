@@ -12,7 +12,11 @@ const Employee = () => {
 
   const callEmployeeEndpoint = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
 
       const response = await axios.get("http://localhost:8080/api/employee/info", {
         headers: { Authorization: `Bearer ${token}` },
@@ -30,7 +34,11 @@ const Employee = () => {
     setProjectsError("");
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
 
       const response = await axios.get("http://localhost:8080/api/employee/projects", {
         headers: { Authorization: `Bearer ${token}` },

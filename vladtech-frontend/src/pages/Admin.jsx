@@ -33,10 +33,62 @@ const Admin = () => {
 
   const fetchActiveProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
-      const response = await axios.get(
-        "http://localhost:8080/api/projects/active",
-        {
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
+      const response = await axios.get("http://localhost:8080/api/projects", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setMessage("Failed to fetch projects.");
+    }
+  };
+
+  useEffect(() => {
+  const loadEmployees = async () => {
+    try {
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
+      const res = await axios.get("http://localhost:8080/api/employee/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const index = {};
+      (res.data || []).forEach((emp) => {
+        index[emp.userId] = {
+          name: emp.name,
+          email: emp.email,
+        };
+      });
+
+      setEmployeeIndex(index);
+    } catch (err) {
+      console.error("Error fetching employees for index", err);
+    }
+  };
+
+  loadEmployees();
+}, [getAccessTokenSilently]);
+
+
+  useEffect(() => {
+    const loadInitialProjects = async () => {
+      try {
+        const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
+        const response = await axios.get("http://localhost:8080/api/projects", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
