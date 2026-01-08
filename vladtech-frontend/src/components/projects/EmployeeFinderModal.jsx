@@ -25,7 +25,11 @@ const EmployeeFinderModal = ({
     setLoading(true);
     setError("");
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       let url;
 
       if (query.trim()) {

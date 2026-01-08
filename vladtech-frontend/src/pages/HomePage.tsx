@@ -72,7 +72,11 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
   const [token, setToken] = useState<string>("");
   useEffect(() => {
     if (isAuthenticated) {
-      getAccessTokenSilently().then(t => {
+      getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            }).then(t => {
         setToken(t);
         console.log("Token:", t);
       });
@@ -87,7 +91,11 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         console.log("👤 Full user object:", user);
         
         try {
-          const token = await getAccessTokenSilently();
+          const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
           console.log("🔑 JWT Token:", token);
         } catch (error) {
           console.error("Failed to get access token:", error);

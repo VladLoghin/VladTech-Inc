@@ -19,10 +19,10 @@ public class RoleAssignmentServiceImpl {
 
     private final RestTemplate restTemplate;
 
-    @Value("${auth0.domain}")
+    @Value("${AUTH0_DOMAIN}")
     private String domain;
 
-    @Value("${auth0.default.client.roleId}")
+    @Value("${AUTH0_ROLE_CLIENT}")
     private String clientRoleId;
 
 

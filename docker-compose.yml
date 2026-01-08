@@ -1,0 +1,58 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  vladtech-backend:
+    build: ./vladtech-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - mailhog
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      IMAGES: /uploads
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/vladtechdb
+
+      # Auth0 Resource Server
+      AUTH0_ISSUER_URI: ${AUTH0_ISSUER_URI}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+
+      # Auth0 Management API
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_MGMT_CLIENT_ID: ${AUTH0_MGMT_CLIENT_ID}
+      AUTH0_MGMT_CLIENT_SECRET: ${AUTH0_MGMT_CLIENT_SECRET}
+      AUTH0_MGMT_AUDIENCE: ${AUTH0_MGMT_AUDIENCE}
+
+      # Auth0 Roles (1:1 with .env)
+      AUTH0_ROLE_CLIENT: ${AUTH0_ROLE_CLIENT}
+      AUTH0_ROLE_EMPLOYEE: ${AUTH0_ROLE_EMPLOYEE}
+      AUTH0_ROLE_ADMIN: ${AUTH0_ROLE_ADMIN}
+      AUTH0_ROLE_DEFAULT: ${AUTH0_ROLE_DEFAULT}
+    volumes:
+      # If your images are at repo root: ./uploads/reviews/...
+      - ./vladtech-backend/uploads:/uploads
+      # If your images are actually inside backend project, use this instead:
+      # - ./vladtech-backend/uploads:/uploads
+
+  vladtech-frontend:
+    build: ./vladtech-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - vladtech-backend
+
+volumes:
+  mongo_data:

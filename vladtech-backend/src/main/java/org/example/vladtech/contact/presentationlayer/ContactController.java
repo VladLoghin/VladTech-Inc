@@ -20,7 +20,6 @@ public class ContactController {
 
         contactService.sendContactMessage(requestDto);
 
-        // 200 OK, no body
         return ResponseEntity.ok().build();
     }
 }

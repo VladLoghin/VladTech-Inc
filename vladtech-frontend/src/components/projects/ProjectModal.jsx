@@ -88,7 +88,11 @@ const ProjectModal = ({
     if (!validateForm()) return;
 
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
 
       if (isEdit) {
         await axios.put(
