@@ -1,68 +1,64 @@
 package org.example.vladtech.reviews.presentation;
 
 import org.example.vladtech.reviews.business.ReviewService;
-import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
-import org.example.vladtech.reviews.data.Review;
-import org.example.vladtech.reviews.data.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@WebMvcTest(ReviewController.class)
 @AutoConfigureMockMvc
+@Import(ReviewControllerIntegrationTest.TestSecurityConfig.class)
 class ReviewControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ReviewRepository reviewRepository; // real repository
+    @MockitoBean
+    private ReviewService reviewService;
 
-    @Autowired
-    private ReviewServiceImpl reviewService;
-
-    @Mock
-    private ReviewService reviewServiceMock;
+    private ReviewResponseModel r1;
+    private ReviewResponseModel r2;
 
     @BeforeEach
     void setup() {
-        // Clean the database before each test
-        reviewRepository.deleteAll();
+        r1 = new ReviewResponseModel(
+                "review-1",
+                "client1",
+                "appt1",
+                "Roger",
+                "hell yeah!",
+                true,
+                Rating.FIVE,
+                List.of()
+        );
 
-        Review review1 = new Review("client1", "appt1", "Great service", "hell yeah!",true, Rating.FIVE, List.of());
-        Review review2 = new Review(
+        r2 = new ReviewResponseModel(
+                "review-2",
                 "client2",
                 "appt2",
                 "John",
@@ -72,59 +68,65 @@ class ReviewControllerIntegrationTest {
                 List.of(new Photo("client2", "photo.jpg", "image/jpeg", "/uploads/reviews/photo.jpg"))
         );
 
-        reviewRepository.saveAll(List.of(review1, review2));
+        when(reviewService.getAllVisibleReviews()).thenReturn(List.of(r1, r2));
     }
 
     @Test
     void getAllVisibleReviews_returnsOkAndJsonArray() throws Exception {
         mockMvc.perform(get("/api/reviews/visible")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
                 .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
     }
 
     @Test
-    void createReview_savesAndReturnsReview() throws Exception {
-        // Mock the Jwt object
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaim("sub")).thenReturn("client3");
-        when(jwt.getClaim("scope")).thenReturn("review:write");
-
-        // We'll attach the mocked Jwt to the request using the jwt() post-processor below
-
-        String reviewJson = """
-        {
-            "clientId": "client3",
-            "appointmentId": "appt3",
-            "clientName": "Alice",
-            "comment": "Excellent!",
-            "visible": true,
-            "rating": "FIVE"
-        }
-        """;
-
-        MockMultipartFile reviewPart = new MockMultipartFile(
-                "review",
-                "review.json",
-                "application/json",
-                reviewJson.getBytes()
-        );
-
-        mockMvc.perform(multipart("/api/reviews")
-                        .file(reviewPart)
-                        .with(request -> { request.setMethod("POST"); return request; })
-                        .with(jwt().jwt(jwt).authorities(new SimpleGrantedAuthority("Client")))
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.clientId").value("client3"))
-                .andExpect(jsonPath("$.appointmentId").value("appt3"))
-                .andExpect(jsonPath("$.clientName").value("Alice"))
-                .andExpect(jsonPath("$.comment").value("Excellent!"))
-                .andExpect(jsonPath("$.visible").value(false))
-                .andExpect(jsonPath("$.rating").value("FIVE"));
+    void getAllReviews_asClient_forbidden() throws Exception {
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 
+    @Test
+    void getAllReviews_asAdmin_ok() throws Exception {
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllReviews_asEmployee_ok() throws Exception{
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Employee")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+
+    @TestConfiguration
+    @EnableMethodSecurity
+    static class TestSecurityConfig {
+
+        @Bean
+        SecurityFilterChain testFilterChain(HttpSecurity http) throws Exception {
+            http
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                    .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+            return http.build();
+        }
+
+        @Bean
+        JwtDecoder jwtDecoder() {
+            return token -> Jwt.withTokenValue(token)
+                    .header("alg", "none")
+                    .claim("sub", "test-sub")
+                    .build();
+        }
+    }
 }

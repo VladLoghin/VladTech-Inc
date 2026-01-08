@@ -430,11 +430,12 @@ class FileStorageServiceTest {
     }
 
     @Test
-    void loadAsResource_WithValidId_ShouldReturnResource() throws FileNotFoundException {
+    void loadAsResource_WithValidId_ShouldReturnResource() throws IOException {
         // Arrange
         Document metadata = new Document();
         doReturn(gridFSFile).when(gridFsTemplate).findOne(any(Query.class));
-        doReturn(gridFsResource).when(gridFsOperations).getResource(any(GridFSFile.class));
+        doReturn(gridFsResource).when(gridFsOperations).getResource(eq(gridFSFile));
+        when(gridFsResource.getInputStream()).thenReturn(new ByteArrayInputStream("test content".getBytes()));
         when(gridFSFile.getMetadata()).thenReturn(metadata);
 
         // Act

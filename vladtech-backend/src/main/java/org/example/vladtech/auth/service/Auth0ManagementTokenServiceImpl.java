@@ -14,16 +14,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class Auth0ManagementTokenServiceImpl implements Auth0ManagementTokenService {
 
-    @Value("${auth0.domain}")
+    @Value("${AUTH0_DOMAIN}")
     private String domain;
 
-    @Value("${auth0.mgmt.clientId}")
+    @Value("${AUTH0_MGMT_CLIENT_ID}")
     private String clientId;
 
-    @Value("${auth0.mgmt.clientSecret}")
+    @Value("${AUTH0_MGMT_CLIENT_SECRET}")
     private String clientSecret;
 
-    @Value("${auth0.mgmt.audience}")
+    @Value("${AUTH0_MGMT_AUDIENCE}")
     private String audience;
 
     private final RestTemplate restTemplate;

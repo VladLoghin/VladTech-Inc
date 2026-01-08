@@ -29,7 +29,11 @@ const Admin = () => {
 
   const fetchProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       const response = await axios.get("http://localhost:8080/api/projects", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -45,7 +49,11 @@ const Admin = () => {
   useEffect(() => {
   const loadEmployees = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
       const res = await axios.get("http://localhost:8080/api/employee/list", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -71,7 +79,11 @@ const Admin = () => {
   useEffect(() => {
     const loadInitialProjects = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
         const response = await axios.get("http://localhost:8080/api/projects", {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -90,7 +90,11 @@ export default function PortfolioGallery() {
 
     try {
       // Get access token
-      const accessToken = await getAccessTokenSilently();
+      const accessToken = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
 
       // Get user's nickname or name
       const authorName = user?.nickname || user?.name || user?.email || "Anonymous User";
