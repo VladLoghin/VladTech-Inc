@@ -712,4 +712,102 @@ class ProjectServiceImplTest {
                 verify(projectRepository, never()).save(any());
         }
 
+        // ---------- reactivateProject Tests ----------
+
+        @Test
+        void reactivateProject_ShouldSetStateToActiveAndClearArchivedAt() {
+                // Arrange
+                String projectId = "PROJ-1";
+                Project archivedProject = new Project();
+                archivedProject.setProjectIdentifier(projectId);
+                archivedProject.setState(ProjectState.COMPLETE);
+                archivedProject.setArchivedAt(java.time.LocalDateTime.now());
+
+                Project savedProject = new Project();
+                savedProject.setProjectIdentifier(projectId);
+                savedProject.setState(ProjectState.ACTIVE);
+                savedProject.setArchivedAt(null);
+
+                ProjectResponseModel response = new ProjectResponseModel();
+                response.setProjectIdentifier(projectId);
+                response.setState("ACTIVE");
+
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.of(archivedProject));
+                when(projectRepository.save(any(Project.class)))
+                                .thenReturn(savedProject);
+                when(projectResponseMapper.entityToResponseModel(savedProject))
+                                .thenReturn(response);
+
+                // Act
+                ProjectResponseModel result = projectService.reactivateProject(projectId);
+
+                // Assert
+                assertNotNull(result);
+                assertEquals("ACTIVE", result.getState());
+                assertEquals(ProjectState.ACTIVE, archivedProject.getState());
+                assertNull(archivedProject.getArchivedAt());
+                verify(projectRepository).save(archivedProject);
+        }
+
+        @Test
+        void reactivateProject_ShouldThrowProjectNotFoundException_WhenProjectNotFound() {
+                // Arrange
+                String projectId = "INVALID";
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.empty());
+
+                // Act & Assert
+                assertThrows(ProjectNotFoundException.class,
+                                () -> projectService.reactivateProject(projectId));
+                verify(projectRepository, never()).save(any());
+        }
+
+        // ---------- getProjectsForEmployee Tests ----------
+
+        @Test
+        void getProjectsForEmployee_ShouldReturnProjectsAssignedToEmployee() {
+                // Arrange
+                String employeeId = "auth0|emp-123";
+
+                Project assignedProject = new Project();
+                assignedProject.setProjectIdentifier("PROJ-1");
+                assignedProject.setAssignedEmployeeIds(List.of(employeeId));
+
+                List<Project> projects = List.of(assignedProject);
+                List<ProjectResponseModel> expectedResponse = List.of(new ProjectResponseModel());
+
+                when(projectRepository.findByAssignedEmployeeIdsContains(employeeId))
+                                .thenReturn(projects);
+                when(projectResponseMapper.entityListToResponseModelList(projects))
+                                .thenReturn(expectedResponse);
+
+                // Act
+                List<ProjectResponseModel> result = projectService.getProjectsForEmployee(employeeId);
+
+                // Assert
+                assertNotNull(result);
+                assertEquals(1, result.size());
+                verify(projectRepository).findByAssignedEmployeeIdsContains(employeeId);
+                verify(projectResponseMapper).entityListToResponseModelList(projects);
+        }
+
+        @Test
+        void getProjectsForEmployee_ShouldReturnEmptyList_WhenNoProjectsAssigned() {
+                // Arrange
+                String employeeId = "auth0|emp-no-projects";
+
+                when(projectRepository.findByAssignedEmployeeIdsContains(employeeId))
+                                .thenReturn(Collections.emptyList());
+                when(projectResponseMapper.entityListToResponseModelList(Collections.emptyList()))
+                                .thenReturn(Collections.emptyList());
+
+                // Act
+                List<ProjectResponseModel> result = projectService.getProjectsForEmployee(employeeId);
+
+                // Assert
+                assertNotNull(result);
+                assertTrue(result.isEmpty());
+        }
+
 }
