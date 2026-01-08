@@ -2,10 +2,12 @@ package org.example.vladtech.fileservice;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.example.vladtech.filestorageservice.FileController;
 import org.example.vladtech.filestorageservice.FileStorageService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.mock.web.MockMultipartFile;
@@ -24,8 +26,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureMockMvc
+@WebMvcTest(FileController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FileControllerTest {
 

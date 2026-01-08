@@ -16,13 +16,13 @@ public class UserManagementController {
 
     private final UserManagementService userManagementService;
 
-    @Value("${auth0.roles.client}")
+    @Value("${AUTH0_ROLE_CLIENT}")
     private String clientRoleId;
 
-    @Value("${auth0.roles.employee}")
+    @Value("${AUTH0_ROLE_EMPLOYEE}")
     private String employeeRoleId;
 
-    @Value("${auth0.roles.admin}")
+    @Value("${AUTH0_ROLE_ADMIN}")
     private String adminRoleId;
 
     @PreAuthorize("hasAuthority('Admin')")

@@ -21,16 +21,16 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final Auth0ManagementTokenService managementTokenService;
     private final RestTemplate restTemplate;
 
-    @Value("${auth0.domain}")
+    @Value("${AUTH0_DOMAIN}")
     private String domain;
 
-    @Value("${auth0.roles.client}")
+    @Value("${AUTH0_ROLE_CLIENT}")
     private String clientRoleId;
 
-    @Value("${auth0.roles.employee}")
+    @Value("${AUTH0_ROLE_EMPLOYEE}")
     private String employeeRoleId;
 
-    @Value("${auth0.roles.admin}")
+    @Value("${AUTH0_ROLE_ADMIN}")
     private String adminRoleId;
 
     @Override

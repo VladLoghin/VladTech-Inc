@@ -8,7 +8,11 @@ const Client = () => {
 
   const callClientEndpoint = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: "https://vladtech/api",
+                },
+            });
 
       const response = await axios.get("http://localhost:8080/api/client/info", {
         headers: {

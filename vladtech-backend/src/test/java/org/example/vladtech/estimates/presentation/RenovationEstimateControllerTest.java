@@ -21,8 +21,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureMockMvc
+@WebMvcTest(RenovationEstimateController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class RenovationEstimateControllerTest {
 
     @Autowired
@@ -35,7 +35,7 @@ class RenovationEstimateControllerTest {
     private RenovationEstimateResponseMapper responseMapper;
 
     @Test
-    void calculateEstimate_ShouldReturnResponse() throws Exception {
+    void  calculateEstimate_ShouldReturnResponse() throws Exception {
         RenovationProject calculatedProject = new RenovationProject();
         RenovationEstimateResponseModel responseModel = new RenovationEstimateResponseModel();
         responseModel.setTotalPrice(BigDecimal.valueOf(12075.00));
