@@ -8,6 +8,8 @@ import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectRepository;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectEmailSender;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
+import org.example.vladtech.projectsubdomain.exceptions.InvalidEmployeeIdException;
+import org.example.vladtech.projectsubdomain.exceptions.ProjectNotFoundException;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectEmailMapper;
@@ -16,7 +18,6 @@ import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseMo
 import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -63,7 +64,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseModel getProjectByIdentifier(String projectIdentifier) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
-                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
         return projectResponseMapper.entityToResponseModel(project);
     }
 
@@ -86,7 +87,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel) {
         Project existingProject = projectRepository.findByProjectIdentifier(projectIdentifier)
-                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
 
         existingProject.setName(projectRequestModel.getName());
         existingProject.setClientId(projectRequestModel.getClientId());
@@ -102,13 +103,13 @@ public class ProjectServiceImpl implements ProjectService {
                     projectRequestModel.getAddress().getCity(),
                     projectRequestModel.getAddress().getProvince(),
                     projectRequestModel.getAddress().getCountry(),
-                    projectRequestModel.getAddress().getPostalCode()
-            ));
+                    projectRequestModel.getAddress().getPostalCode()));
         }
 
         if (projectRequestModel.getProjectType() != null) {
             ProjectType projectType = new ProjectType();
-            projectType.setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
+            projectType
+                    .setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
             existingProject.setProjectType(projectType);
         }
 
@@ -149,10 +150,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
-                .orElseThrow(() -> new RuntimeException("Project not found: " + projectIdentifier));
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
 
         if (employeeId == null || employeeId.isBlank()) {
-            throw new IllegalArgumentException("employeeId cannot be null or blank");
+            throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
         }
 
         if (project.getAssignedEmployeeIds() == null) {
@@ -213,14 +214,12 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getName(),
                 locationSummary,
                 project.getStartDate(),
-                project.getDueDate()
-        );
+                project.getDueDate());
     }
 
     @Override
     public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
-        List<Project> projects =
-                projectRepository.findByAssignedEmployeeIdsContains(employeeId);
+        List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
 
         return projectResponseMapper.entityListToResponseModelList(projects);
     }
