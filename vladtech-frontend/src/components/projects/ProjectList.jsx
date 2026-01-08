@@ -63,6 +63,18 @@ const ProjectList = ({ projects, onEdit, employeeIndex, showEdit = true }) => {
             </p>
 
             <p>
+              <strong className="text-black/60">Status:</strong>{" "}
+              <span className={`px-2 py-1 rounded ${(project.status || "PENDING") === "COMPLETED"
+                  ? "bg-green-100 text-green-800"
+                  : (project.status || "PENDING") === "IN_PROGRESS"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}>
+                {project.status || "PENDING"}
+              </span>
+            </p>
+
+            <p>
               <strong className="text-black/60">Start Date:</strong>{" "}
               {project.startDate}
             </p>
@@ -90,11 +102,11 @@ const ProjectList = ({ projects, onEdit, employeeIndex, showEdit = true }) => {
           )}
 
           {project.assignedEmployeeIds && project.assignedEmployeeIds.length > 0 && (
-  <p className="mt-2 text-sm">
-    <strong className="text-black/60">Assigned Employees:</strong>{" "}
-    {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex)}
-  </p>
-)}
+            <p className="mt-2 text-sm">
+              <strong className="text-black/60">Assigned Employees:</strong>{" "}
+              {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex)}
+            </p>
+          )}
           {project.photos?.length > 0 && (
             <p className="mt-2 text-sm">
               <strong className="text-black/60">Photos:</strong>{" "}
@@ -104,7 +116,7 @@ const ProjectList = ({ projects, onEdit, employeeIndex, showEdit = true }) => {
         </div>
       ))}
     </div>
-    
+
   );
 };
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectRepository;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectEmailSender;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
@@ -26,10 +27,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
 
-
 @Slf4j
 @Service
-//@RequiredArgsConstructor
+// @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -44,10 +44,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-                              ProjectRequestMapper projectRequestMapper,
-                              ProjectResponseMapper projectResponseMapper,
-                              ProjectEmailMapper projectEmailMapper,
-                              ProjectEmailSender projectEmailSender) {
+            ProjectRequestMapper projectRequestMapper,
+            ProjectResponseMapper projectResponseMapper,
+            ProjectEmailMapper projectEmailMapper,
+            ProjectEmailSender projectEmailSender) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -72,10 +72,11 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
 
-        //project.setProjectIdentifier(UUID.randomUUID().toString());
+        // project.setProjectIdentifier(UUID.randomUUID().toString());
 
         long count = projectRepository.count();
         project.setProjectIdentifier("PROJ-" + (count + 1));
+        project.setStatus(ProjectStatus.PENDING);
 
         Project savedProject = projectRepository.save(project);
 
@@ -124,7 +125,14 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
+    /////////////////////////////////////////////////////////////////////////////////////// FILL
+    /////////////////////////////////////////////////////////////////////////////////////// THE
+    /////////////////////////////////////////////////////////////////////////////////////// OTHER
+    /////////////////////////////////////////////////////////////////////////////////////// ONES
+    /////////////////////////////////////////////////////////////////////////////////////// OUT
+    /////////////////////////////////////////////////////////////////////////////////////// IN
+    /////////////////////////////////////////////////////////////////////////////////////// OTHER
+    /////////////////////////////////////////////////////////////////////////////////////// TICKETS
     @Async
     @Override
     public void sendEmailNotificationAsync(Project project, String operation) {
@@ -167,7 +175,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         return projectResponseMapper.entityToResponseModel(project);
     }
-
 
     @Override
     public List<PhotoResponseModel> getProjectPhotos(String projectIdentifier) {

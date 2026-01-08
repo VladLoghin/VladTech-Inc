@@ -34,6 +34,9 @@ public class ProjectResponseMapper {
         responseModel.setAssignedEmployeeIds(project.getAssignedEmployeeIds());
         responseModel.setPhotos(mapPhotos(project.getPhotos()));
         responseModel.setAssignedEmployeeEmails(project.getAssignedEmployeeEmails());
+        responseModel.setStatus(project.getStatus() != null
+                ? project.getStatus().name()
+                : "PENDING");
         return responseModel;
     }
 
@@ -62,8 +65,7 @@ public class ProjectResponseMapper {
                 address.getCity(),
                 address.getProvince(),
                 address.getCountry(),
-                address.getPostalCode()
-        );
+                address.getPostalCode());
     }
 
     private List<PhotoResponseModel> mapPhotos(List<ProjectPhoto> photos) {
@@ -82,7 +84,6 @@ public class ProjectResponseMapper {
         return new PhotoResponseModel(
                 photo.getPhotoId(),
                 photo.getPhotoUrl(),
-                photo.getDescription()
-        );
+                photo.getDescription());
     }
 }

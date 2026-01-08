@@ -26,4 +26,5 @@ public class ProjectResponseModel {
     private List<String> assignedEmployeeIds;
     private List<String> assignedEmployeeEmails = new ArrayList<>();
     private List<PhotoResponseModel> photos;
+    private String status;
 }
