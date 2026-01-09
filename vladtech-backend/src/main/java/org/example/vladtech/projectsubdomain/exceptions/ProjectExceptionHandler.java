@@ -32,6 +32,16 @@ public class ProjectExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(ProjectArchivedException.class)
+    public ResponseEntity<ProjectErrorResponse> handleProjectArchived(ProjectArchivedException ex) {
+        log.error("Project archived: {}", ex.getMessage());
+        ProjectErrorResponse error = new ProjectErrorResponse(
+                "PROJECT_ARCHIVED",
+                ex.getMessage(),
+                LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProjectErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error occurred in project subdomain", ex);

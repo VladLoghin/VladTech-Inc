@@ -35,4 +35,12 @@ public interface ProjectService {
 
     List<ProjectResponseModel> getProjectsForEmployee(String employeeId);
 
+    ProjectResponseModel completeProject(String projectIdentifier);
+
+    ProjectResponseModel reactivateProject(String projectIdentifier);
+
+    List<ProjectResponseModel> getActiveProjects();
+
+    List<ProjectResponseModel> getArchivedProjects();
+
 }

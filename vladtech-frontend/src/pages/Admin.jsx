@@ -12,7 +12,10 @@ import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.j
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [message, setMessage] = useState("");
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [archivedProjects, setArchivedProjects] = useState([]);
+  const [activeTab, setActiveTab] = useState("active"); // "active" or "archived"
   // const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
@@ -20,80 +23,136 @@ const Admin = () => {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [employeeIndex, setEmployeeIndex] = useState({});
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
-  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
+  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] =
+    useState(false);
 
   const handleEditProject = (project) => {
     setEditProject(project);
     setIsProjectModalOpen(true);
   };
 
-  const fetchProjects = async () => {
+  const fetchActiveProjects = async () => {
     try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      const response = await axios.get("http://localhost:8080/api/projects", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setProjects(response.data);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      setMessage("Failed to fetch projects.");
-    }
-  };
-
-  useEffect(() => {
-  const loadEmployees = async () => {
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      const res = await axios.get("http://localhost:8080/api/employee/list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const index = {};
-      (res.data || []).forEach((emp) => {
-        index[emp.userId] = {
-          name: emp.name,
-          email: emp.email,
-        };
-      });
-
-      setEmployeeIndex(index);
-    } catch (err) {
-      console.error("Error fetching employees for index", err);
-    }
-  };
-
-  loadEmployees();
-}, [getAccessTokenSilently]);
-
-
-  useEffect(() => {
-    const loadInitialProjects = async () => {
-      try {
-        const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-        const response = await axios.get("http://localhost:8080/api/projects", {
+      const token = await getAccessTokenSilently();
+      const response = await axios.get(
+        "http://localhost:8080/api/projects/active",
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        }
+      );
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Error fetching active projects:", error);
+      setMessage("Failed to fetch active projects.");
+    }
+  };
+
+  const fetchArchivedProjects = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await axios.get(
+        "http://localhost:8080/api/projects/archived",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setArchivedProjects(response.data);
+    } catch (error) {
+      console.error("Error fetching archived projects:", error);
+      setMessage("Failed to fetch archived projects.");
+    }
+  };
+
+  const fetchProjects = async () => {
+    await fetchActiveProjects();
+    await fetchArchivedProjects();
+  };
+
+  const handleCompleteProject = async (project) => {
+    try {
+      const token = await getAccessTokenSilently();
+      await axios.put(
+        `http://localhost:8080/api/projects/${project.projectIdentifier}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMessage(`Project "${project.name}" has been marked as complete.`);
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error completing project:", error);
+      setMessage("Failed to complete project.");
+    }
+  };
+
+  const handleReactivateProject = async (project) => {
+    try {
+      const token = await getAccessTokenSilently();
+      await axios.put(
+        `http://localhost:8080/api/projects/${project.projectIdentifier}/reactivate`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMessage(`Project "${project.name}" has been reactivated.`);
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error reactivating project:", error);
+      setMessage("Failed to reactivate project.");
+    }
+  };
+
+  // Auto-dismiss message after 5 seconds with fade out
+  useEffect(() => {
+    if (message) {
+      setIsMessageVisible(true);
+      const timer = setTimeout(() => {
+        setIsMessageVisible(false);
+        setTimeout(() => setMessage(""), 300); // Wait for fade out animation
+      }, 4700);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const res = await axios.get("http://localhost:8080/api/employee/list", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setProjects(response.data);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        setMessage("Failed to fetch projects.");
+
+        const index = {};
+        (res.data || []).forEach((emp) => {
+          index[emp.userId] = {
+            name: emp.name,
+            email: emp.email,
+          };
+        });
+
+        setEmployeeIndex(index);
+      } catch (err) {
+        console.error("Error fetching employees for index", err);
       }
+    };
+
+    loadEmployees();
+  }, [getAccessTokenSilently]);
+
+  useEffect(() => {
+    const loadInitialProjects = async () => {
+      await fetchActiveProjects();
+      await fetchArchivedProjects();
     };
 
     loadInitialProjects();
@@ -153,10 +212,30 @@ const Admin = () => {
       </div>
 
       {message && (
-        <p className="mt-5 text-lg bg-yellow-100 border-l-4 border-yellow-400 p-4">
-          {message}
-        </p>
+        <div
+          className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
+        >
+          <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
+            <span className="text-lg font-medium">{message}</span>
+            <button
+              onClick={() => {
+                setIsMessageVisible(false);
+                setTimeout(() => setMessage(""), 300);
+              }}
+              className="ml-4 text-yellow-600 hover:text-yellow-800 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
+
+      <style>{`
+        .animate-bounce-in {
+          animation: bounce-in 0.4s ease-out forwards;
+        }
+      `}</style>
 
       <RoleFinderModal
         isOpen={isRoleFinderModalOpen}
@@ -174,17 +253,6 @@ const Admin = () => {
         onClose={() => setIsDeletePortfolioModalOpen(false)}
         onSuccess={() => setMessage("Portfolio item deleted successfully!")}
       />
-
-      {/* Top bar title + New Project button */}
-      {/* <div className="mt-10 flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Admin Calendar</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black px-8 py-3 rounded-lg transition-all font-semibold shadow-lg"
-        >
-          New Project
-        </button>
-      </div> */}
 
       {/* New project modal */}
       <ProjectModal
@@ -258,14 +326,57 @@ const Admin = () => {
         </div>
       </div>
 
-      {/* BOTTOM: All projects scrollable list with full fields */}
+      {/* BOTTOM: Projects with Tab Toggle */}
       <section className="mt-10">
-        <h2 className="text-2xl font-bold mb-4 tracking-tight">All Projects</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold tracking-tight">Projects</h2>
 
-        <ProjectList projects={projects} onEdit={handleEditProject} employeeIndex={employeeIndex}/>
+          {/* Tab Toggle */}
+          <div className="flex border-2 border-black rounded-lg overflow-hidden">
+            <button
+              onClick={() => setActiveTab("active")}
+              className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
+                ? "bg-black text-white"
+                : "bg-white text-black hover:bg-gray-100"
+                }`}
+            >
+              Active ({projects.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("archived")}
+              className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
+                ? "bg-black text-white"
+                : "bg-white text-black hover:bg-gray-100"
+                }`}
+            >
+              Archived ({archivedProjects.length})
+            </button>
+          </div>
+        </div>
+
+        {activeTab === "active" ? (
+          <ProjectList
+            projects={projects}
+            onEdit={handleEditProject}
+            onComplete={handleCompleteProject}
+            employeeIndex={employeeIndex}
+            showEdit={true}
+            showComplete={true}
+          />
+        ) : (
+          <ProjectList
+            projects={archivedProjects}
+            onReactivate={handleReactivateProject}
+            employeeIndex={employeeIndex}
+            showEdit={false}
+            showComplete={false}
+            showReactivate={true}
+          />
+        )}
       </section>
     </div>
   );
 };
 
 export default Admin;
+

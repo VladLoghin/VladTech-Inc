@@ -1,6 +1,5 @@
 package org.example.vladtech.projectsubdomain.businesslayer;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
@@ -21,15 +20,16 @@ import org.springframework.stereotype.Service;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import java.util.List;
-import java.util.UUID;
 import java.util.ArrayList;
-
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
+import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
 
 @Slf4j
 @Service
-//@RequiredArgsConstructor
+// @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -44,10 +44,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-                              ProjectRequestMapper projectRequestMapper,
-                              ProjectResponseMapper projectResponseMapper,
-                              ProjectEmailMapper projectEmailMapper,
-                              ProjectEmailSender projectEmailSender) {
+            ProjectRequestMapper projectRequestMapper,
+            ProjectResponseMapper projectResponseMapper,
+            ProjectEmailMapper projectEmailMapper,
+            ProjectEmailSender projectEmailSender) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -72,7 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
 
-        //project.setProjectIdentifier(UUID.randomUUID().toString());
+        // project.setProjectIdentifier(UUID.randomUUID().toString());
 
         long count = projectRepository.count();
         project.setProjectIdentifier("PROJ-" + (count + 1));
@@ -88,6 +88,10 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel) {
         Project existingProject = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        if (existingProject.getState() == ProjectState.COMPLETE) {
+            throw new ProjectArchivedException(projectIdentifier);
+        }
 
         existingProject.setName(projectRequestModel.getName());
         existingProject.setClientId(projectRequestModel.getClientId());
@@ -124,7 +128,14 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL THE OTHER ONES OUT IN OTHER TICKETS
+    /////////////////////////////////////////////////////////////////////////////////////// FILL
+    /////////////////////////////////////////////////////////////////////////////////////// THE
+    /////////////////////////////////////////////////////////////////////////////////////// OTHER
+    /////////////////////////////////////////////////////////////////////////////////////// ONES
+    /////////////////////////////////////////////////////////////////////////////////////// OUT
+    /////////////////////////////////////////////////////////////////////////////////////// IN
+    /////////////////////////////////////////////////////////////////////////////////////// OTHER
+    /////////////////////////////////////////////////////////////////////////////////////// TICKETS
     @Async
     @Override
     public void sendEmailNotificationAsync(Project project, String operation) {
@@ -167,7 +178,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         return projectResponseMapper.entityToResponseModel(project);
     }
-
 
     @Override
     public List<PhotoResponseModel> getProjectPhotos(String projectIdentifier) {
@@ -222,6 +232,48 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
 
         return projectResponseMapper.entityListToResponseModelList(projects);
+    }
+
+    @Override
+    public ProjectResponseModel completeProject(String projectIdentifier) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        project.setState(ProjectState.COMPLETE);
+        project.setArchivedAt(LocalDateTime.now());
+
+        Project savedProject = projectRepository.save(project);
+        return projectResponseMapper.entityToResponseModel(savedProject);
+    }
+
+    @Override
+    public ProjectResponseModel reactivateProject(String projectIdentifier) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        project.setState(ProjectState.ACTIVE);
+        project.setArchivedAt(null);
+
+        Project savedProject = projectRepository.save(project);
+        return projectResponseMapper.entityToResponseModel(savedProject);
+    }
+
+    @Override
+    public List<ProjectResponseModel> getActiveProjects() {
+        List<Project> allProjects = projectRepository.findAll();
+        List<Project> activeProjects = allProjects.stream()
+                .filter(p -> p.getState() == null || p.getState() == ProjectState.ACTIVE)
+                .collect(Collectors.toList());
+        return projectResponseMapper.entityListToResponseModelList(activeProjects);
+    }
+
+    @Override
+    public List<ProjectResponseModel> getArchivedProjects() {
+        List<Project> allProjects = projectRepository.findAll();
+        List<Project> archivedProjects = allProjects.stream()
+                .filter(p -> p.getState() == ProjectState.COMPLETE)
+                .collect(Collectors.toList());
+        return projectResponseMapper.entityListToResponseModelList(archivedProjects);
     }
 
 }
