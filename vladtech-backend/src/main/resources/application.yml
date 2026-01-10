@@ -47,7 +47,7 @@ email:
   noreply: noreply@cle4rwater.ca
 
 file:
-  upload-dir: ${IMAGES}
+  upload-dir: ${IMAGES:./uploads}
 
 de:
   flapdoodle:
@@ -187,7 +187,7 @@ spring:
 
 
 file:
-    upload-dir: ${IMAGES}
+    upload-dir: ${IMAGES:./uploads}
 
 logging:
   level:
