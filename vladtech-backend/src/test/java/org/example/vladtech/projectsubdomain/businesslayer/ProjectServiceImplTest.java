@@ -202,6 +202,25 @@ class ProjectServiceImplTest {
         }
 
         @Test
+        void createProject_ShouldSetStatusToPending() {
+                // Arrange
+                when(projectRepository.count()).thenReturn(5L);
+                when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
+                when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> {
+                        Project savedProject = invocation.getArgument(0);
+                        assertEquals(ProjectStatus.PENDING, savedProject.getStatus());
+                        return savedProject;
+                });
+                when(projectResponseMapper.entityToResponseModel(any())).thenReturn(responseModel);
+
+                // Act
+                projectService.createProject(requestModel);
+
+                // Assert
+                verify(projectRepository, times(1)).save(any(Project.class));
+        }
+
+        @Test
         void createProject_ShouldSendEmailNotification_WhenClientEmailPresent() {
                 when(projectRepository.count()).thenReturn(5L);
                 when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
