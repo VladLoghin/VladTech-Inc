@@ -47,4 +47,17 @@ class ProjectExceptionHandlerTest {
         assertEquals("An unexpected error occurred. Please try again later.", response.getBody().getMessage());
         assertNotNull(response.getBody().getTimestamp());
     }
+
+    @Test
+    void handleProjectArchived_ShouldReturnConflictStatus() {
+        ProjectArchivedException exception = new ProjectArchivedException("PROJ-123");
+
+        ResponseEntity<ProjectErrorResponse> response = handler.handleProjectArchived(exception);
+
+        assertNotNull(response);
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("PROJECT_ARCHIVED", response.getBody().getErrorCode());
+        assertTrue(response.getBody().getMessage().contains("PROJ-123"));
+        assertNotNull(response.getBody().getTimestamp());
+    }
 }

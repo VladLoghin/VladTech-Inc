@@ -37,6 +37,8 @@ public class ProjectResponseMapper {
         responseModel.setStatus(project.getStatus() != null
                 ? project.getStatus().name()
                 : "PENDING");
+        responseModel.setState(project.getState() != null ? project.getState().name() : null);
+        responseModel.setArchivedAt(project.getArchivedAt());
         return responseModel;
     }
 
