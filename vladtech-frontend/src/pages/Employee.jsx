@@ -1,7 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import ProjectList from "../components/projects/ProjectList.jsx";
+import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
@@ -9,6 +10,7 @@ const Employee = () => {
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
 
   const callEmployeeEndpoint = async () => {
     try {
@@ -63,6 +65,31 @@ const Employee = () => {
   }
 }, [isLoading, isAuthenticated]);
 
+const projectsForSelectedDate = useMemo(() => {
+  if (!selectedDate) return [];
+
+  return projects.filter((p) => {
+    if (!p.startDate) return false;
+    const end = p.dueDate || p.startDate;
+    return p.startDate <= selectedDate && end >= selectedDate;
+  });
+}, [projects, selectedDate]);
+
+const formatSelectedDate = (dateStr) => {
+  if (!dateStr) return "";
+
+  // avoids timezone shifting (Dec 10 showing as Dec 9)
+  const [year, month, day] = dateStr.split("-");
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 
   return (
     <div className="p-8 bg-white min-h-screen">
@@ -88,10 +115,6 @@ const Employee = () => {
       )}
 
       <section className="mt-10">
-        <h2 className="text-2xl font-bold mb-4 tracking-tight">
-          My Assigned Projects
-        </h2>
-
         {projectsLoading && (
           <p className="text-black/60">Loading projects...</p>
         )}
@@ -101,8 +124,68 @@ const Employee = () => {
         )}
 
         {!projectsLoading && !projectsError && (
-          <ProjectList projects={projects} showEdit={false} employeeIndex={{}} />
-        )}
+  <>
+    {/* TOP: calendar (left) + projects on selected date (right) */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <EmployeeProjectCalendar
+        projects={projects}
+        onDateSelect={setSelectedDate}
+      />
+
+      <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
+        <h3 className="text-2xl font-bold mb-2">
+          {selectedDate
+            ? formatSelectedDate(selectedDate)
+            : "Select a date on the calendar"}
+        </h3>
+
+        <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
+          {!selectedDate && (
+            <p className="text-black/60">
+              Click a date to see your assigned projects.
+            </p>
+          )}
+
+          {selectedDate && projectsForSelectedDate.length === 0 && (
+            <p className="text-black/60">No projects on this date.</p>
+          )}
+
+          {projectsForSelectedDate.map((project) => (
+            <div
+              key={project.projectIdentifier}
+              className="border border-black/20 rounded-lg p-4 bg-gray-50"
+            >
+              <p className="font-semibold">{project.name}</p>
+              <p className="text-xs text-black/60">
+                ID: {project.projectIdentifier}
+              </p>
+              <p className="text-xs text-black/60">
+                {project.startDate} - {project.dueDate}
+              </p>
+              {project.address && (
+                <p className="text-xs text-black/60 mt-1">
+                  {project.address.city}, {project.address.province}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* BOTTOM: scrollable list of all assigned projects */}
+    <div className="mt-10">
+      <h3 className="text-2xl font-bold mb-4 tracking-tight">
+        All My Assigned Projects
+      </h3>
+
+      <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
+        <ProjectList projects={projects} showEdit={false} employeeIndex={{}} />
+      </div>
+    </div>
+  </>
+)}
+
       </section>
     </div>
   );
