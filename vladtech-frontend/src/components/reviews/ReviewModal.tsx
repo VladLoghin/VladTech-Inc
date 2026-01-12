@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { api } from "../../api/http";
 
 interface ReviewModalProps {
     open: boolean;
@@ -23,66 +24,57 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     if (!open) return null;
 
     async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
+  e.preventDefault();
 
-        const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
+  const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
 
-        const reviewPayload = {
-            clientId,                
-            clientName,              
-            appointmentId: appointmentId || "temp-appointment",
-            comment,
-            visible: false,
-            rating: ratingEnum
-        };
+  const reviewPayload = {
+    clientId,
+    clientName,
+    appointmentId: appointmentId || "temp-appointment",
+    comment,
+    visible: false,
+    rating: ratingEnum,
+  };
 
-        const formData = new FormData();
-        formData.append(
-        "review",
-        new Blob(
-            [JSON.stringify(reviewPayload)],
-            { type: "application/json;charset=UTF-8" }
-        )
-        );
+  const formData = new FormData();
+  formData.append(
+    "review",
+    new Blob([JSON.stringify(reviewPayload)], {
+      type: "application/json;charset=UTF-8",
+    })
+  );
 
-        if (imageFile) {
-            formData.append("photos", imageFile);
-        }
+  if (imageFile) {
+    formData.append("photos", imageFile); // if backend expects MultipartFile[] photos, you can append multiple
+  }
 
-        try {
-            const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech-api"
-                }
-            });
-            const res = await fetch("http://localhost:8080/api/reviews", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
 
-            if (!res.ok) {
-                console.error("Failed to submit review:", await res.text());
-                return;
-            }
+    const res = await api.post("/reviews", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // DON'T set Content-Type here; axios will set boundary properly
+      },
+    });
 
-            const createdReview = await res.json();
-            console.log("Review submitted successfully:", createdReview);
-            onSubmitSuccess?.(createdReview);
-            onClose();
+    const createdReview = res.data;
+    console.log("Review submitted successfully:", createdReview);
+    onSubmitSuccess?.(createdReview);
+    onClose();
 
-            // Reset form
-            setClientName("");
-            setComment("");
-            setStars(5);
-            setImageFile(null);
-
-        } catch (err) {
-            console.error("Error submitting review:", err);
-        }
-    }
+    // Reset form
+    setClientName("");
+    setComment("");
+    setStars(5);
+    setImageFile(null);
+  } catch (err) {
+    console.error("Error submitting review:", err);
+  }
+}
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Estimate.css";
+import {api} from "../../api/http";
 
 const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const [selectedPreset, setSelectedPreset] = useState(null);
@@ -35,30 +36,26 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     };
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
+  event.preventDefault();
 
-        const queryParams = new URLSearchParams(formData).toString();
+  try {
+    const response = await api.get("/estimates/calculate", {
+      params: formData,
+    });
 
-        try {
-            const response = await fetch(`http://localhost:8080/api/estimates/calculate?${queryParams}`, {
-                method: "GET",
-            });
+    setResult(response.data);
+    setIsResultModalOpen(true);
+  } catch (error) {
+    console.error("Error submitting estimate:", error);
+    setToast({
+      type: "error",
+      message:
+        error.response?.data?.message ||
+        "Failed to submit estimate. Please try again.",
+    });
+  }
+};
 
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status} ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            setResult(result);
-            setIsResultModalOpen(true);
-        } catch (error) {
-            console.error("Error submitting estimate:", error);
-            setToast({
-                type: "error",
-                message: error.message || "Failed to submit estimate. Please try again."
-            });
-        }
-    };
 
     const handleCloseResultModal = () => {
         setIsResultModalOpen(false);

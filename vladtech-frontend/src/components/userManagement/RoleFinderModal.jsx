@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import axios from "axios";
+import {api} from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const RoleFinderModal = ({ isOpen, onClose }) => {
@@ -17,9 +17,9 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   const perPage = 25;
 
   const roleEndpoints = {
-    clients: "/api/users/clients",
-    employees: "/api/users/employees",
-    admins: "/api/users/admins",
+    clients: "/users/clients",
+    employees: "/users/employees",
+    admins: "/users/admins",
   };
 
   const roleLabels = {
@@ -31,23 +31,28 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   const fetchUsers = async (page, query = "") => {
   setLoading(true);
   setError("");
+
   try {
     const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-    let url;
-
-    if (query.trim()) {
-      url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(query)}&role=${selectedRole}&page=${page}&perPage=${perPage}`;
-    } else {
-      url = `http://localhost:8080${roleEndpoints[selectedRole]}?page=${page}&perPage=${perPage}`;
-    }
-
-    const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
+      authorizationParams: { audience: "https://vladtech/api" },
     });
+
+    const headers = { Authorization: `Bearer ${token}` };
+
+    const response = query.trim()
+      ? await api.get("/users/search", {
+          headers,
+          params: {
+            query,
+            role: selectedRole,
+            page,
+            perPage,
+          },
+        })
+      : await api.get(roleEndpoints[selectedRole], {
+          headers,
+          params: { page, perPage },
+        });
 
     setUsers(response.data.users || []);
     setTotalUsers(response.data.total || 0);

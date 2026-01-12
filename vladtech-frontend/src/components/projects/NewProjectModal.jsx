@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import {api} from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
@@ -39,28 +39,32 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      await axios.post("http://localhost:8080/api/projects", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      onProjectCreated();
-      handleClose();
-    } catch (error) {
-      console.error("Error creating project:", error);
-      setSubmitError(error.response?.data?.message || "Failed to create project. Please try again.");
-    }
-  };
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+
+    await api.post("/projects", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    onProjectCreated();
+    handleClose();
+  } catch (error) {
+    console.error("Error creating project:", error);
+    setSubmitError(
+      error.response?.data?.message ||
+        "Failed to create project. Please try again."
+    );
+  }
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;

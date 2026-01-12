@@ -1,6 +1,8 @@
-import axios from "axios";
+//import axios from "axios";
+import { api } from "../http";
 
-const API_BASE = "http://localhost:8080/api/portfolio";
+
+const API_BASE = "/portfolio";
 
 export interface AddCommentRequest {
   text: string;
@@ -20,7 +22,7 @@ export const addComment = async (
   accessToken: string
 ): Promise<PortfolioCommentDto> => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
       `${API_BASE}/${portfolioId}/comments`,
       { 
         text: commentText,
@@ -42,7 +44,7 @@ export const addComment = async (
 
 export const getAllPortfolioItems = async () => {
   try {
-    const response = await axios.get(API_BASE);
+    const response = await api.get(API_BASE);
     return response.data;
   } catch (error) {
     console.error("Error fetching portfolio items:", error);
@@ -52,7 +54,7 @@ export const getAllPortfolioItems = async () => {
 
 export const getPortfolioItemById = async (portfolioId: string) => {
   try {
-    const response = await axios.get(`${API_BASE}/${portfolioId}`);
+    const response = await api.get(`${API_BASE}/${portfolioId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching portfolio item:", error);
@@ -67,7 +69,7 @@ export const createPortfolioItem = async (
   accessToken: string
 ) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
       API_BASE,
       {
         title,
@@ -93,7 +95,7 @@ export const deletePortfolioItem = async (
   accessToken: string
 ) => {
   try {
-    await axios.delete(`${API_BASE}/${portfolioId}`, {
+    await api.delete(`${API_BASE}/${portfolioId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

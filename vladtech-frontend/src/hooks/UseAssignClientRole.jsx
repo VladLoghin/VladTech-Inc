@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import axios from "axios";
-import { useAuth0 } from "@auth0/auth0-react";
+//import { useEffect } from "react";
+//import axios from "axios";
+//import { useAuth0 } from "@auth0/auth0-react";
 
+/*
 export default function useAssignClientRole() {
   const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -36,3 +37,5 @@ export default function useAssignClientRole() {
     assign();
   }, [isAuthenticated, user]);
 }
+
+*/

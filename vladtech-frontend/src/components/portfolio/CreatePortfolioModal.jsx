@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Upload } from "lucide-react";
+import { api } from "../../api/http";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -29,55 +30,43 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+  e.preventDefault();
+  setError("");
+  setIsSubmitting(true);
 
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      
-      // Upload image first
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', formData.imageFile);
-      
-      const uploadResponse = await fetch('http://localhost:8080/api/portfolio/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formDataUpload
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const { imageUrl } = await uploadResponse.json();
-      
-      // Create portfolio item with uploaded image path
-      await createPortfolioItem(
-        formData.title,
-        imageUrl,
-        formData.rating,
-        token
-      );
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
 
-      // Reset form and close
-      setFormData({ title: "", imageFile: null, rating: 5.0 });
-      setImagePreview(null);
-      onSuccess?.();
-      onClose();
-    } catch (err) {
-      console.error("Error creating portfolio item:", err);
-      setError("Failed to create portfolio item. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    // Upload image first
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", formData.imageFile);
+
+    const uploadResponse = await api.post("/portfolio/upload", formDataUpload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // DO NOT set Content-Type manually for FormData
+      },
+    });
+
+    const { imageUrl } = uploadResponse.data;
+
+    // Create portfolio item with uploaded image path
+    await createPortfolioItem(formData.title, imageUrl, formData.rating, token);
+
+    setFormData({ title: "", imageFile: null, rating: 5.0 });
+    setImagePreview(null);
+    onSuccess?.();
+    onClose();
+  } catch (err) {
+    console.error("Error creating portfolio item:", err);
+    setError("Failed to create portfolio item. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   if (!isOpen) return null;
 
