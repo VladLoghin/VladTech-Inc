@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useMemo, useState } from "react";
-import api from "../api/http";
+import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 
