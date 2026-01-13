@@ -63,7 +63,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
             return;
         }
 
-        /// ///////////////////////////////////////////////////////// WE DELETE THE DATA EVERY TIME WE RUN IN DEVELOPMENT ENRVORNMENT. WITH DEPLOYED, IT SHOULD BE DIFFERENT
+        /// ///////////////////////////////////////////////////////// WE DELETE THE DATA EVERY TIME WE RUN IN DEVELOPMENT ENVIRONMENT. WITH DEPLOYED, IT SHOULD BE DIFFERENT
         log.info("Clearing existing data...");
 
         projectRepository.deleteAll();
