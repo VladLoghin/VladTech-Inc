@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectRepository;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectEmailSender;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
@@ -76,6 +77,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         long count = projectRepository.count();
         project.setProjectIdentifier("PROJ-" + (count + 1));
+        project.setStatus(ProjectStatus.PENDING);
 
         Project savedProject = projectRepository.save(project);
 

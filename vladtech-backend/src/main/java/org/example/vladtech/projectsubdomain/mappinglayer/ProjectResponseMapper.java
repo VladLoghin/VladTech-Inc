@@ -34,6 +34,9 @@ public class ProjectResponseMapper {
         responseModel.setAssignedEmployeeIds(project.getAssignedEmployeeIds());
         responseModel.setPhotos(mapPhotos(project.getPhotos()));
         responseModel.setAssignedEmployeeEmails(project.getAssignedEmployeeEmails());
+        responseModel.setStatus(project.getStatus() != null
+                ? project.getStatus().name()
+                : "PENDING");
         responseModel.setState(project.getState() != null ? project.getState().name() : null);
         responseModel.setArchivedAt(project.getArchivedAt());
         return responseModel;
