@@ -1,16 +1,31 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar.jsx";
 import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 
 const Employee = () => {
-  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState("");
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+
+  // Normalize roles and compute flags
+  const rawRoles = user?.["https://vladtech.com/roles"];
+  const roles = Array.isArray(rawRoles)
+    ? rawRoles
+    : typeof rawRoles === "string"
+      ? [rawRoles]
+      : [];
+
+  const isAdmin = roles.includes("Admin");
+  const isEmployee = roles.includes("Employee");
+  const isClient = roles.includes("Client");
 
   /*const callEmployeeEndpoint = async () => {
     try {
@@ -91,7 +106,11 @@ const formatSelectedDate = (dateStr) => {
 
 
   return (
-    <div className="p-8 bg-white min-h-screen">
+    <>
+      {/* Navigation Bar */}
+      <Navbar />
+
+      <div className="p-8 bg-white min-h-screen pt-32">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tight">
           Employee Area - Only for Employees
@@ -189,6 +208,7 @@ const formatSelectedDate = (dateStr) => {
 
       </section>
     </div>
+    </>
   );
 };
 

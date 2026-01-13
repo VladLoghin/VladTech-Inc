@@ -56,8 +56,11 @@ const ReviewsPage = () => {
     }, [isClient, isStaff, showMine, getAccessTokenSilently]);
 
     useEffect(() => {
-        if (!isLoading) fetchReviews();
-    }, [isLoading, fetchReviews]);
+        if (!isLoading) {
+            fetchReviews();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoading, isClient, isStaff, showMine]);
 
     return (
         <div className="reviews-page" data-testid="reviews-page">

@@ -1,5 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar.jsx";
 //import axios from "axios";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
@@ -11,7 +13,8 @@ import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.j
 import { api } from "../api/http";
 
 const Admin = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -26,6 +29,19 @@ const Admin = () => {
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] =
     useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Normalize roles and compute flags
+  const rawRoles = user?.["https://vladtech.com/roles"];
+  const roles = Array.isArray(rawRoles)
+    ? rawRoles
+    : typeof rawRoles === "string"
+      ? [rawRoles]
+      : [];
+
+  const isAdmin = roles.includes("Admin");
+  const isEmployee = roles.includes("Employee");
+  const isClient = roles.includes("Client");
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -169,7 +185,11 @@ const handleCompleteProject = async (project) => {
   };
 
   return (
-    <div className="p-8 bg-white min-h-screen">
+    <>
+      {/* Navigation Bar */}
+      <Navbar />
+
+      <div className="p-8 bg-white min-h-screen pt-32">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tight">
           Admin Area - Only for Admin Role
@@ -361,6 +381,7 @@ const handleCompleteProject = async (project) => {
         )}
       </section>
     </div>
+    </>
   );
 };
 
