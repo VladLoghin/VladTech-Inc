@@ -112,6 +112,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
   const [projectCount, setProjectCount] = useState<number | null>(null);
   const [ageValue, setAgeValue] = useState<string>("10+");
   const [ageUnit, setAgeUnit] = useState<string>("MONTHS");
+  const [satisfactionPercentage, setSatisfactionPercentage] = useState<number | null>(null);
 
   // Fetch project count from backend
   useEffect(() => {
@@ -127,6 +128,21 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
 
   fetchProjectCount();
 }, []);
+
+  // Fetch satisfaction percentage from backend
+  useEffect(() => {
+    const fetchSatisfactionPercentage = async () => {
+      try {
+        const response = await api.get("/reviews/satisfaction-percentage");
+        setSatisfactionPercentage(response.data);
+      } catch (error) {
+        console.error("Failed to fetch satisfaction percentage:", error);
+        setSatisfactionPercentage(98); // fallback to default
+      }
+    };
+
+    fetchSatisfactionPercentage();
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -730,7 +746,9 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                     transition={{ delay: 0.6, duration: 0.5 }}
                     className="text-center"
                   >
-                    <div className="text-5xl text-yellow-400 mb-2">98%</div>
+                    <div className="text-5xl text-yellow-400 mb-2">
+                      {satisfactionPercentage !== null ? `${Math.round(satisfactionPercentage)}%` : "…"}
+                    </div>
                     <div className="text-sm text-black/60 tracking-wide">SATISFIED</div>
                   </motion.div>
                 </div>
