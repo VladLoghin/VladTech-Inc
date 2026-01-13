@@ -1,5 +1,6 @@
 package org.example.vladtech.portfolio.presentation;
 
+import org.example.vladtech.filestorageservice.FileStorageService;
 import org.example.vladtech.portfolio.business.PortfolioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,10 @@ class PortfolioControllerIntegrationTest {
 
     @MockitoBean
     private PortfolioService portfolioService;
+
+    @MockitoBean
+    private FileStorageService fileStorageService;
+
 
     private PortfolioResponseDto item1;
     private PortfolioResponseDto item2;
