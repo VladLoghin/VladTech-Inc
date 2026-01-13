@@ -7,6 +7,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import getImageUrl from "../utils/getImageUrl.js";
 import { api } from "../api/http.ts";
+import { useLanguage } from "../context/LanguageContext";
 
 
 interface HomePageProps {
@@ -65,6 +66,7 @@ const portfolioImages = [
 
 export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimateModal }: HomePageProps) {
   const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -223,11 +225,54 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
           }`}
       >
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
-          <div
-            className={`tracking-widest transition-colors ${isNavbarDark ? "text-white" : "text-black"
+          <div className="flex items-center gap-4">
+            <div
+              className={`tracking-widest transition-colors ${isNavbarDark ? "text-white" : "text-black"
+                }`}
+            >
+              VLADTECH
+            </div>
+
+            {/* Language Toggle - Always Visible */}
+            <div
+              onClick={toggleLanguage}
+              className={`relative flex items-center w-20 h-8 rounded-full cursor-pointer transition-all ${
+                isNavbarDark ? "bg-white/20" : "bg-black/20"
               }`}
-          >
-            VLADTECH
+              aria-label="Toggle language"
+              role="switch"
+              aria-checked={language === "fr"}
+            >
+              <span
+                className={`absolute left-2 text-xs font-semibold transition-all ${
+                  language === "en"
+                    ? isNavbarDark
+                      ? "text-white"
+                      : "text-black"
+                    : "text-gray-400"
+                }`}
+              >
+                EN
+              </span>
+
+              <span
+                className={`absolute right-2 text-xs font-semibold transition-all ${
+                  language === "fr"
+                    ? isNavbarDark
+                      ? "text-white"
+                      : "text-black"
+                    : "text-gray-400"
+                }`}
+              >
+                FR
+              </span>
+
+              <div
+                className={`absolute w-6 h-6 rounded-full bg-yellow-400 shadow-md transition-all duration-300 ${
+                  language === "en" ? "left-1" : "left-[calc(100%-1.75rem)]"
+                }`}
+              />
+            </div>
           </div>
 
           {/* Hamburger Menu Button - Mobile Only */}
