@@ -33,8 +33,16 @@ public class PortfolioController {
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
-        log.info("POST request to /api/portfolio/upload - Uploading image: {}", file.getOriginalFilename());
+        log.info("POST request to /api/portfolio/upload - Uploading image: {}", 
+                (file != null ? file.getOriginalFilename() : "null"));
 
+        // Validate that the file is present and not empty before processing
+        if (file == null || file.isEmpty()) {
+            log.warn("POST request to /api/portfolio/upload with null or empty file");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Uploaded file must not be null or empty");
+            return ResponseEntity.badRequest().body(error);
+        }
         try {
             // Save file into GridFS via FileStorageService
             String id = fileStorageService.save(file);
