@@ -2,8 +2,12 @@ import { useState } from "react";
 import HomePage from "./HomePage";
 import ContactUs from "../components/ContactUs";
 import EstimateInputModal from "../components/estimates/EstimateInputModal";
+import { useLanguage } from "../context/LanguageContext";
+import { estimateTranslations } from "../translations/estimateTranslations";
 
 const Home = () => {
+    const { language } = useLanguage();
+    const t = estimateTranslations[language];
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
 
@@ -26,11 +30,11 @@ const Home = () => {
           onClose={() => setIsEstimateModalOpen(false)}
           presets={[
               {
-                  name: "Default",
+                  name: t.defaultPreset,
                   defaultValues: { squareFeet: 0, materialCostPerSqFt: 0 },
                   fields: [
-                      { name: "squareFeet", label: "Square Feet", type: "number", required: true },
-                      { name: "materialCostPerSqFt", label: "Average Material Cost per Sq Ft", type: "number", required: true },
+                      { name: "squareFeet", label: t.squareFeet, type: "number", required: true },
+                      { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true },
                   ],
               },
           ]}

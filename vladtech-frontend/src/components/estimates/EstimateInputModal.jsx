@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./Estimate.css";
 import {api} from "../../api/http";
+import { useLanguage } from "../../context/LanguageContext";
+import { estimateTranslations } from "../../translations/estimateTranslations";
 
 const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
+    const { language } = useLanguage();
+    const t = estimateTranslations[language];
     const [selectedPreset, setSelectedPreset] = useState(null);
     const [formData, setFormData] = useState({});
     const [result, setResult] = useState(null);
@@ -74,16 +78,16 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             }}
             >
                 <div className="modal-content">
-                    <h2>Enter Estimate Details</h2>
+                    <h2>{t.enterEstimateDetails}</h2>
                     {presets.length > 0 && (
                         <div>
-                            <label htmlFor="preset-select">Presets:</label>
+                            <label htmlFor="preset-select">{t.presets}:</label>
                             <select
                                 id="preset-select"
                                 value={selectedPreset?.name || ""}
                                 onChange={(e) => handlePresetSelect(e.target.value)}
                             >
-                                <option value="">Select a preset</option>
+                                <option value="">{t.selectPreset}</option>
                                 {presets.map((preset) => (
                                     <option key={preset.name} value={preset.name}>
                                         {preset.name}
@@ -107,11 +111,11 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                         min={field.type === "number" ? "0" : undefined}
                                         onInvalid={(e) => {
                                             if (e.target.validity.valueMissing) {
-                                                e.target.setCustomValidity(`${field.label} is required`);
+                                                e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
                                             } else if (e.target.validity.rangeUnderflow) {
-                                                e.target.setCustomValidity(`${field.label} must be greater than 0`);
+                                                e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
                                             } else if (e.target.validity.typeMismatch) {
-                                                e.target.setCustomValidity(`${field.label} must be a valid number`);
+                                                e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
                                             }
                                         }}
                                         onInput={(e) => e.target.setCustomValidity("")}
@@ -119,9 +123,9 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                 </div>
                             ))}
                             <div className="modal-actions">
-                                <button type="submit">Submit</button>
+                                <button type="submit">{t.submit}</button>
                                 <button type="button" onClick={onClose}>
-                                    Close
+                                    {t.close}
                                 </button>
                             </div>
                         </form>
@@ -142,15 +146,15 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         }
                     }}>
                     <div className="modal-content">
-                        <h2>Estimate Result</h2>
-                        <p><strong>Estimated Total:</strong> ${result.totalPrice}</p>
+                        <h2>{t.estimateResult}</h2>
+                        <p><strong>{t.estimatedTotal}:</strong> ${result.totalPrice}</p>
                         <div className="modal-actions">
                             <button
                                 type="button"
                                 onClick={handleCloseResultModal}
                                 data-testid="estimate-result-close"
                             >
-                                Close
+                                {t.close}
                             </button>
                         </div>
                     </div>
