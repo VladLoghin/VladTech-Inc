@@ -4,9 +4,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "motion/react";
+import { useLanguage } from "../context/LanguageContext";
 
 const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks = false }) => {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -30,14 +32,57 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
         }`}
       >
         <div className="container mx-auto px-8 py-6 flex justify-between items-center">
-          <button
-            onClick={() => navigate("/")}
-            className={`tracking-widest transition-colors ${
-              isNavbarDark ? "text-white hover:text-yellow-400" : "text-black hover:text-yellow-400"
-            }`}
-          >
-            VLADTECH
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/")}
+              className={`tracking-widest transition-colors ${
+                isNavbarDark ? "text-white hover:text-yellow-400" : "text-black hover:text-yellow-400"
+              }`}
+            >
+              VLADTECH
+            </button>
+
+            {/* Language Toggle - Always Visible */}
+            <div
+              onClick={toggleLanguage}
+              className={`relative flex items-center w-20 h-8 rounded-full cursor-pointer transition-all ${
+                isNavbarDark ? "bg-white/20" : "bg-black/20"
+              }`}
+              aria-label="Toggle language"
+              role="switch"
+              aria-checked={language === "fr"}
+            >
+              <span
+                className={`absolute left-2 text-xs font-semibold transition-all ${
+                  language === "en"
+                    ? isNavbarDark
+                      ? "text-white"
+                      : "text-black"
+                    : "text-gray-400"
+                }`}
+              >
+                EN
+              </span>
+
+              <span
+                className={`absolute right-2 text-xs font-semibold transition-all ${
+                  language === "fr"
+                    ? isNavbarDark
+                      ? "text-white"
+                      : "text-black"
+                    : "text-gray-400"
+                }`}
+              >
+                FR
+              </span>
+
+              <div
+                className={`absolute w-6 h-6 rounded-full bg-yellow-400 shadow-md transition-all duration-300 ${
+                  language === "en" ? "left-1" : "left-[calc(100%-1.75rem)]"
+                }`}
+              />
+            </div>
+          </div>
 
           {/* Hamburger Menu Button - Mobile Only */}
           <button
