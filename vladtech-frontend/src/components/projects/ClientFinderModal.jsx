@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import axios from "axios";
+//import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { api } from "../../api/http";
 
 const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -19,23 +20,26 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   const fetchClients = async (page, query = "") => {
   setLoading(true);
   setError("");
+
   try {
     const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-    let url;
-
-    if (query.trim()) {
-      url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(query)}&role=clients&page=${page}&perPage=${perPage}`;
-    } else {
-      url = `http://localhost:8080/api/users/clients?page=${page}&perPage=${perPage}`;
-    }
-
-    const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
+      authorizationParams: { audience: "https://vladtech/api" },
     });
+
+    const commonConfig = {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page, perPage, role: "clients" },
+    };
+
+    const response = query.trim()
+      ? await api.get("/users/search", {
+          ...commonConfig,
+          params: {
+            ...commonConfig.params,
+            query, // axios will encode it
+          },
+        })
+      : await api.get("/users/clients", commonConfig);
 
     setClients(response.data.users || []);
     setTotalClients(response.data.total || 0);
@@ -47,26 +51,23 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   }
 };
 
-  const fetchSelectedClient = async () => {
-    if (!selectedClientId) return;
-    
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      const response = await axios.get(
-        `http://localhost:8080/api/users/${encodeURIComponent(selectedClientId)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setSelectedClient(response.data);
-    } catch (err) {
-      console.error("Error fetching selected client:", err);
-    }
-  };
+const fetchSelectedClient = async () => {
+  if (!selectedClientId) return;
+
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+
+    const response = await api.get(`/users/${selectedClientId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    setSelectedClient(response.data);
+  } catch (err) {
+    console.error("Error fetching selected client:", err);
+  }
+};
 
   useEffect(() => {
     if (isOpen) {

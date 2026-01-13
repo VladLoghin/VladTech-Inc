@@ -1,10 +1,11 @@
-import axios from "axios";
+//import axios from "axios";
+import { api } from "../http";
 
-const API_BASE = "http://localhost:8080/api/reviews";
+const API_BASE = "/reviews";
 
 export const getAllVisibleReviews = async () => {
     try {
-        const res = await axios.get(`${API_BASE}/visible`);
+        const res = await api.get(`${API_BASE}/visible`);
         return res.data;
     } catch (err) {
         throw err;
@@ -12,7 +13,7 @@ export const getAllVisibleReviews = async () => {
 };
 
 export const getAllReviews = async (token) => {
-    const res = await axios.get(`${API_BASE}`, {
+    const res = await api.get(`${API_BASE}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -23,7 +24,7 @@ export const getAllReviews = async (token) => {
 
 export const getMyReviews = async (token) => {
     try {
-        const res = await axios.get(`${API_BASE}/mine`, {
+        const res = await api.get(`${API_BASE}/mine`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -35,8 +36,7 @@ export const getMyReviews = async (token) => {
 };
 
 export const deleteReview = async (reviewId, token) => {
-    return fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
-        method: "DELETE",
+    return api.delete(`${API_BASE}/${reviewId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 
@@ -12,7 +12,7 @@ const Employee = () => {
   const [projectsError, setProjectsError] = useState("");
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
 
-  const callEmployeeEndpoint = async () => {
+  /*const callEmployeeEndpoint = async () => {
     try {
       const token = await getAccessTokenSilently({
                 authorizationParams: {
@@ -30,34 +30,33 @@ const Employee = () => {
       setMessage("You are not authorized or endpoint failed.");
     }
   };
+  */
 
   const loadMyProjects = async () => {
-    setProjectsLoading(true);
-    setProjectsError("");
+  setProjectsLoading(true);
+  setProjectsError("");
 
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
 
-      const response = await axios.get("http://localhost:8080/api/employee/projects", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const response = await api.get("/employee/projects", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      setProjects(response.data || []);
-    } catch (error) {
-      console.error("Error loading employee projects:", error);
-      setProjectsError(
-        error.response?.data?.message ||
-          `Failed to load projects (status: ${error.response?.status || "unknown"})`
-      );
-      setProjects([]);
-    } finally {
-      setProjectsLoading(false);
-    }
-  };
+    setProjects(response.data || []);
+  } catch (error) {
+    console.error("Error loading employee projects:", error);
+    setProjectsError(
+      error.response?.data?.message ||
+        `Failed to load projects (status: ${error.response?.status || "unknown"})`
+    );
+    setProjects([]);
+  } finally {
+    setProjectsLoading(false);
+  }
+};
 
   useEffect(() => {
   if (!isLoading && isAuthenticated) {
@@ -98,6 +97,7 @@ const formatSelectedDate = (dateStr) => {
           Employee Area - Only for Employees
         </h1>
 
+{/* 
         <div className="flex gap-3">
           <button
             onClick={callEmployeeEndpoint}
@@ -106,6 +106,7 @@ const formatSelectedDate = (dateStr) => {
             Call Employee Endpoint
           </button>
         </div>
+*/}
       </div>
 
       {message && (

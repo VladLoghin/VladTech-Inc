@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+//import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import ClientFinderModal from "./ClientFinderModal.jsx";
 import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
+import { api } from "../../api/http";
 
 const EMPTY_FORM = {
   name: "",
@@ -95,13 +96,13 @@ const ProjectModal = ({
             });
 
       if (isEdit) {
-        await axios.put(
-          `http://localhost:8080/api/projects/${formData.projectIdentifier}`,
+        await api.put(
+          `/projects/${formData.projectIdentifier}`,
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
-        await axios.post("http://localhost:8080/api/projects", formData, {
+        await api.post("/projects", formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
