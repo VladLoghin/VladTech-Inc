@@ -1,5 +1,6 @@
 import {BrowserRouter as Router, Routes, Route, useLocation, useNavigate} from "react-router-dom";
 import Auth0ProviderWithConfig from "./auth/Auth0ProviderWithConfig";
+import { LanguageProvider } from "./context/LanguageContext";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -19,10 +20,12 @@ function Layout({ children }) {
   const navigate = useNavigate();
 
   return (
-      <Auth0ProviderWithConfig navigate={navigate}>
-      {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
-      {children}
-      </Auth0ProviderWithConfig>
+      <LanguageProvider>
+        <Auth0ProviderWithConfig navigate={navigate}>
+          {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
+          {children}
+        </Auth0ProviderWithConfig>
+      </LanguageProvider>
   );
 }
 

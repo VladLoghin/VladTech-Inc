@@ -5,5 +5,9 @@ public enum Rating {
     TWO,
     THREE,
     FOUR,
-    FIVE
+    FIVE;
+
+    public int getValue() {
+        return this.ordinal() + 1;
+    }
 }

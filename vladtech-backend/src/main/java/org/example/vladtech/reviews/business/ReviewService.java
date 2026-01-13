@@ -23,5 +23,8 @@ public interface ReviewService {
 
     List<ReviewResponseModel> getReviewsByOwnerAuth0Id(String ownerAuth0Id);
 
+    // Compute customer satisfaction percentage based on visible reviews
+    double computeSatisfactionPercentage();
+
 }
 
