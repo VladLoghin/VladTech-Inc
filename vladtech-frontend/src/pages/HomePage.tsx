@@ -6,6 +6,8 @@ import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import getImageUrl from "../utils/getImageUrl.js";
+import { api } from "../api/http.ts";
+
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -113,21 +115,18 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
 
   // Fetch project count from backend
   useEffect(() => {
-    const fetchProjectCount = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/projects/count");
-        if (response.ok) {
-          const count = await response.json();
-          setProjectCount(count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch project count:", error);
-        setProjectCount(0); // Fallback to 0 if fetch fails
-      }
-    };
+  const fetchProjectCount = async () => {
+    try {
+      const response = await api.get("/projects/count");
+      setProjectCount(response.data);
+    } catch (error) {
+      console.error("Failed to fetch project count:", error);
+      setProjectCount(0);
+    }
+  };
 
-    fetchProjectCount();
-  }, []);
+  fetchProjectCount();
+}, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -269,15 +268,15 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               </button>
             )}
 
-            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
-              <button
-                onClick={() => navigate("/client")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
-                  }`}
-              >
-                CLIENT AREA
-              </button>
-            )}
+          {/* {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
+            <button
+            onClick={() => navigate("/client")}
+            className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
+              }`}
+            >
+            CLIENT AREA
+            </button>
+          )} */}
 
             {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
               <button
@@ -411,7 +410,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               </button>
             )}
 
-            {isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
+            {/*isAuthenticated && user?.["https://vladtech.com/roles"]?.includes("Client") && (
               <button
                 onClick={() => {
                   navigate("/client");
@@ -422,7 +421,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               >
                 CLIENT AREA
               </button>
-            )}
+            )*/}
 
             {isAuthenticated && !user?.["https://vladtech.com/roles"]?.includes("Admin") && (
               <button

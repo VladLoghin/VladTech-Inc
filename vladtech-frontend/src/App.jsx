@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Employee from "./pages/Employee";
-import Client from "./pages/Client";
+//import Client from "./pages/Client";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import ReviewsPage from "./pages/Reviews.jsx";
@@ -64,7 +64,7 @@ function App() {
           }
         />
 
-        {/* Client-only */}
+        {/* Client-only 
         <Route
           path="/client"
           element={
@@ -72,7 +72,7 @@ function App() {
               <Client />
             </ProtectedRoute>
           }
-        />
+        />*/}
         <Route
             path="/reviews"
             element={<ReviewsPage />}

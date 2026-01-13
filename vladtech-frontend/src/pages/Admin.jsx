@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+//import axios from "axios";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
@@ -8,6 +8,7 @@ import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
 import ProjectModal from "../components/projects/ProjectModal.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
 import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
+import { api } from "../api/http";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -32,85 +33,70 @@ const Admin = () => {
   };
 
   const fetchActiveProjects = async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      const response = await axios.get(
-        "http://localhost:8080/api/projects/active",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setProjects(response.data);
-    } catch (error) {
-      console.error("Error fetching active projects:", error);
-      setMessage("Failed to fetch active projects.");
-    }
-  };
+  try {
+    const token = await getAccessTokenSilently();
+    const response = await api.get("/projects/active", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setProjects(response.data);
+  } catch (error) {
+    console.error("Error fetching active projects:", error);
+    setMessage("Failed to fetch active projects.");
+  }
+};
 
   const fetchArchivedProjects = async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      const response = await axios.get(
-        "http://localhost:8080/api/projects/archived",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setArchivedProjects(response.data);
-    } catch (error) {
-      console.error("Error fetching archived projects:", error);
-      setMessage("Failed to fetch archived projects.");
-    }
-  };
+  try {
+    const token = await getAccessTokenSilently();
+    const response = await api.get("/projects/archived", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setArchivedProjects(response.data);
+  } catch (error) {
+    console.error("Error fetching archived projects:", error);
+    setMessage("Failed to fetch archived projects.");
+  }
+};
 
   const fetchProjects = async () => {
     await fetchActiveProjects();
     await fetchArchivedProjects();
   };
 
-  const handleCompleteProject = async (project) => {
-    try {
-      const token = await getAccessTokenSilently();
-      await axios.put(
-        `http://localhost:8080/api/projects/${project.projectIdentifier}/complete`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setMessage(`Project "${project.name}" has been marked as complete.`);
-      await fetchProjects();
-    } catch (error) {
-      console.error("Error completing project:", error);
-      setMessage("Failed to complete project.");
-    }
-  };
+  
+const handleCompleteProject = async (project) => {
+  try {
+    const token = await getAccessTokenSilently();
+    await api.put(
+      `/projects/${project.projectIdentifier}/complete`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setMessage(`Project "${project.name}" has been marked as complete.`);
+    await fetchProjects();
+  } catch (error) {
+    console.error("Error completing project:", error);
+    setMessage("Failed to complete project.");
+  }
+};
 
   const handleReactivateProject = async (project) => {
-    try {
-      const token = await getAccessTokenSilently();
-      await axios.put(
-        `http://localhost:8080/api/projects/${project.projectIdentifier}/reactivate`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setMessage(`Project "${project.name}" has been reactivated.`);
-      await fetchProjects();
-    } catch (error) {
-      console.error("Error reactivating project:", error);
-      setMessage("Failed to reactivate project.");
-    }
-  };
+  try {
+    const token = await getAccessTokenSilently();
+    await api.put(
+      `/projects/${project.projectIdentifier}/reactivate`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setMessage(`Project "${project.name}" has been reactivated.`);
+    await fetchProjects();
+  } catch (error) {
+    console.error("Error reactivating project:", error);
+    setMessage("Failed to reactivate project.");
+  }
+};
 
   // Auto-dismiss message after 5 seconds with fade out
   useEffect(() => {
@@ -125,29 +111,29 @@ const Admin = () => {
   }, [message]);
 
   useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-        const res = await axios.get("http://localhost:8080/api/employee/list", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const loadEmployees = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      const res = await api.get("/employee/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const index = {};
-        (res.data || []).forEach((emp) => {
-          index[emp.userId] = {
-            name: emp.name,
-            email: emp.email,
-          };
-        });
+      const index = {};
+      (res.data || []).forEach((emp) => {
+        index[emp.userId] = {
+          name: emp.name,
+          email: emp.email,
+        };
+      });
 
-        setEmployeeIndex(index);
-      } catch (err) {
-        console.error("Error fetching employees for index", err);
-      }
-    };
+      setEmployeeIndex(index);
+    } catch (err) {
+      console.error("Error fetching employees for index", err);
+    }
+  };
 
-    loadEmployees();
-  }, [getAccessTokenSilently]);
+  loadEmployees();
+}, [getAccessTokenSilently]);
 
   useEffect(() => {
     const loadInitialProjects = async () => {

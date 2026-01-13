@@ -1,3 +1,6 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   security:
     oauth2:
@@ -7,7 +10,7 @@ spring:
           audience: ${AUTH0_AUDIENCE}
   data:
     mongodb:
-      uri: mongodb://localhost:27017/vladtechdb
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/vladtechdb}
       database: vladtechdb
       auto-index-creation: true
 
@@ -192,3 +195,23 @@ file:
 logging:
   level:
     org.springframework.security: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  autoconfigure:
+    exclude:
+        - de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+
+  mongodb:
+    embedded:
+      enabled: false
+
+  data:
+    mongodb:
+        uri: ${SPRING_DATA_MONGODB_URI}
+       #database: vladtechdb
+        auto-index-creation: true

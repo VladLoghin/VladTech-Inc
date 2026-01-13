@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addComment } from "../api/portfolio/portfolioService.js";
 import getImageUrl from "../utils/getImageUrl.js";
+import {api} from "../api/http";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -54,25 +55,20 @@ export default function PortfolioGallery() {
 
   // Fetch portfolio items from backend
   useEffect(() => {
-    const fetchPortfolioItems = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/portfolio");
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Portfolio data:", data);
-          setPortfolioItems(data);
-        } else {
-          console.error("Failed to fetch portfolio items");
-        }
-      } catch (error) {
-        console.error("Error fetching portfolio:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPortfolioItems = async () => {
+    try {
+      const response = await api.get("/portfolio");
+      console.log("Portfolio data:", response.data);
+      setPortfolioItems(response.data);
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchPortfolioItems();
-  }, []);
+  fetchPortfolioItems();
+}, []);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();

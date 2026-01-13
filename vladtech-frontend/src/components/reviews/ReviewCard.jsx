@@ -4,6 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { deleteReview } from "../../api/reviews/reviewsService.js";
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
+import { api } from "../../api/http";
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -67,43 +68,37 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
 
     const handleVisibilityToggle = async () => {
-        if (!reviewId) {
-            console.error("Missing reviewId; cannot update visibility.");
-            return;
-        }
+  if (!reviewId) {
+    console.error("Missing reviewId; cannot update visibility.");
+    return;
+  }
 
-        const nextValue = !isVisible;
-        setIsVisible(nextValue);
-        setSaving(true);
+  const nextValue = !isVisible;
+  setIsVisible(nextValue);
+  setSaving(true);
 
-        try {
-            const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-            const res = await fetch(
-                `http://localhost:8080/api/reviews/${reviewId}/visibility`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ visible: nextValue }),
-                }
-            );
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
 
-            if (!res.ok) {
-                throw new Error(`PATCH failed with status ${res.status}`);
-            }
-        } catch (err) {
-            console.error("Failed to update visibility:", err);
-            setIsVisible(!nextValue); // revert on error
-        } finally {
-            setSaving(false);
-        }
-    };
+    await api.patch(
+      `/reviews/${reviewId}/visibility`,
+      { visible: nextValue },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update visibility:", err);
+    setIsVisible(!nextValue); // revert on error
+  } finally {
+    setSaving(false);
+  }
+};
 
     const handleDelete = async (e) => {
         e.stopPropagation();

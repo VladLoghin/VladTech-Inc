@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import axios from "axios";
+//import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { api } from "../../api/http";
 
 const EmployeeFinderModal = ({
   isOpen,
@@ -22,37 +23,45 @@ const EmployeeFinderModal = ({
 
 
   const fetchEmployees = async (page, query = "") => {
-    setLoading(true);
-    setError("");
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-      let url;
+  setLoading(true);
+  setError("");
 
-      if (query.trim()) {
-        url = `http://localhost:8080/api/users/search?query=${encodeURIComponent(
-          query
-        )}&role=employees&page=${page}&perPage=${perPage}`;
-      } else {
-        url = `http://localhost:8080/api/users/employees?page=${page}&perPage=${perPage}`;
-      }
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
 
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
 
-      setEmployees(response.data.users || []);
-      setTotalEmployees(response.data.total || 0);
-    } catch (err) {
-      console.error("Error fetching employees:", err);
-      setError("Failed to load employees");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const response = query.trim()
+      ? await api.get("/users/search", {
+          headers,
+          params: {
+            query,
+            role: "employees",
+            page,
+            perPage,
+          },
+        })
+      : await api.get("/users/employees", {
+          headers,
+          params: {
+            page,
+            perPage,
+          },
+        });
+
+    setEmployees(response.data.users ?? []);
+    setTotalEmployees(response.data.total ?? 0);
+  } catch (err) {
+    console.error("Error fetching employees:", err);
+    setError("Failed to load employees");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
   if (isOpen) {
