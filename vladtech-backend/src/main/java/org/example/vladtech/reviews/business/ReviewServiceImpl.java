@@ -108,5 +108,21 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ReviewResponseModel> getReviewsByOwnerAuth0Id(String ownerAuth0Id) {
         return responseMapper.entityListToResponseModelList(reviewRepository.findByOwnerAuth0Id(ownerAuth0Id));
     }
+
+    @Override
+    public double computeSatisfactionPercentage() {
+        long count = reviewRepository.countByVisibleTrue();
+        if (count == 0) {
+            return 0.0;
+        }
+
+        List<Review> visibleReviews = reviewRepository.findByVisibleTrue();
+        int totalStars = visibleReviews.stream()
+                .mapToInt(review -> review.getRating().getValue())
+                .sum();
+
+        double averageRating = totalStars / (double) count;
+        return (averageRating / 5.0) * 100.0;
+    }
 }
 

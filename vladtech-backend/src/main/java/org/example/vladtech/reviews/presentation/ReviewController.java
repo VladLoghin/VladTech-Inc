@@ -78,5 +78,10 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByOwnerAuth0Id(userId));
     }
 
+    @GetMapping("/satisfaction-percentage")
+    public ResponseEntity<Double> getSatisfactionPercentage() {
+        return ResponseEntity.ok(reviewService.computeSatisfactionPercentage());
+    }
+
 }
 
