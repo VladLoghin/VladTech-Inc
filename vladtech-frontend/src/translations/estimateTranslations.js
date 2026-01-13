@@ -28,8 +28,8 @@ export const estimateTranslations = {
     // Field labels
     squareFeet: "Pieds carrés",
     materialCostPerSqFt: "Coût moyen du matériau par pied carré",
-    // Preset names
-    defaultPreset: "Par défaut",
+
+    defaultPreset: "Défaut",
     // Validation messages
     isRequired: "est requis",
     mustBeGreaterThanZero: "doit être supérieur à 0",
