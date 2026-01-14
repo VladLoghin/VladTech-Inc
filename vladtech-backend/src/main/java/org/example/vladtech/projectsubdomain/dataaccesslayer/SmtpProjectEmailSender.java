@@ -47,7 +47,7 @@ public class SmtpProjectEmailSender implements ProjectEmailSender {
 
         sb.append("<h2 style='color: #333;'>Project ").append(email.getOperation()).append("</h2>");
 
-        sb.append("<p>Dear ").append(escape(email.getClientName())).append(",</p>");
+        sb.append("<p>Dear ").append(escape(email.getRecipientEmail())).append(",</p>");
 
         sb.append("<p>Your project has been successfully ").append(email.getOperation().toLowerCase()).append(".</p>");
 

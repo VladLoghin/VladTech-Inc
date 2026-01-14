@@ -88,7 +88,7 @@ public class ProjectEmailMapper {
                 project.getDueDate(),
                 addressString,
                 projectType,
-                "EmployeeAssigned",
+                "Assigned",
                 LocalDateTime.now()
         );
     }
