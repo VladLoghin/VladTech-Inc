@@ -9,4 +9,5 @@ public interface UserManagementService {
     Map<String, Object> searchUsers(String query, String roleName, int page, int perPage);
     Map<String, Object> getUsersWithoutRole(String roleId, int page, int perPage);
     List<EmployeeSummaryResponseModel> getAllEmployees(int page, int perPage);
+    String getUserEmailById(String userId);
 }

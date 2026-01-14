@@ -84,6 +84,31 @@ const ProjectModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
+const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) => {
+  for (const id of employeeIds) {
+    const encodedId = encodeURIComponent(id); // auth0|xxx → auth0%7Cxxx
+
+    try {
+      await api.post(
+        `/projects/${projectIdentifier}/assign/${encodedId}`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("ASSIGN SUCCESS:", projectIdentifier, id);
+    } catch (e) {
+      console.error(
+        "ASSIGN FAILED:",
+        id,
+        e?.response?.status,
+        e?.response?.data
+      );
+    }
+  }
+};
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -96,16 +121,29 @@ const ProjectModal = ({
             });
 
       if (isEdit) {
-        await api.put(
-          `/projects/${formData.projectIdentifier}`,
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        await api.post("/projects", formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+  const before = initialData?.assignedEmployeeIds || [];
+  const after = formData.assignedEmployeeIds || [];
+  const newlyAdded = after.filter((id) => !before.includes(id));
+
+  const payload = { ...formData };
+  delete payload.assignedEmployeeIds;
+  delete payload.assignedEmployeeEmails;
+
+  await api.put(
+    `/projects/${formData.projectIdentifier}`,
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  if (newlyAdded.length > 0) {
+    await assignEmployeesToProject(formData.projectIdentifier, newlyAdded, token);
+  }
+} else {
+  await api.post("/projects", formData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 
       onSubmitSuccess();
       handleClose();

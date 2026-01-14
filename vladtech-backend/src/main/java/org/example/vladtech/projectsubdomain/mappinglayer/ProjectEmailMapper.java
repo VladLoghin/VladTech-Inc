@@ -68,4 +68,29 @@ public class ProjectEmailMapper {
 
         return sb.length() > 0 ? sb.toString() : null;
     }
+    public ProjectNotificationEmail toEmployeeAssignedEmail(Project project, String employeeEmail) {
+        if (project == null || employeeEmail == null || employeeEmail.isBlank()) {
+            return null;
+        }
+
+        String subject = "You were assigned to project: " + project.getName();
+        String addressString = formatAddress(project.getAddress());
+        String projectType = project.getProjectType() != null ? project.getProjectType().getType().name() : null;
+
+        return new ProjectNotificationEmail(
+                employeeEmail,
+                subject,
+                project.getProjectIdentifier(),
+                project.getName(),
+                project.getClientName(),
+                project.getDescription(),
+                project.getStartDate(),
+                project.getDueDate(),
+                addressString,
+                projectType,
+                "EmployeeAssigned",
+                LocalDateTime.now()
+        );
+    }
+
 }
