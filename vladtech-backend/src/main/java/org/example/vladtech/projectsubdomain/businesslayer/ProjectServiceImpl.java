@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.ArrayList;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
+import org.example.vladtech.auth.service.UserManagementService;
 
 @Slf4j
 @Service
@@ -38,6 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectResponseMapper projectResponseMapper;
     private final ProjectEmailMapper projectEmailMapper;
     private final ProjectEmailSender projectEmailSender;
+    private final UserManagementService userManagementService;
 
     @Lazy
     @Autowired
@@ -48,12 +50,13 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectRequestMapper projectRequestMapper,
             ProjectResponseMapper projectResponseMapper,
             ProjectEmailMapper projectEmailMapper,
-            ProjectEmailSender projectEmailSender) {
+            ProjectEmailSender projectEmailSender,UserManagementService userManagementService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
         this.projectEmailMapper = projectEmailMapper;
         this.projectEmailSender = projectEmailSender;
+        this.userManagementService = userManagementService;
     }
 
     @Override
@@ -165,6 +168,9 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
 
+        log.info("[ASSIGN] called projectIdentifier={} employeeId={}", projectIdentifier, employeeId);
+        log.info("[ASSIGN] before list={}", project.getAssignedEmployeeIds());
+
         if (employeeId == null || employeeId.isBlank()) {
             throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
         }
@@ -176,7 +182,19 @@ public class ProjectServiceImpl implements ProjectService {
         if (!project.getAssignedEmployeeIds().contains(employeeId)) {
             project.getAssignedEmployeeIds().add(employeeId);
             project = projectRepository.save(project);
+
+            log.info("[ASSIGN] saved project. now list={}", project.getAssignedEmployeeIds());
+
+            String employeeEmail = userManagementService.getUserEmailById(employeeId);
+            log.info("[ASSIGN] resolved employeeEmail='{}'", employeeEmail);
+
+            self.sendEmployeeAssignedEmailAsync(project, employeeEmail);
+            log.info("[ASSIGN] triggered async send");
+        } else {
+            log.info("[ASSIGN] employee already assigned, skipping email");
         }
+
+
 
         return projectResponseMapper.entityToResponseModel(project);
     }
@@ -276,6 +294,29 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(p -> p.getState() == ProjectState.COMPLETE)
                 .collect(Collectors.toList());
         return projectResponseMapper.entityListToResponseModelList(archivedProjects);
+    }
+
+    @Async
+    public void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail) {
+        log.info("[MAIL] entered sendEmployeeAssignedEmailAsync. to='{}'", employeeEmail);
+
+        if (employeeEmail == null || employeeEmail.isBlank()) {
+            return;
+        }
+
+        try {
+            ProjectNotificationEmail email =
+                    projectEmailMapper.toEmployeeAssignedEmail(project, employeeEmail);
+
+            if (email != null) {
+                projectEmailSender.send(email);
+                log.info("Employee assignment email sent to {} for project {}",
+                        employeeEmail, project.getProjectIdentifier());
+            }
+        } catch (Exception e) {
+            log.error("Failed to send employee assignment email for project {}: {}",
+                    project.getProjectIdentifier(), e.getMessage());
+        }
     }
 
 }

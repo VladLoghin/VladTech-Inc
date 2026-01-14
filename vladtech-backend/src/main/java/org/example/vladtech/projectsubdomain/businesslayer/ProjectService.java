@@ -43,4 +43,6 @@ public interface ProjectService {
 
     List<ProjectResponseModel> getArchivedProjects();
 
+    void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
+
 }

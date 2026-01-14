@@ -275,4 +275,36 @@ public class UserManagementServiceImpl implements UserManagementService {
                 })
                 .toList();
     }
+    @Override
+    public String getUserEmailById(String userId) {
+        if (userId == null || userId.isBlank()) return null;
+
+        String mgmtToken = managementTokenService.getManagementApiToken();
+
+        // IMPORTANT: do NOT pre-encode userId. Let RestTemplate encode it once.
+        String url = "https://" + domain + "/api/v2/users/{userId}";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(mgmtToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                Map.class,
+                userId
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            return null;
+        }
+
+        Object email = response.getBody().get("email");
+        return email != null ? email.toString() : null;
+    }
+
+
+
 }
