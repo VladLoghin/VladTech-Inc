@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.example.vladtech.auth.service.UserManagementService;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -26,7 +27,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceImplTest {
 
-        @Mock
+    @Mock
+    private UserManagementService userManagementService;
+
+    @Mock
         private ProjectRepository projectRepository;
 
         @Mock
@@ -57,7 +61,8 @@ class ProjectServiceImplTest {
                                 projectRequestMapper,
                                 projectResponseMapper,
                                 projectEmailMapper,
-                                projectEmailSender);
+                                projectEmailSender,
+                        userManagementService);
                 projectService.self = projectServiceMock;
 
                 project = new Project();
