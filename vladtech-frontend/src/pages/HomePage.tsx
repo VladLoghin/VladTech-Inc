@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import getImageUrl from "../utils/getImageUrl.js";
-import { api } from "../api/http.ts";
+import { api } from "../api/http.js";
 import { useLanguage } from "../context/LanguageContext";
 
 

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addComment } from "../api/portfolio/portfolioService.js";
 import getImageUrl from "../utils/getImageUrl.js";
-import {api} from "../api/http";
+import {api} from "../api/http.js";
 
 interface PortfolioItem {
   portfolioId: string;
