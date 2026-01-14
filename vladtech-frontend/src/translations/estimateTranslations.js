@@ -10,8 +10,22 @@ export const estimateTranslations = {
     // Field labels
     squareFeet: "Square Feet",
     materialCostPerSqFt: "Average Material Cost per Sq Ft",
+    areaSqFt: "Area (sq ft)",
+    locationFactor: "Location Factor",
+    sidingMaterial: "Siding Material",
+    stories: "Stories",
+    includeInsulation: "Include Insulation",
+    // Siding material options
+    sidingMaterialOptions: {
+      VINYL: "Vinyl",
+      WOOD: "Wood",
+      FIBER_CEMENT: "Fiber Cement",
+      BRICK: "Brick",
+      STONE_VENEER: "Stone Veneer",
+    },
     // Preset names
     defaultPreset: "Default",
+    sidingReplacePreset: "Siding Replace",
     // Validation messages
     isRequired: "is required",
     mustBeGreaterThanZero: "must be greater than 0",
@@ -28,8 +42,22 @@ export const estimateTranslations = {
     // Field labels
     squareFeet: "Pieds carrés",
     materialCostPerSqFt: "Coût moyen du matériau par pied carré",
-
+    areaSqFt: "Surface (pi²)",
+    locationFactor: "Facteur de localisation",
+    sidingMaterial: "Matériau du revêtement",
+    stories: "Étages",
+    includeInsulation: "Inclure l'isolation",
+    // Siding material options
+    sidingMaterialOptions: {
+      VINYL: "Vinyle",
+      WOOD: "Bois",
+      FIBER_CEMENT: "Fibre de ciment",
+      BRICK: "Brique",
+      STONE_VENEER: "Placage de pierre",
+    },
+    // Preset names
     defaultPreset: "Défaut",
+    sidingReplacePreset: "Remplacement du revêtement",
     // Validation messages
     isRequired: "est requis",
     mustBeGreaterThanZero: "doit être supérieur à 0",

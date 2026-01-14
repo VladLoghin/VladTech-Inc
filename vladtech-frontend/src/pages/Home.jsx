@@ -1,3 +1,4 @@
+// javascript
 import { useState } from "react";
 import HomePage from "./HomePage";
 import ContactUs from "../components/ContactUs";
@@ -11,37 +12,46 @@ const Home = () => {
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
 
-    const handleEstimateSubmit = (formData) => {
-        console.log("Estimate submitted:", formData);
-        setIsEstimateModalOpen(false);
-    };
-
-  return (
-    <>
-      <HomePage onOpenContactModal={() => setIsContactModalOpen(true)}
+    return (
+        <>
+            <HomePage
+                onOpenContactModal={() => setIsContactModalOpen(true)}
                 onOpenEstimateModal={() => setIsEstimateModalOpen(true)}
-      />
-      <ContactUs 
-        isOpen={isContactModalOpen} 
-        onClose={() => setIsContactModalOpen(false)} 
-      />
-      <EstimateInputModal
-          onSubmit={handleEstimateSubmit}
-          onClose={() => setIsEstimateModalOpen(false)}
-          presets={[
-              {
-                  name: t.defaultPreset,
-                  defaultValues: { squareFeet: 0, materialCostPerSqFt: 0 },
-                  fields: [
-                      { name: "squareFeet", label: t.squareFeet, type: "number", required: true },
-                      { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true },
-                  ],
-              },
-          ]}
-          isOpen={isEstimateModalOpen}
-      />
-    </>
-  );
+            />
+            <ContactUs
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+            />
+            <EstimateInputModal
+                onClose={() => setIsEstimateModalOpen(false)}
+                presets={[
+                    {
+                        name: t.defaultPreset,
+                        defaultValues: { squareFeet: 0, materialCostPerSqFt: 0 },
+                        fields: [
+                            {
+                                name: "squareFeet",
+                                label: t.squareFeet,
+                                type: "number",
+                                required: true,
+                                min: 1,
+                                step: "0.01",
+                            },
+                            {
+                                name: "materialCostPerSqFt",
+                                label: t.materialCostPerSqFt,
+                                type: "number",
+                                required: true,
+                                min: 0,
+                                step: "0.01",
+                            },
+                        ],
+                    },
+                ]}
+                isOpen={isEstimateModalOpen}
+            />
+        </>
+    );
 };
 
 export default Home;
