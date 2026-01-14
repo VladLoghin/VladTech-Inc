@@ -1,5 +1,6 @@
 package org.example.vladtech.portfolio.presentation;
 
+import org.example.vladtech.filestorageservice.FileStorageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -10,13 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
@@ -34,29 +31,18 @@ class UploadPortfolioImageControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static final String UPLOAD_DIR = "uploads/portfolio/";
+    @MockitoBean
+    private FileStorageService fileStorageService;
+
 
     @BeforeEach
     void setup() throws Exception {
-        // Create upload directory if it doesn't exist
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
+        // No local filesystem setup required — uploads are stored in GridFS now.
     }
 
     @AfterEach
     void cleanup() throws Exception {
-        // Clean up uploaded test files
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (Files.exists(uploadPath)) {
-            try (Stream<Path> paths = Files.walk(uploadPath)) {
-                paths.sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .filter(File::isFile) // Only delete files, not the directory
-                        .forEach(File::delete);
-            }
-        }
+        // No local filesystem cleanup required.
     }
 
     @Test
@@ -79,7 +65,8 @@ class UploadPortfolioImageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.imageUrl").exists())
                 .andExpect(jsonPath("$.imageUrl", startsWith("/uploads/portfolio/")))
-                .andExpect(jsonPath("$.imageUrl", endsWith(".jpg")));
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.filename", is("test-image.jpg")));
     }
 
     @Test
@@ -155,7 +142,9 @@ class UploadPortfolioImageControllerTest {
                                 .authorities(new SimpleGrantedAuthority("Admin"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.imageUrl").exists())
-                .andExpect(jsonPath("$.imageUrl", endsWith(".png")));
+                .andExpect(jsonPath("$.imageUrl", startsWith("/uploads/portfolio/")))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.filename", is("test-image.png")));
     }
 
     @Test
@@ -180,10 +169,9 @@ class UploadPortfolioImageControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        // Extract imageUrl from response and verify file exists
-        String imageUrl = response.substring(response.indexOf("/uploads/"), response.indexOf(".jpg") + 4);
-        Path filePath = Paths.get(imageUrl.substring(1)); // Remove leading slash
-        assertTrue(Files.exists(filePath), "Uploaded file should exist on disk");
+        // Ensure we got an id back and filename matches
+        assertTrue(response.contains("\"id\":"), "Response should contain id");
+        assertTrue(response.contains("\"filename\":\"test-image.jpg\""), "Response should contain original filename");
     }
 
     @Test
@@ -255,16 +243,6 @@ class UploadPortfolioImageControllerTest {
 
     @Test
     void uploadImage_VerifyDirectoryCreation_WhenNotExists() throws Exception {
-        // Delete the upload directory first
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (Files.exists(uploadPath)) {
-            try (Stream<Path> paths = Files.walk(uploadPath)) {
-                paths.sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-        }
-
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "test-image.jpg",
@@ -281,10 +259,8 @@ class UploadPortfolioImageControllerTest {
                                         .claim("https://vladtech.com/roles", java.util.List.of("Admin")))
                                 .authorities(new SimpleGrantedAuthority("Admin"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imageUrl").exists());
-
-        // Verify directory was created
-        assertTrue(Files.exists(uploadPath), "Upload directory should be created if it doesn't exist");
+                .andExpect(jsonPath("$.imageUrl").exists())
+                .andExpect(jsonPath("$.id").isNotEmpty());
     }
 }
 

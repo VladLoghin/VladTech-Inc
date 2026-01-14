@@ -1,16 +1,14 @@
 package org.example.vladtech.portfolio.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.vladtech.auth.config.SecurityConfig;
 import org.example.vladtech.portfolio.business.PortfolioService;
+import org.example.vladtech.filestorageservice.FileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,8 +23,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/** Tests need to be redone */
-
 @WebMvcTest(PortfolioController.class)
 @AutoConfigureMockMvc
 class CreatePortfolioControllerTest {
@@ -40,6 +36,9 @@ class CreatePortfolioControllerTest {
     @MockitoBean
     private PortfolioService portfolioService;
 
+    @MockitoBean
+    private FileStorageService fileStorageService;
+
     @BeforeEach
     void setup() {
         PortfolioResponseDto response = new PortfolioResponseDto();
@@ -49,12 +48,8 @@ class CreatePortfolioControllerTest {
         response.setRating(4.8);
         response.setComments(new ArrayList<>());
 
-        // If your controller calls createPortfolioItem(title, url, rating)
         when(portfolioService.createPortfolioItem(anyString(), anyString(), anyDouble()))
                 .thenReturn(response);
-
-        // If instead your controller calls createPortfolioItem(dto), swap to:
-        // when(portfolioService.createPortfolioItem(any(PortfolioResponseDto.class))).thenReturn(response);
     }
 
     @Test
@@ -82,14 +77,9 @@ class CreatePortfolioControllerTest {
 
         verify(portfolioService, times(1))
                 .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq(4.8));
-
-        // If DTO-based instead, verify like this:
-        // verify(portfolioService, times(1)).createPortfolioItem(any(PortfolioResponseDto.class));
     }
 
-    /** Test does not pass as intended*/
     @Disabled("Disabled until we fix the security config and permissions in the controller class")
-
     @Test
     void createPortfolio_AsClient_ShouldBeForbidden() throws Exception {
         PortfolioResponseDto request = new PortfolioResponseDto();

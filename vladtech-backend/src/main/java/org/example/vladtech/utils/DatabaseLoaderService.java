@@ -14,12 +14,14 @@ import org.example.vladtech.reviews.data.ReviewRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +30,8 @@ import java.util.function.Function;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.seed-db", havingValue = "true", matchIfMissing = false)
+@Profile("!test")
 public class DatabaseLoaderService implements CommandLineRunner {
 
     private final ProjectRepository projectRepository;
@@ -35,7 +39,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final PortfolioRepository portfolioRepository;
     private final FileStorageService fileStorageService;
 
-    @Value("${app.seed-db:true}")
+    // default to false so tests and local runs without explicit property don't execute the seeder
+    @Value("${app.seed-db:false}")
     private boolean seedDb;
 
     // In docker profile you set: file.upload-dir: ${IMAGES}
@@ -51,6 +56,14 @@ public class DatabaseLoaderService implements CommandLineRunner {
         }
 
         log.info("Loading sample data into MongoDB...");
+
+        // Check if data already exists
+        if (projectRepository.count() > 0) {
+            log.info("Database already contains project data. Skipping initialization.");
+            return;
+        }
+
+        /// ///////////////////////////////////////////////////////// WE DELETE THE DATA EVERY TIME WE RUN IN DEVELOPMENT ENVIRONMENT. WITH DEPLOYED, IT SHOULD BE DIFFERENT
         log.info("Clearing existing data...");
 
         projectRepository.deleteAll();

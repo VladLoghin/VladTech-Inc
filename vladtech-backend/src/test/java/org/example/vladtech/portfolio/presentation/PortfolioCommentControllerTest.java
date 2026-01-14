@@ -1,6 +1,7 @@
 package org.example.vladtech.portfolio.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.vladtech.filestorageservice.FileStorageService;
 import org.example.vladtech.portfolio.business.PortfolioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -47,6 +48,10 @@ class PortfolioCommentControllerTest {
 
     @MockitoBean
     private PortfolioService portfolioService;
+
+    @MockitoBean
+    private FileStorageService fileStorageService;
+
 
     private final String portfolioId = "portfolio-1";
 

@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
-@RequestMapping("/uploads/reviews")
+@RequestMapping("/uploads")
 @RequiredArgsConstructor
 public class FileController {
 
     private final FileStorageService fileStorageService;
 
-    @PostMapping
+    @PostMapping("/reviews")
     public ResponseEntity<?> uploadReviewImage(@RequestParam("file") MultipartFile file) {
         try {
             String fileId = fileStorageService.save(file);
@@ -54,7 +54,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/reviews/{id}")
     public ResponseEntity<StreamingResponseBody> getReviewImage(
             @PathVariable String id,
             @RequestParam(value = "download", defaultValue = "false") boolean forceDownload) {
@@ -70,7 +70,7 @@ public class FileController {
             // Get original filename from metadata or fallback to resource filename
             String originalFilename = (metadata != null && metadata.containsKey("originalFilename"))
                     ? metadata.getString("originalFilename")
-                    : resource.getFilename();
+                    : (resource != null ? resource.getFilename() : "file");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
@@ -124,7 +124,7 @@ public class FileController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/reviews/{id}")
     public ResponseEntity<?> deleteReviewImage(@PathVariable String id) {
         try {
             fileStorageService.delete(id);
@@ -145,7 +145,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("/{id}/metadata")
+    @GetMapping("/reviews/{id}/metadata")
     public ResponseEntity<?> getFileMetadata(@PathVariable String id) {
         try {
             Document metadata = fileStorageService.getMetadata(id);
@@ -171,6 +171,111 @@ public class FileController {
 
         } catch (Exception e) {
             log.error("Error retrieving metadata: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // --- Portfolio endpoints (same class, separate URL space) ---
+
+    @GetMapping("/portfolio/{id}")
+    public ResponseEntity<StreamingResponseBody> getPortfolioImage(
+            @PathVariable String id,
+            @RequestParam(value = "download", defaultValue = "false") boolean forceDownload) {
+
+        try {
+            FileStorageService.FileResourceWithMetadata fileData =
+                    fileStorageService.loadResourceWithMetadata(id);
+
+            Resource resource = fileData.getResource();
+            Document metadata = fileData.getMetadata();
+            String contentType = fileData.getContentType();
+
+            String originalFilename = (metadata != null && metadata.containsKey("originalFilename"))
+                    ? metadata.getString("originalFilename")
+                    : (resource != null ? resource.getFilename() : "file");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+
+            try {
+                long contentLength = resource.contentLength();
+                headers.setContentLength(contentLength);
+            } catch (IOException e) {
+                log.warn("Could not determine content length for portfolio file: {}", id, e);
+            }
+
+            String disposition = forceDownload ? "attachment" : "inline";
+            headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                    disposition + "; filename=\"" + originalFilename + "\"");
+
+            headers.setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic());
+
+            StreamingResponseBody body = outputStream -> {
+                try (var in = resource.getInputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = in.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.flush();
+                }
+            };
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid portfolio file ID requested: {}", id);
+            return ResponseEntity.badRequest().build();
+
+        } catch (FileNotFoundException e) {
+            log.warn("Portfolio file not found: {}", id);
+            return ResponseEntity.notFound().build();
+
+        } catch (Exception e) {
+            log.error("Error retrieving portfolio file: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/portfolio/{id}/metadata")
+    public ResponseEntity<?> getPortfolioFileMetadata(@PathVariable String id) {
+        try {
+            Document metadata = fileStorageService.getMetadata(id);
+            Map<String, Object> response = new HashMap<>();
+            if (metadata != null) {
+                response.put("originalFilename", metadata.getString("originalFilename"));
+                response.put("contentType", metadata.getString("contentType"));
+                response.put("size", metadata.getLong("size"));
+                response.put("uploadedAt", metadata.getLong("uploadedAt"));
+            }
+            response.put("id", id);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid portfolio file ID for metadata: {}", id);
+            return ResponseEntity.badRequest().build();
+        } catch (FileNotFoundException e) {
+            log.warn("Portfolio file not found for metadata: {}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error retrieving portfolio metadata: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/portfolio/{id}")
+    public ResponseEntity<?> deletePortfolioFile(@PathVariable String id) {
+        try {
+            fileStorageService.delete(id);
+            log.info("Portfolio file deleted successfully: id={}", id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid portfolio file ID for deletion: {}", id);
+            return ResponseEntity.badRequest().build();
+        } catch (FileNotFoundException e) {
+            log.warn("Portfolio file not found for deletion: {}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error deleting portfolio file: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
