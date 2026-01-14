@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {api} from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
+import EmployeeFinderModal from "../projects/EmployeeFinderModal.jsx";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -10,6 +11,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     startDate: "",
     dueDate: "",
     projectType: "",
+    assignedEmployeeIds: [],
     address: {
       streetAddress: "",
       city: "",
@@ -20,6 +22,9 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+const [selectedEmployees, setSelectedEmployees] = useState([]); // [{id,email,name}]
+
 
   useEffect(() => {
     if (defaultDate) {
@@ -39,7 +44,52 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     return Object.keys(newErrors).length === 0;
   };
 
-  
+  const handleToggleEmployee = (employee) => {
+  const empId = employee.id ?? employee.userId;
+  if (!empId) return;
+
+  setSelectedEmployees((prev) => {
+    const exists = prev.some((e) => (e.id ?? e.userId) === empId);
+
+    const updated = exists
+      ? prev.filter((e) => (e.id ?? e.userId) !== empId)
+      : [...prev, employee];
+
+    setFormData((prevForm) => ({
+      ...prevForm,
+      assignedEmployeeIds: updated.map((e) => e.id ?? e.userId).filter(Boolean),
+    }));
+
+    return updated;
+  });
+};
+
+
+const handleClearEmployees = () => {
+  setSelectedEmployees([]);
+  setFormData((prev) => ({ ...prev, assignedEmployeeIds: [] }));
+};
+
+const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) => {
+  for (const id of employeeIds) {
+    const encodedId = encodeURIComponent(id);
+
+    try {
+      await api.post(
+        `/projects/${projectIdentifier}/assign/${encodedId}`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("ASSIGN OK", projectIdentifier, id);
+    } catch (e) {
+      console.error("ASSIGN FAILED", projectIdentifier, id, e?.response?.status, e?.response?.data);
+      throw e; // optional: stop the flow so you see the error immediately
+    }
+  }
+};
+
+
+
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validateForm()) return;
@@ -49,22 +99,33 @@ const handleSubmit = async (e) => {
       authorizationParams: { audience: "https://vladtech/api" },
     });
 
-    await api.post("/projects", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const payload = { ...formData }; // keep assignedEmployeeIds
+
+    const createRes = await api.post("/projects", payload, {
+      headers: { Authorization: `Bearer ${token}` },
     });
+
+    const created = createRes.data;
+    const projectIdentifier = created.projectIdentifier;
+
+    const employeeIds = formData.assignedEmployeeIds || [];
+    console.log("CREATE -> will assign employees:", employeeIds);
+
+    if (employeeIds.length > 0) {
+      await assignEmployeesToProject(projectIdentifier, employeeIds, token);
+    }
 
     onProjectCreated();
     handleClose();
   } catch (error) {
     console.error("Error creating project:", error);
     setSubmitError(
-      error.response?.data?.message ||
-        "Failed to create project. Please try again."
+      error.response?.data?.message || "Failed to create project. Please try again."
     );
   }
 };
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,6 +147,7 @@ const handleSubmit = async (e) => {
       startDate: "",
       dueDate: "",
       projectType: "",
+      assignedEmployeeIds: [],
       address: { streetAddress: "", city: "", province: "", country: "", postalCode: "" }
     });
     setErrors({});
@@ -96,6 +158,7 @@ const handleSubmit = async (e) => {
   if (!isOpen) return null;
 
   return (
+    <>
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white border-2 border-yellow-400 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
         <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">New Project</h2>
@@ -116,6 +179,37 @@ const handleSubmit = async (e) => {
             />
             {errors.name && <span className="text-red-600 text-sm mt-1 block">{errors.name}</span>}
           </div>
+<div className="mb-5">
+  <label className="block text-sm font-semibold text-black mb-2">
+    Employees
+  </label>
+
+  <div className="flex gap-2">
+    <button
+      type="button"
+      onClick={() => setIsEmployeeModalOpen(true)}
+      className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
+    >
+      {selectedEmployees.length > 0 ? (
+        <div className="text-sm text-black/80">
+          {selectedEmployees.map((e) => e.email).join(", ")}
+        </div>
+      ) : (
+        "Select employees"
+      )}
+    </button>
+
+    {formData.assignedEmployeeIds?.length > 0 && (
+      <button
+        type="button"
+        onClick={handleClearEmployees}
+        className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+</div>
 
           <div className="mb-5">
             <label className="block text-sm font-semibold text-black mb-2">Street Address</label>
@@ -239,6 +333,13 @@ const handleSubmit = async (e) => {
         </form>
       </div>
     </div>
+    <EmployeeFinderModal
+      isOpen={isEmployeeModalOpen}
+      onClose={() => setIsEmployeeModalOpen(false)}
+      selectedEmployeeIds={formData.assignedEmployeeIds}
+      onToggleEmployee={handleToggleEmployee}
+    />
+    </>
   );
 };
 

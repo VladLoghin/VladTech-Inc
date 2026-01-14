@@ -139,10 +139,33 @@ const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) =
     await assignEmployeesToProject(formData.projectIdentifier, newlyAdded, token);
   }
 } else {
-  await api.post("/projects", formData, {
+  const employeeIds = formData.assignedEmployeeIds || [];
+
+  // 1) create project WITHOUT employees
+  const payload = { ...formData };
+  delete payload.assignedEmployeeIds;
+  delete payload.assignedEmployeeEmails;
+
+  const createRes = await api.post("/projects", payload, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+  // 2) get the new identifier from backend response
+  const projectIdentifier = createRes?.data?.projectIdentifier;
+
+  if (!projectIdentifier) {
+    console.error("Create response missing projectIdentifier:", createRes?.data);
+    setSubmitError("Project created but missing projectIdentifier in response.");
+    return;
+  }
+
+  // 3) trigger email by assigning employees
+  if (employeeIds.length > 0) {
+    await assignEmployeesToProject(projectIdentifier, employeeIds, token);
+  }
 }
+
+
 
 
       onSubmitSuccess();
