@@ -6,6 +6,8 @@ import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseMo
 import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import java.util.List;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
+
 
 public interface ProjectService {
 
@@ -44,5 +46,7 @@ public interface ProjectService {
     List<ProjectResponseModel> getArchivedProjects();
 
     void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
+
+    ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId, ProjectStatus newStatus);
 
 }

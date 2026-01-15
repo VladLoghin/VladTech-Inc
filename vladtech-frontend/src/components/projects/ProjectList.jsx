@@ -35,7 +35,10 @@ const ProjectList = ({
   showEdit = true,
   showComplete = false,
   showReactivate = false,
+  showStatusControl = false,
+  onUpdateStatus,
 }) => {
+
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
       {projects.length === 0 && (
@@ -173,6 +176,25 @@ const ProjectList = ({
                 {project.status || "PENDING"}
               </span>
             </p>
+
+            {showStatusControl && !isArchived && (
+  <div className="mt-3">
+    <label className="block text-sm font-semibold text-black/60 mb-1">
+      Update Status
+    </label>
+
+    <select
+      value={project.status || "PENDING"}
+      onChange={(e) => onUpdateStatus?.(project, e.target.value)}
+      className="w-full px-3 py-2 border-2 border-black/20 rounded-lg bg-white"
+    >
+      <option value="PENDING">PENDING</option>
+      <option value="IN_PROGRESS">IN_PROGRESS</option>
+      <option value="COMPLETED">COMPLETED</option>
+    </select>
+  </div>
+)}
+
 
             {project.assignedEmployeeIds &&
               project.assignedEmployeeIds.length > 0 && (

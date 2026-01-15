@@ -46,6 +46,25 @@ const Employee = () => {
     }
   };
   */
+const handleUpdateStatus = async (project, nextStatus) => {
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+
+    await api.put(
+      `/employee/projects/${project.projectIdentifier}/status`,
+      { status: nextStatus },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setMessage(`Updated "${project.name}" to ${nextStatus}`);
+    await loadMyProjects();
+  } catch (err) {
+    console.error("Error updating project status:", err);
+    setMessage("Failed to update status.");
+  }
+};
 
   const loadMyProjects = async () => {
   setProjectsLoading(true);
@@ -200,7 +219,14 @@ const formatSelectedDate = (dateStr) => {
       </h3>
 
       <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
-        <ProjectList projects={projects} showEdit={false} employeeIndex={{}} />
+        <ProjectList
+  projects={projects}
+  showEdit={false}
+  employeeIndex={{}}
+  showStatusControl={true}
+  onUpdateStatus={handleUpdateStatus}
+/>
+
       </div>
     </div>
   </>
