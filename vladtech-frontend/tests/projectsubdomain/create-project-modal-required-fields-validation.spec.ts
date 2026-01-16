@@ -1,12 +1,12 @@
 import { test, expect } from '../fixtures/fixtures';
 
-test('validation errors appear for required fields', async ({ page, loginAs }) => {
+test('create project modal required fields validation', async ({ page, loginAs }) => {
   await loginAs('admin');
-  
+
   // Check if we're in mobile view
   const viewportSize = page.viewportSize();
   const isMobile = viewportSize && viewportSize.width < 768;
-  
+
   if (isMobile) {
     // Mobile: Open hamburger menu and click ADMIN PANEL
     const hamburgerButton = page.locator('button svg').first();
@@ -17,10 +17,10 @@ test('validation errors appear for required fields', async ({ page, loginAs }) =
     // Desktop: Click ADMIN PANEL in navbar
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
-  
+
   await page.getByRole('button', { name: 'ADD' }).click();
 
-  await page.getByRole('button', { name: 'Create' }).click();
+  await page.getByRole('button', { name: /^Create$/ }).click();
 
   await expect(page.getByText('Project name is required')).toBeVisible();
   await expect(page.getByText('City is required')).toBeVisible();

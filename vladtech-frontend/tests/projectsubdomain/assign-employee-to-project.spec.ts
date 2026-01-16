@@ -1,22 +1,22 @@
 import { test, expect } from '../fixtures/fixtures.js';
 
 test.describe('Admin assigns employee to project', () => {
-  test('admin can assign an employee to a project', async ({ page, loginAs }) => {
+  test('assign employee to project', async ({ page, loginAs, createProject }) => {
     const targetEmployeeEmail = 'employee.vladtech@cle4rwater.ca';
 
     // 1) Login as admin
     await loginAs('admin');
 
-    // 2) Go to admin panel
-    await page.goto('http://localhost:5173/admin');
+    // 2) Create a project to assign employee to
+    const projectName = await createProject('Employee Assignment Test');
 
-    await expect(
-      page.getByRole('heading', { name: /Admin Area - Only for Admin Role/i })
-    ).toBeVisible();
+    // 3) Wait for page to be ready
+    await page.waitForTimeout(500);
 
-    // 3) Open first project via Edit button in "All Projects"
-    const firstEditButton = page.getByRole('button', { name: 'Edit' }).first();
-    await firstEditButton.click();
+    // 4) Find our project and open edit modal
+    const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
+    await expect(projectCard).toBeVisible({ timeout: 5000 });
+    await projectCard.getByRole('button', { name: 'Edit' }).click();
 
     // Wait for the ProjectModal to appear
     const projectModalTitle = page.getByRole('heading', {
@@ -24,7 +24,7 @@ test.describe('Admin assigns employee to project', () => {
     });
     await expect(projectModalTitle).toBeVisible();
 
-    // 4) Open Employee picker
+    // 5) Open Employee picker
     const employeePickerButton = page.getByRole('button', {
       name: /Select employees?|Select employee/i,
     });
@@ -35,7 +35,7 @@ test.describe('Admin assigns employee to project', () => {
       page.getByRole('heading', { name: /Select Employee/i })
     ).toBeVisible();
 
-    // 5) Click the employee row for employee.vladtech@cle4rwater.ca
+    // 6) Click the employee row for employee.vladtech@cle4rwater.ca
     const employeeRow = page
       .getByRole('button')
       .filter({ hasText: targetEmployeeEmail })
@@ -44,7 +44,7 @@ test.describe('Admin assigns employee to project', () => {
     await expect(employeeRow).toBeVisible();
     await employeeRow.click(); // toggles selection, modal stays open
 
-    // 6) Click the Confirm button inside the modal
+    // 7) Click the Confirm button inside the modal
     const confirmButton = page.getByRole('button', { name: /^Confirm$/i });
     await confirmButton.click();
 
@@ -53,27 +53,25 @@ test.describe('Admin assigns employee to project', () => {
       page.getByRole('heading', { name: /Select Employee/i })
     ).toBeHidden();
 
-    // 7) Check that the employee email now appears in the Employee field in the modal
+    // 8) Check that the employee email now appears in the Employee field in the modal
     await expect(
       page.getByRole('button', {
         name: new RegExp(targetEmployeeEmail.replace('.', '\\.'), 'i'),
       })
     ).toBeVisible();
 
-    // 8) Save the project
-    const saveButton = page.getByRole('button', { name: /Save|Create/i });
+    // 9) Save the project
+    const saveButton = page.getByRole('button', { name: 'Save' });
     await saveButton.click();
 
     // Wait for modal to close
     await expect(projectModalTitle).toBeHidden();
 
-    // 9) Verify the assigned employee email appears in "All Projects" list
-    const allProjectsSection = page
-      .getByRole('heading', { name: /All Projects/i })
-      .locator('..'); // parent container
-
+    // 10) Verify the assigned employee email appears in the project card
+    await page.waitForTimeout(1000);
+    const updatedProjectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
     await expect(
-      allProjectsSection.getByText(targetEmployeeEmail, { exact: false })
+      updatedProjectCard.getByText(targetEmployeeEmail, { exact: false })
     ).toBeVisible();
   });
 });

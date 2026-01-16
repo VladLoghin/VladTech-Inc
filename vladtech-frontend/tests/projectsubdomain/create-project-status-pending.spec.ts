@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/fixtures';
 
-test('newly created project should have PENDING status', async ({ page, loginAs }) => {
+test('create project status pending', async ({ page, loginAs }) => {
     await loginAs('admin');
 
     // Check if we're in mobile view
