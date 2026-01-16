@@ -13,6 +13,19 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByOwnerAuth0Id(String ownerAuth0Id);
 
+    List<Review> findByClientNameAndRating(String clientName, Rating rating);
+
+    List<Review> findByClientName(String clientName);
+
+    List<Review> findByRating(Rating rating);
+
+    List<Review> findByVisibleTrueAndClientNameAndRating(String clientName, Rating rating);
+
+    List<Review> findByVisibleTrueAndClientName(String clientName);
+
+    List<Review> findByVisibleTrueAndRating(Rating rating);
+
+
 //
 //    // Get reviews by client ID
 //    List<Review> findByClientId(String clientId);

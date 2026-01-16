@@ -2,6 +2,7 @@ package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vladtech.reviews.business.ReviewService;
+import org.example.vladtech.reviews.data.Rating;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,8 +25,11 @@ public class ReviewController {
 
     @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
     @GetMapping()
-    public ResponseEntity<List<ReviewResponseModel>> getAllReviews(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(reviewService.getAllReviews());
+    public ResponseEntity<List<ReviewResponseModel>> getAllReviews(@AuthenticationPrincipal Jwt jwt,
+                                                                   @RequestParam(required = false) String clientName,
+                                                                   @RequestParam(required = false) Rating rating
+                                                                   ) {
+        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating));
     }
 
 
@@ -43,8 +47,9 @@ public class ReviewController {
 
 
     @GetMapping("/visible")
-    public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews() {
-        return ResponseEntity.ok(reviewService.getAllVisibleReviews());
+    public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews(@RequestParam(required = false) String clientName,
+                                                                           @RequestParam(required = false) Rating rating) {
+        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -3,6 +3,7 @@ package org.example.vladtech.reviews.business;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.reviews.data.Photo;
+import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
 import org.example.vladtech.filestorageservice.FileStorageService;
@@ -30,7 +31,20 @@ public class ReviewServiceImpl implements ReviewService {
     private final FileStorageService fileStorageService;
 
     @Override
-    public List<ReviewResponseModel> getAllReviews() {
+    public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue) {
+        if (clientName != null && ratingValue != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByClientNameAndRating(clientName, ratingValue)
+            );
+        } else if (clientName != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByClientName(clientName)
+            );
+        } else if (ratingValue != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByRating(ratingValue)
+            );
+        }
         return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
     }
 
@@ -86,11 +100,24 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public List<ReviewResponseModel> getAllVisibleReviews() {
+    public List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue) {
+        if (clientName != null && ratingValue != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByVisibleTrueAndClientNameAndRating(clientName, ratingValue)
+            );
+        } else if (clientName != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByVisibleTrueAndClientName(clientName)
+            );
+        } else if (ratingValue != null) {
+            return responseMapper.entityListToResponseModelList(
+                    reviewRepository.findByVisibleTrueAndRating(ratingValue)
+            );
+        }
         return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
     }
 
-    @PreAuthorize("hasAuthority('Client')")
+    //@PreAuthorize("hasAuthority('Client')")
     @Override
     public ReviewResponseModel deleteReviewAsClient(String reviewId, String clientId) {
         Review existing = reviewRepository.findById(reviewId)
