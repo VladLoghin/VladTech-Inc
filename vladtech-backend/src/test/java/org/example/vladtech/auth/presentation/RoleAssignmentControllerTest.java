@@ -5,9 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,7 +14,7 @@ import static org.mockito.Mockito.*;
 class RoleAssignmentControllerTest {
 
     @Mock
-    private RoleAssignmentServiceImpl roleAssignmentService; // must match constructor type
+    private RoleAssignmentServiceImpl roleAssignmentService;
 
     private RoleAssignmentController controller;
 
@@ -27,65 +25,65 @@ class RoleAssignmentControllerTest {
 
     @Test
     void assignClientRole_returnsSuccessMessage_whenRoleIsAssigned() {
-        doNothing().when(roleAssignmentService).assignClientRole("user123");
+        doNothing().when(roleAssignmentService).assignClientRole("user123", "Test User");
 
-        var response = controller.assignClientRole("user123");
+        var response = controller.assignClientRole("user123", "Test User");
 
         assertEquals("Client role assigned successfully.", response);
-        verify(roleAssignmentService).assignClientRole("user123");
+        verify(roleAssignmentService).assignClientRole("user123", "Test User");
     }
 
     @Test
     void assignClientRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .assignClientRole("user123");
+                .assignClientRole("user123", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.assignClientRole("user123"));
+                () -> controller.assignClientRole("user123", null));
     }
 
     @Test
     void assignEmployeeRole_returnsSuccessMessage_whenRoleIsAssigned() {
-        doNothing().when(roleAssignmentService).assignEmployeeRole("user456");
+        doNothing().when(roleAssignmentService).assignEmployeeRole("user456", "Test User");
 
-        var response = controller.assignEmployeeRole("user456");
+        var response = controller.assignEmployeeRole("user456", "Test User");
 
         assertEquals("Employee role assigned successfully.", response);
-        verify(roleAssignmentService).assignEmployeeRole("user456");
+        verify(roleAssignmentService).assignEmployeeRole("user456", "Test User");
     }
 
     @Test
     void assignEmployeeRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .assignEmployeeRole("user456");
+                .assignEmployeeRole("user456", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.assignEmployeeRole("user456"));
+                () -> controller.assignEmployeeRole("user456", null));
     }
 
     @Test
     void assignAdminRole_returnsSuccessMessage_whenRoleIsAssigned() {
-        doNothing().when(roleAssignmentService).assignAdminRole("user789");
+        doNothing().when(roleAssignmentService).assignAdminRole("user789", "Test User");
 
-        var response = controller.assignAdminRole("user789");
+        var response = controller.assignAdminRole("user789", "Test User");
 
         assertEquals("Admin role assigned successfully.", response);
-        verify(roleAssignmentService).assignAdminRole("user789");
+        verify(roleAssignmentService).assignAdminRole("user789", "Test User");
     }
 
     @Test
     void assignAdminRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .assignAdminRole("user789");
+                .assignAdminRole("user789", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.assignAdminRole("user789"));
+                () -> controller.assignAdminRole("user789", null));
     }
 
     @Test
@@ -117,65 +115,65 @@ class RoleAssignmentControllerTest {
 
     @Test
     void removeClientRole_returnsSuccessMessage_whenRoleIsRemoved() {
-        doNothing().when(roleAssignmentService).removeClientRole("user123");
+        doNothing().when(roleAssignmentService).removeClientRole("user123", "Test User");
 
-        var response = controller.removeClientRole("user123");
+        var response = controller.removeClientRole("user123", "Test User");
 
         assertEquals("Client role removed successfully.", response);
-        verify(roleAssignmentService).removeClientRole("user123");
+        verify(roleAssignmentService).removeClientRole("user123", "Test User");
     }
 
     @Test
     void removeClientRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .removeClientRole("user123");
+                .removeClientRole("user123", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.removeClientRole("user123"));
+                () -> controller.removeClientRole("user123", null));
     }
 
     @Test
     void removeEmployeeRole_returnsSuccessMessage_whenRoleIsRemoved() {
-        doNothing().when(roleAssignmentService).removeEmployeeRole("user456");
+        doNothing().when(roleAssignmentService).removeEmployeeRole("user456", "Test User");
 
-        var response = controller.removeEmployeeRole("user456");
+        var response = controller.removeEmployeeRole("user456", "Test User");
 
         assertEquals("Employee role removed successfully.", response);
-        verify(roleAssignmentService).removeEmployeeRole("user456");
+        verify(roleAssignmentService).removeEmployeeRole("user456", "Test User");
     }
 
     @Test
     void removeEmployeeRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .removeEmployeeRole("user456");
+                .removeEmployeeRole("user456", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.removeEmployeeRole("user456"));
+                () -> controller.removeEmployeeRole("user456", null));
     }
 
     @Test
     void removeAdminRole_returnsSuccessMessage_whenRoleIsRemoved() {
-        doNothing().when(roleAssignmentService).removeAdminRole("user789");
+        doNothing().when(roleAssignmentService).removeAdminRole("user789", "Test User");
 
-        var response = controller.removeAdminRole("user789");
+        var response = controller.removeAdminRole("user789", "Test User");
 
         assertEquals("Admin role removed successfully.", response);
-        verify(roleAssignmentService).removeAdminRole("user789");
+        verify(roleAssignmentService).removeAdminRole("user789", "Test User");
     }
 
     @Test
     void removeAdminRole_throwsException_whenServiceFails() {
         doThrow(new IllegalStateException("Failed"))
                 .when(roleAssignmentService)
-                .removeAdminRole("user789");
+                .removeAdminRole("user789", null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> controller.removeAdminRole("user789"));
+                () -> controller.removeAdminRole("user789", null));
     }
 
     @Test

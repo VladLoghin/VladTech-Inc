@@ -1,5 +1,6 @@
 package org.example.vladtech.auth.service;
 
+import org.example.vladtech.auth.dataaccess.RoleChangeLogRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,14 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -26,6 +23,9 @@ class RoleAssignmentServiceImplTest {
 
         @Mock
         private Auth0ManagementTokenService managementTokenService;
+
+        @Mock
+        private RoleChangeLogRepository roleChangeLogRepository;
 
         private RestTemplate restTemplate;
         private MockRestServiceServer mockServer;
@@ -39,7 +39,8 @@ class RoleAssignmentServiceImplTest {
 
                 service = new RoleAssignmentServiceImpl(
                                 managementTokenService,
-                                restTemplate);
+                                restTemplate,
+                                roleChangeLogRepository);
 
                 // Inject @Value fields manually
                 ReflectionTestUtils.setField(service, "domain", "dev-ljz84r2xvrlnftfv.ca.auth0.com");
@@ -61,7 +62,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(jsonPath("$.users[0]").value("user123"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.assignClientRole("user123");
+                service.assignClientRole("user123", "Test User");
 
                 mockServer.verify();
         }
@@ -79,7 +80,7 @@ class RoleAssignmentServiceImplTest {
 
                 Assertions.assertThrows(
                                 HttpServerErrorException.InternalServerError.class,
-                                () -> service.assignClientRole("user123"));
+                                () -> service.assignClientRole("user123", null));
 
                 mockServer.verify();
         }
@@ -97,7 +98,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(jsonPath("$.users[0]").value("user456"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.assignEmployeeRole("user456");
+                service.assignEmployeeRole("user456", "Test User");
 
                 mockServer.verify();
         }
@@ -115,7 +116,7 @@ class RoleAssignmentServiceImplTest {
 
                 Assertions.assertThrows(
                                 HttpServerErrorException.InternalServerError.class,
-                                () -> service.assignEmployeeRole("user456"));
+                                () -> service.assignEmployeeRole("user456", null));
 
                 mockServer.verify();
         }
@@ -133,7 +134,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(jsonPath("$.users[0]").value("user789"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.assignAdminRole("user789");
+                service.assignAdminRole("user789", "Test User");
 
                 mockServer.verify();
         }
@@ -151,7 +152,7 @@ class RoleAssignmentServiceImplTest {
 
                 Assertions.assertThrows(
                                 HttpServerErrorException.InternalServerError.class,
-                                () -> service.assignAdminRole("user789"));
+                                () -> service.assignAdminRole("user789", null));
 
                 mockServer.verify();
         }
@@ -210,7 +211,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.removeClientRole("user123");
+                service.removeClientRole("user123", "Test User");
 
                 mockServer.verify();
         }
@@ -227,7 +228,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.removeEmployeeRole("user456");
+                service.removeEmployeeRole("user456", "Test User");
 
                 mockServer.verify();
         }
@@ -244,7 +245,7 @@ class RoleAssignmentServiceImplTest {
                                 .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                service.removeAdminRole("user789");
+                service.removeAdminRole("user789", "Test User");
 
                 mockServer.verify();
         }

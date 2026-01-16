@@ -1,12 +1,14 @@
 package org.example.vladtech.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.vladtech.auth.dataaccess.RoleChangeLog;
+import org.example.vladtech.auth.dataaccess.RoleChangeLogRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +18,8 @@ import java.util.Map;
 public class RoleAssignmentServiceImpl {
 
     private final Auth0ManagementTokenService managementTokenService;
-
     private final RestTemplate restTemplate;
+    private final RoleChangeLogRepository roleChangeLogRepository;
 
     @Value("${AUTH0_DOMAIN}")
     private String domain;
@@ -31,19 +33,19 @@ public class RoleAssignmentServiceImpl {
     @Value("${AUTH0_ROLE_ADMIN}")
     private String adminRoleId;
 
-    public void assignClientRole(String auth0UserId) {
+    public void assignClientRole(String auth0UserId, String userName) {
         assignRole(auth0UserId, clientRoleId);
-        System.out.println("Client role assigned to " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Client", "ASSIGNED");
     }
 
-    public void assignEmployeeRole(String auth0UserId) {
+    public void assignEmployeeRole(String auth0UserId, String userName) {
         assignRole(auth0UserId, employeeRoleId);
-        System.out.println("Employee role assigned to " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Employee", "ASSIGNED");
     }
 
-    public void assignAdminRole(String auth0UserId) {
+    public void assignAdminRole(String auth0UserId, String userName) {
         assignRole(auth0UserId, adminRoleId);
-        System.out.println("Admin role assigned to " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Admin", "ASSIGNED");
     }
 
     public void assignRole(String auth0UserId, String roleId) {
@@ -67,19 +69,19 @@ public class RoleAssignmentServiceImpl {
         }
     }
 
-    public void removeClientRole(String auth0UserId) {
+    public void removeClientRole(String auth0UserId, String userName) {
         removeRole(auth0UserId, clientRoleId);
-        System.out.println("Client role removed from " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Client", "REMOVED");
     }
 
-    public void removeEmployeeRole(String auth0UserId) {
+    public void removeEmployeeRole(String auth0UserId, String userName) {
         removeRole(auth0UserId, employeeRoleId);
-        System.out.println("Employee role removed from " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Employee", "REMOVED");
     }
 
-    public void removeAdminRole(String auth0UserId) {
+    public void removeAdminRole(String auth0UserId, String userName) {
         removeRole(auth0UserId, adminRoleId);
-        System.out.println("Admin role removed from " + auth0UserId);
+        logRoleChange(auth0UserId, userName, "Admin", "REMOVED");
     }
 
     public void removeRole(String auth0UserId, String roleId) {
@@ -102,5 +104,25 @@ public class RoleAssignmentServiceImpl {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new IllegalStateException("Failed to remove role: " + response.getStatusCode());
         }
+    }
+
+    private void logRoleChange(String userId, String userName, String roleName, String action) {
+        RoleChangeLog log = RoleChangeLog.builder()
+                .userId(userId)
+                .userName(userName != null ? userName : userId)
+                .roleName(roleName)
+                .action(action)
+                .performedAt(Instant.now())
+                .build();
+        roleChangeLogRepository.save(log);
+    }
+
+    public List<RoleChangeLog> getChangeLog() {
+        return roleChangeLogRepository.findAllByOrderByPerformedAtDesc();
+    }
+
+    public org.springframework.data.domain.Page<RoleChangeLog> getChangeLog(int page, int size) {
+        return roleChangeLogRepository.findAllByOrderByPerformedAtDesc(
+                org.springframework.data.domain.PageRequest.of(page, size));
     }
 }
