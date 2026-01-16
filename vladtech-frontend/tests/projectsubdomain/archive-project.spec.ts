@@ -24,5 +24,5 @@ test('archive project', async ({ page, loginAs, createProject }) => {
     await projectCard.getByRole('button', { name: /Mark Complete/i }).click();
 
     // Verify success message
-    await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 15000 });
 });

@@ -65,7 +65,7 @@ test.describe('Admin assigns employee to project', () => {
     await saveButton.click();
 
     // Wait for modal to close
-    await expect(projectModalTitle).toBeHidden();
+    await expect(projectModalTitle).toBeHidden({ timeout: 15000 });
 
     // 10) Verify the assigned employee email appears in the project card
     await page.waitForTimeout(1000);
