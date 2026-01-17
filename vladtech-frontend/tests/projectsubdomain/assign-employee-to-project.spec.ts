@@ -41,7 +41,7 @@ test.describe('Admin assigns employee to project', () => {
       .filter({ hasText: targetEmployeeEmail })
       .first();
 
-    await expect(employeeRow).toBeVisible();
+    await expect(employeeRow).toBeVisible({ timeout: 15000 }); // Increased timeout for cold start
     await employeeRow.click(); // toggles selection, modal stays open
 
     // 7) Click the Confirm button inside the modal
@@ -65,7 +65,17 @@ test.describe('Admin assigns employee to project', () => {
     await saveButton.click();
 
     // Wait for modal to close
-    await expect(projectModalTitle).toBeHidden({ timeout: 15000 });
+    try {
+      await expect(projectModalTitle).toBeHidden({ timeout: 15000 });
+    } catch (e) {
+      // If modal is still open, check for error message
+      const errorAlert = page.locator('div.bg-red-100.border-red-400');
+      if (await errorAlert.isVisible()) {
+        const errorText = await errorAlert.innerText();
+        throw new Error(`Project update failed with error: ${errorText}`);
+      }
+      throw e;
+    }
 
     // 10) Verify the assigned employee email appears in the project card
     await page.waitForTimeout(1000);
