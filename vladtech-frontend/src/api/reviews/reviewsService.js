@@ -3,23 +3,47 @@ import { api } from "../http";
 
 const API_BASE = "/reviews";
 
-export const getAllVisibleReviews = async () => {
+export const getAllVisibleReviews = async (filters = {}) => {
     try {
-        const res = await api.get(`${API_BASE}/visible`);
+        const params = {};
+        
+        // Only add non-empty filters
+        if (filters.clientName?.trim()) {
+            params.clientName = filters.clientName.trim();
+        }
+        if (filters.rating) {
+            params.rating = filters.rating;
+        }
+        
+        const res = await api.get(`${API_BASE}/visible`, { params });
         return res.data;
     } catch (err) {
         throw err;
     }
 };
 
-export const getAllReviews = async (token) => {
+
+export const getAllReviews = async (token, filters = {}) => {
+    const params = {};
+    
+    // Only add non-empty filters
+    if (filters.clientName?.trim()) {
+        params.clientName = filters.clientName.trim();
+    }
+    if (filters.rating) {
+        params.rating = filters.rating;
+    }
+    
     const res = await api.get(`${API_BASE}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
+        params,
     });
+
     return res.data;
 };
+
 
 
 export const getMyReviews = async (token) => {

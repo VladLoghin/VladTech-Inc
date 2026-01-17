@@ -68,7 +68,7 @@ class ReviewControllerIntegrationTest {
                 List.of(new Photo("client2", "photo.jpg", "image/jpeg", "/uploads/reviews/photo.jpg"))
         );
 
-        when(reviewService.getAllVisibleReviews()).thenReturn(List.of(r1, r2));
+        when(reviewService.getAllVisibleReviews(null, null)).thenReturn(List.of(r1, r2));
     }
 
     @Test
@@ -105,6 +105,136 @@ class ReviewControllerIntegrationTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("Employee")))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllReviews("client1", Rating.FIVE)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .param("clientName", "client1")
+                        .param("rating", "FIVE")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].rating").value("FIVE"));
+    }
+
+    @Test
+    void getAllReviews_withClientNameOnly_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllReviews("client1", null)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .param("clientName", "client1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].clientId").value("client1"));
+    }
+
+    @Test
+    void getAllReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllReviews(null, Rating.FIVE)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .param("rating", "FIVE")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].rating").value("FIVE"));
+    }
+
+    @Test
+    void getAllReviews_withoutParameters_returnsAllReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllReviews(null, null)).thenReturn(List.of(r1, r2));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
+                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
+    }
+
+    @Test
+    void getAllVisibleReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllVisibleReviews("client1", Rating.FIVE)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews/visible")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .param("clientName", "client1")
+                        .param("rating", "FIVE")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].clientId").value("client1"));
+    }
+
+    @Test
+    void getAllVisibleReviews_withClientNameOnly_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllVisibleReviews("client1", null)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews/visible")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .param("clientName", "client1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].clientId").value("client1"));
+    }
+
+    @Test
+    void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllVisibleReviews(null, Rating.FIVE)).thenReturn(List.of(r1));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews/visible")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .param("rating", "FIVE")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].rating").value("FIVE"));
+    }
+
+    @Test
+    void getAllVisibleReviews_withoutParameters_returnsAllVisibleReviews() throws Exception {
+        // Arrange
+        when(reviewService.getAllVisibleReviews(null, null)).thenReturn(List.of(r1, r2));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/reviews/visible")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
+                .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
     }
 
 
