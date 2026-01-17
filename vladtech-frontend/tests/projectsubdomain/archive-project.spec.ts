@@ -24,5 +24,14 @@ test('archive project', async ({ page, loginAs, createProject }) => {
     await projectCard.getByRole('button', { name: /Mark Complete/i }).click();
 
     // Verify success message
-    await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 15000 });
+    try {
+        await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 15000 });
+    } catch (e) {
+        // If success message not found, check if error message is present
+        const errorMsg = page.getByText('Failed to complete project.');
+        if (await errorMsg.isVisible()) {
+            throw new Error('Backend failed to complete project: UI reported "Failed to complete project."');
+        }
+        throw e;
+    }
 });
