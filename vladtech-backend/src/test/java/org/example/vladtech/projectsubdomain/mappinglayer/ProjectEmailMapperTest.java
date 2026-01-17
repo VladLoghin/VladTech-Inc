@@ -128,4 +128,49 @@ class ProjectEmailMapperTest {
         assertEquals("Project Updated: Test Project", email.getSubject());
         assertEquals("Updated", email.getOperation());
     }
+
+    @Test
+    void toProjectNotificationEmail_ShouldReturnNull_WhenProjectIsNull() {
+        assertNull(mapper.toProjectNotificationEmail(null, "Created"));
+    }
+
+    @Test
+    void toProjectNotificationEmail_ShouldReturnNull_WhenAllAddressFieldsBlank() {
+        project.setAddress(new Address("   ", "", "  ", "   ", "   "));
+
+        ProjectNotificationEmail email = mapper.toProjectNotificationEmail(project, "Created");
+
+        assertNotNull(email);
+        assertNull(email.getAddress()); // this hits: sb.length() == 0 ? null
+    }
+
+// --------- toEmployeeAssignedEmail coverage (0% in your report) ---------
+
+    @Test
+    void toEmployeeAssignedEmail_ShouldReturnNull_WhenProjectNull() {
+        assertNull(mapper.toEmployeeAssignedEmail(null, "employee@example.com"));
+    }
+
+    @Test
+    void toEmployeeAssignedEmail_ShouldReturnNull_WhenEmployeeEmailNull() {
+        assertNull(mapper.toEmployeeAssignedEmail(project, null));
+    }
+
+    @Test
+    void toEmployeeAssignedEmail_ShouldReturnNull_WhenEmployeeEmailBlank() {
+        assertNull(mapper.toEmployeeAssignedEmail(project, "   "));
+    }
+
+    @Test
+    void toEmployeeAssignedEmail_ShouldMapFields_WhenValid() {
+        ProjectNotificationEmail email = mapper.toEmployeeAssignedEmail(project, "employee@example.com");
+
+        assertNotNull(email);
+        assertEquals("employee@example.com", email.getRecipientEmail());
+        assertEquals("You were assigned to project: Test Project", email.getSubject());
+        assertEquals("Assigned", email.getOperation());
+        assertNotNull(email.getSentDate());
+    }
+
+
 }
