@@ -833,5 +833,229 @@ class ProjectServiceImplTest {
                 assertNotNull(result);
                 assertTrue(result.isEmpty());
         }
+    // ---------- updateProjectStatusForEmployee tests ----------
+
+    @Test
+    void updateProjectStatusForEmployee_pendingToInProgress_ok_whenEmployeeAssigned() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setStatus(ProjectStatus.PENDING);
+
+        Project saved = new Project();
+        saved.setProjectIdentifier(projectId);
+        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        saved.setStatus(ProjectStatus.IN_PROGRESS);
+
+        ProjectResponseModel mapped = new ProjectResponseModel();
+        mapped.setProjectIdentifier(projectId);
+        mapped.setStatus("IN_PROGRESS");
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenReturn(saved);
+        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(mapped);
+
+        ProjectResponseModel result =
+                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS);
+
+        assertNotNull(result);
+        assertEquals("IN_PROGRESS", result.getStatus());
+        assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
+        verify(projectRepository).save(existing);
+    }
+
+    @Test
+    void updateProjectStatusForEmployee_setsPendingWhenCurrentStatusNull_thenAllowsToInProgress() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setStatus(null); // important
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+
+        assertDoesNotThrow(() ->
+                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS)
+        );
+
+        assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
+        verify(projectRepository).save(existing);
+    }
+
+    @Test
+    void updateProjectStatusForEmployee_throwsWhenEmployeeNotAssigned() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|someoneElse")));
+        existing.setStatus(ProjectStatus.PENDING);
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS)
+        );
+
+        assertTrue(ex.getMessage().toLowerCase().contains("not allowed"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void updateProjectStatusForEmployee_throwsWhenInvalidTransition_pendingToCompleted() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setStatus(ProjectStatus.PENDING);
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.COMPLETED)
+        );
+
+        assertTrue(ex.getMessage().toLowerCase().contains("invalid status transition"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void updateProjectStatusForEmployee_blankEmployeeId_throwsInvalidEmployeeIdException() {
+        String projectId = "PROJ-1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|emp1")));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+
+        assertThrows(InvalidEmployeeIdException.class, () ->
+                projectService.updateProjectStatusForEmployee(projectId, "   ", ProjectStatus.IN_PROGRESS)
+        );
+
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void updateProjectStatusForEmployee_projectNotFound_throwsProjectNotFoundException() {
+        when(projectRepository.findByProjectIdentifier("PROJ-404")).thenReturn(Optional.empty());
+
+        assertThrows(ProjectNotFoundException.class, () ->
+                projectService.updateProjectStatusForEmployee("PROJ-404", "auth0|emp1", ProjectStatus.IN_PROGRESS)
+        );
+    }
+
+    // ---------- assignEmployee email flow tests ----------
+
+    @Test
+    void assignEmployee_whenListIsNull_createsList_andSendsAssignedEmail() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+        String employeeEmail = "emp1@x.com";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(null); // important branch
+
+        Project saved = new Project();
+        saved.setProjectIdentifier(projectId);
+        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenReturn(saved);
+        when(userManagementService.getUserEmailById(employeeId)).thenReturn(employeeEmail);
+        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
+
+        projectService.assignEmployee(projectId, employeeId);
+
+        assertNotNull(existing.getAssignedEmployeeIds());
+        assertTrue(existing.getAssignedEmployeeIds().contains(employeeId));
+
+        verify(userManagementService).getUserEmailById(employeeId);
+        verify(projectServiceMock).sendEmployeeAssignedEmailAsync(any(Project.class), eq(employeeEmail));
+    }
+
+    @Test
+    void assignEmployee_sendsAssignedEmail_evenWhenResolvedEmailBlank() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>());
+
+        Project saved = new Project();
+        saved.setProjectIdentifier(projectId);
+        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenReturn(saved);
+
+        String blankEmail = "   ";
+        when(userManagementService.getUserEmailById(employeeId)).thenReturn(blankEmail);
+
+        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
+
+        projectService.assignEmployee(projectId, employeeId);
+
+        // production behavior: it still calls the async method, even with blank email
+        verify(projectServiceMock, times(1))
+                .sendEmployeeAssignedEmailAsync(any(Project.class), eq(blankEmail));
+    }
+
+
+    // ---------- sendEmployeeAssignedEmailAsync tests ----------
+
+    @Test
+    void sendEmployeeAssignedEmailAsync_sendsEmail_whenMapperReturnsEmail() {
+        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+
+        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
+
+        projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
+
+        verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
+        verify(projectEmailSender).send(email);
+    }
+
+    @Test
+    void sendEmployeeAssignedEmailAsync_doesNothing_whenEmailNullOrBlank() {
+        projectService.sendEmployeeAssignedEmailAsync(project, null);
+        projectService.sendEmployeeAssignedEmailAsync(project, "   ");
+
+        verify(projectEmailMapper, never()).toEmployeeAssignedEmail(any(), any());
+        verify(projectEmailSender, never()).send(any());
+    }
+
+    @Test
+    void sendEmployeeAssignedEmailAsync_doesNotSend_whenMapperReturnsNull() {
+        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(null);
+
+        projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
+
+        verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
+        verify(projectEmailSender, never()).send(any());
+    }
+
+    @Test
+    void sendEmployeeAssignedEmailAsync_handlesException_whenSenderThrows() {
+        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
+        doThrow(new RuntimeException("boom")).when(projectEmailSender).send(email);
+
+        assertDoesNotThrow(() -> projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com"));
+
+        verify(projectEmailSender).send(email);
+    }
 
 }

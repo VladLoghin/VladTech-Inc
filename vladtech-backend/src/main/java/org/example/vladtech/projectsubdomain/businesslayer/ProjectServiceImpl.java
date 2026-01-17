@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
 import org.example.vladtech.auth.service.UserManagementService;
+import java.util.List;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 
 @Slf4j
 @Service
@@ -317,6 +319,42 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("Failed to send employee assignment email for project {}: {}",
                     project.getProjectIdentifier(), e.getMessage());
         }
+    }
+
+    @Override
+    public ProjectResponseModel updateProjectStatusForEmployee(
+            String projectIdentifier,
+            String employeeId,
+            ProjectStatus newStatus
+    ) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
+        }
+
+        List<String> assigned = project.getAssignedEmployeeIds();
+        if (assigned == null || !assigned.contains(employeeId)) {
+            throw new RuntimeException("Not allowed: employee is not assigned to this project");
+        }
+
+        ProjectStatus current = (project.getStatus() == null) ? ProjectStatus.PENDING : project.getStatus();
+
+        if (!isValidStatusTransition(current, newStatus)) {
+            throw new RuntimeException("Invalid status transition: " + current + " -> " + newStatus);
+        }
+
+        project.setStatus(newStatus);
+        Project saved = projectRepository.save(project);
+        return projectResponseMapper.entityToResponseModel(saved);
+    }
+
+    private boolean isValidStatusTransition(ProjectStatus current, ProjectStatus next) {
+        if (current == next) return true;
+
+        return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
+                || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);
     }
 
 }
