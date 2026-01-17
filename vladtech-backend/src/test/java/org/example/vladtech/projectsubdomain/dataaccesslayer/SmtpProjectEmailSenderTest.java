@@ -1,5 +1,6 @@
 package org.example.vladtech.projectsubdomain.dataaccesslayer;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
@@ -8,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,26 @@ class SmtpProjectEmailSenderTest {
     private SmtpProjectEmailSender emailSender;
 
     private ProjectNotificationEmail notificationEmail;
+
+    private static String readHtml(MimeMessage msg) throws Exception {
+        Object content = msg.getContent();
+
+        if (content instanceof String s) {
+            return s;
+        }
+
+        if (content instanceof jakarta.mail.Multipart mp) {
+            for (int i = 0; i < mp.getCount(); i++) {
+                var part = mp.getBodyPart(i);
+                Object partContent = part.getContent();
+                if (partContent instanceof String s) {
+                    return s;
+                }
+            }
+        }
+
+        return String.valueOf(content);
+    }
 
     @BeforeEach
     void setUp() {
@@ -49,305 +70,126 @@ class SmtpProjectEmailSenderTest {
     }
 
     @Test
-    void send_ShouldSendEmailSuccessfully() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(notificationEmail);
-
-        verify(mailSender, times(1)).createMimeMessage();
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldThrowException_WhenMailServerFails() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        doThrow(new MailSendException("Mail server error")).when(mailSender).send(any(MimeMessage.class));
-
-        assertThrows(MailSendException.class, () -> emailSender.send(notificationEmail));
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldIncludeAllProjectDetails_WhenAllFieldsPresent() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
+    void send_ShouldSendEmailSuccessfully_andIncludeOptionalSections() throws Exception {
+        MimeMessage mimeMessage = new MimeMessage(Session.getInstance(new Properties()));
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         emailSender.send(notificationEmail);
 
         verify(mailSender, times(1)).send(any(MimeMessage.class));
+
+        String html = (String) mimeMessage.getContent();
+
+        // base content
+        assertTrue(html.contains("Project Created"));
+        assertTrue(html.contains("Project ID:"));
+        assertTrue(html.contains("PROJ-1"));
+        assertTrue(html.contains("Project Name:"));
+        assertTrue(html.contains("Test Project"));
+
+        // optional sections present
+        assertTrue(html.contains("<strong>Description:</strong>"));
+        assertTrue(html.contains("<strong>Type:</strong>"));
+        assertTrue(html.contains("<strong>Start Date:</strong>"));
+        assertTrue(html.contains("<strong>Due Date:</strong>"));
+        assertTrue(html.contains("<strong>Location:</strong>"));
     }
 
     @Test
-    void send_ShouldHandleNullDescription() {
-        ProjectNotificationEmail emailWithoutDescription = new ProjectNotificationEmail(
+    void send_ShouldOmitOptionalSections_WhenNullOrBlank() throws Exception {
+        ProjectNotificationEmail minimal = new ProjectNotificationEmail(
                 "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                null,
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                "123 Main St, Montreal",
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithoutDescription);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleBlankDescription() {
-        ProjectNotificationEmail emailWithBlankDescription = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "   ",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                "123 Main St, Montreal",
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithBlankDescription);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleNullProjectType() {
-        ProjectNotificationEmail emailWithoutType = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Description",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                "123 Main St, Montreal",
-                null,
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithoutType);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleNullStartDate() {
-        ProjectNotificationEmail emailWithoutStartDate = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Description",
-                null,
-                LocalDate.of(2025, 3, 30),
-                "123 Main St, Montreal",
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithoutStartDate);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleNullDueDate() {
-        ProjectNotificationEmail emailWithoutDueDate = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Description",
-                LocalDate.of(2025, 1, 15),
-                null,
-                "123 Main St, Montreal",
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithoutDueDate);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleNullAddress() {
-        ProjectNotificationEmail emailWithoutAddress = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Description",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                null,
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithoutAddress);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleBlankAddress() {
-        ProjectNotificationEmail emailWithBlankAddress = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Description",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                "   ",
-                "SCHEDULED",
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(emailWithBlankAddress);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
-
-    @Test
-    void send_ShouldHandleUpdateOperation() {
-        ProjectNotificationEmail updateEmail = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Updated: Test Project",
-                "PROJ-1",
-                "Test Project",
-                "John Doe",
-                "Updated Description",
-                LocalDate.of(2025, 1, 15),
-                LocalDate.of(2025, 3, 30),
-                "123 Main St, Montreal",
-                "SCHEDULED",
+                "Project Updated: Minimal",
+                "PROJ-2",
+                "Minimal",
+                "Client",
+                "   ", // blank description
+                null,  // null start date
+                null,  // null due date
+                "   ", // blank address
+                null,  // null type
                 "Updated",
                 LocalDateTime.now()
         );
 
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        MimeMessage mimeMessage = new MimeMessage(Session.getInstance(new Properties()));
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        emailSender.send(updateEmail);
+        emailSender.send(minimal);
 
         verify(mailSender, times(1)).send(any(MimeMessage.class));
+
+        String html = (String) mimeMessage.getContent();
+
+        // base exists
+        assertTrue(html.contains("Project Updated"));
+
+        // optional omitted
+        assertFalse(html.contains("<strong>Description:</strong>"));
+        assertFalse(html.contains("<strong>Type:</strong>"));
+        assertFalse(html.contains("<strong>Start Date:</strong>"));
+        assertFalse(html.contains("<strong>Due Date:</strong>"));
+        assertFalse(html.contains("<strong>Location:</strong>"));
     }
 
     @Test
-    void send_ShouldEscapeHtmlCharacters() {
-        ProjectNotificationEmail emailWithHtmlChars = new ProjectNotificationEmail(
+    void send_ShouldEscapeHtmlCharacters() throws Exception {
+        ProjectNotificationEmail emailWithHtml = new ProjectNotificationEmail(
                 "client@example.com",
-                "Project Created: <Test> Project",
+                "Project Created: <Test>",
                 "PROJ-1",
-                "<script>alert('test')</script>",
+                "<script>alert('x')</script>",
                 "John & Doe",
-                "<b>Bold</b> Description",
+                "<b>Bold</b> & <i>Italic</i>",
                 LocalDate.of(2025, 1, 15),
                 LocalDate.of(2025, 3, 30),
-                "123 Main St & Avenue",
+                "123 Main & <Ave>",
                 "SCHEDULED",
                 "Created",
                 LocalDateTime.now()
         );
 
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        MimeMessage mimeMessage = new MimeMessage(Session.getInstance(new Properties()));
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        emailSender.send(emailWithHtmlChars);
+        emailSender.send(emailWithHtml);
 
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
+        String html = readHtml(mimeMessage);
+
+        assertTrue(html.contains("&lt;script&gt;alert('x')&lt;/script&gt;"));
+        assertTrue(html.contains("&lt;b&gt;Bold&lt;/b&gt; &amp; &lt;i&gt;Italic&lt;/i&gt;"));
+        assertTrue(html.contains("123 Main &amp; &lt;Ave&gt;"));
+        assertFalse(html.contains("<script>"));
+        assertFalse(html.contains("<b>"));
+        assertFalse(html.contains("<i>"));
+        assertFalse(html.contains("&lt;script&gt;alert(&apos;x&apos;)&lt;/script&gt;")); // optional: proves quotes aren't escaped
+
     }
+
 
     @Test
-    void send_ShouldFormatDatesCorrectly() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+    void send_ShouldWrapMessagingExceptionInRuntimeException() {
+        // Force MessagingException inside the try-block by throwing from MimeMessage.setFrom(...)
+        MimeMessage throwing = new ThrowingMimeMessage(Session.getInstance(new Properties()));
+        when(mailSender.createMimeMessage()).thenReturn(throwing);
 
-        emailSender.send(notificationEmail);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> emailSender.send(notificationEmail));
+        assertTrue(ex.getMessage().contains("Failed to send project notification email"));
+        assertNotNull(ex.getCause());
+        assertTrue(ex.getCause() instanceof MessagingException);
 
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
     }
 
-    @Test
-    void send_ShouldUseCorrectFromAddress() {
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+    static class ThrowingMimeMessage extends MimeMessage {
+        ThrowingMimeMessage(Session session) {
+            super(session);
+        }
 
-        emailSender.send(notificationEmail);
-
-        verify(mailSender, times(1)).createMimeMessage();
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
+        @Override
+        public void setFrom(jakarta.mail.Address address) throws MessagingException {
+            throw new MessagingException("boom");
+        }
     }
 
-    @Test
-    void send_ShouldHandleMinimalProjectInfo() {
-        ProjectNotificationEmail minimalEmail = new ProjectNotificationEmail(
-                "client@example.com",
-                "Project Created: Minimal Project",
-                "PROJ-999",
-                "Minimal Project",
-                "Client Name",
-                null,
-                null,
-                null,
-                null,
-                null,
-                "Created",
-                LocalDateTime.now()
-        );
-
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        emailSender.send(minimalEmail);
-
-        verify(mailSender, times(1)).send(any(MimeMessage.class));
-    }
 }
