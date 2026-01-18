@@ -2,7 +2,9 @@ package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vladtech.reviews.business.ReviewService;
+import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Rating;
+import org.example.vladtech.reviews.data.ReviewRepository;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +42,11 @@ public class ReviewController {
             @PathVariable String reviewId,
             @RequestBody ReviewRequestModel reviewRequestModel
     ) {
+        if (reviewId == null || reviewId.isBlank() || reviewRequestModel == null || reviewRequestModel.getVisible() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+
         return ResponseEntity.ok(
                 reviewService.updateReviewVisibility(reviewId, reviewRequestModel.getVisible())
         );
@@ -69,7 +76,13 @@ public class ReviewController {
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(@PathVariable String reviewId,
                                              @AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null || jwt.getClaimAsString("sub") == null) {
+            return ResponseEntity.status(401).build();
+        }
         String userId = jwt.getClaim("sub");
+        if (reviewId == null || reviewId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         reviewService.deleteReviewAsClient(reviewId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -85,6 +98,9 @@ public class ReviewController {
 
     @GetMapping("/satisfaction-percentage")
     public ResponseEntity<Double> getSatisfactionPercentage() {
+        if (reviewService.getAllVisibleReviews(null, null).isEmpty()) {
+            return ResponseEntity.ok(0.0);
+        }
         return ResponseEntity.ok(reviewService.computeSatisfactionPercentage());
     }
 
