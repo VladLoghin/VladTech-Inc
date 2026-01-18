@@ -21,6 +21,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+
 
 import java.util.List;
 
@@ -236,6 +241,163 @@ class ReviewControllerIntegrationTest {
                 .andExpect(jsonPath("$[?(@.clientId == 'client1')]").exists())
                 .andExpect(jsonPath("$[?(@.clientId == 'client2')]").exists());
     }
+
+    @Test
+    void patchReviewVisibility_asAdmin_ok() throws Exception {
+        // Arrange
+        ReviewResponseModel updated = new ReviewResponseModel(
+                "review-1",
+                "client1",
+                "appt1",
+                "Roger",
+                "hell yeah!",
+                false,
+                Rating.FIVE,
+                List.of()
+        );
+
+        when(reviewService.updateReviewVisibility("review-1", false)).thenReturn(updated);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/reviews/review-1/visibility")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"visible\":false}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.reviewId").value("review-1"))
+                .andExpect(jsonPath("$.visible").value(false));
+
+        verify(reviewService).updateReviewVisibility("review-1", false);
+    }
+
+    @Test
+    void patchReviewVisibility_asClient_forbidden() throws Exception {
+        mockMvc.perform(patch("/api/reviews/review-1/visibility")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"visible\":true}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        verify(reviewService, never()).updateReviewVisibility(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    void patchReviewVisibility_missingBody_returnsBadRequest() throws Exception {
+        // Because @RequestBody is required by default, Spring will reject missing body with 400
+        mockMvc.perform(patch("/api/reviews/review-1/visibility")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(reviewService, never()).updateReviewVisibility(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    void patchReviewVisibility_visibleNull_returnsBadRequest() throws Exception {
+        mockMvc.perform(patch("/api/reviews/review-1/visibility")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"visible\":null}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(reviewService, never()).updateReviewVisibility(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    void patchReviewVisibility_blankReviewId_returnsBadRequest() throws Exception {
+        // "%20" becomes " " which isBlank() == true in your controller
+        mockMvc.perform(patch("/api/reviews/%20/visibility")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"visible\":true}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(reviewService, never()).updateReviewVisibility(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    void deleteReview_asClient_noContent() throws Exception {
+        Jwt jwtWithSub = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .claim("sub", "test-sub")
+                .build();
+
+        mockMvc.perform(delete("/api/reviews/review-1")
+                        .with(jwt().jwt(jwtWithSub).authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(reviewService).deleteReviewAsClient("review-1", "test-sub");
+    }
+
+
+    @Test
+    void deleteReview_asAdmin_forbidden() throws Exception {
+        mockMvc.perform(delete("/api/reviews/review-1")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        verify(reviewService, never()).deleteReviewAsClient(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void deleteReview_blankReviewId_returnsBadRequest() throws Exception {
+        mockMvc.perform(delete("/api/reviews/%20")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(reviewService, never()).deleteReviewAsClient(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void deleteReview_missingSubClaim_returns401() throws Exception {
+        Jwt noSubJwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .claim("some", "thing")
+                .build();
+
+        mockMvc.perform(delete("/api/reviews/review-1")
+                        .with(jwt().jwt(noSubJwt).authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+
+        verify(reviewService, never()).deleteReviewAsClient(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void getSatisfactionPercentage_whenVisibleEmpty_returnsOkWithZero() throws Exception {
+        when(reviewService.getAllVisibleReviews(null, null)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/reviews/satisfaction-percentage")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0.0"));
+    }
+
+
+    @Test
+    void getSatisfactionPercentage_whenVisibleNotEmpty_returnsOkWithValue() throws Exception {
+        when(reviewService.getAllVisibleReviews(null, null)).thenReturn(List.of(r1));
+        when(reviewService.computeSatisfactionPercentage()).thenReturn(75.0);
+
+        mockMvc.perform(get("/api/reviews/satisfaction-percentage")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("75.0"));
+
+        verify(reviewService).computeSatisfactionPercentage();
+    }
+
 
 
     @TestConfiguration
