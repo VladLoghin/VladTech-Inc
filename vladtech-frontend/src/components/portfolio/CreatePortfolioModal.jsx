@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Upload } from "lucide-react";
 import { api } from "../../api/http";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
     title: "",
@@ -80,7 +82,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
           <X className="h-6 w-6" />
         </button>
 
-        <h2 className="text-2xl font-bold mb-6">Create Portfolio Item</h2>
+        <h2 className="text-2xl font-bold mb-6">{t('portfolio.createItem')}</h2>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -91,7 +93,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Title <span className="text-red-500">*</span>
+              {t('portfolio.title')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -106,7 +108,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Image <span className="text-red-500">*</span>
+              {t('portfolio.image')} <span className="text-red-500">*</span>
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-yellow-400 transition-colors">
               <input
@@ -131,10 +133,10 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                   <>
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
                     <span className="text-sm text-gray-600">
-                      Click to upload image
+                      {t('portfolio.clickUpload')}
                     </span>
                     <span className="text-xs text-gray-500 mt-1">
-                      PNG, JPG up to 10MB
+                      {t('portfolio.fileFormat')}
                     </span>
                   </>
                 )}
@@ -144,7 +146,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Rating <span className="text-red-500">*</span>
+              {t('portfolio.rating')} <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -158,7 +160,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Rating from 0.0 to 5.0</p>
+            <p className="text-xs text-gray-500 mt-1">{t('portfolio.ratingRange')}</p>
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -168,14 +170,14 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-semibold disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              {isSubmitting ? "Creating..." : t('portfolio.create')}
             </button>
           </div>
         </form>

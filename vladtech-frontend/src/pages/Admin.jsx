@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 //import axios from "axios";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
@@ -14,6 +15,7 @@ import { api } from "../api/http";
 
 const Admin = () => {
   const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
@@ -192,7 +194,7 @@ const handleCompleteProject = async (project) => {
       <div className="p-8 bg-white min-h-screen pt-32">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tight">
-          Admin Area - Only for Admin Role
+          {t('admin.title')}
         </h1>
 
         <div className="flex gap-3">
@@ -200,19 +202,19 @@ const handleCompleteProject = async (project) => {
             onClick={() => setIsPortfolioModalOpen(true)}
             className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
           >
-            Create Portfolio
+            {t('admin.createPortfolio')}
           </button>
           <button
             onClick={() => setIsDeletePortfolioModalOpen(true)}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
           >
-            Delete Portfolio
+            {t('admin.deletePortfolio')}
           </button>
           <button
             onClick={() => setIsRoleFinderModalOpen(true)}
             className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
           >
-            Role Finder
+            {t('admin.roleFinder')}
           </button>
         </div>
       </div>
@@ -286,17 +288,17 @@ const handleCompleteProject = async (project) => {
           <h2 className="text-2xl font-bold mb-2">
             {selectedDate
               ? formatSelectedDate(selectedDate)
-              : "Select a date on the calendar"}
+              : t('admin.selectDate')}
           </h2>
 
           <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
             {!selectedDate && (
-              <p className="text-black/60">Pick a day to see its projects.</p>
+              <p className="text-black/60">{t('admin.pickDay')}</p>
             )}
 
             {selectedDate && projectsForSelectedDate.length === 0 && (
               <p className="text-black/60">
-                No projects scheduled for this date.
+                {t('admin.noProjects')}
               </p>
             )}
 
@@ -327,7 +329,7 @@ const handleCompleteProject = async (project) => {
             className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
             onClick={() => setIsProjectModalOpen(true)}
           >
-            ADD
+            {t('add')}
           </button>
         </div>
       </div>
@@ -335,7 +337,7 @@ const handleCompleteProject = async (project) => {
       {/* BOTTOM: Projects with Tab Toggle */}
       <section className="mt-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold tracking-tight">Projects</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('admin.projects')}</h2>
 
           {/* Tab Toggle */}
           <div className="flex border-2 border-black rounded-lg overflow-hidden">
@@ -346,7 +348,7 @@ const handleCompleteProject = async (project) => {
                 : "bg-white text-black hover:bg-gray-100"
                 }`}
             >
-              Active ({projects.length})
+              {t('admin.active')} ({projects.length})
             </button>
             <button
               onClick={() => setActiveTab("archived")}
@@ -355,7 +357,7 @@ const handleCompleteProject = async (project) => {
                 : "bg-white text-black hover:bg-gray-100"
                 }`}
             >
-              Archived ({archivedProjects.length})
+              {t('admin.archived')} ({archivedProjects.length})
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "motion/react";
@@ -9,6 +10,7 @@ import { useLanguage } from "../context/LanguageContext";
 const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks = false }) => {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   const { language, toggleLanguage } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -103,7 +105,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  PORTFOLIO
+                  {t('nav.portfolio')}
                 </button>
                 <button
                   onClick={() => onScrollToSection("about")}
@@ -111,7 +113,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  ABOUT
+                  {t('nav.about')}
                 </button>
                 <button
                   onClick={() => onScrollToSection("contact")}
@@ -119,7 +121,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  CONTACT
+                  {t('nav.contact')}
                 </button>
               </>
             )}
@@ -132,7 +134,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                ADMIN PANEL
+                {t('nav.adminPanel')}
               </button>
             )}
 
@@ -143,7 +145,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                EMPLOYEE TOOLS
+                {t('nav.employeeTools')}
               </button>
             )}
 
@@ -154,7 +156,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                DASHBOARD
+                {t('nav.dashboard')}
               </button>
             )}
 
@@ -191,7 +193,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 }`}
               >
                 <LogIn className="h-4 w-4" />
-                LOGIN
+                {t('nav.login')}
               </button>
             ) : (
               <button
@@ -203,7 +205,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 }`}
               >
                 <LogOut className="h-4 w-4" />
-                LOGOUT
+                {t('nav.logout')}
               </button>
             )}
           </div>
@@ -234,7 +236,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  PORTFOLIO
+                  {t('nav.portfolio')}
                 </button>
                 <button
                   onClick={() => {
@@ -245,7 +247,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  ABOUT
+                  {t('nav.about')}
                 </button>
                 <button
                   onClick={() => {
@@ -256,7 +258,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  CONTACT
+                  {t('nav.contact')}
                 </button>
               </>
             )}
@@ -272,7 +274,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                ADMIN PANEL
+                {t('nav.adminPanel')}
               </button>
             )}
 
@@ -286,7 +288,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                EMPLOYEE TOOLS
+                {t('nav.employeeTools')}
               </button>
             )}
 
@@ -300,7 +302,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                DASHBOARD
+                {t('nav.dashboard')}
               </button>
             )}
 
@@ -317,7 +319,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 }`}
               >
                 <LogIn className="h-4 w-4" />
-                LOGIN
+                {t('nav.login')}
               </button>
             ) : (
               <button
@@ -332,7 +334,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 }`}
               >
                 <LogOut className="h-4 w-4" />
-                LOGOUT
+                {t('nav.logout')}
               </button>
             )}
           </div>

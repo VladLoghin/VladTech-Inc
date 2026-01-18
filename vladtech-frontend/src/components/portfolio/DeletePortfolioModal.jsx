@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { getAllPortfolioItems, deletePortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Trash2, AlertTriangle } from "lucide-react";
 import getImageUrl from "../../utils/getImageUrl.js";
 
 export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [portfolioItems, setPortfolioItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,7 +76,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col relative">
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Delete Portfolio Item</h2>
+            <h2 className="text-2xl font-bold">{t('portfolio.deleteItem')}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -108,8 +110,8 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.title}</h3>
-                      <p className="text-sm text-gray-500">Rating: {item.rating}/5.0</p>
-                      <p className="text-xs text-gray-400">{item.comments?.length || 0} comments</p>
+                      <p className="text-sm text-gray-500">{t('portfolio.rating')}: {item.rating}/5.0</p>
+                      <p className="text-xs text-gray-400">{item.comments?.length || 0} {t('portfolio.comments')}</p>
                     </div>
                     <button
                       onClick={() => handleDelete(item.portfolioId, item.title)}
@@ -117,7 +119,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
                       className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold disabled:opacity-50 flex items-center gap-2"
                     >
                       <Trash2 className="h-4 w-4" />
-                      {deleting === item.portfolioId ? "Deleting..." : "Delete"}
+                      {deleting === item.portfolioId ? "Deleting..." : t('delete')}
                     </button>
                   </div>
                 ))}
@@ -130,7 +132,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
               onClick={onClose}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
             >
-              Close
+              {t('close')}
             </button>
           </div>
         </div>
@@ -166,7 +168,7 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
                   onClick={confirmDeleteAction}
                   className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
                 >
-                  Delete
+                  {t('delete')}
                 </button>
               </div>
             </div>

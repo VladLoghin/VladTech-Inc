@@ -5,6 +5,7 @@ import { Send, LogIn, LogOut, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import getImageUrl from "../utils/getImageUrl.js";
 import { api } from "../api/http.js";
 import { useLanguage } from "../context/LanguageContext";
@@ -67,6 +68,7 @@ const portfolioImages = [
 export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimateModal }: HomePageProps) {
   const { loginWithRedirect, logout, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const { language, toggleLanguage } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -291,21 +293,21 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              PORTFOLIO
+              {t('nav.portfolio')}
             </button>
             <button
               onClick={() => scrollToSection("about")}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              ABOUT
+              {t('nav.about')}
             </button>
             <button
               onClick={() => scrollToSection("contact")}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              CONTACT
+              {t('nav.contact')}
             </button>
 
             {/* Role-based navigation links */}
@@ -315,7 +317,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                ADMIN PANEL
+                {t('nav.adminPanel')}
               </button>
             )}
 
@@ -325,7 +327,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                EMPLOYEE TOOLS
+                {t('nav.employeeTools')}
               </button>
             )}
 
@@ -345,7 +347,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                DASHBOARD
+                {t('nav.dashboard')}
               </button>
             )}
 
@@ -384,7 +386,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   }`}
               >
                 <LogIn className="h-4 w-4" />
-                LOGIN
+                {t('nav.login')}
               </button>
             ) : (
               <button
@@ -395,7 +397,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   }`}
               >
                 <LogOut className="h-4 w-4" />
-                LOGOUT
+                {t('nav.logout')}
               </button>
             )}
           </div>
@@ -421,7 +423,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              PORTFOLIO
+              {t('nav.portfolio')}
             </button>
             <button
               onClick={() => {
@@ -431,7 +433,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              ABOUT
+              {t('nav.about')}
             </button>
             <button
               onClick={() => {
@@ -441,7 +443,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                 }`}
             >
-              CONTACT
+              {t('nav.contact')}
             </button>
 
             {/* Role-based navigation - Mobile */}
@@ -454,7 +456,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                ADMIN PANEL
+                {t('nav.adminPanel')}
               </button>
             )}
 
@@ -467,7 +469,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                EMPLOYEE TOOLS
+                {t('nav.employeeTools')}
               </button>
             )}
 
@@ -493,7 +495,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${isNavbarDark ? "text-white" : "text-black"
                   }`}
               >
-                DASHBOARD
+                {t('nav.dashboard')}
               </button>
             )}
 
@@ -509,7 +511,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   }`}
               >
                 <LogIn className="h-4 w-4" />
-                LOGIN
+                {t('nav.login')}
               </button>
             ) : (
               <button
@@ -523,7 +525,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                   }`}
               >
                 <LogOut className="h-4 w-4" />
-                LOGOUT
+                {t('nav.logout')}
               </button>
             )}
           </div>
@@ -560,8 +562,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
           className="absolute top-32 left-24 max-w-xs hidden md:block"
         >
           <p className="text-sm text-black/60 leading-relaxed">
-            Based in the heart of innovation with expertise spanning construction, engineering,
-            and technology integration for tomorrow&apos;s infrastructure.
+            {t('home.expertiseText')}
           </p>
         </motion.div>
 
@@ -572,8 +573,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
           className="absolute top-32 right-24 max-w-xs text-right hidden md:block"
         >
           <p className="text-sm text-black/60 leading-relaxed">
-            From initial idea to final execution, we work with you to craft solutions that stand
-            the test of time. We develop. We get it done. Really.
+            {t('home.executionText')}
           </p>
         </motion.div>
 
@@ -640,7 +640,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             className="text-center mt-8"
           >
             <p className="text-xl md:text-2xl text-black/70 tracking-wide">
-              Your Ideas. We Realize.
+              {t('home.yourIdeas')}
             </p>
           </motion.div>
 
@@ -656,7 +656,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 onClick={() => navigate("/portfolio")}
                 className="bg-black text-white hover:bg-yellow-400 hover:text-black px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
-                PORTFOLIO
+                {t('home.portfolio')}
               </Button>
             </motion.div>
             <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
@@ -664,7 +664,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 onClick={onOpenEstimateModal}
                 className="bg-yellow-400 text-black hover:bg-black hover:text-white px-8 py-6 text-sm tracking-wider transition-all shadow-lg"
               >
-                CREATE ESTIMATE
+                {t('home.createEstimate')}
               </Button>
             </motion.div>
           </motion.div>
@@ -681,12 +681,12 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
       >
         <div className="container mx-auto px-8">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-6xl md:text-7xl text-white tracking-tight">PORTFOLIO</h2>
+            <h2 className="text-6xl md:text-7xl text-white tracking-tight">{t('home.featuredWork')}</h2>
             <button
               onClick={() => navigate("/portfolio")}
               className="text-white hover:text-yellow-400 tracking-wider transition-colors"
             >
-              VIEW ALL →
+              {t('home.viewGallery')} →
             </button>
           </div>
 
@@ -743,7 +743,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               transition={{ duration: 0.8 }}
               className="text-center text-6xl md:text-7xl text-black mb-20 tracking-tight"
             >
-              ABOUT
+              {t('home.about')}
             </motion.h2>
             <div className="grid md:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -753,13 +753,10 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <p className="text-lg text-black/70 mb-6 leading-relaxed">
-                  At VLADTECH, we&apos;re committed to transforming your vision into reality. With
-                  decades of combined experience in construction, engineering, and technology
-                  integration, our team delivers excellence in every project.
+                  {t('home.aboutParagraph1')}
                 </p>
                 <p className="text-lg text-black/70 mb-8 leading-relaxed">
-                  We believe in innovation, quality, and building lasting relationships with our
-                  clients. From concept to completion, we&apos;re with you every step of the way.
+                  {t('home.aboutParagraph2')}
                 </p>
                 <div className="grid grid-cols-3 gap-8 mt-12">
                   <motion.div
@@ -772,7 +769,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                     <div className="text-5xl text-yellow-400 mb-2">
                       {projectCount !== null ? `${projectCount}+` : "…"}
                     </div>
-                    <div className="text-sm text-black/60 tracking-wide">PROJECTS</div>
+                    <div className="text-sm text-black/60 tracking-wide">{t('home.projectsCompleted')}</div>
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -782,7 +779,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                     className="text-center"
                   >
                     <div className="text-5xl text-yellow-400 mb-2">{ageValue}</div>
-                    <div className="text-sm text-black/60 tracking-wide">{ageUnit}</div>
+                    <div className="text-sm text-black/60 tracking-wide">{ageUnit === 'MONTHS' ? t('home.months') : ageUnit === 'YEAR' ? t('home.years') : t('home.years')}</div>
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -794,7 +791,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                     <div className="text-5xl text-yellow-400 mb-2">
                       {satisfactionPercentage !== null ? `${Math.round(satisfactionPercentage)}%` : "…"}
                     </div>
-                    <div className="text-sm text-black/60 tracking-wide">SATISFIED</div>
+                    <div className="text-sm text-black/60 tracking-wide">{t('home.satisfactionRate')}</div>
                   </motion.div>
                 </div>
               </motion.div>
@@ -834,7 +831,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               transition={{ duration: 0.8 }}
               className="text-center text-6xl md:text-7xl text-white mb-4 tracking-tight"
             >
-              GET IN TOUCH
+              {t('home.getInTouch')}
             </motion.h2>
             <motion.p
               initial={{ opacity: 0 }}
@@ -843,7 +840,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-center text-gray-400 mb-20 text-lg tracking-wide"
             >
-              Let&apos;s build something extraordinary together
+              {t('home.readyToStart')}
             </motion.p>
 
             {/* Send Message Button */}
@@ -858,7 +855,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 className="w-full max-w-md mx-auto bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20"
               >
                 <Send className="mr-3 h-5 w-5" />
-                SEND MESSAGE
+                {t('home.contactUs')}
               </Button>
             </motion.div>
           </div>
@@ -869,7 +866,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
       <footer className="bg-white border-t border-black/10 py-12">
         <div className="container mx-auto px-8 text-center">
           <p className="text-2xl mb-2 text-black tracking-widest">VLADTECH</p>
-          <p className="text-black/40 tracking-wide">© 2025 VLADTECH. All rights reserved.</p>
+          <p className="text-black/40 tracking-wide">{t('home.allRights')}</p>
           <p className="text-black/30 text-sm mt-2 tracking-wide">Your Ideas. We Realize.</p>
         </div>
       </footer>
