@@ -39,7 +39,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final PortfolioRepository portfolioRepository;
     private final FileStorageService fileStorageService;
 
-    // default to false so tests and local runs without explicit property don't execute the seeder
+    //TODO turn this to true when you want to seed the DB see the yaml file if you need to test with seeding further
     @Value("${app.seed-db:false}")
     private boolean seedDb;
 

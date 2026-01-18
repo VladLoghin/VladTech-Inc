@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/fixtures.ts';
 
-test('admin creates project and verifies count on homepage', async ({ page, loginAs }) => {
+test('create project and verify count', async ({ page, loginAs }) => {
   // Step 1: Login as admin using fixtures
   await loginAs('admin');
   console.log('✅ Step 1: Logged in as admin');
@@ -9,113 +9,91 @@ test('admin creates project and verifies count on homepage', async ({ page, logi
   const viewportSize = page.viewportSize();
   const isMobile = viewportSize && viewportSize.width < 768;
 
-  // Step 2: Navigate to Admin Panel
+  // Helper function to get project count from About section
+  const getProjectCountFromHome = async () => {
+    // Navigate to homepage
+    await page.goto('http://localhost:5173/');
+    await page.waitForLoadState('networkidle');
+
+    // Scroll to About section and wait
+    if (isMobile) {
+      const hamburgerButton = page.locator('button svg').first();
+      if (await hamburgerButton.isVisible()) {
+        await hamburgerButton.click();
+        await page.waitForTimeout(500);
+        await page.getByRole('button', { name: 'ABOUT' }).first().click();
+      }
+    } else {
+      await page.getByRole('button', { name: /^about$/i }).click();
+    }
+    await page.waitForTimeout(1500);
+
+    // Get count text
+    const projectCountElement = page.locator('.text-5xl.text-yellow-400').filter({ hasText: /^\d+\+?$/ }).first();
+    await expect(projectCountElement).toBeVisible();
+    const text = await projectCountElement.textContent();
+    const match = text?.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Step 2: Get initial count from Homepage
+  const initialHomeCount = await getProjectCountFromHome();
+  console.log(`📊 Initial Homepage project count: ${initialHomeCount}`);
+
+  // Step 3: Navigate to Admin Panel
   if (isMobile) {
-    // Mobile: Open hamburger menu and click ADMIN PANEL
     const hamburgerButton = page.locator('button svg').first();
     await hamburgerButton.click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
   } else {
-    // Desktop: Click ADMIN PANEL in navbar
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
   await page.waitForURL('http://localhost:5173/admin');
-  console.log('✅ Step 2: Navigated to Admin Panel');
+  console.log('✅ Step 3: Navigated to Admin Panel');
 
-  // Step 3: Get current project count before creating new project
-  await page.waitForTimeout(1000);
-  const projectListRows = page.locator('div.border.border-black\\/10.rounded-lg.p-4');
-  const initialCount = await projectListRows.count();
-  console.log(`📊 Initial project count: ${initialCount}`);
-
-  // Step 4: Click yellow "New Project" button (top right)
+  // Step 4: Click yellow "New Project" button
   await page.getByRole('button', { name: /add/i }).click();
   await page.waitForTimeout(500);
-  console.log('✅ Step 4: Clicked New Project button');
 
   // Wait for modal to appear
   await expect(page.getByRole('heading', { name: /new project/i })).toBeVisible({ timeout: 5000 });
-  console.log('✅ Step 5: New Project modal opened');
 
-  // Step 6: Fill out the project form
+  // Step 5: Fill out the project form
   const timestamp = Date.now();
   const projectName = `Playwright Test ${timestamp}`;
-  
+
   await page.locator('input[name="name"]').fill(projectName);
   await page.locator('input[name="address.city"]').fill('Montreal');
   await page.locator('input[name="dueDate"]').fill('2025-12-31');
-  
-  // Scroll down in the modal to see more fields
+
   await page.evaluate(() => {
     const modal = document.querySelector('.overflow-y-auto');
     if (modal) modal.scrollTop = 400;
   });
   await page.waitForTimeout(300);
-  
+
   await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
   await page.locator('input[name="startDate"]').fill('2025-01-15');
   await page.locator('textarea[name="description"]').fill('Automated test project created by Playwright');
-  
-  console.log(`✅ Step 6: Filled project form with name: ${projectName}`);
 
-  // Step 7: Click yellow "Save" button
+  // Step 6: Click create
   await page.getByRole('button', { name: /^create$/i }).click();
-  console.log('✅ Step 7: Clicked Save button');
 
   // Wait for modal to close
   await expect(page.getByRole('heading', { name: /add/i })).not.toBeVisible({ timeout: 10000 });
-  console.log('✅ Step 8: Modal closed, project saved');
+  console.log('✅ Step 6: Project created');
 
-  // Step 9: Verify new project appears in the list
-  await page.waitForTimeout(2000); // Give time for UI to update
-  const updatedRows = page.locator('div.border.border-black\\/10.rounded-lg.p-4');
-  const newCount = await updatedRows.count();
-  console.log(`📊 New project count: ${newCount}`);
-  
-  expect(newCount).toBe(initialCount + 1);
-  console.log('✅ Step 9: Verified new project appears in list');
+  // Step 7: Verify new project appears in Admin List (sanity check)
+  // Instead of just counting, we check if our specific project is in the list
+  await expect(page.locator('body')).toContainText(projectName, { timeout: 10000 });
+  console.log('✅ Step 7: Verified new project is present in Admin List');
 
-  // Step 10: Navigate back to homepage
-  await page.goto('http://localhost:5173/');
-  await page.waitForLoadState('networkidle');
-  console.log('✅ Step 10: Back on homepage');
+  // Step 8: Get final count from Homepage
+  const finalHomeCount = await getProjectCountFromHome();
+  console.log(`📊 Final Homepage project count: ${finalHomeCount}`);
 
-  // Step 11: Click "ABOUT" button in the navbar to scroll to About section
-  if (isMobile) {
-    // Mobile: Open hamburger menu and click ABOUT
-    const hamburgerButton = page.locator('button svg').first();
-    await hamburgerButton.click();
-    await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'ABOUT' }).first().click();
-  } else {
-    // Desktop: Click ABOUT in navbar
-    await page.getByRole('button', { name: /^about$/i }).click();
-  }
-  await page.waitForTimeout(1500); // Wait for smooth scroll
-  console.log('✅ Step 11: Clicked ABOUT, scrolled to About section');
-
-  // Step 12: Verify project count is displayed correctly in the About section
-  const projectsLabel = page.locator('text=/PROJECTS/i').first();
-  await expect(projectsLabel).toBeVisible({ timeout: 5000 });
-  
-  // Get the project count number (the yellow text above "PROJECTS")
-  const projectCountElement = page.locator('.text-5xl.text-yellow-400').filter({ hasText: /^\d+\+?$/ }).first();
-  await expect(projectCountElement).toBeVisible();
-  
-  const displayedText = await projectCountElement.textContent();
-  console.log(`📊 Displayed project count text: ${displayedText}`);
-  
-  // Extract the number from the text (e.g., "5+" -> 5)
-  const countMatch = displayedText?.match(/(\d+)/);
-  if (countMatch) {
-    const displayedCount = parseInt(countMatch[1]);
-    console.log(`📊 Parsed project count: ${displayedCount}`);
-    expect(displayedCount).toBe(newCount);
-    console.log(`✅ Step 12: Project count verified in About section: ${displayedCount}`);
-  } else {
-    console.log('⚠️ Could not parse project count from About section');
-  }
-  
-  console.log(`\n🎉 TEST PASSED! Created project "${projectName}" and verified count: ${newCount}`);
+  // We relax this to be >= because other tests might have added projects in parallel
+  expect(finalHomeCount).toBeGreaterThanOrEqual(initialHomeCount + 1);
+  console.log(`\n🎉 TEST PASSED! Homepage count incremented from ${initialHomeCount} to ${finalHomeCount} (>= expected)`);
 });

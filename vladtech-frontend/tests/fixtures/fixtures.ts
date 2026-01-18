@@ -27,6 +27,7 @@ const USERS: Record<UserRole, { email: string; password: string }> = {
 
 export const test = base.extend<{
   loginAs: (role: UserRole) => Promise<void>;
+  createProject: (projectNamePrefix?: string) => Promise<string>;
 }>({
   loginAs: async ({ page }, use) => {
     // Provide a helper that logs in as ANY role (works for both mobile and desktop)
@@ -34,17 +35,17 @@ export const test = base.extend<{
       const user = USERS[role];
 
       await page.goto('http://localhost:5173/');
-      
+
       // Check if we're in mobile view by checking viewport width
       const viewportSize = page.viewportSize();
       const isMobile = viewportSize && viewportSize.width < 768;
-      
+
       if (isMobile) {
         // Mobile view: Open hamburger menu first
         const hamburgerButton = page.locator('button svg').first();
         await hamburgerButton.click();
         await page.waitForTimeout(500); // Wait for menu animation to complete
-        
+
         // Click LOGIN button inside mobile dropdown menu (now visible after animation)
         const loginButton = page.getByRole('button', { name: 'LOGIN' }).last();
         await loginButton.waitFor({ state: 'visible', timeout: 5000 });
@@ -54,17 +55,80 @@ export const test = base.extend<{
         const loginButton = page.getByRole('button', { name: 'LOGIN' }).first();
         await loginButton.click();
       }
-      
+
       // Fill Auth0 login form
       await page.getByLabel('Email').fill(user.email);
       await page.locator('input[type="password"]').fill(user.password);
       await page.getByRole('button', { name: 'Continue' }).click();
-      
+
       // Wait for redirect back to app
       await page.waitForURL('http://localhost:5173/', { timeout: 10000 });
     }
 
     await use(loginAs);
+  },
+
+  createProject: async ({ page }, use) => {
+    // Helper to create a project via the UI and return the project name
+    async function createProject(projectNamePrefix: string = 'Test Project'): Promise<string> {
+      const viewportSize = page.viewportSize();
+      const isMobile = viewportSize && viewportSize.width < 768;
+
+      // Navigate to Admin Panel if not already there
+      const currentUrl = page.url();
+      if (!currentUrl.includes('/admin')) {
+        if (isMobile) {
+          const hamburgerButton = page.locator('button svg').first();
+          await hamburgerButton.click();
+          await page.waitForTimeout(500);
+          await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
+        } else {
+          await page.getByRole('button', { name: /admin panel/i }).click();
+        }
+        await page.waitForURL('http://localhost:5173/admin', { timeout: 5000 });
+      }
+
+      await page.waitForTimeout(500);
+
+      // Click "New Project" button
+      await page.getByRole('button', { name: /add/i }).click();
+      await page.waitForTimeout(500);
+
+      // Wait for modal to appear
+      await page.getByRole('heading', { name: /new project/i }).waitFor({ state: 'visible', timeout: 5000 });
+
+      // Fill out the project form with unique name
+      const timestamp = Date.now();
+      const projectName = `${projectNamePrefix} ${timestamp}`;
+
+      await page.locator('input[name="name"]').fill(projectName);
+      await page.locator('input[name="address.city"]').fill('Montreal');
+      await page.locator('input[name="dueDate"]').fill('2026-12-31');
+
+      // Scroll down in the modal
+      await page.evaluate(() => {
+        const modal = document.querySelector('.overflow-y-auto');
+        if (modal) modal.scrollTop = 400;
+      });
+      await page.waitForTimeout(300);
+
+      await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
+      await page.locator('input[name="startDate"]').fill('2026-01-15');
+      await page.locator('textarea[name="description"]').fill('Auto-created by Playwright test');
+
+      // Click "Create" button
+      await page.getByRole('button', { name: /^create$/i }).click();
+
+      // Wait for modal to close
+      await page.getByRole('heading', { name: /new project/i }).waitFor({ state: 'hidden', timeout: 10000 });
+
+      // Wait for UI to update
+      await page.waitForTimeout(1000);
+
+      return projectName;
+    }
+
+    await use(createProject);
   }
 });
 
