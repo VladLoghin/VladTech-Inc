@@ -2,8 +2,10 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { useTranslation } from "react-i18next";
 
 const AdminProjectCalendar = ({ onDateSelect }) => {
+  const { t } = useTranslation();
   const handleDateClick = (info) => {
     // info.dateStr = "YYYY-MM-DD"
     onDateSelect(info.dateStr);
@@ -11,7 +13,7 @@ const AdminProjectCalendar = ({ onDateSelect }) => {
 
   return (
     <div className="border-2 border-black rounded-xl p-4 shadow-md bg-white">
-      <h2 className="text-2xl font-bold mb-4">Project Calendar</h2>
+      <h2 className="text-2xl font-bold mb-4">{t('admin.projectCalendar')}</h2>
 
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}

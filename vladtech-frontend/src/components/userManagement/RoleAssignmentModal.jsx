@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search, UserPlus, UserMinus, Settings, History } from "lucide-react";
 import { api } from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 
 const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
     const { getAccessTokenSilently } = useAuth0();
+    const { t } = useTranslation();
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalUsers, setTotalUsers] = useState(0);
@@ -25,19 +27,19 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
 
     const roleConfig = {
         client: {
-            label: "Client",
+            label: t('roleManager.client'),
             assignEndpoint: "/role-assignment/users/{userId}/roles/client",
             removeEndpoint: "/role-assignment/users/{userId}/roles/client",
             bgColor: "#4ade80",
         },
         employee: {
-            label: "Employee",
+            label: t('roleManager.employee'),
             assignEndpoint: "/role-assignment/users/{userId}/roles/employee",
             removeEndpoint: "/role-assignment/users/{userId}/roles/employee",
             bgColor: "#4ade80",
         },
         admin: {
-            label: "Admin",
+            label: t('roleManager.admin'),
             assignEndpoint: "/role-assignment/users/{userId}/roles/admin",
             removeEndpoint: "/role-assignment/users/{userId}/roles/admin",
             bgColor: "#4ade80",
@@ -68,7 +70,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
             }
         } catch (err) {
             console.error("Error fetching changelog:", err);
-            setError("Failed to load changelog");
+            setError(t('roleManager.failedToLoadChangelog'));
         } finally {
             setLoading(false);
         }
@@ -125,7 +127,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
             }
         } catch (err) {
             console.error("Error fetching users:", err);
-            setError("Failed to load users");
+            setError(t('roleManager.failedToLoadUsers'));
         } finally {
             setLoading(false);
         }
@@ -189,13 +191,13 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                     headers: { Authorization: `Bearer ${token}` },
                     params: { userName: userName || "" },
                 });
-                setSuccess(`${config.label} role assigned to ${userName || userId}`);
+                setSuccess(t('roleManager.roleAssignedTo', { role: config.label, name: userName || userId }));
             } else {
                 await api.delete(endpoint, {
                     headers: { Authorization: `Bearer ${token}` },
                     params: { userName: userName || "" },
                 });
-                setSuccess(`${config.label} role removed from ${userName || userId}`);
+                setSuccess(t('roleManager.roleRemovedFrom', { role: config.label, name: userName || userId }));
             }
 
             setUsers(users.filter((u) => u.user_id !== userId));
@@ -206,7 +208,10 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
             }
         } catch (err) {
             console.error(`Error ${mode}ing role:`, err);
-            setError(`Failed to ${mode} ${roleConfig[selectedRole].label} role`);
+            setError(mode === "assign" 
+                ? t('roleManager.failedToAssign', { role: roleConfig[selectedRole].label })
+                : t('roleManager.failedToRemove', { role: roleConfig[selectedRole].label })
+            );
         } finally {
             setActionLoading(null);
         }
@@ -233,12 +238,14 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                             <Settings className="h-6 w-6" />
-                            Role Manager
+                            {t('roleManager.title')}
                         </h2>
                         <p className="text-sm text-black/60 mt-1">
                             {mode === "history"
-                                ? `${changelog.length} changes recorded`
-                                : `${totalUsers} users ${mode === "assign" ? "available" : `with ${roleConfig[selectedRole].label} role`}`}
+                                ? t('roleManager.changesRecorded', { count: changelog.length })
+                                : mode === "assign"
+                                    ? t('roleManager.usersAvailable', { count: totalUsers })
+                                    : t('roleManager.usersWithRole', { count: totalUsers, role: roleConfig[selectedRole].label })}
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-lg transition-colors">
@@ -249,7 +256,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                 {/* Mode Toggle */}
                 <div className="p-6 border-b border-black/10 space-y-4">
                     <div>
-                        <p className="text-sm font-medium text-black/60 mb-2">Action:</p>
+                        <p className="text-sm font-medium text-black/60 mb-2">{t('roleManager.action')}</p>
                         <div className="flex border-2 border-black rounded-lg overflow-hidden w-fit">
                             <button
                                 onClick={() => setMode("assign")}
@@ -257,7 +264,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                     }`}
                             >
                                 <UserPlus className="h-4 w-4" />
-                                Assign
+                                {t('roleManager.assign')}
                             </button>
                             <button
                                 onClick={() => setMode("remove")}
@@ -265,7 +272,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                     }`}
                             >
                                 <UserMinus className="h-4 w-4" />
-                                Remove
+                                {t('roleManager.remove')}
                             </button>
                             <button
                                 onClick={() => setMode("history")}
@@ -273,7 +280,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                     }`}
                             >
                                 <History className="h-4 w-4" />
-                                History
+                                {t('roleManager.history')}
                             </button>
                         </div>
                     </div>
@@ -281,25 +288,25 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                     {/* Role Selection - only for assign/remove mode */}
                     {mode !== "history" && (
                         <div>
-                            <p className="text-sm font-medium text-black/60 mb-2">Select role:</p>
+                            <p className="text-sm font-medium text-black/60 mb-2">{t('roleManager.selectRole')}</p>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setSelectedRole("client")}
                                     className={`px-4 py-2 rounded-lg transition-all font-medium ${getRoleButtonColor("client")}`}
                                 >
-                                    Client
+                                    {t('roleManager.client')}
                                 </button>
                                 <button
                                     onClick={() => setSelectedRole("employee")}
                                     className={`px-4 py-2 rounded-lg transition-all font-medium ${getRoleButtonColor("employee")}`}
                                 >
-                                    Employee
+                                    {t('roleManager.employee')}
                                 </button>
                                 <button
                                     onClick={() => setSelectedRole("admin")}
                                     className={`px-4 py-2 rounded-lg transition-all font-medium ${getRoleButtonColor("admin")}`}
                                 >
-                                    Admin
+                                    {t('roleManager.admin')}
                                 </button>
                             </div>
                         </div>
@@ -314,7 +321,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search users by email, name, or ID..."
+                                    placeholder={t('roleManager.searchPlaceholder')}
                                     className="w-full pl-10 pr-4 py-2 border border-black/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                 />
                             </div>
@@ -322,7 +329,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                 type="submit"
                                 className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors font-semibold"
                             >
-                                Search
+                                {t('roleManager.search')}
                             </button>
                             {activeQuery && (
                                 <button
@@ -330,7 +337,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                     onClick={handleClearSearch}
                                     className="px-4 py-2 border border-black/20 hover:bg-black/5 rounded-lg transition-colors"
                                 >
-                                    Clear
+                                    {t('roleManager.clear')}
                                 </button>
                             )}
                         </form>
@@ -369,7 +376,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                         // Changelog view
                         changelog.length === 0 ? (
                             <div className="text-center py-12 text-black/60">
-                                No role changes recorded yet
+                                {t('roleManager.noChangesRecorded')}
                             </div>
                         ) : (
                             <div className="space-y-2">
@@ -399,9 +406,9 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                                             log.action === "ASSIGNED" ? "text-green-700" : "text-red-700"
                                                         }
                                                     >
-                                                        {log.action}
+                                                        {log.action === "ASSIGNED" ? t('roleManager.assigned') : t('roleManager.removed')}
                                                     </span>{" "}
-                                                    {log.roleName} role
+                                                    {log.roleName} {t('roleManager.role')}
                                                 </p>
                                                 <p className="text-sm text-black/80">
                                                     {log.userName || log.userId}
@@ -421,9 +428,9 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                             <div className="text-center py-12 text-black/60">
                                 {mode === "assign"
                                     ? activeQuery
-                                        ? "No users found matching your search"
-                                        : `All users already have the ${roleConfig[selectedRole].label} role`
-                                    : `No users have the ${roleConfig[selectedRole].label} role`}
+                                        ? t('roleManager.noUsersFound')
+                                        : t('roleManager.allUsersHaveRole', { role: roleConfig[selectedRole].label })
+                                    : t('roleManager.noUsersHaveRole', { role: roleConfig[selectedRole].label })}
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -437,7 +444,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                                 <img src={user.picture} alt={user.name} className="w-12 h-12 rounded-full" />
                                             )}
                                             <div>
-                                                <p className="font-semibold text-lg">{user.name || "No name"}</p>
+                                                <p className="font-semibold text-lg">{user.name || t('roleManager.noName')}</p>
                                                 <p className="text-sm text-black/60">{user.email}</p>
                                                 <p className="text-xs text-black/40 mt-1">
                                                     ID: {encodeURIComponent(user.user_id)}
@@ -465,17 +472,17 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                                             {actionLoading === user.user_id ? (
                                                 <>
                                                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent"></div>
-                                                    {mode === "assign" ? "Assigning..." : "Removing..."}
+                                                    {mode === "assign" ? t('roleManager.assigning') : t('roleManager.removing')}
                                                 </>
                                             ) : mode === "assign" ? (
                                                 <>
                                                     <UserPlus className="h-4 w-4" />
-                                                    Assign {roleConfig[selectedRole].label}
+                                                    {t('roleManager.assignRole', { role: roleConfig[selectedRole].label })}
                                                 </>
                                             ) : (
                                                 <>
                                                     <UserMinus className="h-4 w-4" />
-                                                    Remove {roleConfig[selectedRole].label}
+                                                    {t('roleManager.removeRole', { role: roleConfig[selectedRole].label })}
                                                 </>
                                             )}
                                         </button>
@@ -500,12 +507,12 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                         className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <ChevronLeft className="h-4 w-4" />
-                        Previous
+                        {t('roleManager.previous')}
                     </button>
                     <div className="text-sm text-black/60">
                         {mode === "history"
-                            ? `Page ${historyPage + 1} of ${totalHistoryPages || 1} (${totalHistoryItems} total)`
-                            : `Page ${currentPage + 1} of ${totalPages || 1}`}
+                            ? t('roleManager.pageOfTotal', { current: historyPage + 1, total: totalHistoryPages || 1, totalItems: totalHistoryItems })
+                            : t('roleManager.pageOf', { current: currentPage + 1, total: totalPages || 1 })}
                     </div>
                     <button
                         onClick={() => {
@@ -519,7 +526,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
                         disabled={(mode === "history" ? historyPage >= totalHistoryPages - 1 : currentPage >= totalPages - 1) || loading}
                         className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        Next
+                        {t('roleManager.next')}
                         <ChevronRight className="h-4 w-4" />
                     </button>
                 </div>
