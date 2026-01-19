@@ -15,14 +15,17 @@ import java.util.stream.Collectors;
 @ControllerAdvice(basePackages = "org.example.vladtech.estimates")
 public class EstimatesExceptionHandler {
 
+    @ExceptionHandler(EstimationException.class)
+    public ResponseEntity<ErrorResponse> handleEstimation(EstimationException ex) {
+        log.error("Estimation error: [{}] {}", ex.getCode(), ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getCode(), ex.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.error("Invalid argument: {}", ex.getMessage());
-        ErrorResponse error = new ErrorResponse(
-                "INVALID_INPUT",
-                ex.getMessage(),
-                LocalDateTime.now()
-        );
+        ErrorResponse error = new ErrorResponse("INVALID_INPUT", ex.getMessage(), LocalDateTime.now());
         return ResponseEntity.badRequest().body(error);
     }
 
@@ -31,13 +34,8 @@ public class EstimatesExceptionHandler {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
-
         log.error("Validation error: {}", message);
-        ErrorResponse error = new ErrorResponse(
-                "VALIDATION_ERROR",
-                message,
-                LocalDateTime.now()
-        );
+        ErrorResponse error = new ErrorResponse("VALIDATION_ERROR", message, LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
