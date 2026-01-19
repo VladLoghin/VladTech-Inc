@@ -52,14 +52,14 @@ class UserManagementServiceImplTest {
         String expectedUrl = "https://test-tenant.auth0.com/api/v2/roles/role-123/users?page=0&per_page=25&include_totals=true";
 
         String json = """
-        {
-            "users": [
-                {"user_id": "auth0|user1", "email": "user1@example.com"},
-                {"user_id": "auth0|user2", "email": "user2@example.com"}
-            ],
-            "total": 2
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1", "email": "user1@example.com"},
+                        {"user_id": "auth0|user2", "email": "user2@example.com"}
+                    ],
+                    "total": 2
+                }
+                """;
 
         mockServer.expect(requestTo(expectedUrl))
                 .andExpect(method(HttpMethod.GET))
@@ -102,17 +102,17 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String json = """
-        {
-            "users": [
-                {"user_id": "auth0|found1", "email": "john@example.com"}
-            ],
-            "total": 1
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|found1", "email": "john@example.com"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:jo* OR name:jo* OR user_id:jo*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:jo* OR name:jo* OR user_id:jo*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
@@ -133,24 +133,24 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String searchJson = """
-        {
-            "users": [
-                {"user_id": "auth0|user1", "email": "john@example.com"},
-                {"user_id": "auth0|user2", "email": "jane@example.com"}
-            ],
-            "total": 2
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1", "email": "john@example.com"},
+                        {"user_id": "auth0|user2", "email": "jane@example.com"}
+                    ],
+                    "total": 2
+                }
+                """;
 
         String roleUsersJson = """
-        [
-            {"user_id": "auth0|user1"}
-        ]
-        """;
+                [
+                    {"user_id": "auth0|user1"}
+                ]
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*john* OR name:*john* OR user_id:*john*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*john* OR name:*john* OR user_id:*john*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(searchJson, MediaType.APPLICATION_JSON));
 
@@ -173,18 +173,18 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String json = """
-        {
-            "users": [
-                {"user_id": "auth0|user1"},
-                {"user_id": "auth0|user2"}
-            ],
-            "total": 2
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1"},
+                        {"user_id": "auth0|user2"}
+                    ],
+                    "total": 2
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
@@ -202,17 +202,17 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String json = """
-        {
-            "users": [
-                {"user_id": "auth0|user1"}
-            ],
-            "total": 1
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
@@ -230,8 +230,8 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
@@ -250,20 +250,20 @@ class UserManagementServiceImplTest {
         String roleUsersUrl = "https://test-tenant.auth0.com/api/v2/roles/role-123/users?per_page=100";
 
         String allUsersJson = """
-        {
-            "users": [
-                {"user_id": "auth0|user1", "email": "user1@example.com"},
-                {"user_id": "auth0|user2", "email": "user2@example.com"},
-                {"user_id": "auth0|user3", "email": "user3@example.com"}
-            ]
-        }
-        """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1", "email": "user1@example.com"},
+                        {"user_id": "auth0|user2", "email": "user2@example.com"},
+                        {"user_id": "auth0|user3", "email": "user3@example.com"}
+                    ]
+                }
+                """;
 
         String roleUsersJson = """
-        [
-            {"user_id": "auth0|user1"}
-        ]
-        """;
+                [
+                    {"user_id": "auth0|user1"}
+                ]
+                """;
 
         mockServer.expect(requestTo(allUsersUrl))
                 .andExpect(method(HttpMethod.GET))
@@ -311,11 +311,11 @@ class UserManagementServiceImplTest {
         String expectedUrl = "https://test-tenant.auth0.com/api/v2/roles/role-123/users?page=0&per_page=25&include_totals=true";
 
         String json = """
-        {
-            "users": [],
-            "total": 0
-        }
-        """;
+                {
+                    "users": [],
+                    "total": 0
+                }
+                """;
 
         mockServer.expect(requestTo(expectedUrl))
                 .andExpect(method(HttpMethod.GET))
@@ -336,23 +336,23 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String searchJson = """
-    {
-        "users": [
-            {"user_id": "auth0|user1", "email": "emp@example.com"}
-        ],
-        "total": 1
-    }
-    """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1", "email": "emp@example.com"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         String roleUsersJson = """
-    [
-        {"user_id": "auth0|user1"}
-    ]
-    """;
+                [
+                    {"user_id": "auth0|user1"}
+                ]
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(searchJson, MediaType.APPLICATION_JSON));
 
@@ -372,23 +372,23 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String searchJson = """
-    {
-        "users": [
-            {"user_id": "auth0|admin1", "email": "admin@example.com"}
-        ],
-        "total": 1
-    }
-    """;
+                {
+                    "users": [
+                        {"user_id": "auth0|admin1", "email": "admin@example.com"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         String roleUsersJson = """
-    [
-        {"user_id": "auth0|admin1"}
-    ]
-    """;
+                [
+                    {"user_id": "auth0|admin1"}
+                ]
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*test* OR name:*test* OR user_id:*test*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(searchJson, MediaType.APPLICATION_JSON));
 
@@ -408,17 +408,17 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String searchJson = """
-    {
-        "users": [
-            {"user_id": "auth0|user1", "email": "john@example.com"}
-        ],
-        "total": 1
-    }
-    """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1", "email": "john@example.com"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "email:*john* OR name:*john* OR user_id:*john*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "email:*john* OR name:*john* OR user_id:*john*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(searchJson, MediaType.APPLICATION_JSON));
 
@@ -438,17 +438,17 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String json = """
-    {
-        "users": [
-            {"user_id": "auth0|user1"}
-        ],
-        "total": 1
-    }
-    """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
@@ -464,17 +464,17 @@ class UserManagementServiceImplTest {
                 .thenReturn("fake-mgmt-token");
 
         String json = """
-    {
-        "users": [
-            {"user_id": "auth0|user1"}
-        ],
-        "total": 1
-    }
-    """;
+                {
+                    "users": [
+                        {"user_id": "auth0|user1"}
+                    ],
+                    "total": 1
+                }
+                """;
 
         mockServer.expect(requestToUriTemplate(
-                        "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
-                        "*", "v3", "0", "25", "true"))
+                "https://test-tenant.auth0.com/api/v2/users?q={q}&search_engine={engine}&page={page}&per_page={perPage}&include_totals={totals}",
+                "*", "v3", "0", "25", "true"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
@@ -482,5 +482,77 @@ class UserManagementServiceImplTest {
 
         assertEquals(1, ((List<?>) result.get("users")).size());
         mockServer.verify();
+    }
+
+    @Test
+    void getAllEmployees_returnsMappedEmployees() {
+        when(managementTokenService.getManagementApiToken())
+                .thenReturn("fake-mgmt-token");
+
+        String expectedUrl = "https://test-tenant.auth0.com/api/v2/roles/employee-role-id/users?page=0&per_page=25&include_totals=true";
+
+        String json = """
+                {
+                    "users": [
+                        {"user_id": "auth0|emp1", "email": "emp1@example.com", "name": "Employee One"},
+                        {"user_id": "auth0|emp2", "email": "emp2@example.com", "nickname": "emp2nick"}
+                    ],
+                    "total": 2
+                }
+                """;
+
+        mockServer.expect(requestTo(expectedUrl))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
+                .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+        List<org.example.vladtech.auth.presentation.EmployeeSummaryResponseModel> result = service.getAllEmployees(0,
+                25);
+
+        assertEquals(2, result.size());
+        assertEquals("auth0|emp1", result.get(0).userId());
+        assertEquals("Employee One", result.get(0).name());
+        assertEquals("emp1@example.com", result.get(0).email());
+
+        mockServer.verify();
+    }
+
+    @Test
+    void getUserEmailById_returnsEmail_whenUserExists() {
+        when(managementTokenService.getManagementApiToken())
+                .thenReturn("fake-mgmt-token");
+
+        String userId = "auth0|user123";
+
+        String json = """
+                {
+                    "user_id": "auth0|user123",
+                    "email": "user123@example.com",
+                    "name": "Test User"
+                }
+                """;
+
+        mockServer.expect(requestToUriTemplate(
+                "https://test-tenant.auth0.com/api/v2/users/{userId}", userId))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer fake-mgmt-token"))
+                .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+        String result = service.getUserEmailById(userId);
+
+        assertEquals("user123@example.com", result);
+        mockServer.verify();
+    }
+
+    @Test
+    void getUserEmailById_returnsNull_whenUserIdIsBlank() {
+        String result = service.getUserEmailById("   ");
+        assertNull(result);
+    }
+
+    @Test
+    void getUserEmailById_returnsNull_whenUserIdIsNull() {
+        String result = service.getUserEmailById(null);
+        assertNull(result);
     }
 }

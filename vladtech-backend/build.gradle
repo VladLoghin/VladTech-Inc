@@ -83,7 +83,7 @@ jacocoTestReport {
 					'**/config/**',
 					'**/entity/**',
 					'**/*Application.class',
-					'**/utils/DatabaseLoaderService.class'
+					'**/utils/DatabaseLoaderService*'
 			])
 		}))
 	}
