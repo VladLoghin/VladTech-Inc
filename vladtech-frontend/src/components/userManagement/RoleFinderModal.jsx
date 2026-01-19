@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import {api} from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 
 const RoleFinderModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -23,9 +25,9 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   };
 
   const roleLabels = {
-    clients: "Client",
-    employees: "Employee",
-    admins: "Admin",
+    clients: t('roleFinder.client'),
+    employees: t('roleFinder.employee'),
+    admins: t('roleFinder.admin'),
   };
 
   const fetchUsers = async (page, query = "") => {
@@ -111,9 +113,9 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Role Finder</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t('roleFinder.title')}</h2>
             <p className="text-sm text-black/60 mt-1">
-              {totalUsers} users found
+              {t('roleFinder.usersFound', { count: totalUsers })}
             </p>
           </div>
           <button
@@ -134,7 +136,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                   : "bg-black/5 hover:bg-black/10"
               }`}
             >
-              Clients
+              {t('roleFinder.clients')}
             </button>
             <button
               onClick={() => setSelectedRole("employees")}
@@ -144,7 +146,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                   : "bg-black/5 hover:bg-black/10"
               }`}
             >
-              Employees
+              {t('roleFinder.employees')}
             </button>
             <button
               onClick={() => setSelectedRole("admins")}
@@ -154,7 +156,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                   : "bg-black/5 hover:bg-black/10"
               }`}
             >
-              Admins
+              {t('roleFinder.admins')}
             </button>
           </div>
 
@@ -165,7 +167,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by email, name, or user ID..."
+                placeholder={t('roleFinder.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-black/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               />
             </div>
@@ -173,7 +175,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
               type="submit"
               className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors font-semibold"
             >
-              Search
+              {t('roleFinder.search')}
             </button>
             {activeQuery && (
               <button
@@ -256,11 +258,11 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            {t('roleFinder.previous')}
           </button>
 
           <div className="text-sm text-black/60">
-            Page {currentPage + 1} of {totalPages || 1}
+            {t('roleFinder.pageOf', { current: currentPage + 1, total: totalPages || 1 })}
           </div>
 
           <button
@@ -268,7 +270,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             disabled={currentPage >= totalPages - 1 || loading}
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Next
+            {t('roleFinder.next')}
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

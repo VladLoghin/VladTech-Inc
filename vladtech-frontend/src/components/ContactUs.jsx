@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
+import { useTranslation } from "react-i18next"
 import { Label } from "./label"
 import { Input } from "./input"
 import { Textarea } from "./textarea"
@@ -7,6 +8,7 @@ import { Button } from "./button"
 import { Send, X } from "lucide-react"
 
 function ContactUs({ isOpen, onClose }) {
+  const { t } = useTranslation();
   const [subject, setSubject] = useState("")
   const [details, setDetails] = useState("")
   const [isSending, setIsSending] = useState(false)
@@ -134,8 +136,8 @@ function ContactUs({ isOpen, onClose }) {
         </button>
 
         <div className="p-10">
-          <h1 className="text-4xl md:text-5xl text-white mb-2 tracking-tight">CONTACT US</h1>
-          <p className="text-gray-400 mb-8 tracking-wide">Share your project details with us</p>
+          <h1 className="text-4xl md:text-5xl text-white mb-2 tracking-tight">{t('contact.title')}</h1>
+          <p className="text-gray-400 mb-8 tracking-wide">{t('contact.shareDetails')}</p>
 
           {!isAuthenticated ? (
             <div className="text-center py-12">
@@ -151,12 +153,12 @@ function ContactUs({ isOpen, onClose }) {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="subject" className="text-white/60 tracking-wider text-xs uppercase">
-                  Subject
+                  {t('contact.subject')}
                 </Label>
                 <Input
                   id="subject"
                   type="text"
-                  placeholder="Enter subject"
+                  placeholder={t('contact.enterSubject')}
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   required
@@ -166,12 +168,12 @@ function ContactUs({ isOpen, onClose }) {
 
               <div className="space-y-3">
                 <Label htmlFor="details" className="text-white/60 tracking-wider text-xs uppercase">
-                  Project Details
+                  {t('contact.projectDetails')}
                 </Label>
                 <Textarea
                   id="details"
                   rows={4}
-                  placeholder="Tell us about your project..."
+                  placeholder={t('contact.tellUs')}
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   required
@@ -185,7 +187,7 @@ function ContactUs({ isOpen, onClose }) {
                 className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="mr-3 h-5 w-5" />
-                {isSending ? "SENDING..." : "SEND MESSAGE"}
+                {isSending ? "SENDING..." : t('contact.sendMessage')}
               </Button>
 
               {success && (

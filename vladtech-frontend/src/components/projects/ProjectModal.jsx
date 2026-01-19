@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 //import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import ClientFinderModal from "./ClientFinderModal.jsx";
 import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
 import { api } from "../../api/http";
@@ -32,6 +33,7 @@ const ProjectModal = ({
   onSubmitSuccess,
   defaultDate,
 }) => {
+  const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
@@ -256,7 +258,7 @@ const handleClearEmployee = () => {
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
         <div className="bg-white border-2 border-yellow-400 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
           <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">
-            {isEdit ? "Update Project" : "New Project"}
+            {isEdit ? t('project.editProject') : t('project.newProject')}
           </h2>
 
           {submitError && (
@@ -268,7 +270,7 @@ const handleClearEmployee = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-sm font-semibold text-black mb-2">
-                Project Name *
+                {t('project.projectName')} *
               </label>
               <input
                 type="text"
@@ -284,7 +286,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-5">
               <label className="block text-sm font-semibold text-black mb-2">
-                Client
+                {t('project.client')}
               </label>
               <div className="flex gap-2">
                 <button
@@ -298,7 +300,7 @@ const handleClearEmployee = () => {
                       <div className="text-sm text-black/60">{formData.clientEmail}</div>
                     </div>
                   ) : (
-                    "Select a client"
+                    t('project.selectClient')
                   )}
                 </button>
                 {formData.clientId && (
@@ -316,7 +318,7 @@ const handleClearEmployee = () => {
                         {/* Employee picker */}
 <div className="mb-5">
   <label className="block text-sm font-semibold text-black mb-2">
-    Employee
+    {t('project.employee')}
   </label>
   <div className="flex gap-2">
     <button
@@ -329,7 +331,7 @@ const handleClearEmployee = () => {
     {selectedEmployee.map((e) => e.email).join(", ")}
   </div>
 ) : (
-  "Select employees"
+  t('project.selectEmployees')
 )}
 
     </button>
@@ -350,7 +352,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
-                Street Address
+                {t('project.streetAddress')}
               </label>
               <input
                 type="text"
@@ -362,7 +364,7 @@ const handleClearEmployee = () => {
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold mb-2">City *</label>
+              <label className="block text-sm font-semibold mb-2">{t('project.city')} *</label>
               <input
                 type="text"
                 name="address.city"
@@ -377,7 +379,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
-                Start Date
+                {t('project.startDate')}
               </label>
               <input
                 type="date"
@@ -390,7 +392,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
-                Due Date *
+                {t('project.dueDate')} *
               </label>
               <input
                 type="date"
@@ -406,7 +408,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
-                Project Type *
+                {t('project.projectType')} *
               </label>
               <select
                 name="projectType"
@@ -414,7 +416,7 @@ const handleClearEmployee = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               >
-                <option value="">Select</option>
+                <option value="">{t('project.select')}</option>
                 <option value="APPOINTMENT">Appointment</option>
                 <option value="SCHEDULED">Scheduled</option>
               </select>
@@ -425,7 +427,7 @@ const handleClearEmployee = () => {
 
             <div className="mb-6">
               <label className="block text-sm font-semibold mb-2">
-                Description
+                {t('project.description')}
               </label>
               <textarea
                 name="description"
@@ -441,13 +443,13 @@ const handleClearEmployee = () => {
                 onClick={handleClose}
                 className="px-8 py-3 border-2 border-black rounded-lg"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-8 py-3 bg-yellow-400 rounded-lg shadow-lg font-semibold"
               >
-                {isEdit ? "Save" : "Create"}
+                {isEdit ? t('save') : t('project.create')}
               </button>
             </div>
           </form>

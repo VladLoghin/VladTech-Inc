@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex) => {
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) {
     return "None";
@@ -38,6 +40,7 @@ const ProjectList = ({
   showStatusControl = false,
   onUpdateStatus,
 }) => {
+  const { t } = useTranslation();
 
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
@@ -63,7 +66,7 @@ const ProjectList = ({
                   className="px-5 py-2 bg-blue-500 text-white rounded-lg 
                              hover:bg-blue-600 transition-all font-semibold"
                 >
-                  Reactivate
+                  {t('project.reactivate')}
                 </button>
               )}
               {showComplete && !isArchived && (
@@ -73,7 +76,7 @@ const ProjectList = ({
                   className="px-5 py-2 bg-green-500 text-white rounded-lg 
                              hover:bg-green-600 transition-all font-semibold"
                 >
-                  Mark Complete
+                  {t('project.markComplete')}
                 </button>
               )}
               {showEdit && !isArchived && (
@@ -84,7 +87,7 @@ const ProjectList = ({
                              text-black rounded-lg hover:bg-black hover:text-white 
                              transition-all font-semibold"
                 >
-                  Edit
+                  {t('edit')}
                 </button>
               )}
             </div>
@@ -99,7 +102,7 @@ const ProjectList = ({
                       : "bg-green-100 text-green-700"
                   }`}
                 >
-                  {isArchived ? "ARCHIVED" : "ACTIVE"}
+                  {isArchived ? t('project.archived') : t('project.active')}
                 </span>
               )}
             </div>
@@ -120,19 +123,19 @@ const ProjectList = ({
               )}
 
               <p>
-                <strong className="text-black/60">Type:</strong>{" "}
+                <strong className="text-black/60">{t('project.projectType')}:</strong>{" "}
                 <span className="bg-yellow-100 px-2 py-1 rounded">
                   {project.projectType}
                 </span>
               </p>
 
               <p>
-                <strong className="text-black/60">Start Date:</strong>{" "}
+                <strong className="text-black/60">{t('project.startDate')}:</strong>{" "}
                 {project.startDate}
               </p>
 
               <p>
-                <strong className="text-black/60">Due Date:</strong>{" "}
+                <strong className="text-black/60">{t('project.dueDate')}:</strong>{" "}
                 {project.dueDate}
               </p>
 
@@ -148,7 +151,7 @@ const ProjectList = ({
 
             {project.description && (
               <p className="mt-2 text-sm">
-                <strong className="text-black/60">Description:</strong>{" "}
+                <strong className="text-black/60">{t('project.description')}:</strong>{" "}
                 {project.description}
               </p>
             )}
@@ -163,7 +166,7 @@ const ProjectList = ({
             )}
 
             <p>
-              <strong className="text-black/60">Status:</strong>{" "}
+              <strong className="text-black/60">{t('project.status')}:</strong>{" "}
               <span
                 className={`px-2 py-1 rounded ${
                   (project.status || "PENDING") === "COMPLETED"
@@ -173,7 +176,9 @@ const ProjectList = ({
                     : "bg-yellow-100 text-yellow-800"
                 }`}
               >
-                {project.status || "PENDING"}
+                {project.status === "COMPLETED" ? t('project.completed') : 
+                 project.status === "IN_PROGRESS" ? t('project.inProgress') : 
+                 t('project.pending')}
               </span>
             </p>
 
@@ -188,9 +193,9 @@ const ProjectList = ({
       onChange={(e) => onUpdateStatus?.(project, e.target.value)}
       className="w-full px-3 py-2 border-2 border-black/20 rounded-lg bg-white"
     >
-      <option value="PENDING">PENDING</option>
-      <option value="IN_PROGRESS">IN_PROGRESS</option>
-      <option value="COMPLETED">COMPLETED</option>
+      <option value="PENDING">{t('project.pending')}</option>
+      <option value="IN_PROGRESS">{t('project.inProgress')}</option>
+      <option value="COMPLETED">{t('project.completed')}</option>
     </select>
   </div>
 )}
@@ -208,7 +213,7 @@ const ProjectList = ({
               )}
             {project.photos?.length > 0 && (
               <p className="mt-2 text-sm">
-                <strong className="text-black/60">Photos:</strong>{" "}
+                <strong className="text-black/60">{t('project.photos')}:</strong>{" "}
                 {project.photos.length}
               </p>
             )}

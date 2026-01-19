@@ -1,8 +1,10 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { useTranslation } from "react-i18next";
 
 const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
+  const { t } = useTranslation();
   const projectDays = new Set();
 
   // mark all days between startDate and dueDate (inclusive)
@@ -27,7 +29,7 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
 
   return (
     <div className="border-2 border-black rounded-xl p-4 shadow-md bg-white">
-      <h2 className="text-2xl font-bold mb-4">My Project Calendar</h2>
+      <h2 className="text-2xl font-bold mb-4">{t('employee.myCalendar')}</h2>
 
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}

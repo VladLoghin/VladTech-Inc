@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
@@ -8,6 +9,7 @@ import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [projects, setProjects] = useState([]);
@@ -46,25 +48,6 @@ const Employee = () => {
     }
   };
   */
-const handleUpdateStatus = async (project, nextStatus) => {
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
-
-    await api.put(
-      `/employee/projects/${project.projectIdentifier}/status`,
-      { status: nextStatus },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    setMessage(`Updated "${project.name}" to ${nextStatus}`);
-    await loadMyProjects();
-  } catch (err) {
-    console.error("Error updating project status:", err);
-    setMessage("Failed to update status.");
-  }
-};
 
   const loadMyProjects = async () => {
   setProjectsLoading(true);
@@ -132,7 +115,7 @@ const formatSelectedDate = (dateStr) => {
       <div className="p-8 bg-white min-h-screen pt-32">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tight">
-          Employee Area - Only for Employees
+          {t('employee.title')}
         </h1>
 
 {/* 
@@ -155,7 +138,7 @@ const formatSelectedDate = (dateStr) => {
 
       <section className="mt-10">
         {projectsLoading && (
-          <p className="text-black/60">Loading projects...</p>
+          <p className="text-black/60">{t('employee.loadingProjects')}</p>
         )}
 
         {projectsError && (
@@ -175,18 +158,18 @@ const formatSelectedDate = (dateStr) => {
         <h3 className="text-2xl font-bold mb-2">
           {selectedDate
             ? formatSelectedDate(selectedDate)
-            : "Select a date on the calendar"}
+            : t('employee.selectDate')}
         </h3>
 
         <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
           {!selectedDate && (
             <p className="text-black/60">
-              Click a date to see your assigned projects.
+              {t('employee.pickDay')}
             </p>
           )}
 
           {selectedDate && projectsForSelectedDate.length === 0 && (
-            <p className="text-black/60">No projects on this date.</p>
+            <p className="text-black/60">{t('employee.noProjects')}</p>
           )}
 
           {projectsForSelectedDate.map((project) => (
@@ -215,18 +198,11 @@ const formatSelectedDate = (dateStr) => {
     {/* BOTTOM: scrollable list of all assigned projects */}
     <div className="mt-10">
       <h3 className="text-2xl font-bold mb-4 tracking-tight">
-        All My Assigned Projects
+        {t('employee.myProjects')}
       </h3>
 
       <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
-        <ProjectList
-  projects={projects}
-  showEdit={false}
-  employeeIndex={{}}
-  showStatusControl={true}
-  onUpdateStatus={handleUpdateStatus}
-/>
-
+        <ProjectList projects={projects} showEdit={false} employeeIndex={{}} />
       </div>
     </div>
   </>
