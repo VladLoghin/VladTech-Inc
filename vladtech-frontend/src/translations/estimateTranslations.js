@@ -13,8 +13,18 @@ export const estimateTranslations = {
     areaSqFt: "Area (sq ft)",
     locationFactor: "Location Factor",
     sidingMaterial: "Siding Material",
+    roofMaterial: "Roof Material",
+    roofPitch: "Roof Pitch",
     stories: "Stories",
     includeInsulation: "Include Insulation",
+    tearOffRequired: "Tear Off Required",
+    hasSkylights: "Has Skylights",
+    numSkylights: "Number of Skylights",
+    cabinetQuality: "Cabinet Quality",
+    countertopMaterial: "Countertop Material",
+    flooringMaterial: "Flooring Material",
+    includeApplianceAllowance: "Include Appliance Allowance",
+    applianceAllowance: "Appliance Allowance",
     // Siding material options
     sidingMaterialOptions: {
       VINYL: "Vinyl",
@@ -23,9 +33,47 @@ export const estimateTranslations = {
       BRICK: "Brick",
       STONE_VENEER: "Stone Veneer",
     },
+    // Roof material options
+    roofMaterialOptions: {
+      ASPHALT: "Asphalt",
+      METAL: "Metal",
+      CLAY: "Clay",
+      SLATE: "Slate",
+      SYNTHETIC: "Synthetic",
+    },
+    // Cabinet quality options
+    cabinetQualityOptions: {
+      STOCK: "Stock",
+      SEMI_CUSTOM: "Semi-Custom",
+      CUSTOM: "Custom",
+    },
+    // Countertop material options
+    countertopMaterialOptions: {
+      LAMINATE: "Laminate",
+      BUTCHERBLOCK: "Butcherblock",
+      GRANITE: "Granite",
+      QUARTZ: "Quartz",
+      MARBLE: "Marble",
+      CONCRETE: "Concrete",
+      STAINLESS_STEEL: "Stainless Steel",
+      SOLID_SURFACE: "Solid Surface",
+      TILE: "Tile",
+    },
+    // Flooring material options
+    flooringMaterialOptions: {
+      HARDWOOD: "Hardwood",
+      ENGINEERED_HARDWOOD: "Engineered Hardwood",
+      LAMINATE: "Laminate",
+      VINYL: "Vinyl",
+      TILE: "Tile",
+      CARPET: "Carpet",
+      POLISHED_CONCRETE: "Polished Concrete",
+    },
     // Preset names
     defaultPreset: "Default",
     sidingReplacePreset: "Siding Replace",
+    roofReplacePreset: "Roof Replace",
+    kitchenRemodelPreset: "Kitchen Remodel",
     // Validation messages
     isRequired: "is required",
     mustBeGreaterThanZero: "must be greater than 0",
@@ -45,8 +93,18 @@ export const estimateTranslations = {
     areaSqFt: "Surface (pi²)",
     locationFactor: "Facteur de localisation",
     sidingMaterial: "Matériau du revêtement",
+    roofMaterial: "Matériau du toit",
+    roofPitch: "Pente du toit",
     stories: "Étages",
     includeInsulation: "Inclure l'isolation",
+    tearOffRequired: "Dépose requise",
+    hasSkylights: "Avec puits de lumière",
+    numSkylights: "Nombre de puits de lumière",
+    cabinetQuality: "Qualité des armoires",
+    countertopMaterial: "Matériau du comptoir",
+    flooringMaterial: "Matériau du sol",
+    includeApplianceAllowance: "Inclure une allocation électroménagers",
+    applianceAllowance: "Allocation électroménagers",
     // Siding material options
     sidingMaterialOptions: {
       VINYL: "Vinyle",
@@ -55,9 +113,47 @@ export const estimateTranslations = {
       BRICK: "Brique",
       STONE_VENEER: "Placage de pierre",
     },
+    // Roof material options
+    roofMaterialOptions: {
+      ASPHALT: "Asphalte",
+      METAL: "Métal",
+      CLAY: "Argile",
+      SLATE: "Ardoise",
+      SYNTHETIC: "Synthétique",
+    },
+    // Cabinet quality options
+    cabinetQualityOptions: {
+      STOCK: "Standard",
+      SEMI_CUSTOM: "Semi-sur mesure",
+      CUSTOM: "Sur mesure",
+    },
+    // Countertop material options
+    countertopMaterialOptions: {
+      LAMINATE: "Stratifié",
+      BUTCHERBLOCK: "Bois de bout",
+      GRANITE: "Granit",
+      QUARTZ: "Quartz",
+      MARBLE: "Marbre",
+      CONCRETE: "Béton",
+      STAINLESS_STEEL: "Acier inoxydable",
+      SOLID_SURFACE: "Surface solide",
+      TILE: "Carrelage",
+    },
+    // Flooring material options
+    flooringMaterialOptions: {
+      HARDWOOD: "Bois franc",
+      ENGINEERED_HARDWOOD: "Bois d'ingénierie",
+      LAMINATE: "Stratifié",
+      VINYL: "Vinyle",
+      TILE: "Carrelage",
+      CARPET: "Moquette",
+      POLISHED_CONCRETE: "Béton poli",
+    },
     // Preset names
     defaultPreset: "Défaut",
     sidingReplacePreset: "Remplacement du revêtement",
+    roofReplacePreset: "Remplacement de toit",
+    kitchenRemodelPreset: "Rénovation de cuisine",
     // Validation messages
     isRequired: "est requis",
     mustBeGreaterThanZero: "doit être supérieur à 0",

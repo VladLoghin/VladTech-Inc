@@ -24,4 +24,39 @@ public class RenovationEstimateRequestModel {
 
     @Positive(message = "Location factor must be positive")
     private BigDecimal locationFactor;
+
+    // Siding-specific properties
+    @Positive(message = "Stories must be positive")
+    private Integer stories;
+
+    private Boolean includeInsulation;
+
+    private String sidingMaterial;
+
+    // Roofing-specific properties
+    @Positive(message = "Roof pitch must be positive")
+    private BigDecimal roofPitch;
+
+    private String roofMaterial;
+
+    private Boolean tearOffRequired;
+
+    private Boolean hasSkylights;
+
+    @PositiveOrZero(message = "Number of skylights must be non-negative")
+    private Integer numSkylights;
+
+    // Kitchen-specific properties
+    @PositiveOrZero(message = "Appliance allowance must be non-negative")
+    private Double applianceAllowance;
+
+    private Boolean plumbingChanges;
+
+    private Boolean electricalChanges;
+
+    private String flooringMaterial;
+
+    private String cabinetQuality;
+
+    private String countertopMaterial;
 }

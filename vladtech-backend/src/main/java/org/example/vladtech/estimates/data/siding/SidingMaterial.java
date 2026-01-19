@@ -5,6 +5,5 @@ public enum SidingMaterial {
     WOOD,
     FIBER_CEMENT,
     BRICK,
-    STONE_VENEER,
-    OTHER
+    STONE_VENEER
 }
