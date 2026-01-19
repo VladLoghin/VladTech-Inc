@@ -284,4 +284,66 @@ class RoleAssignmentServiceImplTest {
 
                 mockServer.verify();
         }
+
+        @Test
+        void getChangeLog_returnsAllLogsOrderedByDate() {
+                // Arrange
+                org.example.vladtech.auth.dataaccess.RoleChangeLog log1 = org.example.vladtech.auth.dataaccess.RoleChangeLog
+                                .builder()
+                                .userId("user1")
+                                .userName("User One")
+                                .roleName("Client")
+                                .action("ASSIGNED")
+                                .performedAt(java.time.Instant.now())
+                                .build();
+                org.example.vladtech.auth.dataaccess.RoleChangeLog log2 = org.example.vladtech.auth.dataaccess.RoleChangeLog
+                                .builder()
+                                .userId("user2")
+                                .userName("User Two")
+                                .roleName("Employee")
+                                .action("REMOVED")
+                                .performedAt(java.time.Instant.now().minusSeconds(3600))
+                                .build();
+
+                when(roleChangeLogRepository.findAllByOrderByPerformedAtDesc())
+                                .thenReturn(java.util.List.of(log1, log2));
+
+                // Act
+                java.util.List<org.example.vladtech.auth.dataaccess.RoleChangeLog> result = service.getChangeLog();
+
+                // Assert
+                Assertions.assertEquals(2, result.size());
+                Assertions.assertEquals("user1", result.get(0).getUserId());
+                Assertions.assertEquals("user2", result.get(1).getUserId());
+        }
+
+        @Test
+        void getChangeLog_withPagination_returnsPagedResults() {
+                // Arrange
+                org.example.vladtech.auth.dataaccess.RoleChangeLog log1 = org.example.vladtech.auth.dataaccess.RoleChangeLog
+                                .builder()
+                                .userId("user1")
+                                .userName("User One")
+                                .roleName("Admin")
+                                .action("ASSIGNED")
+                                .performedAt(java.time.Instant.now())
+                                .build();
+
+                org.springframework.data.domain.Page<org.example.vladtech.auth.dataaccess.RoleChangeLog> page = new org.springframework.data.domain.PageImpl<>(
+                                java.util.List.of(log1),
+                                org.springframework.data.domain.PageRequest.of(0, 10),
+                                1);
+
+                when(roleChangeLogRepository.findAllByOrderByPerformedAtDesc(
+                                org.springframework.data.domain.PageRequest.of(0, 10)))
+                                .thenReturn(page);
+
+                // Act
+                org.springframework.data.domain.Page<org.example.vladtech.auth.dataaccess.RoleChangeLog> result = service
+                                .getChangeLog(0, 10);
+
+                // Assert
+                Assertions.assertEquals(1, result.getTotalElements());
+                Assertions.assertEquals("user1", result.getContent().get(0).getUserId());
+        }
 }
