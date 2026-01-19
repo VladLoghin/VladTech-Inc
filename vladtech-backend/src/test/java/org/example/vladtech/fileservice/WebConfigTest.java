@@ -54,9 +54,10 @@ class WebConfigTest {
         webConfig.addCorsMappings(corsRegistry);
 
         // Assert
-        verify(corsRegistry).addMapping("/uploads/reviews/**");
+        verify(corsRegistry).addMapping("/api/uploads/reviews/**");
         assertTrue(corsRegistration.allowedOrigins.contains("http://localhost:3000"));
         assertTrue(corsRegistration.allowedOrigins.contains("http://localhost:5173"));
+        assertTrue(corsRegistration.allowedOrigins.contains("https://vladtech-inc-fudvj.ondigitalocean.app"));
         assertTrue(corsRegistration.allowedMethods.contains("GET"));
         assertTrue(corsRegistration.allowedMethods.contains("POST"));
         assertTrue(corsRegistration.allowedMethods.contains("DELETE"));
