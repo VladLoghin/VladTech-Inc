@@ -66,7 +66,7 @@ public class ReviewServiceImpl implements ReviewService {
                     .map(file -> {
                         try {
                             String filename = fileStorageService.save(file);
-                            return new Photo(reviewRequest.getClientId(), filename, file.getContentType(), "/uploads/reviews/" + filename);
+                            return new Photo(reviewRequest.getClientId(), filename, file.getContentType(), "/api/uploads/reviews/" + filename);
                         } catch (IOException e) {
                             throw new RuntimeException("Failed to save photo", e);
                         }
