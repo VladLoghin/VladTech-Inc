@@ -70,7 +70,7 @@ class FileControllerTest {
         when(fileStorageService.save(any())).thenReturn(testFileId);
 
         // Act & Assert
-        mockMvc.perform(multipart("/uploads/reviews")
+        mockMvc.perform(multipart("/api/uploads/reviews")
                         .file(file)
                         .with(jwt()))
                 .andExpect(status().isCreated())
@@ -95,7 +95,7 @@ class FileControllerTest {
         when(fileStorageService.save(any())).thenThrow(new IllegalArgumentException("Invalid file type"));
 
         // Act & Assert
-        mockMvc.perform(multipart("/uploads/reviews")
+        mockMvc.perform(multipart("/api/uploads/reviews")
                         .file(file)
                         .with(jwt()))
                 .andExpect(status().isBadRequest())
@@ -116,7 +116,7 @@ class FileControllerTest {
         when(fileStorageService.save(any())).thenThrow(new IOException("Storage error"));
 
         // Act & Assert
-        mockMvc.perform(multipart("/uploads/reviews")
+        mockMvc.perform(multipart("/api/uploads/reviews")
                         .file(file)
                         .with(jwt()))
                 .andExpect(status().isInternalServerError())
@@ -139,7 +139,7 @@ class FileControllerTest {
         when(gridFsResource.getFilename()).thenReturn("test.jpg");
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "image/jpeg"))
@@ -165,7 +165,7 @@ class FileControllerTest {
         when(gridFsResource.contentLength()).thenReturn((long) content.length);
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .param("download", "true")
                         .with(jwt()))
                 .andExpect(status().isOk())
@@ -188,7 +188,7 @@ class FileControllerTest {
         when(gridFsResource.getFilename()).thenReturn("fallback.jpg");
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", "inline; filename=\"fallback.jpg\""));
@@ -209,7 +209,7 @@ class FileControllerTest {
         when(gridFsResource.contentLength()).thenThrow(new IOException("Cannot determine length"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(header().doesNotExist("Content-Length"));
@@ -223,7 +223,7 @@ class FileControllerTest {
                 .thenThrow(new IllegalArgumentException("Invalid id format"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/invalid-id")
+        mockMvc.perform(get("/api/uploads/reviews/invalid-id")
                         .with(jwt()))
                 .andExpect(status().isBadRequest());
     }
@@ -236,7 +236,7 @@ class FileControllerTest {
                 .thenThrow(new FileNotFoundException("File not found"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isNotFound());
     }
@@ -249,7 +249,7 @@ class FileControllerTest {
                 .thenThrow(new RuntimeException("Unexpected error"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId)
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isInternalServerError());
     }
@@ -261,7 +261,7 @@ class FileControllerTest {
         doNothing().when(fileStorageService).delete(testFileId);
 
         // Act & Assert
-        mockMvc.perform(delete("/uploads/reviews/" + testFileId)
+        mockMvc.perform(delete("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isNoContent());
 
@@ -276,7 +276,7 @@ class FileControllerTest {
                 .when(fileStorageService).delete(anyString());
 
         // Act & Assert
-        mockMvc.perform(delete("/uploads/reviews/invalid-id")
+        mockMvc.perform(delete("/api/uploads/reviews/invalid-id")
                         .with(jwt()))
                 .andExpect(status().isBadRequest());
     }
@@ -289,7 +289,7 @@ class FileControllerTest {
                 .when(fileStorageService).delete(anyString());
 
         // Act & Assert
-        mockMvc.perform(delete("/uploads/reviews/" + testFileId)
+        mockMvc.perform(delete("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isNotFound());
     }
@@ -302,7 +302,7 @@ class FileControllerTest {
                 .when(fileStorageService).delete(anyString());
 
         // Act & Assert
-        mockMvc.perform(delete("/uploads/reviews/" + testFileId)
+        mockMvc.perform(delete("/api/uploads/reviews/" + testFileId)
                         .with(jwt()))
                 .andExpect(status().isInternalServerError());
     }
@@ -314,7 +314,7 @@ class FileControllerTest {
         when(fileStorageService.getMetadata(testFileId)).thenReturn(testMetadata);
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId + "/metadata")
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId + "/metadata")
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testFileId))
@@ -333,7 +333,7 @@ class FileControllerTest {
         when(fileStorageService.getMetadata(testFileId)).thenReturn(null);
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId + "/metadata")
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId + "/metadata")
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testFileId))
@@ -348,7 +348,7 @@ class FileControllerTest {
                 .thenThrow(new IllegalArgumentException("Invalid id format"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/invalid-id/metadata")
+        mockMvc.perform(get("/api/uploads/reviews/invalid-id/metadata")
                         .with(jwt()))
                 .andExpect(status().isBadRequest());
     }
@@ -361,7 +361,7 @@ class FileControllerTest {
                 .thenThrow(new FileNotFoundException("File not found"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId + "/metadata")
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId + "/metadata")
                         .with(jwt()))
                 .andExpect(status().isNotFound());
     }
@@ -374,7 +374,7 @@ class FileControllerTest {
                 .thenThrow(new RuntimeException("Unexpected error"));
 
         // Act & Assert
-        mockMvc.perform(get("/uploads/reviews/" + testFileId + "/metadata")
+        mockMvc.perform(get("/api/uploads/reviews/" + testFileId + "/metadata")
                         .with(jwt()))
                 .andExpect(status().isInternalServerError());
     }

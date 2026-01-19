@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
-@RequestMapping("/uploads")
+@RequestMapping("/api/uploads")
 @RequiredArgsConstructor
 public class FileController {
 
