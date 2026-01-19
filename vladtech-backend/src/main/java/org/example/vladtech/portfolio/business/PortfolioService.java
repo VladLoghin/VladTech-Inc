@@ -12,4 +12,3 @@ public interface PortfolioService {
     PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating);
     void deletePortfolioItem(String portfolioId);
 }
-
