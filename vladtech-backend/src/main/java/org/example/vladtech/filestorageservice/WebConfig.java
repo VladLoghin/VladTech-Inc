@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         // Configure CORS for file uploads if needed
-        registry.addMapping("/uploads/reviews/**")
+        registry.addMapping("/api/uploads/reviews/**")
                 .allowedOrigins("http://localhost:3000", "http://localhost:5173", "https://vladtech-inc-fudvj.ondigitalocean.app") // Add your frontend URLs
                 .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

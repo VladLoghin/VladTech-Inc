@@ -43,7 +43,7 @@ class WebConfigTest {
         webConfig = new WebConfig();
         ReflectionTestUtils.setField(webConfig, "maxUploadSize", 10485760L);
     }
-    
+
     @Test
     void addCorsMappings_ShouldConfigureCorsForReviewsEndpoint() {
         // Arrange

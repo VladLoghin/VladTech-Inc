@@ -47,7 +47,7 @@ public class PortfolioController {
             // Save file into GridFS via FileStorageService
             String id = fileStorageService.save(file);
 
-            // Return the GridFS-backed URL under /uploads/portfolio/{id} so front-end can request it
+            // Return the GridFS-backed URL under /api/uploads/portfolio/{id} so front-end can request it
             String imageUrl = "/api/uploads/portfolio/" + id;
             Map<String, String> response = new HashMap<>();
             response.put("imageUrl", imageUrl);
