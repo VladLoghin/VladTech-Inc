@@ -130,22 +130,22 @@ export const estimateTranslations = {
     // Countertop material options
     countertopMaterialOptions: {
       LAMINATE: "Stratifié",
-      BUTCHERBLOCK: "Bois de bout",
+      BUTCHERBLOCK: "Bois de boucher",
       GRANITE: "Granit",
       QUARTZ: "Quartz",
       MARBLE: "Marbre",
       CONCRETE: "Béton",
       STAINLESS_STEEL: "Acier inoxydable",
       SOLID_SURFACE: "Surface solide",
-      TILE: "Carrelage",
+      TILE: "Tuile",
     },
     // Flooring material options
     flooringMaterialOptions: {
-      HARDWOOD: "Bois franc",
+      HARDWOOD: "Bois Dur",
       ENGINEERED_HARDWOOD: "Bois d'ingénierie",
       LAMINATE: "Stratifié",
       VINYL: "Vinyle",
-      TILE: "Carrelage",
+      TILE: "Tuile",
       CARPET: "Moquette",
       POLISHED_CONCRETE: "Béton poli",
     },

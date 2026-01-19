@@ -11,6 +11,13 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface RenovationEstimateRequestMapper {
 
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
     RenovationProject toEntity(RenovationEstimateRequestModel request);
 
     @Mapping(target = "roofPitch", source = "roofPitch")
