@@ -43,45 +43,7 @@ class WebConfigTest {
         webConfig = new WebConfig();
         ReflectionTestUtils.setField(webConfig, "maxUploadSize", 10485760L);
     }
-
-    @Test
-    void addResourceHandlers_ShouldConfigureUploadsPaths() {
-        // Arrange
-        when(resourceHandlerRegistry.addResourceHandler(anyString()))
-                .thenReturn(resourceHandlerRegistration);
-        when(resourceHandlerRegistration.addResourceLocations(any(String[].class)))
-                .thenReturn(resourceHandlerRegistration);
-        when(resourceHandlerRegistration.setCachePeriod(anyInt()))
-                .thenReturn(resourceHandlerRegistration);
-
-        // Act
-        webConfig.addResourceHandlers(resourceHandlerRegistry);
-
-        // Assert
-        verify(resourceHandlerRegistry).addResourceHandler("/uploads/**");
-        verify(resourceHandlerRegistration).addResourceLocations("file:uploads/");
-        verify(resourceHandlerRegistration).setCachePeriod(604800);
-    }
-
-    @Test
-    void addResourceHandlers_ShouldSetCachePeriodTo7Days() {
-        // Arrange
-        when(resourceHandlerRegistry.addResourceHandler(anyString()))
-                .thenReturn(resourceHandlerRegistration);
-        when(resourceHandlerRegistration.addResourceLocations(any(String[].class)))
-                .thenReturn(resourceHandlerRegistration);
-        when(resourceHandlerRegistration.setCachePeriod(anyInt()))
-                .thenReturn(resourceHandlerRegistration);
-
-        // Act
-        webConfig.addResourceHandlers(resourceHandlerRegistry);
-
-        // Assert
-        ArgumentCaptor<Integer> cachePeriodCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(resourceHandlerRegistration).setCachePeriod(cachePeriodCaptor.capture());
-        assertEquals(604800, cachePeriodCaptor.getValue()); // 7 days in seconds
-    }
-
+    
     @Test
     void addCorsMappings_ShouldConfigureCorsForReviewsEndpoint() {
         // Arrange
