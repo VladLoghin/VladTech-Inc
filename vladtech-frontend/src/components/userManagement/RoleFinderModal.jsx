@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import {api} from "../../api/http";
+import { api } from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useTranslation } from "react-i18next";
 
@@ -31,18 +31,18 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   };
 
   const fetchUsers = async (page, query = "") => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
 
-    const headers = { Authorization: `Bearer ${token}` };
+      const headers = { Authorization: `Bearer ${token}` };
 
-    const response = query.trim()
-      ? await api.get("/users/search", {
+      const response = query.trim()
+        ? await api.get("/users/search", {
           headers,
           params: {
             query,
@@ -51,21 +51,22 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
             perPage,
           },
         })
-      : await api.get(roleEndpoints[selectedRole], {
+        : await api.get(roleEndpoints[selectedRole], {
           headers,
           params: { page, perPage },
         });
 
-    setUsers(response.data.users || []);
-    setTotalUsers(response.data.total || 0);
-  } catch (err) {
-    console.error("Error fetching users:", err);
-    setError("Failed to load users");
-  } finally {
-    setLoading(false);
-  }
-};
+      setUsers(response.data.users || []);
+      setTotalUsers(response.data.total || 0);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+   
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0);
@@ -75,6 +76,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen, selectedRole]);
 
+   
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchUsers(currentPage, activeQuery);
@@ -130,31 +132,28 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedRole("clients")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "clients"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "clients"
                   ? "bg-green-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               {t('roleFinder.clients')}
             </button>
             <button
               onClick={() => setSelectedRole("employees")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "employees"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "employees"
                   ? "bg-blue-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               {t('roleFinder.employees')}
             </button>
             <button
               onClick={() => setSelectedRole("admins")}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                selectedRole === "admins"
+              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "admins"
                   ? "bg-red-400 text-black"
                   : "bg-black/5 hover:bg-black/10"
-              }`}
+                }`}
             >
               {t('roleFinder.admins')}
             </button>

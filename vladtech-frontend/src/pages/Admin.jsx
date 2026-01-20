@@ -1,6 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 //import axios from "axios";
@@ -15,9 +14,8 @@ import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.j
 import { api } from "../api/http";
 
 const Admin = () => {
-  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
+  const { getAccessTokenSilently } = useAuth0();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -33,19 +31,6 @@ const Admin = () => {
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] =
     useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Normalize roles and compute flags
-  const rawRoles = user?.["https://vladtech.com/roles"];
-  const roles = Array.isArray(rawRoles)
-    ? rawRoles
-    : typeof rawRoles === "string"
-      ? [rawRoles]
-      : [];
-
-  const isAdmin = roles.includes("Admin");
-  const isEmployee = roles.includes("Employee");
-  const isClient = roles.includes("Client");
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -119,6 +104,7 @@ const Admin = () => {
   };
 
   // Auto-dismiss message after 5 seconds with fade out
+
   useEffect(() => {
     if (message) {
       setIsMessageVisible(true);
@@ -154,6 +140,7 @@ const Admin = () => {
 
     loadEmployees();
   }, [getAccessTokenSilently]);
+
 
   useEffect(() => {
     const loadInitialProjects = async () => {
@@ -194,38 +181,38 @@ const Admin = () => {
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">
-          {t('admin.title')}
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">
+            {t('admin.title')}
+          </h1>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => setIsPortfolioModalOpen(true)}
-            className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-          >
-            {t('admin.createPortfolio')}
-          </button>
-          <button
-            onClick={() => setIsDeletePortfolioModalOpen(true)}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-          >
-            {t('admin.deletePortfolio')}
-          </button>
-          <button
-            onClick={() => setIsRoleFinderModalOpen(true)}
-            className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-          >
-            {t('admin.roleFinder')}
-          </button>
-          <button
-            onClick={() => setIsRoleAssignmentModalOpen(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-          >
-            {t('admin.roleManager')}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsPortfolioModalOpen(true)}
+              className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+            >
+              {t('admin.createPortfolio')}
+            </button>
+            <button
+              onClick={() => setIsDeletePortfolioModalOpen(true)}
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+            >
+              {t('admin.deletePortfolio')}
+            </button>
+            <button
+              onClick={() => setIsRoleFinderModalOpen(true)}
+              className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+            >
+              {t('admin.roleFinder')}
+            </button>
+            <button
+              onClick={() => setIsRoleAssignmentModalOpen(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
+            >
+              {t('admin.roleManager')}
+            </button>
+          </div>
         </div>
-      </div>
 
         {message && (
           <div
@@ -297,24 +284,24 @@ const Admin = () => {
             onDateSelect={setSelectedDate}
           />
 
-        {/* Selected date detail card */}
-        <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
-          <h2 className="text-2xl font-bold mb-2">
-            {selectedDate
-              ? formatSelectedDate(selectedDate)
-              : t('admin.selectDate')}
-          </h2>
+          {/* Selected date detail card */}
+          <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
+            <h2 className="text-2xl font-bold mb-2">
+              {selectedDate
+                ? formatSelectedDate(selectedDate)
+                : t('admin.selectDate')}
+            </h2>
 
-          <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
-            {!selectedDate && (
-              <p className="text-black/60">{t('admin.pickDay')}</p>
-            )}
+            <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
+              {!selectedDate && (
+                <p className="text-black/60">{t('admin.pickDay')}</p>
+              )}
 
-            {selectedDate && projectsForSelectedDate.length === 0 && (
-              <p className="text-black/60">
-                {t('admin.noProjects')}
-              </p>
-            )}
+              {selectedDate && projectsForSelectedDate.length === 0 && (
+                <p className="text-black/60">
+                  {t('admin.noProjects')}
+                </p>
+              )}
 
               {projectsForSelectedDate.map((project) => (
                 <div
@@ -339,42 +326,42 @@ const Admin = () => {
               ))}
             </div>
 
-          <button
-            className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
-            onClick={() => setIsProjectModalOpen(true)}
-          >
-            {t('add')}
-          </button>
-        </div>
-      </div>
-
-      {/* BOTTOM: Projects with Tab Toggle */}
-      <section className="mt-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold tracking-tight">{t('admin.projects')}</h2>
-
-          {/* Tab Toggle */}
-          <div className="flex border-2 border-black rounded-lg overflow-hidden">
             <button
-              onClick={() => setActiveTab("active")}
-              className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
-                ? "bg-black text-white"
-                : "bg-white text-black hover:bg-gray-100"
-                }`}
+              className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
+              onClick={() => setIsProjectModalOpen(true)}
             >
-              {t('admin.active')} ({projects.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("archived")}
-              className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
-                ? "bg-black text-white"
-                : "bg-white text-black hover:bg-gray-100"
-                }`}
-            >
-              {t('admin.archived')} ({archivedProjects.length})
+              {t('add')}
             </button>
           </div>
         </div>
+
+        {/* BOTTOM: Projects with Tab Toggle */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold tracking-tight">{t('admin.projects')}</h2>
+
+            {/* Tab Toggle */}
+            <div className="flex border-2 border-black rounded-lg overflow-hidden">
+              <button
+                onClick={() => setActiveTab("active")}
+                className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-gray-100"
+                  }`}
+              >
+                {t('admin.active')} ({projects.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("archived")}
+                className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-gray-100"
+                  }`}
+              >
+                {t('admin.archived')} ({archivedProjects.length})
+              </button>
+            </div>
+          </div>
 
           {activeTab === "active" ? (
             <ProjectList

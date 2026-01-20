@@ -15,7 +15,7 @@ export default function getImageUrl(url, forceDownload = false) {
     try {
         const parsed = new URL(url);
         return parsed.href;
-    } catch (e) {
+    } catch {
         // Not an absolute URL, continue processing
     }
 

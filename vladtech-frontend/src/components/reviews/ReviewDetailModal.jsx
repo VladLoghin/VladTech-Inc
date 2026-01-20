@@ -1,18 +1,17 @@
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 import { FaStar, FaRegStar, FaTimes } from "react-icons/fa";
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
 
 const ReviewDetailModal = ({ review, open, onClose }) => {
-
-    if (!open || !review) return null;
-
-    const { clientId, clientName, comment, rating, photos } = review;
+    const { clientName, comment, rating, photos } = review || {};
     const photo = photos?.[0];
     const [imgSrc, setImgSrc] = useState(
         photo?.url ? getImageUrl(photo.url) : "/images/placeholder.png"
     );
     const [errored, setErrored] = useState(false);
+
+    if (!open || !review) return null;
 
     const handleError = () => {
         if (!errored) {
