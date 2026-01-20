@@ -106,6 +106,32 @@ const formatSelectedDate = (dateStr) => {
   });
 };
 
+const handleUpdateStatus = async (project, newStatus) => {
+  try {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+
+    await api.put(
+      `/employee/projects/${project.projectIdentifier}/status`,
+      { status: newStatus },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // update UI locally so the dropdown reflects immediately
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.projectIdentifier === project.projectIdentifier
+          ? { ...p, status: newStatus }
+          : p
+      )
+    );
+  } catch (error) {
+    console.error("Error updating project status:", error);
+  }
+};
+
+
 
   return (
     <>
@@ -202,7 +228,14 @@ const formatSelectedDate = (dateStr) => {
       </h3>
 
       <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
-        <ProjectList projects={projects} showEdit={false} employeeIndex={{}} />
+        <ProjectList
+  projects={projects}
+  showEdit={false}
+  employeeIndex={{}}
+  showStatusControl={true}
+  onUpdateStatus={handleUpdateStatus}
+/>
+
       </div>
     </div>
   </>
