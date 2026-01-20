@@ -47,8 +47,8 @@ spring:
       max-request-size: 10MB
 
 email:
-  noreply: noreply@cle4rwater.ca
-  admin: cunninghamvladtech4399@gmail.com
+  noreply: noreply@email.com
+  admin: admin@email.com
 
 file:
   upload-dir: ${IMAGES:./uploads}
@@ -232,3 +232,7 @@ spring:
           auth: true
           starttls:
             enable: true
+
+email:
+  noreply: ${NOREPLY_EMAIL}
+  admin: ${CONTACT_EMAIL}
