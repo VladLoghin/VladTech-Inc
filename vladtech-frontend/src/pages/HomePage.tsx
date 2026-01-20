@@ -84,7 +84,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                 },
             }).then(t => {
         setToken(t);
-        console.log("Token:", t);
+        //console.log("Token:", t);
       });
     }
   }, [isAuthenticated, getAccessTokenSilently]);
@@ -93,8 +93,8 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
   useEffect(() => {
     const logTokenInfo = async () => {
       if (user) {
-        console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
-        console.log("👤 Full user object:", user);
+        //console.log("🔐 User roles:", user["https://vladtech.com/roles"]);
+        //console.log("👤 Full user object:", user);
 
         try {
           const token = await getAccessTokenSilently({
@@ -102,7 +102,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
                     audience: "https://vladtech/api",
                 },
             });
-          console.log("🔑 JWT Token:", token);
+          //console.log("🔑 JWT Token:", token);
         } catch (error) {
           console.error("Failed to get access token:", error);
         }
@@ -221,7 +221,6 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Bar - Changes to dark on scroll */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b transition-all duration-300 ${isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
           }`}
@@ -235,7 +234,6 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               VLADTECH
             </div>
 
-            {/* Language Toggle - Always Visible */}
             <div
               onClick={toggleLanguage}
               className={`relative flex items-center w-20 h-8 rounded-full cursor-pointer transition-all ${
@@ -816,7 +814,6 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
         id="contact"
         className="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden"
       >
-        {/* Ambient Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
@@ -843,7 +840,6 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
               {t('home.readyToStart')}
             </motion.p>
 
-            {/* Send Message Button */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
