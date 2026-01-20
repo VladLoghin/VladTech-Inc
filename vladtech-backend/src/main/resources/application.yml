@@ -48,7 +48,7 @@ spring:
 
 email:
   noreply: noreply@cle4rwater.ca
-  admin: cunninghamadmin4339@gmail.com
+  admin: cunninghamvladtech4399@gmail.com
 
 file:
   upload-dir: ${IMAGES:./uploads}
