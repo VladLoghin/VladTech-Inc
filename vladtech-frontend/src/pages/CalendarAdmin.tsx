@@ -37,6 +37,7 @@ const mockTeams = [
 export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { i18n } = useTranslation();
+  const lang = i18n.resolvedLanguage || i18n.language;
 const dfLocale = i18n.language === "fr" ? fr : enUS;
   const [projects, setProjects] = useState<Project[]>([
     {
@@ -182,12 +183,14 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                   <div className="space-y-2">
                     <Label className="text-white/70">Due Date</Label>
                     <Calendar
-                      mode="single"
-                      selected={newProject.dueDate}
-                      onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
-                      locale={dfLocale}
-                      className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
-                    />
+  key={lang}
+  mode="single"
+  selected={newProject.dueDate}
+  onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
+  locale={dfLocale}
+  className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
+/>
+
                   </div>
                   <Button
                     onClick={handleAddProject}
@@ -223,22 +226,18 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                 </CardHeader>
                 <CardContent>
                   <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    locale={dfLocale}
-                    className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
-                    modifiers={{
-                      hasProject: projects.map((p) => p.dueDate),
-                    }}
-                    modifiersStyles={{
-                      hasProject: {
-                        backgroundColor: "#facc15",
-                        color: "black",
-                        fontWeight: "bold",
-                      },
-                    }}
-                  />
+  key={lang}
+  mode="single"
+  selected={date}
+  onSelect={setDate}
+  locale={dfLocale}
+  className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
+  modifiers={{ hasProject: projects.map((p) => p.dueDate) }}
+  modifiersStyles={{
+    hasProject: { backgroundColor: "#facc15", color: "black", fontWeight: "bold" },
+  }}
+/>
+
                   <div className="mt-6 p-4 bg-yellow-400/10 rounded-lg border border-yellow-400/30">
                     <p className="text-sm text-white/70">
                       <strong className="text-yellow-400">Tip:</strong> Dates highlighted in yellow have scheduled projects. Click a

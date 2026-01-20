@@ -213,6 +213,7 @@ const resources = {
 "project.archivedAt": "Archived",
 "project.assignedEmployees": "Assigned Employees",
 "project.updateStatus": "Update Status",
+"calendar.today": "today",
 
       
       // Portfolio Modals
@@ -453,6 +454,7 @@ const resources = {
 "project.archivedAt": "Archivé",
 "project.assignedEmployees": "Employés assignés",
 "project.updateStatus": "Mettre à jour le statut",
+"calendar.today": "aujourd’hui",
 
       
       // Portfolio Modals
