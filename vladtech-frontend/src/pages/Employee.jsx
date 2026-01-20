@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar.jsx";
 import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
+import i18n from "../i18n";
 
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
@@ -98,7 +99,10 @@ const formatSelectedDate = (dateStr) => {
   const [year, month, day] = dateStr.split("-");
   const date = new Date(Number(year), Number(month) - 1, Number(day));
 
-  return date.toLocaleDateString("en-US", {
+  const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
+
+return date.toLocaleDateString(locale, {
+
     weekday: "long",
     month: "long",
     day: "numeric",

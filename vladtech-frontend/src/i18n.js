@@ -205,6 +205,16 @@ const resources = {
       "project.photos": "Photos",
       "project.create": "Create",
       "project.save": "Save",
+      "project.none": "None",
+"project.noProjectsFound": "No projects found.",
+"project.id": "ID",
+"project.clientLabel": "Client",
+"project.addressLabel": "Address",
+"project.archivedAt": "Archived",
+"project.assignedEmployees": "Assigned Employees",
+"project.updateStatus": "Update Status",
+"calendar.today": "today",
+
       
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
@@ -436,6 +446,16 @@ const resources = {
       "project.photos": "Photos",
       "project.create": "Créer",
       "project.save": "Sauvegarder",
+      "project.none": "Aucun",
+"project.noProjectsFound": "Aucun projet trouvé.",
+"project.id": "ID",
+"project.clientLabel": "Client",
+"project.addressLabel": "Adresse",
+"project.archivedAt": "Archivé",
+"project.assignedEmployees": "Employés assignés",
+"project.updateStatus": "Mettre à jour le statut",
+"calendar.today": "aujourd’hui",
+
       
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
