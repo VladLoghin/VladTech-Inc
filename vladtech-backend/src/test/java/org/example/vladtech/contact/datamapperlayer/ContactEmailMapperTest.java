@@ -8,7 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ContactEmailMapperTest {
 
-    private final ContactEmailMapper mapper = new ContactEmailMapper();
+    private static final String TEST_ADMIN_EMAIL = "cunninghamadmin4339@gmail.com";
+    private final ContactEmailMapper mapper = new ContactEmailMapper(TEST_ADMIN_EMAIL);
 
     @Test
     void toContactEmail_mapsAllFieldsCorrectly() {

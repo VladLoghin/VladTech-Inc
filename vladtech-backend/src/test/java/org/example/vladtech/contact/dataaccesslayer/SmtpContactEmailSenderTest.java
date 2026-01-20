@@ -6,9 +6,9 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import org.example.vladtech.contact.domain.ContactEmail;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,39 +22,45 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SmtpContactEmailSenderTest {
 
+    private static final String NOREPLY_EMAIL = "noreply@cle4rwater.ca";
+
     @Mock
     private JavaMailSender mailSender;
 
-    @InjectMocks
     private SmtpContactEmailSender smtpContactEmailSender;
+
+    @BeforeEach
+    void setUp() {
+        smtpContactEmailSender = new SmtpContactEmailSender(mailSender, NOREPLY_EMAIL);
+    }
 
     @Test
     void send_buildsMimeMessageWithExpectedFields() throws Exception {
-        // Arrange: use a real MimeMessage instance, created by the mocked JavaMailSender
+        // Arrange: use a real MimeMessage instance, created by the mocked
+        // JavaMailSender
         Session session = Session.getInstance(new Properties());
         MimeMessage mimeMessage = new MimeMessage(session);
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         ContactEmail email = new ContactEmail(
-                "cunninghamadmin4339@gmail.com",         // destinary (To)
-                "Hello",                      // title
-                "CONTACT_US",                 // template name
+                "cunninghamadmin4339@gmail.com", // destinary (To)
+                "Hello", // title
+                "CONTACT_US", // template name
                 "New contact request from Jane",
                 "Kitchen renovation details",
                 "Reply to: client@example.com",
-                "Jane",                       // senderName
-                "client@example.com",         // clientEmail
-                LocalDateTime.now()
-        );
+                "Jane", // senderName
+                "client@example.com", // clientEmail
+                LocalDateTime.now());
 
         // Act
         smtpContactEmailSender.send(email);
 
-        // Assert: From should be the client email (current backend logic)
+        // Assert: From should be the noreply email (verified sender in SMTP2GO)
         InternetAddress from = (InternetAddress) mimeMessage.getFrom()[0];
-        assertEquals("client@example.com", from.getAddress());
+        assertEquals(NOREPLY_EMAIL, from.getAddress());
 
-        // Assert: Reply-To should also be the client email
+        // Assert: Reply-To should be the client email
         InternetAddress[] replyToArr = (InternetAddress[]) mimeMessage.getReplyTo();
         assertNotNull(replyToArr, "Reply-To array should not be null");
         assertTrue(replyToArr.length > 0, "Reply-To array should have at least one element");
@@ -62,8 +68,7 @@ class SmtpContactEmailSenderTest {
         assertEquals("client@example.com", replyTo.getAddress());
 
         // Assert: To is the admin address
-        InternetAddress to =
-                (InternetAddress) mimeMessage.getRecipients(MimeMessage.RecipientType.TO)[0];
+        InternetAddress to = (InternetAddress) mimeMessage.getRecipients(MimeMessage.RecipientType.TO)[0];
         assertEquals("cunninghamadmin4339@gmail.com", to.getAddress());
 
         // Assert: subject

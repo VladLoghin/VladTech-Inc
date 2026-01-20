@@ -3,6 +3,7 @@ package org.example.vladtech.contact.dataaccesslayer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.example.vladtech.contact.domain.ContactEmail;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Repository;
@@ -11,9 +12,12 @@ import org.springframework.stereotype.Repository;
 public class SmtpContactEmailSender implements ContactEmailSender {
 
     private final JavaMailSender mailSender;
+    private final String noReplyEmail;
 
-    public SmtpContactEmailSender(JavaMailSender mailSender) {
+    public SmtpContactEmailSender(JavaMailSender mailSender,
+            @Value("${email.noreply}") String noReplyEmail) {
         this.mailSender = mailSender;
+        this.noReplyEmail = noReplyEmail;
     }
 
     @Override
@@ -22,11 +26,7 @@ public class SmtpContactEmailSender implements ContactEmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 
-            String fromAddress =
-                    (email.getClientEmail() != null && !email.getClientEmail().isBlank())
-                            ? email.getClientEmail()
-                            : "cunninghamadmin4339@gmail.com";
-            helper.setFrom(fromAddress);
+            helper.setFrom(noReplyEmail);
 
             // Reply-To: the client's email address
             if (email.getClientEmail() != null && !email.getClientEmail().isBlank()) {
