@@ -3,11 +3,15 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useTranslation } from "react-i18next";
 
+// ADD THESE:
+import frLocale from "@fullcalendar/core/locales/fr";
+import enGbLocale from "@fullcalendar/core/locales/en-gb";
+
 const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation(); // CHANGE: include i18n
+
   const projectDays = new Set();
 
-  // mark all days between startDate and dueDate (inclusive)
   projects.forEach((p) => {
     if (!p.startDate) return;
     const start = new Date(p.startDate);
@@ -23,15 +27,18 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
     }
   });
 
-  const handleDateClick = (info) => {
-    onDateSelect(info.dateStr); // "YYYY-MM-DD"
-  };
+  const handleDateClick = (info) => onDateSelect?.(info.dateStr);
+
+  // ADD THIS:
+  const calendarLocale = i18n.language === "fr" ? frLocale : enGbLocale;
 
   return (
     <div className="border-2 border-black rounded-xl p-4 shadow-md bg-white">
-      <h2 className="text-2xl font-bold mb-4">{t('employee.myCalendar')}</h2>
+      <h2 className="text-2xl font-bold mb-4">{t("employee.myCalendar")}</h2>
 
       <FullCalendar
+        key={i18n.language}                 // ADD: forces calendar to re-render on language switch
+        locale={calendarLocale}            // ADD: tells FullCalendar which locale to use
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
@@ -48,12 +55,11 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
           const key = `${yyyy}-${mm}-${dd}`;
 
           if (projectDays.has(key)) {
-            // small dot indicator (no bars/lines)
             const dot = document.createElement("div");
             dot.style.width = "8px";
             dot.style.height = "8px";
             dot.style.borderRadius = "9999px";
-            dot.style.background = "#facc15"; // yellow-400
+            dot.style.background = "#facc15";
             dot.style.marginTop = "6px";
 
             arg.el.querySelector(".fc-daygrid-day-number")?.after(dot);
