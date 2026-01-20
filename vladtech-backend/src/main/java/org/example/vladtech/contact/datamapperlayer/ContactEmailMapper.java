@@ -2,6 +2,7 @@ package org.example.vladtech.contact.datamapperlayer;
 
 import org.example.vladtech.contact.domain.ContactEmail;
 import org.example.vladtech.contact.presentationlayer.ContactRequestDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -9,10 +10,12 @@ import java.time.LocalDateTime;
 @Component
 public class ContactEmailMapper {
 
-    // For now we hardcode the admin address and template name.
-    // Later we can move these to application.yml if needed.
-    private static final String ADMIN_EMAIL = "cunninghamadmin4339@gmail.com";
+    private final String adminEmail;
     private static final String TEMPLATE_NAME = "CONTACT_US";
+
+    public ContactEmailMapper(@Value("${email.admin}") String adminEmail) {
+        this.adminEmail = adminEmail;
+    }
 
     // Map the incoming DTO from the frontend to our domain object
     public ContactEmail toContactEmail(ContactRequestDto requestDto) {
@@ -25,15 +28,15 @@ public class ContactEmailMapper {
         String footer = "Reply to: " + safe(requestDto.getEmail());
 
         return new ContactEmail(
-                ADMIN_EMAIL,                        // destinary  admin inbox
-                requestDto.getSubject(),            // title
-                TEMPLATE_NAME,                      // templateName
+                adminEmail, // destinary admin inbox
+                requestDto.getSubject(), // title
+                TEMPLATE_NAME, // templateName
                 header,
                 body,
                 footer,
-                requestDto.getName(),               // senderName
-                requestDto.getEmail(),              // senderEmail
-                LocalDateTime.now()                 // sentDate
+                requestDto.getName(), // senderName
+                requestDto.getEmail(), // senderEmail
+                LocalDateTime.now() // sentDate
         );
     }
 

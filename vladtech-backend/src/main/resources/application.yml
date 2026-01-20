@@ -47,7 +47,8 @@ spring:
       max-request-size: 10MB
 
 email:
-  noreply: noreply@cle4rwater.ca
+  noreply: noreply@email.com
+  admin: admin@email.com
 
 file:
   upload-dir: ${IMAGES:./uploads}
@@ -219,3 +220,19 @@ spring:
         uri: ${SPRING_DATA_MONGODB_URI}
        #database: vladtechdb
         auto-index-creation: true
+
+  mail:
+    host: mail.smtp2go.com
+    port: 587
+    username: ${SMTP2GO_USERNAME}
+    password: ${SMTP2GO_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+email:
+  noreply: ${NOREPLY_EMAIL}
+  admin: ${CONTACT_EMAIL}
