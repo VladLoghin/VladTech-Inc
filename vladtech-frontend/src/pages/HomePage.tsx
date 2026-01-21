@@ -117,6 +117,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
   const [ageValue, setAgeValue] = useState<string>("10+");
   const [ageUnit, setAgeUnit] = useState<string>("MONTHS");
   const [satisfactionPercentage, setSatisfactionPercentage] = useState<number | null>(null);
+  const [publicMessage, setPublicMessage] = useState<string>("");
 
   // Fetch project count from backend
   useEffect(() => {
@@ -146,6 +147,20 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
     };
 
     fetchSatisfactionPercentage();
+  }, []);
+
+  // Fetch public hello message from backend
+  useEffect(() => {
+    const fetchPublicMessage = async () => {
+      try {
+        const response = await api.get("/public/hello");
+        setPublicMessage(response.data);
+      } catch (error) {
+        console.error("Failed to fetch public message:", error);
+      }
+    };
+
+    fetchPublicMessage();
   }, []);
 
   const scrollToSection = (sectionId: string) => {
@@ -640,6 +655,11 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
             <p className="text-xl md:text-2xl text-black/70 tracking-wide">
               {t('home.yourIdeas')}
             </p>
+            {publicMessage && (
+              <p className="text-lg md:text-xl text-yellow-400 tracking-wide mt-4 font-semibold">
+                {publicMessage}
+              </p>
+            )}
           </motion.div>
 
           {/* CTA Buttons with Hover Raise Effect */}

@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,11 +41,12 @@ class ReviewServiceImplTest {
 
     @Mock
     private FileStorageService fileStorageService;
+
     @Test
     void getAllVisibleReviews_returnsMappedList() {
-        Review r1 = new Review("client1","abc234", "Jamie","appt1",  true, Rating.FIVE);
+        Review r1 = new Review("client1", "abc234", "Jamie", "appt1", true, Rating.FIVE);
         r1.setReviewId("r1");
-        Review r2 = new Review("client2","abc123", "Joel",  "appt2", true, Rating.THREE);
+        Review r2 = new Review("client2", "abc123", "Joel", "appt2", true, Rating.THREE);
         r2.setReviewId("r2");
 
         List<Review> repoResult = Arrays.asList(r1, r2);
@@ -101,7 +102,7 @@ class ReviewServiceImplTest {
         String reviewId = "r1";
         boolean visible = false;
 
-        Review existing = new Review("client1", "abc789","appt1", "good", true, null);
+        Review existing = new Review("client1", "abc789", "appt1", "good", true, null);
         existing.setReviewId(reviewId);
 
         Review updated = new Review("client1", "abc009", "appt1", "good", visible, null);
@@ -123,7 +124,6 @@ class ReviewServiceImplTest {
         verify(responseMapper).entityToResponseModel(updated);
         verifyNoMoreInteractions(reviewRepository, responseMapper);
     }
-
 
     @Test
     void getReviewById_throwsExceptionWhenReviewNotFound() {
@@ -161,7 +161,6 @@ class ReviewServiceImplTest {
 
     @Test
     void deleteReviewAsClient_successfulDeletion() {
-        // Arrange
         String reviewId = "review123";
         String clientId = "client123";
         Review review = new Review();
@@ -172,23 +171,19 @@ class ReviewServiceImplTest {
         ReviewResponseModel responseModel = new ReviewResponseModel();
         when(responseMapper.entityToResponseModel(review)).thenReturn(responseModel);
 
-        // Act
         ReviewResponseModel result = reviewService.deleteReviewAsClient(reviewId, clientId);
 
-        // Assert
         verify(reviewRepository, times(1)).delete(review);
         assertEquals(responseModel, result);
     }
 
     @Test
     void deleteReviewAsClient_reviewNotFound() {
-        // Arrange
         String reviewId = "review123";
         String clientId = "client123";
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 reviewService.deleteReviewAsClient(reviewId, clientId)
         );
@@ -198,7 +193,6 @@ class ReviewServiceImplTest {
 
     @Test
     void deleteReviewAsClient_unauthorizedDeletion() {
-        // Arrange
         String reviewId = "review123";
         String clientId = "client123";
         Review review = new Review();
@@ -207,7 +201,6 @@ class ReviewServiceImplTest {
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 reviewService.deleteReviewAsClient(reviewId, clientId)
         );
@@ -217,7 +210,6 @@ class ReviewServiceImplTest {
 
     @Test
     void getReviewsByOwnerAuth0Id_returnsMappedList() {
-        // Arrange
         String ownerAuth0Id = "owner123";
         Review review1 = new Review("client1", "owner123", "appt1", "Great service", true, Rating.FIVE);
         review1.setReviewId("r1");
@@ -232,10 +224,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.findByOwnerAuth0Id(ownerAuth0Id)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(Arrays.asList(response1, response2));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getReviewsByOwnerAuth0Id(ownerAuth0Id);
 
-        // Assert
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
         assertEquals("r2", result.get(1).getReviewId());
@@ -246,7 +236,6 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_withClientNameAndRating_returnsFilteredReviews() {
-        // Arrange
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
@@ -257,23 +246,20 @@ class ReviewServiceImplTest {
 
         ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null);
 
-        when(reviewRepository.findByVisibleTrueAndClientNameAndRating(clientName, ratingValue)).thenReturn(reviews);
+        when(reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, ratingValue);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
-        verify(reviewRepository).findByVisibleTrueAndClientNameAndRating(clientName, ratingValue);
+        verify(reviewRepository).findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
         verify(responseMapper).entityListToResponseModelList(reviews);
         verifyNoMoreInteractions(reviewRepository, responseMapper);
     }
 
     @Test
     void getAllVisibleReviews_withClientNameOnly_returnsFilteredReviews() {
-        // Arrange
         String clientName = "client1";
 
         Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE);
@@ -283,23 +269,20 @@ class ReviewServiceImplTest {
 
         ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
 
-        when(reviewRepository.findByVisibleTrueAndClientName(clientName)).thenReturn(reviews);
+        when(reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCase(clientName)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, null);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
-        verify(reviewRepository).findByVisibleTrueAndClientName(clientName);
+        verify(reviewRepository).findByVisibleTrueAndClientNameContainingIgnoreCase(clientName);
         verify(responseMapper).entityListToResponseModelList(reviews);
         verifyNoMoreInteractions(reviewRepository, responseMapper);
     }
 
     @Test
     void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() {
-        // Arrange
         Rating ratingValue = Rating.FIVE;
 
         Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue);
@@ -312,10 +295,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.findByVisibleTrueAndRating(ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, ratingValue);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
         verify(reviewRepository).findByVisibleTrueAndRating(ratingValue);
@@ -325,7 +306,6 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_withoutFilters_returnsAllVisibleReviews() {
-        // Arrange
         Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE);
         review1.setReviewId("r1");
         Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR);
@@ -339,10 +319,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.findByVisibleTrue()).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response1, response2));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null);
 
-        // Assert
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
         assertEquals("r2", result.get(1).getReviewId());
@@ -353,7 +331,6 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_withClientNameAndRating_returnsFilteredReviews() {
-        // Arrange
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
@@ -364,23 +341,20 @@ class ReviewServiceImplTest {
 
         ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null);
 
-        when(reviewRepository.findByClientNameAndRating(clientName, ratingValue)).thenReturn(reviews);
+        when(reviewRepository.findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, ratingValue);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
-        verify(reviewRepository).findByClientNameAndRating(clientName, ratingValue);
+        verify(reviewRepository).findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
         verify(responseMapper).entityListToResponseModelList(reviews);
         verifyNoMoreInteractions(reviewRepository, responseMapper);
     }
 
     @Test
     void getAllReviews_withClientNameOnly_returnsFilteredReviews() {
-        // Arrange
         String clientName = "client1";
 
         Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE);
@@ -390,23 +364,20 @@ class ReviewServiceImplTest {
 
         ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
 
-        when(reviewRepository.findByClientName(clientName)).thenReturn(reviews);
+        when(reviewRepository.findByClientNameContainingIgnoreCase(clientName)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, null);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
-        verify(reviewRepository).findByClientName(clientName);
+        verify(reviewRepository).findByClientNameContainingIgnoreCase(clientName);
         verify(responseMapper).entityListToResponseModelList(reviews);
         verifyNoMoreInteractions(reviewRepository, responseMapper);
     }
 
     @Test
     void getAllReviews_withRatingOnly_returnsFilteredReviews() {
-        // Arrange
         Rating ratingValue = Rating.FIVE;
 
         Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue);
@@ -419,10 +390,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.findByRating(ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllReviews(null, ratingValue);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
         verify(reviewRepository).findByRating(ratingValue);
@@ -432,7 +401,6 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_withoutFilters_returnsAllReviews() {
-        // Arrange
         Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE);
         review1.setReviewId("r1");
         Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR);
@@ -446,10 +414,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.findAll()).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response1, response2));
 
-        // Act
         List<ReviewResponseModel> result = reviewService.getAllReviews(null, null);
 
-        // Assert
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
         assertEquals("r2", result.get(1).getReviewId());
@@ -460,7 +426,6 @@ class ReviewServiceImplTest {
 
     @Test
     void createReview_withoutPhotos_createsReviewSuccessfully() {
-        // Arrange
         ReviewRequestModel requestModel = new ReviewRequestModel();
         requestModel.setClientId("client123");
         requestModel.setClientName("John Doe");
@@ -484,10 +449,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.save(any(Review.class))).thenReturn(savedReview);
         when(responseMapper.entityToResponseModel(savedReview)).thenReturn(responseModel);
 
-        // Act
         ReviewResponseModel result = reviewService.createReview(requestModel, null, "auth0|owner123");
 
-        // Assert
         assertNotNull(result);
         assertEquals("r1", result.getReviewId());
         verify(requestMapper).requestModelToEntity(requestModel);
@@ -497,7 +460,6 @@ class ReviewServiceImplTest {
 
     @Test
     void createReview_withPhotos_createsReviewWithPhotosSuccessfully() throws IOException {
-        // Arrange
         ReviewRequestModel requestModel = new ReviewRequestModel();
         requestModel.setClientId("client123");
         requestModel.setClientName("John Doe");
@@ -526,10 +488,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.save(any(Review.class))).thenReturn(savedReview);
         when(responseMapper.entityToResponseModel(savedReview)).thenReturn(responseModel);
 
-        // Act
         ReviewResponseModel result = reviewService.createReview(requestModel, new MultipartFile[]{photo1, photo2}, "auth0|owner123");
 
-        // Assert
         assertNotNull(result);
         assertEquals("r1", result.getReviewId());
         verify(fileStorageService).save(photo1);
@@ -540,7 +500,6 @@ class ReviewServiceImplTest {
     @Test
     @Disabled("Temporarily disabled due to Mockito unnecessary stubbing issue")
     void createReview_withPhotoSaveFailure_throwsRuntimeException() throws IOException {
-        // Arrange
         ReviewRequestModel requestModel = new ReviewRequestModel();
         requestModel.setClientId("client123");
         requestModel.setClientName("John Doe");
@@ -558,9 +517,8 @@ class ReviewServiceImplTest {
         when(requestMapper.requestModelToEntity(requestModel)).thenReturn(review);
         when(fileStorageService.save(photo)).thenThrow(new IOException("Storage failure"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () ->
-            reviewService.createReview(requestModel, new MultipartFile[]{photo}, "auth0|owner123")
+                reviewService.createReview(requestModel, new MultipartFile[]{photo}, "auth0|owner123")
         );
 
         verify(fileStorageService).save(photo);
@@ -568,14 +526,12 @@ class ReviewServiceImplTest {
 
     @Test
     void updateReviewVisibility_reviewNotFound_throwsException() {
-        // Arrange
         String reviewId = "nonexistent";
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            reviewService.updateReviewVisibility(reviewId, true)
+                reviewService.updateReviewVisibility(reviewId, true)
         );
 
         assertEquals("Review not found", exception.getMessage());
@@ -585,13 +541,10 @@ class ReviewServiceImplTest {
 
     @Test
     void computeSatisfactionPercentage_withZeroReviews_returnsZero() {
-        // Arrange
         when(reviewRepository.countByVisibleTrue()).thenReturn(0L);
 
-        // Act
         double result = reviewService.computeSatisfactionPercentage();
 
-        // Assert
         assertEquals(0.0, result);
         verify(reviewRepository).countByVisibleTrue();
         verify(reviewRepository, never()).findByVisibleTrue();
@@ -599,7 +552,6 @@ class ReviewServiceImplTest {
 
     @Test
     void computeSatisfactionPercentage_withMultipleReviews_calculatesCorrectPercentage() {
-        // Arrange
         Review review1 = new Review("client1", "auth0Id1", "appt1", "Excellent", true, Rating.FIVE);
         Review review2 = new Review("client2", "auth0Id2", "appt2", "Good", true, Rating.FOUR);
         Review review3 = new Review("client3", "auth0Id3", "appt3", "Average", true, Rating.THREE);
@@ -607,12 +559,8 @@ class ReviewServiceImplTest {
         when(reviewRepository.countByVisibleTrue()).thenReturn(3L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(List.of(review1, review2, review3));
 
-        // Act
         double result = reviewService.computeSatisfactionPercentage();
 
-        // Assert
-        // Average: (5 + 4 + 3) / 3 = 4.0
-        // Percentage: (4.0 / 5.0) * 100 = 80.0
         assertEquals(80.0, result, 0.01);
         verify(reviewRepository).countByVisibleTrue();
         verify(reviewRepository).findByVisibleTrue();
@@ -620,14 +568,11 @@ class ReviewServiceImplTest {
 
     @Test
     void deleteReview_successfulDeletion() {
-        // Arrange
         String reviewId = "review123";
         when(reviewRepository.existsById(reviewId)).thenReturn(true);
 
-        // Act
         reviewService.deleteReview(reviewId);
 
-        // Assert
         verify(reviewRepository, times(1)).existsById(reviewId);
         verify(reviewRepository, times(1)).deleteReviewByReviewId(reviewId);
         verifyNoMoreInteractions(reviewRepository);
@@ -635,11 +580,9 @@ class ReviewServiceImplTest {
 
     @Test
     void deleteReview_reviewNotFound_throwsException() {
-        // Arrange
         String reviewId = "nonexistent";
         when(reviewRepository.existsById(reviewId)).thenReturn(false);
 
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> reviewService.deleteReview(reviewId));
         assertEquals("Review with ID " + reviewId + " does not exist", exception.getMessage());
 
