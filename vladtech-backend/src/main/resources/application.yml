@@ -110,7 +110,7 @@ renovation:
     tax: 0.13
 
 app:
-  seed-db: true
+  seed-db: false
 
 ---
 
@@ -197,10 +197,10 @@ file:
 logging:
   level:
     org.springframework.security: DEBUG
-
+    #seed-db: true
 #Add this when implementing a new feature
 #app:
-  #seed-db: true
+
 ---
 spring:
   config:

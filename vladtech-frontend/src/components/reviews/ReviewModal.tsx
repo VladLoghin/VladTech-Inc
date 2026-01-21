@@ -20,61 +20,77 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     const [comment, setComment] = useState("");
     const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [errors, setErrors] = useState<{ name?: string; comment?: string }>({});
 
     if (!open) return null;
 
     async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
+        e.preventDefault();
 
-  const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
+        // Validate fields
+        const newErrors: { name?: string; comment?: string } = {};
+        if (!clientName.trim()) {
+            newErrors.name = "Name is required";
+        }
+        if (!comment.trim()) {
+            newErrors.comment = "Description is required";
+        }
 
-  const reviewPayload = {
-    clientId,
-    clientName,
-    appointmentId: appointmentId || "temp-appointment",
-    comment,
-    visible: false,
-    rating: ratingEnum,
-  };
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
 
-  const formData = new FormData();
-  formData.append(
-    "review",
-    new Blob([JSON.stringify(reviewPayload)], {
-      type: "application/json;charset=UTF-8",
-    })
-  );
+        setErrors({});
 
-  if (imageFile) {
-    formData.append("photos", imageFile); // if backend expects MultipartFile[] photos, you can append multiple
-  }
+        const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+        const reviewPayload = {
+            clientId,
+            clientName,
+            appointmentId: appointmentId || "temp-appointment",
+            comment,
+            visible: false,
+            rating: ratingEnum,
+        };
 
-    const res = await api.post("/reviews", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        // DON'T set Content-Type here; axios will set boundary properly
-      },
-    });
+        const formData = new FormData();
+        formData.append(
+            "review",
+            new Blob([JSON.stringify(reviewPayload)], {
+                type: "application/json;charset=UTF-8",
+            })
+        );
 
-    const createdReview = res.data;
-    console.log("Review submitted successfully:", createdReview);
-    onSubmitSuccess?.(createdReview);
-    onClose();
+        if (imageFile) {
+            formData.append("photos", imageFile);
+        }
 
-    // Reset form
-    setClientName("");
-    setComment("");
-    setStars(5);
-    setImageFile(null);
-  } catch (err) {
-    console.error("Error submitting review:", err);
-  }
-}
+        try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: { audience: "https://vladtech/api" },
+            });
+
+            const res = await api.post("/reviews", formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const createdReview = res.data;
+            console.log("Review submitted successfully:", createdReview);
+            onSubmitSuccess?.(createdReview);
+            onClose();
+
+            // Reset form
+            setClientName("");
+            setComment("");
+            setStars(5);
+            setImageFile(null);
+        } catch (err) {
+            console.error("Error submitting review:", err);
+        }
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
@@ -85,22 +101,28 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="Your name"
-                        value={clientName}
-                        onChange={(e) => setClientName(e.target.value)}
-                        className="w-full border border-gray-300 rounded-xl p-3"
-                        required
-                    />
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Your name"
+                            value={clientName}
+                            onChange={(e) => setClientName(e.target.value)}
+                            className="w-full border border-gray-300 rounded-xl p-3"
+                            required
+                        />
+                        {errors.name && <p className="text-red-600 text-sm font-semibold mt-1">{errors.name}</p>}
+                    </div>
 
-                    <textarea
-                        placeholder="Your message"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="w-full border border-gray-300 rounded-xl p-3 h-24"
-                        required
-                    />
+                    <div>
+                        <textarea
+                            placeholder="Your message"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="w-full border border-gray-300 rounded-xl p-3 h-24"
+                            required
+                        />
+                        {errors.comment && <p className="text-red-600 text-sm font-semibold mt-1">{errors.comment}</p>}
+                    </div>
 
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((s) => (

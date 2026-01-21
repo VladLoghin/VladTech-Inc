@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -367,6 +368,36 @@ class ReviewControllerTest {
         assertEquals(0.0, response.getBody());
         verify(reviewService).getAllVisibleReviews(null, null);
         verify(reviewService, never()).computeSatisfactionPercentage();
+    }
+
+    @Test
+    void deleteReviewsByReviewId_successfulDeletion() {
+        // Arrange
+        String reviewId = "review123";
+
+        // Act
+        assertDoesNotThrow(() -> reviewController.deleteReviewsByReviewId(reviewId));
+
+        // Assert
+        verify(reviewService, times(1)).deleteReview(reviewId);
+        verifyNoMoreInteractions(reviewService);
+    }
+
+    @Test
+    void deleteReviewsByReviewId_reviewNotFound_throwsResponseStatusException() {
+        // Arrange
+        String reviewId = "nonexistent";
+        doThrow(new RuntimeException("Review with ID " + reviewId + " does not exist"))
+                .when(reviewService).deleteReview(reviewId);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> reviewController.deleteReviewsByReviewId(reviewId));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Review with ID " + reviewId + " does not exist", exception.getReason());
+
+        verify(reviewService, times(1)).deleteReview(reviewId);
+        verifyNoMoreInteractions(reviewService);
     }
 }
 

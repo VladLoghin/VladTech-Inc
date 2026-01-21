@@ -25,7 +25,7 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByVisibleTrueAndRating(Rating rating);
 
-
+    void deleteReviewByReviewId(String reviewId);
 //
 //    // Get reviews by client ID
 //    List<Review> findByClientId(String clientId);

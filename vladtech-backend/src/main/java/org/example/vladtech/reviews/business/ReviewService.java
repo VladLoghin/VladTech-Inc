@@ -27,6 +27,8 @@ public interface ReviewService {
     // Compute customer satisfaction percentage based on visible reviews
     double computeSatisfactionPercentage();
 
+    void deleteReview(String reviewId);
+
 
 }
 

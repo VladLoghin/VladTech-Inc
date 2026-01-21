@@ -51,10 +51,18 @@ export const getMyReviews = async (token) => {
     return res.data;
 };
 
-export const deleteReview = async (reviewId, token) => {
+export const deleteReviewClient = async (reviewId, token) => {
     return api.delete(`${API_BASE}/${reviewId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     });
 };
+
+export const deleteReviewAdmin = async (reviewId, token) => {
+    return api.delete(`${API_BASE}/admin/${reviewId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+}

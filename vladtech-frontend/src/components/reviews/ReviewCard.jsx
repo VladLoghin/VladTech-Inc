@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
-import { deleteReview } from "../../api/reviews/reviewsService.js";
+import { deleteReviewClient, deleteReviewAdmin } from "../../api/reviews/reviewsService.js";
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
 import { api } from "../../api/http";
+
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -14,10 +15,12 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     const initialVisible = review.visible ?? false;
     const roles = user?.["https://vladtech.com/roles"] || [];
     const isClient = isAuthenticated && roles.includes("Client");
+    const isAdmin = isAuthenticated && roles.includes("Admin");
 
     const isOwner = isAuthenticated && user?.sub && review?.clientId === user.sub;
 
-    const canDelete = isClient && isOwner;
+    // Admin can delete any review; clients can delete only their own
+    const canDelete = isAdmin || (isClient && isOwner);
 
     const [deleting, setDeleting] = useState(false);
 
@@ -94,7 +97,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             );
         } catch (err) {
             console.error("Failed to update visibility:", err);
-            setIsVisible(!nextValue); // revert on error
+            setIsVisible(!nextValue);
         } finally {
             setSaving(false);
         }
@@ -113,15 +116,21 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                 },
             });
 
-            const res = await deleteReview(reviewId, token);
+            const res = isAdmin
+                ? await deleteReviewAdmin(reviewId, token)
+                : await deleteReviewClient(reviewId, token);
 
-            if (!res.ok) {
+            if (res.status !== 200 && res.status !== 204) {
                 throw new Error(`Delete failed with status ${res.status}`);
             }
 
-            onDelete?.(reviewId);
+            // Call onDelete to notify parent component
+            if (onDelete) {
+                onDelete(reviewId);
+            }
         } catch (err) {
             console.error("Failed to delete review:", err);
+            alert("Failed to delete review. Please try again.");
         } finally {
             setDeleting(false);
         }
