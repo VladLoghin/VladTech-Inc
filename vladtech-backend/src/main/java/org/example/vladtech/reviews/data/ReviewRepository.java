@@ -15,15 +15,17 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByClientNameAndRating(String clientName, Rating rating);
 
-    List<Review> findByClientName(String clientName);
+    List<Review> findByClientNameContainingIgnoreCase(String clientName);
 
-    List<Review> findByRating(Rating rating);
+    List<Review> findByClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
 
-    List<Review> findByVisibleTrueAndClientNameAndRating(String clientName, Rating rating);
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCase(String clientName);
 
-    List<Review> findByVisibleTrueAndClientName(String clientName);
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
 
     List<Review> findByVisibleTrueAndRating(Rating rating);
+
+    List<Review> findByRating(Rating rating);
 
     void deleteReviewByReviewId(String reviewId);
 //

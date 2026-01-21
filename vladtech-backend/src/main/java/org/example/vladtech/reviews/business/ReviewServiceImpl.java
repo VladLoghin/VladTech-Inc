@@ -34,11 +34,11 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue) {
         if (clientName != null && ratingValue != null) {
             return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByClientNameAndRating(clientName, ratingValue)
+                    reviewRepository.findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)
             );
         } else if (clientName != null) {
             return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByClientName(clientName)
+                    reviewRepository.findByClientNameContainingIgnoreCase(clientName)
             );
         } else if (ratingValue != null) {
             return responseMapper.entityListToResponseModelList(
@@ -47,6 +47,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
     }
+
 
 
     @Override
@@ -103,11 +104,11 @@ public class ReviewServiceImpl implements ReviewService {
     public List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue) {
         if (clientName != null && ratingValue != null) {
             return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByVisibleTrueAndClientNameAndRating(clientName, ratingValue)
+                    reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)
             );
         } else if (clientName != null) {
             return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByVisibleTrueAndClientName(clientName)
+                    reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCase(clientName)
             );
         } else if (ratingValue != null) {
             return responseMapper.entityListToResponseModelList(
@@ -116,6 +117,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
     }
+
 
     //@PreAuthorize("hasAuthority('Client')")
     @Override
