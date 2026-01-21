@@ -40,7 +40,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final FileStorageService fileStorageService;
 
     //TODO turn this to true when you want to seed the DB see the yaml file if you need to test with seeding further
-    @Value("${app.seed-db:false}")
+    @Value("${app.seed-db = false}")
     private boolean seedDb;
 
     // In docker profile you set: file.upload-dir: ${IMAGES}

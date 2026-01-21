@@ -617,4 +617,34 @@ class ReviewServiceImplTest {
         verify(reviewRepository).countByVisibleTrue();
         verify(reviewRepository).findByVisibleTrue();
     }
+
+    @Test
+    void deleteReview_successfulDeletion() {
+        // Arrange
+        String reviewId = "review123";
+        when(reviewRepository.existsById(reviewId)).thenReturn(true);
+
+        // Act
+        reviewService.deleteReview(reviewId);
+
+        // Assert
+        verify(reviewRepository, times(1)).existsById(reviewId);
+        verify(reviewRepository, times(1)).deleteReviewByReviewId(reviewId);
+        verifyNoMoreInteractions(reviewRepository);
+    }
+
+    @Test
+    void deleteReview_reviewNotFound_throwsException() {
+        // Arrange
+        String reviewId = "nonexistent";
+        when(reviewRepository.existsById(reviewId)).thenReturn(false);
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> reviewService.deleteReview(reviewId));
+        assertEquals("Review with ID " + reviewId + " does not exist", exception.getMessage());
+
+        verify(reviewRepository, times(1)).existsById(reviewId);
+        verify(reviewRepository, never()).deleteReviewByReviewId(anyString());
+        verifyNoMoreInteractions(reviewRepository);
+    }
 }

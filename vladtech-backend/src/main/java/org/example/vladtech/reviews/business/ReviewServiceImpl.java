@@ -151,5 +151,14 @@ public class ReviewServiceImpl implements ReviewService {
         double averageRating = totalStars / (double) count;
         return (averageRating / 5.0) * 100.0;
     }
+
+    @Override
+    public void deleteReview(String reviewId) {
+        boolean exists = reviewRepository.existsById(reviewId);
+        if (!exists) {
+            throw new RuntimeException("Review with ID " + reviewId + " does not exist");
+        }
+        reviewRepository.deleteReviewByReviewId(reviewId);
+    }
 }
 

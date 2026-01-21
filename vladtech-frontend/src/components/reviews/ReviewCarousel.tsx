@@ -14,6 +14,7 @@ const ReviewCarousel = ({ reviews, onReviewClick, onDelete }) => {
 
     return (
         <Swiper
+            key={reviews.length} // Force re-render when reviews array changes
             modules={[Autoplay, Navigation, Pagination]}
             spaceBetween={20}
             slidesPerView={1}
