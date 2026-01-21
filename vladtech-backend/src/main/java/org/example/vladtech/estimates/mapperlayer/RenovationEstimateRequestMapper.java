@@ -20,20 +20,33 @@ public interface RenovationEstimateRequestMapper {
     @Mapping(target = "totalPrice", ignore = true)
     RenovationProject toEntity(RenovationEstimateRequestModel request);
 
-    @Mapping(target = "roofPitch", source = "roofPitch")
-    @Mapping(target = "roofMaterial", source = "roofMaterial")
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    @Mapping(target = "areaSqFt", ignore = true)
     RoofingReplace toRoofingReplace(RenovationEstimateRequestModel request);
 
-    @Mapping(target = "stories", source = "stories")
-    @Mapping(target = "includeInsulation", source = "includeInsulation")
-    @Mapping(target = "sidingMaterial", source = "sidingMaterial")
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    @Mapping(target = "areaSqFt", ignore = true)
     SidingReplace toSidingReplace(RenovationEstimateRequestModel request);
 
-    @Mapping(target = "applianceAllowance", source = "applianceAllowance")
-    @Mapping(target = "plumbingChanges", source = "plumbingChanges")
-    @Mapping(target = "electricalChanges", source = "electricalChanges")
-    @Mapping(target = "flooringMaterial", source = "flooringMaterial")
-    @Mapping(target = "cabinetQuality", source = "cabinetQuality")
-    @Mapping(target = "countertopMaterial", source = "countertopMaterial")
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    @Mapping(target = "areaSqFt", ignore = true)
     KitchenRemodel toKitchenRemodel(RenovationEstimateRequestModel request);
 }
