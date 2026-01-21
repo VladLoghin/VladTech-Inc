@@ -1,0 +1,68 @@
+# Frontend Linting CI Workflow
+# Validates that UI changes adhere to ESLint linting standards
+# Only lints files changed in the PR/push (incremental linting)
+
+name: Frontend Lint
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'vladtech-frontend/**/*.js'
+      - 'vladtech-frontend/**/*.jsx'
+      - 'vladtech-frontend/**/*.ts'
+      - 'vladtech-frontend/**/*.tsx'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'vladtech-frontend/**/*.js'
+      - 'vladtech-frontend/**/*.jsx'
+      - 'vladtech-frontend/**/*.ts'
+      - 'vladtech-frontend/**/*.tsx'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: vladtech-frontend
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for diff
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: vladtech-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            vladtech-frontend/**/*.js
+            vladtech-frontend/**/*.jsx
+            vladtech-frontend/**/*.ts
+            vladtech-frontend/**/*.tsx
+
+      - name: Run ESLint on changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          # Extract just the frontend paths and run eslint
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | sed 's|vladtech-frontend/||' | tr '\n' ' ')
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Linting changed files: $CHANGED_FILES"
+            npx eslint $CHANGED_FILES
+          fi
+
+      - name: No files to lint
+        if: steps.changed-files.outputs.any_changed != 'true'
+        run: echo "No JavaScript/JSX files changed in vladtech-frontend"

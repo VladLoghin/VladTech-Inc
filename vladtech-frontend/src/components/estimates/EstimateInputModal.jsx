@@ -70,144 +70,144 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     );
 
     const builtInPresets = useMemo(
-    () => [
-        {
-            name: t.sidingReplacePreset ?? "Siding Replace",
-            key: "SIDING_REPLACE",
-            projectType: "SIDING_REPLACE",
-            defaultValues: {
-                squareFeet: "",
-                materialCostPerSqFt: "",
-                locationFactor: "1.00",
-                sidingMaterial: "VINYL",
-                stories: "1",
-                includeInsulation: false,
+        () => [
+            {
+                name: t.sidingReplacePreset ?? "Siding Replace",
+                key: "SIDING_REPLACE",
+                projectType: "SIDING_REPLACE",
+                defaultValues: {
+                    squareFeet: "",
+                    materialCostPerSqFt: "",
+                    locationFactor: "1.00",
+                    sidingMaterial: "VINYL",
+                    stories: "1",
+                    includeInsulation: false,
+                },
+                fields: [
+                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                    {
+                        name: "sidingMaterial",
+                        label: t.sidingMaterial ?? "Siding Material",
+                        type: "select",
+                        required: true,
+                        options: [
+                            { value: "VINYL", label: t?.sidingMaterialOptions?.VINYL ?? "Vinyl" },
+                            { value: "WOOD", label: t?.sidingMaterialOptions?.WOOD ?? "Wood" },
+                            { value: "FIBER_CEMENT", label: t?.sidingMaterialOptions?.FIBER_CEMENT ?? "Fiber Cement" },
+                            { value: "BRICK", label: t?.sidingMaterialOptions?.BRICK ?? "Brick" },
+                            { value: "STONE_VENEER", label: t?.sidingMaterialOptions?.STONE_VENEER ?? "Stone Veneer" },
+                        ],
+                    },
+                    { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
+                    { name: "includeInsulation", label: t.includeInsulation ?? "Include Insulation", type: "checkbox", required: false },
+                ],
             },
-            fields: [
-                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                {
-                    name: "sidingMaterial",
-                    label: t.sidingMaterial ?? "Siding Material",
-                    type: "select",
-                    required: true,
-                    options: [
-                        { value: "VINYL", label: t?.sidingMaterialOptions?.VINYL ?? "Vinyl" },
-                        { value: "WOOD", label: t?.sidingMaterialOptions?.WOOD ?? "Wood" },
-                        { value: "FIBER_CEMENT", label: t?.sidingMaterialOptions?.FIBER_CEMENT ?? "Fiber Cement" },
-                        { value: "BRICK", label: t?.sidingMaterialOptions?.BRICK ?? "Brick" },
-                        { value: "STONE_VENEER", label: t?.sidingMaterialOptions?.STONE_VENEER ?? "Stone Veneer" },
-                    ],
+            {
+                name: t.roofReplacePreset ?? "Roof Replace",
+                key: "ROOFING_REPLACE",
+                projectType: "ROOFING_REPLACE",
+                defaultValues: {
+                    squareFeet: "",
+                    materialCostPerSqFt: "",
+                    locationFactor: "1.00",
+                    roofMaterial: "ASPHALT",
+                    roofPitch: "1.0",
+                    stories: "1",
+                    tearOffRequired: false,
+                    hasSkylights: false,
+                    numSkylights: "0",
                 },
-                { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
-                { name: "includeInsulation", label: t.includeInsulation ?? "Include Insulation", type: "checkbox", required: false },
-            ],
-        },
-        {
-            name: t.roofReplacePreset ?? "Roof Replace",
-            key: "ROOFING_REPLACE",
-            projectType: "ROOFING_REPLACE",
-            defaultValues: {
-                squareFeet: "",
-                materialCostPerSqFt: "",
-                locationFactor: "1.00",
-                roofMaterial: "ASPHALT",
-                roofPitch: "1.0",
-                stories: "1",
-                tearOffRequired: false,
-                hasSkylights: false,
-                numSkylights: "0",
+                fields: [
+                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                    {
+                        name: "roofMaterial",
+                        label: t.roofMaterial ?? "Roof Material",
+                        type: "select",
+                        required: true,
+                        options: [
+                            { value: "ASPHALT", label: t?.roofMaterialOptions?.ASPHALT ?? "Asphalt" },
+                            { value: "METAL", label: t?.roofMaterialOptions?.METAL ?? "Metal" },
+                            { value: "CLAY", label: t?.roofMaterialOptions?.CLAY ?? "Clay" },
+                            { value: "SLATE", label: t?.roofMaterialOptions?.SLATE ?? "Slate" },
+                            { value: "SYNTHETIC", label: t?.roofMaterialOptions?.SYNTHETIC ?? "Synthetic" },
+                        ],
+                    },
+                    { name: "roofPitch", label: t.roofPitch ?? "Roof Pitch", type: "number", required: true, min: 0.1, step: "0.1" },
+                    { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
+                    { name: "tearOffRequired", label: t.tearOffRequired ?? "Tear Off Required", type: "checkbox", required: false },
+                    { name: "hasSkylights", label: t.hasSkylights ?? "Has Skylights", type: "checkbox", required: false },
+                    { name: "numSkylights", label: t.numSkylights ?? "Number of Skylights", type: "number", required: false, min: 0 },
+                ],
             },
-            fields: [
-                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                {
-                    name: "roofMaterial",
-                    label: t.roofMaterial ?? "Roof Material",
-                    type: "select",
-                    required: true,
-                    options: [
-                        { value: "ASPHALT", label: t?.roofMaterialOptions?.ASPHALT ?? "Asphalt" },
-                        { value: "METAL", label: t?.roofMaterialOptions?.METAL ?? "Metal" },
-                        { value: "CLAY", label: t?.roofMaterialOptions?.CLAY ?? "Clay" },
-                        { value: "SLATE", label: t?.roofMaterialOptions?.SLATE ?? "Slate" },
-                        { value: "SYNTHETIC", label: t?.roofMaterialOptions?.SYNTHETIC ?? "Synthetic" },
-                    ],
+            {
+                name: t.kitchenRemodelPreset ?? "Kitchen Remodel",
+                key: "KITCHEN_REMODEL",
+                projectType: "KITCHEN_REMODEL",
+                defaultValues: {
+                    squareFeet: "",
+                    materialCostPerSqFt: "",
+                    locationFactor: "1.00",
+                    cabinetQuality: "STOCK",
+                    countertopMaterial: "LAMINATE",
+                    flooringMaterial: "VINYL",
+                    includeApplianceAllowance: false,
+                    applianceAllowance: "0",
                 },
-                { name: "roofPitch", label: t.roofPitch ?? "Roof Pitch", type: "number", required: true, min: 0.1, step: "0.1" },
-                { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
-                { name: "tearOffRequired", label: t.tearOffRequired ?? "Tear Off Required", type: "checkbox", required: false },
-                { name: "hasSkylights", label: t.hasSkylights ?? "Has Skylights", type: "checkbox", required: false },
-                { name: "numSkylights", label: t.numSkylights ?? "Number of Skylights", type: "number", required: false, min: 0 },
-            ],
-        },
-        {
-            name: t.kitchenRemodelPreset ?? "Kitchen Remodel",
-            key: "KITCHEN_REMODEL",
-            projectType: "KITCHEN_REMODEL",
-            defaultValues: {
-                squareFeet: "",
-                materialCostPerSqFt: "",
-                locationFactor: "1.00",
-                cabinetQuality: "STOCK",
-                countertopMaterial: "LAMINATE",
-                flooringMaterial: "VINYL",
-                includeApplianceAllowance: false,
-                applianceAllowance: "0",
+                fields: [
+                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                    {
+                        name: "cabinetQuality",
+                        label: t.cabinetQuality ?? "Cabinet Quality",
+                        type: "select",
+                        required: true,
+                        options: [
+                            { value: "STOCK", label: t?.cabinetQualityOptions?.STOCK ?? "Stock" },
+                            { value: "SEMI_CUSTOM", label: t?.cabinetQualityOptions?.SEMI_CUSTOM ?? "Semi-Custom" },
+                            { value: "CUSTOM", label: t?.cabinetQualityOptions?.CUSTOM ?? "Custom" },
+                        ],
+                    },
+                    {
+                        name: "countertopMaterial",
+                        label: t.countertopMaterial ?? "Countertop Material",
+                        type: "select",
+                        required: true,
+                        options: [
+                            { value: "LAMINATE", label: t?.countertopMaterialOptions?.LAMINATE ?? "Laminate" },
+                            { value: "BUTCHERBLOCK", label: t?.countertopMaterialOptions?.BUTCHERBLOCK ?? "Butcherblock" },
+                            { value: "GRANITE", label: t?.countertopMaterialOptions?.GRANITE ?? "Granite" },
+                            { value: "QUARTZ", label: t?.countertopMaterialOptions?.QUARTZ ?? "Quartz" },
+                            { value: "MARBLE", label: t?.countertopMaterialOptions?.MARBLE ?? "Marble" },
+                            { value: "CONCRETE", label: t?.countertopMaterialOptions?.CONCRETE ?? "Concrete" },
+                            { value: "STAINLESS_STEEL", label: t?.countertopMaterialOptions?.STAINLESS_STEEL ?? "Stainless Steel" },
+                            { value: "SOLID_SURFACE", label: t?.countertopMaterialOptions?.SOLID_SURFACE ?? "Solid Surface" },
+                            { value: "TILE", label: t?.countertopMaterialOptions?.TILE ?? "Tile" },
+                        ],
+                    },
+                    {
+                        name: "flooringMaterial",
+                        label: t.flooringMaterial ?? "Flooring Material",
+                        type: "select",
+                        required: true,
+                        options: [
+                            { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
+                            { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
+                            { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
+                            { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
+                            { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
+                            { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
+                            { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
+                        ],
+                    },
+                    { name: "includeApplianceAllowance", label: t.includeApplianceAllowance ?? "Include Appliance Allowance", type: "checkbox", required: false },
+                    { name: "applianceAllowance", label: t.applianceAllowance ?? "Appliance Allowance", type: "number", required: false, min: 0, step: "0.01" },
+                ],
             },
-            fields: [
-                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                {
-                    name: "cabinetQuality",
-                    label: t.cabinetQuality ?? "Cabinet Quality",
-                    type: "select",
-                    required: true,
-                    options: [
-                        { value: "STOCK", label: t?.cabinetQualityOptions?.STOCK ?? "Stock" },
-                        { value: "SEMI_CUSTOM", label: t?.cabinetQualityOptions?.SEMI_CUSTOM ?? "Semi-Custom" },
-                        { value: "CUSTOM", label: t?.cabinetQualityOptions?.CUSTOM ?? "Custom" },
-                    ],
-                },
-                {
-                    name: "countertopMaterial",
-                    label: t.countertopMaterial ?? "Countertop Material",
-                    type: "select",
-                    required: true,
-                    options: [
-                        { value: "LAMINATE", label: t?.countertopMaterialOptions?.LAMINATE ?? "Laminate" },
-                        { value: "BUTCHERBLOCK", label: t?.countertopMaterialOptions?.BUTCHERBLOCK ?? "Butcherblock" },
-                        { value: "GRANITE", label: t?.countertopMaterialOptions?.GRANITE ?? "Granite" },
-                        { value: "QUARTZ", label: t?.countertopMaterialOptions?.QUARTZ ?? "Quartz" },
-                        { value: "MARBLE", label: t?.countertopMaterialOptions?.MARBLE ?? "Marble" },
-                        { value: "CONCRETE", label: t?.countertopMaterialOptions?.CONCRETE ?? "Concrete" },
-                        { value: "STAINLESS_STEEL", label: t?.countertopMaterialOptions?.STAINLESS_STEEL ?? "Stainless Steel" },
-                        { value: "SOLID_SURFACE", label: t?.countertopMaterialOptions?.SOLID_SURFACE ?? "Solid Surface" },
-                        { value: "TILE", label: t?.countertopMaterialOptions?.TILE ?? "Tile" },
-                    ],
-                },
-                {
-                    name: "flooringMaterial",
-                    label: t.flooringMaterial ?? "Flooring Material",
-                    type: "select",
-                    required: true,
-                    options: [
-                        { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
-                        { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
-                        { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
-                        { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
-                        { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
-                        { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
-                        { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
-                    ],
-                },
-                { name: "includeApplianceAllowance", label: t.includeApplianceAllowance ?? "Include Appliance Allowance", type: "checkbox", required: false },
-                { name: "applianceAllowance", label: t.applianceAllowance ?? "Appliance Allowance", type: "number", required: false, min: 0, step: "0.01" },
-            ],
-        },
-    ],
-    [t]
-);
+        ],
+        [t]
+    );
 
     const availablePresets = useMemo(
         () => [...builtInPresets, ...presets],
@@ -271,6 +271,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         return data;
     };
 
+     
     useEffect(() => {
         if (isOpen && sortedPresets.length > 0) {
             const defaultPreset = sortedPresets[0];
@@ -287,7 +288,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
     }, [toast]);
 
-    // Still update the price if user changes material
+     
     useEffect(() => {
         if (!selectedPreset) return;
 
@@ -460,58 +461,59 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                 if (field.name === "numSkylights" && !formData.hasSkylights) return null;
                                 if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
                                 return (
-                                <div key={field.name}>
-                                    <label htmlFor={field.name}>{field.label}:</label>
+                                    <div key={field.name}>
+                                        <label htmlFor={field.name}>{field.label}:</label>
 
-                                    {field.type === "select" ? (
-                                        <select
-                                            id={field.name}
-                                            name={field.name}
-                                            value={formData[field.name] ?? ""}
-                                            onChange={handleChange}
-                                            required={field.required}
-                                        >
-                                            <option value="" disabled>
-                                                {t.selectPreset}
-                                            </option>
-                                            {field.options.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>
-                                                    {opt.label}
+                                        {field.type === "select" ? (
+                                            <select
+                                                id={field.name}
+                                                name={field.name}
+                                                value={formData[field.name] ?? ""}
+                                                onChange={handleChange}
+                                                required={field.required}
+                                            >
+                                                <option value="" disabled>
+                                                    {t.selectPreset}
                                                 </option>
-                                            ))}
-                                        </select>
-                                    ) : field.type === "checkbox" ? (
-                                        <input
-                                            id={field.name}
-                                            type="checkbox"
-                                            name={field.name}
-                                            checked={!!formData[field.name]}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <input
-                                            id={field.name}
-                                            type={field.type}
-                                            name={field.name}
-                                            value={formData[field.name] ?? ""}
-                                            onChange={handleChange}
-                                            required={field.required}
-                                            min={field.min !== undefined ? String(field.min) : undefined}
-                                            step={field.step}
-                                            onInvalid={(e) => {
-                                                if (e.target.validity.valueMissing) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
-                                                } else if (e.target.validity.rangeUnderflow) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
-                                                } else if (e.target.validity.typeMismatch) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
-                                                }
-                                            }}
-                                            onInput={(e) => e.target.setCustomValidity("")}
-                                        />
-                                    )}
-                                </div>
-                            );})}
+                                                {field.options.map((opt) => (
+                                                    <option key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : field.type === "checkbox" ? (
+                                            <input
+                                                id={field.name}
+                                                type="checkbox"
+                                                name={field.name}
+                                                checked={!!formData[field.name]}
+                                                onChange={handleChange}
+                                            />
+                                        ) : (
+                                            <input
+                                                id={field.name}
+                                                type={field.type}
+                                                name={field.name}
+                                                value={formData[field.name] ?? ""}
+                                                onChange={handleChange}
+                                                required={field.required}
+                                                min={field.min !== undefined ? String(field.min) : undefined}
+                                                step={field.step}
+                                                onInvalid={(e) => {
+                                                    if (e.target.validity.valueMissing) {
+                                                        e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                    } else if (e.target.validity.rangeUnderflow) {
+                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                    } else if (e.target.validity.typeMismatch) {
+                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                    }
+                                                }}
+                                                onInput={(e) => e.target.setCustomValidity("")}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
 
                             <div className="modal-actions">
                                 <button type="submit">{t.submit}</button>

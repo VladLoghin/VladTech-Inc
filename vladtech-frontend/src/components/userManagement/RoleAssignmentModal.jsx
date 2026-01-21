@@ -133,6 +133,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
         }
     };
 
+     
     useEffect(() => {
         if (isOpen) {
             setCurrentPage(0);
@@ -148,6 +149,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
         }
     }, [isOpen, selectedRole, mode]);
 
+     
     useEffect(() => {
         if (isOpen && currentPage > 0 && mode !== "history") {
             fetchUsers(currentPage, activeQuery);
@@ -208,7 +210,7 @@ const RoleManagerModal = ({ isOpen, onClose, onSuccess }) => {
             }
         } catch (err) {
             console.error(`Error ${mode}ing role:`, err);
-            setError(mode === "assign" 
+            setError(mode === "assign"
                 ? t('roleManager.failedToAssign', { role: roleConfig[selectedRole].label })
                 : t('roleManager.failedToRemove', { role: roleConfig[selectedRole].label })
             );

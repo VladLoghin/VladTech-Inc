@@ -9,7 +9,7 @@ import { api } from "../../api/http";
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
-    const { clientId, clientName, comment, rating, photos } = review;
+    const { clientName, comment, rating, photos } = review;
     const reviewId = review.id ?? review.reviewId;
     const initialVisible = review.visible ?? false;
     const roles = user?.["https://vladtech.com/roles"] || [];
@@ -68,37 +68,37 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
 
     const handleVisibilityToggle = async () => {
-  if (!reviewId) {
-    console.error("Missing reviewId; cannot update visibility.");
-    return;
-  }
+        if (!reviewId) {
+            console.error("Missing reviewId; cannot update visibility.");
+            return;
+        }
 
-  const nextValue = !isVisible;
-  setIsVisible(nextValue);
-  setSaving(true);
+        const nextValue = !isVisible;
+        setIsVisible(nextValue);
+        setSaving(true);
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+        try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: { audience: "https://vladtech/api" },
+            });
 
-    await api.patch(
-      `/reviews/${reviewId}/visibility`,
-      { visible: nextValue },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  } catch (err) {
-    console.error("Failed to update visibility:", err);
-    setIsVisible(!nextValue); // revert on error
-  } finally {
-    setSaving(false);
-  }
-};
+            await api.patch(
+                `/reviews/${reviewId}/visibility`,
+                { visible: nextValue },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+        } catch (err) {
+            console.error("Failed to update visibility:", err);
+            setIsVisible(!nextValue); // revert on error
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const handleDelete = async (e) => {
         e.stopPropagation();
@@ -115,7 +115,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
             const res = await deleteReview(reviewId, token);
 
-            if(!res.ok) {
+            if (!res.ok) {
                 throw new Error(`Delete failed with status ${res.status}`);
             }
 
@@ -196,26 +196,26 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             </p>
 
             {canDelete && (
-    <button
-        type="button"
-        onClick={handleDelete}
-        disabled={deleting}
-        style={{
-            backgroundColor: "#dc2626",
-            color: "white",
-            padding: "8px 10px",
-            borderRadius: "8px",
-            marginTop: "10px",
-            width: "100%",
-            fontWeight: 700,
-            cursor: deleting ? "not-allowed" : "pointer",
-            opacity: deleting ? 0.7 : 1,
-        }}
-        data-testid="review-delete-button"
-    >
-        {deleting ? "Deleting..." : "Delete"}
-    </button>
-)}
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    style={{
+                        backgroundColor: "#dc2626",
+                        color: "white",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        marginTop: "10px",
+                        width: "100%",
+                        fontWeight: 700,
+                        cursor: deleting ? "not-allowed" : "pointer",
+                        opacity: deleting ? 0.7 : 1,
+                    }}
+                    data-testid="review-delete-button"
+                >
+                    {deleting ? "Deleting..." : "Delete"}
+                </button>
+            )}
         </div>
     );
 };

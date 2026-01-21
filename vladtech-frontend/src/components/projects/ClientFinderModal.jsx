@@ -18,57 +18,58 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   const perPage = 25;
 
   const fetchClients = async (page, query = "") => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
 
-    const commonConfig = {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { page, perPage, role: "clients" },
-    };
+      const commonConfig = {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page, perPage, role: "clients" },
+      };
 
-    const response = query.trim()
-      ? await api.get("/users/search", {
+      const response = query.trim()
+        ? await api.get("/users/search", {
           ...commonConfig,
           params: {
             ...commonConfig.params,
             query, // axios will encode it
           },
         })
-      : await api.get("/users/clients", commonConfig);
+        : await api.get("/users/clients", commonConfig);
 
-    setClients(response.data.users || []);
-    setTotalClients(response.data.total || 0);
-  } catch (err) {
-    console.error("Error fetching clients:", err);
-    setError("Failed to load clients");
-  } finally {
-    setLoading(false);
-  }
-};
+      setClients(response.data.users || []);
+      setTotalClients(response.data.total || 0);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      setError("Failed to load clients");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchSelectedClient = async () => {
-  if (!selectedClientId) return;
+  const fetchSelectedClient = async () => {
+    if (!selectedClientId) return;
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
 
-    const response = await api.get(`/users/${selectedClientId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const response = await api.get(`/users/${selectedClientId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setSelectedClient(response.data);
-  } catch (err) {
-    console.error("Error fetching selected client:", err);
-  }
-};
+      setSelectedClient(response.data);
+    } catch (err) {
+      console.error("Error fetching selected client:", err);
+    }
+  };
 
+   
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0);
@@ -79,6 +80,7 @@ const fetchSelectedClient = async () => {
     }
   }, [isOpen, selectedClientId]);
 
+   
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchClients(currentPage, activeQuery);
@@ -112,7 +114,7 @@ const fetchSelectedClient = async () => {
 
   const getDisplayClients = () => {
     if (!selectedClient) return clients;
-    
+
     const filteredClients = clients.filter(c => c.user_id !== selectedClientId);
     return [selectedClient, ...filteredClients];
   };
@@ -196,11 +198,10 @@ const fetchSelectedClient = async () => {
                   <button
                     key={client.user_id || index}
                     onClick={() => handleSelectClient(client)}
-                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${
-                      isSelected 
-                        ? "bg-yellow-100 border-yellow-400 border-2" 
+                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
+                        ? "bg-yellow-100 border-yellow-400 border-2"
                         : "border-black/10"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

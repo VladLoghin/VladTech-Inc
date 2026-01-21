@@ -24,6 +24,10 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Allow setState in effects for controlled patterns like auto-dismiss messages
+      'react-hooks/set-state-in-effect': 'warn',
+      // Keep exhaustive-deps as warning since intentional exclusions are common
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 ])
