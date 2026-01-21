@@ -80,8 +80,14 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
-          # Clean up any existing containers/networks first
+          # Aggressive cleanup - kill anything on our ports and remove all containers
+          sudo lsof -ti:5173 | xargs -r kill -9 2>/dev/null || true
+          sudo lsof -ti:8080 | xargs -r kill -9 2>/dev/null || true
+          docker ps -aq | xargs -r docker rm -f 2>/dev/null || true
           docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v 2>/dev/null || true
+          
+          # Give it a moment to clean up
+          sleep 2
           
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
           echo "Waiting for services to be ready..."
