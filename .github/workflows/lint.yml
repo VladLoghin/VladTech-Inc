@@ -8,11 +8,17 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'vladtech-frontend/**'
+      - 'vladtech-frontend/**/*.js'
+      - 'vladtech-frontend/**/*.jsx'
+      - 'vladtech-frontend/**/*.ts'
+      - 'vladtech-frontend/**/*.tsx'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'vladtech-frontend/**'
+      - 'vladtech-frontend/**/*.js'
+      - 'vladtech-frontend/**/*.jsx'
+      - 'vladtech-frontend/**/*.ts'
+      - 'vladtech-frontend/**/*.tsx'
 
 jobs:
   lint:
@@ -44,6 +50,8 @@ jobs:
           files: |
             vladtech-frontend/**/*.js
             vladtech-frontend/**/*.jsx
+            vladtech-frontend/**/*.ts
+            vladtech-frontend/**/*.tsx
 
       - name: Run ESLint on changed files
         if: steps.changed-files.outputs.any_changed == 'true'
