@@ -10,6 +10,9 @@ import { Badge } from "../components/badge";
 import { ArrowLeft, Plus, Calendar as CalendarIcon, Users, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
+import { enUS, fr } from "date-fns/locale";
+
 
 interface Project {
   id: string;
@@ -33,6 +36,9 @@ const mockTeams = [
 
 export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const { i18n } = useTranslation();
+  const lang = i18n.resolvedLanguage || i18n.language;
+const dfLocale = i18n.language === "fr" ? fr : enUS;
   const [projects, setProjects] = useState<Project[]>([
     {
       id: "1",
@@ -177,11 +183,14 @@ export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
                   <div className="space-y-2">
                     <Label className="text-white/70">Due Date</Label>
                     <Calendar
-                      mode="single"
-                      selected={newProject.dueDate}
-                      onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
-                      className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
-                    />
+  key={lang}
+  mode="single"
+  selected={newProject.dueDate}
+  onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
+  locale={dfLocale}
+  className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
+/>
+
                   </div>
                   <Button
                     onClick={handleAddProject}
@@ -217,21 +226,18 @@ export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
                 </CardHeader>
                 <CardContent>
                   <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
-                    modifiers={{
-                      hasProject: projects.map((p) => p.dueDate),
-                    }}
-                    modifiersStyles={{
-                      hasProject: {
-                        backgroundColor: "#facc15",
-                        color: "black",
-                        fontWeight: "bold",
-                      },
-                    }}
-                  />
+  key={lang}
+  mode="single"
+  selected={date}
+  onSelect={setDate}
+  locale={dfLocale}
+  className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
+  modifiers={{ hasProject: projects.map((p) => p.dueDate) }}
+  modifiersStyles={{
+    hasProject: { backgroundColor: "#facc15", color: "black", fontWeight: "bold" },
+  }}
+/>
+
                   <div className="mt-6 p-4 bg-yellow-400/10 rounded-lg border border-yellow-400/30">
                     <p className="text-sm text-white/70">
                       <strong className="text-yellow-400">Tip:</strong> Dates highlighted in yellow have scheduled projects. Click a
@@ -254,7 +260,7 @@ export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
               <Card className="relative bg-white/5 backdrop-blur-xl border-yellow-400/20 shadow-2xl">
                 <CardHeader>
                   <CardTitle className="text-xl text-white tracking-wide">
-                    {date ? format(date, "MMMM d, yyyy") : "SELECT A DATE"}
+                    {date ? format(date, "MMMM d, yyyy", { locale: dfLocale }) : "SELECT A DATE"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -320,7 +326,7 @@ export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-300 mb-2">
-                          Due: {format(project.dueDate, "MMM d, yyyy")}
+                          Due: {format(project.dueDate, "MMM d, yyyy", { locale: dfLocale })}
                         </p>
                         <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
                       </div>

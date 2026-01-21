@@ -15,7 +15,7 @@ import { api } from "../api/http";
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -163,17 +163,19 @@ const Admin = () => {
   const formatSelectedDate = (dateStr) => {
     if (!dateStr) return "";
 
-    // dateStr is "YYYY-MM-DD"
     const [year, month, day] = dateStr.split("-");
-    const date = new Date(Number(year), Number(month) - 1, Number(day)); // local date
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
 
-    return date.toLocaleDateString("en-US", {
+    const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
+
+    return date.toLocaleDateString(locale, {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
     });
   };
+
 
   return (
     <>
