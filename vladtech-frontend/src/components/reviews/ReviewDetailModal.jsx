@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaStar, FaRegStar, FaTimes } from "react-icons/fa";
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
@@ -6,21 +6,16 @@ import "./Review.css";
 const ReviewDetailModal = ({ review, open, onClose }) => {
     const { clientName, comment, rating, photos } = review || {};
     const photo = photos?.[0];
-    const [imgSrc, setImgSrc] = useState(
-        photo?.url ? getImageUrl(photo.url) : "/images/placeholder.png"
-    );
-    const [errored, setErrored] = useState(false);
+    const imgSrc = photo?.url ? getImageUrl(photo.url) : "/images/placeholder.png";
 
     if (!open || !review) return null;
 
-    const handleError = () => {
-        if (!errored) {
-            setImgSrc("/images/placeholder.png");
-            setErrored(true);
+    const handleError = (e) => {
+        // Fallback to placeholder without triggering React state updates
+        if (e?.currentTarget?.src !== "/images/placeholder.png") {
+            e.currentTarget.src = "/images/placeholder.png";
         }
     };
-
-
     const ratingMap = {
         ONE: 1,
         TWO: 2,
