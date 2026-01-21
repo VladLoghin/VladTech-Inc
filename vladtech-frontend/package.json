@@ -9,10 +9,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:ci": "playwright test --project=chromium",
+    "test": "playwright test",
+    "test:ci": "playwright test --project=chromium",
     "preview": "vite preview"
   },
   "dependencies": {
