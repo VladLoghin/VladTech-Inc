@@ -50,19 +50,6 @@ jobs:
       - name: Check formatting with Prettier
         run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,json}"
 
-      # Step 4: Playwright E2E Tests
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Playwright tests
-        run: npx playwright test --project=chromium
-        env:
-          CI: true
-
-      - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: vladtech-frontend/playwright-report/
-          retention-days: 30
+      # Step 4: Unit Tests with Vitest
+      - name: Run Unit Tests
+        run: npm test
