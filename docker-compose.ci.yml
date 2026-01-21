@@ -1,0 +1,21 @@
+# Docker Compose override for CI/CD
+# This file overrides the main docker-compose.yml for running E2E tests in CI
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.ci.yml up
+
+services:
+  vladtech-frontend:
+    build:
+      context: ./vladtech-frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./vladtech-frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8080
+    depends_on:
+      - vladtech-backend
+

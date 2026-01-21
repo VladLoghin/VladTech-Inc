@@ -3,7 +3,7 @@
 # 1. Build/Compilation (vite build)
 # 2. ESLint Linting
 # 3. Prettier Code Formatting Check
-# 4. Playwright E2E Tests
+# 4. Playwright E2E Tests (with backend services)
 
 name: Frontend CI
 
@@ -12,19 +12,21 @@ on:
     branches: [ "main" ]
     paths:
       - 'vladtech-frontend/**'
+      - 'vladtech-backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'vladtech-frontend/**'
+      - 'vladtech-backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/frontend-ci.yml'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     
-    defaults:
-      run:
-        working-directory: vladtech-frontend
-
     steps:
       - uses: actions/checkout@v4
 
@@ -35,26 +37,91 @@ jobs:
           cache: 'npm'
           cache-dependency-path: vladtech-frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install frontend dependencies
+        working-directory: vladtech-frontend
         run: npm ci
 
       # Step 1: Build/Compilation
-      - name: Build
+      - name: Build frontend
+        working-directory: vladtech-frontend
         run: npm run build
 
       # Step 2: ESLint Linting
       - name: Lint
+        working-directory: vladtech-frontend
         run: npm run lint
 
       # Step 3: Prettier Format Check
       - name: Check formatting with Prettier
+        working-directory: vladtech-frontend
         run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,json}"
 
-      # Step 4: Playwright E2E Tests
+      # Step 4: Playwright E2E Tests with full stack
+      - name: Create .env file for docker-compose
+        run: |
+          cat > .env << EOF
+          AUTH0_ISSUER_URI=${{ secrets.AUTH0_ISSUER_URI }}
+          AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
+          AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_MGMT_CLIENT_ID=${{ secrets.AUTH0_MGMT_CLIENT_ID }}
+          AUTH0_MGMT_CLIENT_SECRET=${{ secrets.AUTH0_MGMT_CLIENT_SECRET }}
+          AUTH0_MGMT_AUDIENCE=${{ secrets.AUTH0_MGMT_AUDIENCE }}
+          AUTH0_ROLE_CLIENT=${{ secrets.AUTH0_ROLE_CLIENT }}
+          AUTH0_ROLE_EMPLOYEE=${{ secrets.AUTH0_ROLE_EMPLOYEE }}
+          AUTH0_ROLE_ADMIN=${{ secrets.AUTH0_ROLE_ADMIN }}
+          AUTH0_ROLE_DEFAULT=${{ secrets.AUTH0_ROLE_DEFAULT }}
+          EOF
+
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
+          echo "Waiting for services to be ready..."
+          
+          # Wait for MongoDB
+          echo "Waiting for MongoDB..."
+          timeout 30 bash -c 'until docker-compose exec -T mongo mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done' || echo "MongoDB check skipped"
+          
+          # Wait for MailHog
+          echo "Waiting for MailHog..."
+          timeout 30 bash -c 'until curl -f http://localhost:8025 2>/dev/null; do sleep 2; done' || echo "MailHog not ready"
+          
+          # Wait for backend (try simple port check since no health endpoint)
+          echo "Waiting for backend..."
+          timeout 120 bash -c 'until curl -f http://localhost:8080 2>/dev/null || nc -z localhost 8080; do sleep 3; done' || echo "Backend might not be ready"
+          
+          # Wait for frontend
+          echo "Waiting for frontend..."
+          timeout 60 bash -c 'until curl -f http://localhost:5173 2>/dev/null; do sleep 2; done' || echo "Frontend might not be ready"
+          
+          # Give everything a few more seconds to stabilize
+          sleep 10
+          
+          echo "All services should be up now"
+
+      - name: Show running containers
+        if: always()
+        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps
+
+      - name: Show backend logs
+        if: always()
+        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-backend
+
+      - name: Show frontend logs
+        if: always()
+        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-frontend
+
       - name: Install Playwright Browsers
+        working-directory: vladtech-frontend
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
+        working-directory: vladtech-frontend
         run: npx playwright test --project=chromium
         env:
           CI: true
@@ -66,3 +133,7 @@ jobs:
           name: playwright-report
           path: vladtech-frontend/playwright-report/
           retention-days: 30
+
+      - name: Stop services
+        if: always()
+        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml down -v
