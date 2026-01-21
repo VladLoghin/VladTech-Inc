@@ -80,15 +80,33 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
-          # Aggressive cleanup - kill anything on our ports and remove all containers
+          # Nuclear cleanup - remove EVERYTHING Docker related
+          echo "=== Stopping all containers ==="
+          docker ps -aq | xargs -r docker stop -t 1 2>/dev/null || true
+          docker ps -aq | xargs -r docker rm -f 2>/dev/null || true
+          
+          echo "=== Cleaning up compose resources ==="
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v --remove-orphans 2>/dev/null || true
+          
+          echo "=== Killing processes on ports 5173 and 8080 ==="
           sudo lsof -ti:5173 | xargs -r kill -9 2>/dev/null || true
           sudo lsof -ti:8080 | xargs -r kill -9 2>/dev/null || true
-          docker ps -aq | xargs -r docker rm -f 2>/dev/null || true
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v 2>/dev/null || true
           
-          # Give it a moment to clean up
-          sleep 2
+          echo "=== Pruning Docker system ==="
+          docker system prune -f 2>/dev/null || true
           
+          echo "=== Waiting for cleanup to complete ==="
+          sleep 5
+          
+          echo "=== Verifying port 5173 is free ==="
+          if sudo lsof -i:5173; then
+            echo "ERROR: Port 5173 is still in use after cleanup!"
+            sudo lsof -i:5173
+            exit 1
+          fi
+          echo "Port 5173 is free ✓"
+          
+          echo "=== Starting services ==="
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
           echo "Waiting for services to be ready..."
           
