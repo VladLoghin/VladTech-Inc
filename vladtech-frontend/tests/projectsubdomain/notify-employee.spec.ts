@@ -14,7 +14,7 @@ async function clickLogin(page: Page) {
   const viewport = page.viewportSize();
   const isMobile = viewport && viewport.width < 768;
 
-  await page.goto('http://localhost:5173/');
+  await page.goto('/');
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(200);
 
@@ -36,7 +36,7 @@ async function loginAuth0(page: Page, email: string, password: string) {
 
   await safeClick(page.getByRole('button', { name: /continue/i }).first());
 
-  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 });
+  await page.waitForURL(/localhost:\d+\/?$/, { timeout: 30000 });
 }
 
 async function gotoAdminPanel(page: Page) {
@@ -60,7 +60,7 @@ async function gotoAdminPanel(page: Page) {
 // ---------- MailHog helpers ----------
 async function mailhogClear(request: any) {
   // MailHog supports DELETE /api/v1/messages
-  await request.delete(`${MAILHOG_BASE}/api/v1/messages`).catch(() => {});
+  await request.delete(`${MAILHOG_BASE}/api/v1/messages`).catch(() => { });
 }
 
 async function mailhogWaitForMessage(
@@ -99,7 +99,7 @@ async function mailhogWaitForMessage(
 
   throw new Error(
     `Timed out waiting for MailHog email to "${opts.toEmail}"` +
-      (opts.subjectIncludes ? ` with subject containing "${opts.subjectIncludes}"` : '')
+    (opts.subjectIncludes ? ` with subject containing "${opts.subjectIncludes}"` : '')
   );
 }
 

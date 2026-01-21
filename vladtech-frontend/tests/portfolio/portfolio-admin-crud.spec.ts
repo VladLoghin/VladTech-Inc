@@ -10,7 +10,7 @@ test.describe('Admin Portfolio CRUD Operations', () => {
     await loginAs('realAdmin');
 
     // Navigate to admin page
-    await page.goto('http://localhost:5173/admin');
+    await page.goto('/admin');
     await page.waitForLoadState('networkidle');
     
     // Wait for admin page to load

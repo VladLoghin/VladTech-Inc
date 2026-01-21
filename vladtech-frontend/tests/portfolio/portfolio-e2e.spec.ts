@@ -5,7 +5,7 @@ test.describe('Portfolio Page E2E - Desktop', () => {
     test.beforeEach(async ({ page }) => {
         await page.setViewportSize({ width: 1920, height: 1080 });
         // Start from homepage
-        await page.goto('http://localhost:5173/');
+        await page.goto('/');
         await page.waitForLoadState('networkidle');
     });
 
@@ -36,7 +36,7 @@ test.describe('Portfolio Page E2E - Mobile', () => {
     test.beforeEach(async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
         // Start from homepage
-        await page.goto('http://localhost:5173/');
+        await page.goto('/');
         await page.waitForLoadState('networkidle');
     });
 

@@ -11,7 +11,7 @@ async function clickLogin(page: Page) {
   const viewport = page.viewportSize();
   const isMobile = viewport && viewport.width < 768;
 
-  await page.goto('http://localhost:5173/');
+  await page.goto('/');
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(200);
 
@@ -42,7 +42,7 @@ async function loginAuth0(page: Page, email: string, password: string) {
   await safeClick(continueBtn);
 
   // back to app (Auth0 redirect can be slow on webkit)
-  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 });
+  await page.waitForURL(/localhost:\d+\/?$/, { timeout: 30000 });
 }
 
 async function gotoAdminPanel(page: Page) {
@@ -109,7 +109,7 @@ async function clickLogout(page: Page) {
   }
 
   // Wait until we’re back at home and LOGIN exists again
-  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 }).catch(() => {});
+  await page.waitForURL(/localhost:\d+\/?$/, { timeout: 30000 }).catch(() => { });
   await page.waitForTimeout(800);
 }
 

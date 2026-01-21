@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Language Toggle', () => {
   test('should toggle language from English to French on home page', async ({ page }) => {
     // Navigate to the home page
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
 
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
@@ -36,7 +36,7 @@ test.describe('Language Toggle', () => {
 
   test('should toggle language from English to French and back to English', async ({ page }) => {
     // Navigate to the home page
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const languageToggle = page.locator('[aria-label="Toggle language"]');

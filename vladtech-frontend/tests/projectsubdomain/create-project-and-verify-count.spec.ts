@@ -12,7 +12,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
   // Helper function to get project count from About section
   const getProjectCountFromHome = async () => {
     // Navigate to homepage
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Scroll to About section and wait
@@ -49,7 +49,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
   } else {
     await page.getByRole('button', { name: /admin panel/i }).click();
   }
-  await page.waitForURL('http://localhost:5173/admin');
+  await page.waitForURL('/admin');
   console.log('✅ Step 3: Navigated to Admin Panel');
 
   // Step 4: Click yellow "New Project" button

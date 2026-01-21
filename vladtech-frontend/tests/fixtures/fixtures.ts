@@ -34,7 +34,7 @@ export const test = base.extend<{
     async function loginAs(role: UserRole) {
       const user = USERS[role];
 
-      await page.goto('http://localhost:5173/');
+      await page.goto('/');
 
       // Check if we're in mobile view by checking viewport width
       const viewportSize = page.viewportSize();
@@ -62,7 +62,7 @@ export const test = base.extend<{
       await page.getByRole('button', { name: 'Continue' }).click();
 
       // Wait for redirect back to app
-      await page.waitForURL('http://localhost:5173/', { timeout: 10000 });
+      await page.waitForURL('/', { timeout: 10000 });
     }
 
     await use(loginAs);
@@ -85,7 +85,7 @@ export const test = base.extend<{
         } else {
           await page.getByRole('button', { name: /admin panel/i }).click();
         }
-        await page.waitForURL('http://localhost:5173/admin', { timeout: 5000 });
+        await page.waitForURL('/admin', { timeout: 5000 });
       }
 
       await page.waitForTimeout(500);

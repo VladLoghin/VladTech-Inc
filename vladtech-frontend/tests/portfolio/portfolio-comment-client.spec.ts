@@ -10,7 +10,7 @@ test.describe('Portfolio Comment - Client - Desktop', () => {
     await loginAs('realClient');
     
     // Navigate to portfolio
-    await page.goto('http://localhost:5173/portfolio');
+    await page.goto('/portfolio');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     
@@ -63,7 +63,7 @@ test.describe('Portfolio Comment - Client - Mobile', () => {
     await loginAs('realClient');
     
     // Navigate to portfolio
-    await page.goto('http://localhost:5173/portfolio');
+    await page.goto('/portfolio');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     

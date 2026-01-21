@@ -25,7 +25,7 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
+    /* Base URL to use in actions like `await page.goto('/')`. */
     /* CI uses port 3000 (docker-compose.ci.yml), local dev uses 5173 */
     baseURL: process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173',
 

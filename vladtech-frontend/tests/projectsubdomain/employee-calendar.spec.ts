@@ -6,7 +6,7 @@ test('employee clicks January 15 on calendar (employee dashboard)', async ({ pag
   await loginAs('employee');
 
   // Go to employee dashboard
-  await page.goto('http://localhost:5173/employee');
+  await page.goto('/employee');
 
   await expect(page.getByRole('heading', { name: /employee area/i })).toBeVisible();
 

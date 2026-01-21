@@ -3,7 +3,7 @@ import { test, expect } from '../fixtures/fixtures.ts';
 
 test.describe('Estimate Modal E2E', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Open the estimate modal from the hero CTA

@@ -8,7 +8,7 @@ test.describe('Reviews Page E2E', () => {
     test.describe('View and Create Reviews', () => {
         test.beforeEach(async ({page}) => {
             // Go directly to reviews page
-            await page.goto('http://localhost:5173/reviews');
+            await page.goto('/reviews');
             await page.waitForLoadState('networkidle');
         });
 
@@ -39,7 +39,7 @@ test.describe('Reviews Page E2E', () => {
             console.log('✅ Logged in as client');
 
             // Navigate to reviews page
-            await page.goto('http://localhost:5173/reviews');
+            await page.goto('/reviews');
             await page.waitForLoadState('networkidle');
 
             // Open the review modal
@@ -106,7 +106,7 @@ test.describe('Reviews Page E2E', () => {
     test.describe('Review Detail Modal', () => {
 
         test.beforeEach(async ({ page }) => {
-            await page.goto('http://localhost:5173/reviews');
+            await page.goto('/reviews');
             await page.waitForLoadState('networkidle');
         });
 
