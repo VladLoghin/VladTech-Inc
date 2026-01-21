@@ -47,18 +47,18 @@ Playwright configuration that:
 ### Option 1: With Docker Compose (Recommended - matches CI exactly)
 ```bash
 # Start all services
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
 
 # Wait for services to be ready (30-60 seconds)
 # Check logs if needed:
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs -f
+docker compose -f docker-compose.yml -f docker-compose.ci.yml logs -f
 
 # Run Playwright tests from host
 cd vladtech-frontend
 npx playwright test
 
 # Cleanup
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml down -v
+docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
 ```
 
 ### Option 2: Without Docker (Faster, but needs manual setup)
@@ -89,7 +89,7 @@ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/
 
 1. **Services not started**: Check CI logs for Docker Compose startup
    - Look for: "Waiting for services to be ready..."
-   - Verify all services started: `docker-compose ps` output in logs
+   - Verify all services started: `docker compose ps` output in logs
 
 2. **Frontend not ready**: Frontend might need more time to start
    - Check "Show frontend logs" in CI output
@@ -125,7 +125,7 @@ Error: MailHog not reachable at http://localhost:8025
 ```
 
 **Solution**: MailHog should start automatically via Docker Compose. Check if:
-- MailHog container is running: `docker-compose ps mailhog`
+- MailHog container is running: `docker compose ps mailhog`
 - Port 8025 is accessible
 - No port conflicts in CI environment
 
@@ -191,7 +191,7 @@ Total startup time: ~2-3 minutes
 
 ### Check service logs in CI
 All CI runs include:
-- Container status (`docker-compose ps`)
+- Container status (`docker compose ps`)
 - Backend logs
 - Frontend logs
 
@@ -206,6 +206,7 @@ Look for these in the CI output under "Show running containers", "Show backend l
 | Slow Docker builds | Use `docker system prune` to clean up old images |
 | Tests timeout | Increase timeout in playwright.config.ts or wait longer in CI |
 | Database state issues | Ensure tests clean up data or use unique test data |
+| `docker-compose: command not found` | Use `docker compose` (V2) instead of `docker-compose` (V1) |
 
 ## Further Reading
 

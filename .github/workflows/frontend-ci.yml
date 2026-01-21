@@ -80,12 +80,12 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
           echo "Waiting for services to be ready..."
           
           # Wait for MongoDB
           echo "Waiting for MongoDB..."
-          timeout 30 bash -c 'until docker-compose exec -T mongo mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done' || echo "MongoDB check skipped"
+          timeout 30 bash -c 'until docker compose exec -T mongo mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done' || echo "MongoDB check skipped"
           
           # Wait for MailHog
           echo "Waiting for MailHog..."
@@ -106,15 +106,15 @@ jobs:
 
       - name: Show running containers
         if: always()
-        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml ps
 
       - name: Show backend logs
         if: always()
-        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-backend
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-backend
 
       - name: Show frontend logs
         if: always()
-        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-frontend
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs vladtech-frontend
 
       - name: Install Playwright Browsers
         working-directory: vladtech-frontend
@@ -136,4 +136,4 @@ jobs:
 
       - name: Stop services
         if: always()
-        run: docker-compose -f docker-compose.yml -f docker-compose.ci.yml down -v
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
