@@ -80,6 +80,9 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
+          # Clean up any existing containers/networks first
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v 2>/dev/null || true
+          
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
           echo "Waiting for services to be ready..."
           
