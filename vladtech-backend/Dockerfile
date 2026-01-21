@@ -6,8 +6,8 @@ COPY gradlew gradlew.bat ./
 COPY gradle/ gradle/
 COPY settings.gradle build.gradle ./
 
-# Download dependencies (cacheable layer)
-RUN ./gradlew dependencies --no-daemon || true
+# Make gradle wrapper executable and download dependencies (cacheable layer)
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true
 
 # Copy source code
 COPY src/ src/
