@@ -1,12 +1,12 @@
-import { Auth0Provider } from "@auth0/auth0-react";
+import { Auth0Provider } from '@auth0/auth0-react';
 
 const Auth0ProviderWithConfig = ({ children, navigate }) => {
-  const domain = "dev-ljz84r2xvrlnftfv.ca.auth0.com";
-  const clientId = "sDVdjRgneqMMYuQm8njufqcG0yrPV2j6";
-  const audience = "https://vladtech/api";
+  const domain = 'dev-ljz84r2xvrlnftfv.ca.auth0.com';
+  const clientId = 'sDVdjRgneqMMYuQm8njufqcG0yrPV2j6';
+  const audience = 'https://vladtech/api';
 
   const onRedirectCallback = (appState) => {
-      navigate(appState?.returnTo || '/');
+    navigate(appState?.returnTo || '/');
   };
 
   return (
@@ -16,7 +16,7 @@ const Auth0ProviderWithConfig = ({ children, navigate }) => {
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience,
-        scope: "openid profile email"
+        scope: 'openid profile email',
       }}
       onRedirectCallback={onRedirectCallback}
       cacheLocation="localstorage"

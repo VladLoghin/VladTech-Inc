@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react"
-import { useAuth0 } from "@auth0/auth0-react"
-import { useTranslation } from "react-i18next"
-import { Label } from "./label"
-import { Input } from "./input"
-import { Textarea } from "./textarea"
-import { Button } from "./button"
-import { Send, X } from "lucide-react"
+import React, { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useTranslation } from 'react-i18next';
+import { Label } from './label';
+import { Input } from './input';
+import { Textarea } from './textarea';
+import { Button } from './button';
+import { Send, X } from 'lucide-react';
 
 function ContactUs({ isOpen, onClose }) {
   const { t } = useTranslation();
-  const [subject, setSubject] = useState("")
-  const [details, setDetails] = useState("")
-  const [isSending, setIsSending] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
+  const [subject, setSubject] = useState('');
+  const [details, setDetails] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
-  const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0()
-  const isFormInvalid = subject.trim() === "" || details.trim() === "";
+  const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0();
+  const isFormInvalid = subject.trim() === '' || details.trim() === '';
 
   // Redirect to login if modal opens and user is not authenticated
   useEffect(() => {
@@ -27,71 +27,71 @@ function ContactUs({ isOpen, onClose }) {
   }, [isOpen, isAuthenticated, onClose, loginWithRedirect]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setSuccess(false)
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
 
     if (!isAuthenticated) {
-      setError("You must be logged in to contact us.")
-      return
+      setError('You must be logged in to contact us.');
+      return;
     }
 
     try {
-      setIsSending(true)
+      setIsSending(true);
 
       // Get JWT from Auth0 for the backend
       const token = await getAccessTokenSilently({
         authorizationParams: {
-          audience: "https://vladtech/api",
+          audience: 'https://vladtech/api',
         },
-      })
+      });
 
       // Backend DTO fields:
       // email, name, subject, message
       const payload = {
         subject,
         message: details,
-        name: user?.name || user?.nickname || "",
-        email: user?.email || "",
-      }
+        name: user?.name || user?.nickname || '',
+        email: user?.email || '',
+      };
 
-      const response = await fetch("http://localhost:8080/api/contact", {
-        method: "POST",
+      const response = await fetch('http://localhost:8080/api/contact', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Backend returned status ${response.status}`)
+        throw new Error(`Backend returned status ${response.status}`);
       }
 
-      setSuccess(true)
-      setSubject("")
-      setDetails("")
+      setSuccess(true);
+      setSubject('');
+      setDetails('');
       // Close modal after successful send
       setTimeout(() => {
-        onClose()
-        setSuccess(false)
-      }, 2000)
+        onClose();
+        setSuccess(false);
+      }, 2000);
     } catch (err) {
-      console.error("Failed to send contact message", err)
-      setError("Something went wrong while sending your message.")
+      console.error('Failed to send contact message', err);
+      setError('Something went wrong while sending your message.');
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/0 backdrop-blur-0 animate-in fade-in duration-300"
       onClick={onClose}
       style={{
-        animation: 'fadeInBackdrop 0.3s ease-out forwards'
+        animation: 'fadeInBackdrop 0.3s ease-out forwards',
       }}
     >
       <style>
@@ -118,13 +118,13 @@ function ContactUs({ isOpen, onClose }) {
           }
         `}
       </style>
-      <div 
+      <div
         className="relative w-full max-w-2xl mx-4 bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-3xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         style={{
           animation: 'modalSlideIn 0.4s ease-out forwards',
           animationDelay: '0.1s',
-          opacity: 0
+          opacity: 0,
         }}
       >
         {/* Close button */}
@@ -136,7 +136,9 @@ function ContactUs({ isOpen, onClose }) {
         </button>
 
         <div className="p-10">
-          <h1 className="text-4xl md:text-5xl text-white mb-2 tracking-tight">{t('contact.title')}</h1>
+          <h1 className="text-4xl md:text-5xl text-white mb-2 tracking-tight">
+            {t('contact.title')}
+          </h1>
           <p className="text-gray-400 mb-8 tracking-wide">{t('contact.shareDetails')}</p>
 
           {!isAuthenticated ? (
@@ -187,7 +189,7 @@ function ContactUs({ isOpen, onClose }) {
                 className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="mr-3 h-5 w-5" />
-                {isSending ? "SENDING..." : t('contact.sendMessage')}
+                {isSending ? 'SENDING...' : t('contact.sendMessage')}
               </Button>
 
               {success && (
@@ -205,7 +207,7 @@ function ContactUs({ isOpen, onClose }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ContactUs
+export default ContactUs;

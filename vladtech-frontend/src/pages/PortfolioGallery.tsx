@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { X, Star, Send } from "lucide-react";
-import { Button } from "../components/button.js";
-import { Textarea } from "../components/textarea.js";
-import { motion, AnimatePresence } from "motion/react";
-import { useNavigate } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
-import { addComment } from "../api/portfolio/portfolioService.js";
-import getImageUrl from "../utils/getImageUrl.js";
-import {api} from "../api/http.js";
+import { useState, useEffect } from 'react';
+import { X, Star, Send } from 'lucide-react';
+import { Button } from '../components/button.js';
+import { Textarea } from '../components/textarea.js';
+import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { addComment } from '../api/portfolio/portfolioService.js';
+import getImageUrl from '../utils/getImageUrl.js';
+import { api } from '../api/http.js';
 
 interface PortfolioItem {
   portfolioId: string;
@@ -30,7 +30,7 @@ export default function PortfolioGallery() {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Helper function to calculate time ago
@@ -42,7 +42,7 @@ export default function PortfolioGallery() {
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
 
-    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
@@ -55,20 +55,20 @@ export default function PortfolioGallery() {
 
   // Fetch portfolio items from backend
   useEffect(() => {
-  const fetchPortfolioItems = async () => {
-    try {
-      const response = await api.get("/portfolio");
-      console.log("Portfolio data:", response.data);
-      setPortfolioItems(response.data);
-    } catch (error) {
-      console.error("Error fetching portfolio:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchPortfolioItems = async () => {
+      try {
+        const response = await api.get('/portfolio');
+        console.log('Portfolio data:', response.data);
+        setPortfolioItems(response.data);
+      } catch (error) {
+        console.error('Error fetching portfolio:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchPortfolioItems();
-}, []);
+    fetchPortfolioItems();
+  }, []);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +77,7 @@ export default function PortfolioGallery() {
     // Check if user is authenticated
     if (!isAuthenticated) {
       loginWithRedirect({
-        appState: { returnTo: window.location.pathname }
+        appState: { returnTo: window.location.pathname },
       });
       return;
     }
@@ -87,13 +87,13 @@ export default function PortfolioGallery() {
     try {
       // Get access token
       const accessToken = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
+        authorizationParams: {
+          audience: 'https://vladtech/api',
+        },
+      });
 
       // Get user's nickname or name
-      const authorName = user?.nickname || user?.name || user?.email || "Anonymous User";
+      const authorName = user?.nickname || user?.name || user?.email || 'Anonymous User';
 
       // Call API to add comment
       const newCommentDto = await addComment(
@@ -113,25 +113,25 @@ export default function PortfolioGallery() {
 
       // Update the portfolio items list
       setPortfolioItems((items) =>
-        items.map((item) =>
-          item.portfolioId === selectedItem.portfolioId ? updatedItem : item
-        )
+        items.map((item) => (item.portfolioId === selectedItem.portfolioId ? updatedItem : item))
       );
 
-      setNewComment("");
+      setNewComment('');
     } catch (error: any) {
-      console.error("Error adding comment:", error);
-      
+      console.error('Error adding comment:', error);
+
       // Handle specific error cases
       if (error.response?.status === 401) {
-        alert("Your session has expired. Please log in again.");
+        alert('Your session has expired. Please log in again.');
         loginWithRedirect({
-          appState: { returnTo: window.location.pathname }
+          appState: { returnTo: window.location.pathname },
         });
       } else if (error.response?.status === 403) {
-        alert("You don't have permission to comment. Only clients and admins can comment on portfolio items.");
+        alert(
+          "You don't have permission to comment. Only clients and admins can comment on portfolio items."
+        );
       } else {
-        alert("Failed to add comment. Please try again.");
+        alert('Failed to add comment. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -152,7 +152,7 @@ export default function PortfolioGallery() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-yellow-400/20 shadow-2xl">
         <div className="container mx-auto px-8 py-6 flex items-center justify-between">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className="text-2xl text-white tracking-widest hover:text-yellow-400 transition-colors"
           >
             VLADTECH
@@ -160,13 +160,13 @@ export default function PortfolioGallery() {
 
           <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-12">
             <button
-              onClick={() => navigate("/portfolio")}
+              onClick={() => navigate('/portfolio')}
               className="text-white hover:text-yellow-400 transition-colors tracking-wider text-sm border-b-2 border-yellow-400"
             >
               PORTFOLIO
             </button>
             <button
-              onClick={() => navigate("/reviews")}
+              onClick={() => navigate('/reviews')}
               className="text-white/40 hover:text-yellow-400 transition-colors tracking-wider text-sm"
             >
               REVIEWS
@@ -221,7 +221,7 @@ export default function PortfolioGallery() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               className="bg-black border border-yellow-400/30 rounded-3xl overflow-hidden max-w-5xl w-full max-h-[90vh] grid md:grid-cols-2 shadow-2xl"
             >
@@ -256,17 +256,23 @@ export default function PortfolioGallery() {
                 {/* Comments List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   {selectedItem.comments.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No comments yet. Be the first to comment!</p>
+                    <p className="text-center text-gray-500 py-8">
+                      No comments yet. Be the first to comment!
+                    </p>
                   ) : (
                     selectedItem.comments.map((comment, idx) => (
                       <div key={idx} className="flex gap-3">
                         <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-black font-bold text-sm">{getAuthorInitial(comment.authorName)}</span>
+                          <span className="text-black font-bold text-sm">
+                            {getAuthorInitial(comment.authorName)}
+                          </span>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-white tracking-wide">{comment.authorName}</span>
-                            <span className="text-gray-500 text-sm">{getTimeAgo(comment.timestamp)}</span>
+                            <span className="text-gray-500 text-sm">
+                              {getTimeAgo(comment.timestamp)}
+                            </span>
                           </div>
                           <p className="text-gray-300">{comment.text}</p>
                         </div>
@@ -281,7 +287,9 @@ export default function PortfolioGallery() {
                     <div className="flex gap-3">
                       <Textarea
                         value={newComment}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setNewComment(e.target.value)
+                        }
                         placeholder="Add a comment..."
                         className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
                         rows={2}
@@ -301,9 +309,11 @@ export default function PortfolioGallery() {
                     <div className="text-center">
                       <p className="text-gray-400 mb-3">Sign in to leave a comment</p>
                       <Button
-                        onClick={() => loginWithRedirect({
-                          appState: { returnTo: window.location.pathname }
-                        })}
+                        onClick={() =>
+                          loginWithRedirect({
+                            appState: { returnTo: window.location.pathname },
+                          })
+                        }
                         className="bg-yellow-400 hover:bg-yellow-500 text-black px-6"
                       >
                         Sign In

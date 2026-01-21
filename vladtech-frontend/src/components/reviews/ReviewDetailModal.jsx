@@ -1,85 +1,88 @@
-import React, { useState } from "react";
-import { FaStar, FaRegStar, FaTimes } from "react-icons/fa";
-import getImageUrl from "../../utils/getImageUrl.js";
-import "./Review.css";
+import React, { useState } from 'react';
+import { FaStar, FaRegStar, FaTimes } from 'react-icons/fa';
+import getImageUrl from '../../utils/getImageUrl.js';
+import './Review.css';
 
 const ReviewDetailModal = ({ review, open, onClose }) => {
-    const { clientName, comment, rating, photos } = review || {};
-    const photo = photos?.[0];
-    const [imgSrc, setImgSrc] = useState(
-        photo?.url ? getImageUrl(photo.url) : "/images/placeholder.png"
-    );
-    const [errored, setErrored] = useState(false);
+  const { clientName, comment, rating, photos } = review || {};
+  const photo = photos?.[0];
+  const [imgSrc, setImgSrc] = useState(
+    photo?.url ? getImageUrl(photo.url) : '/images/placeholder.png'
+  );
+  const [errored, setErrored] = useState(false);
 
-    if (!open || !review) return null;
+  if (!open || !review) return null;
 
-    const handleError = () => {
-        if (!errored) {
-            setImgSrc("/images/placeholder.png");
-            setErrored(true);
-        }
-    };
+  const handleError = () => {
+    if (!errored) {
+      setImgSrc('/images/placeholder.png');
+      setErrored(true);
+    }
+  };
 
+  const ratingMap = {
+    ONE: 1,
+    TWO: 2,
+    THREE: 3,
+    FOUR: 4,
+    FIVE: 5,
+  };
 
-    const ratingMap = {
-        ONE: 1,
-        TWO: 2,
-        THREE: 3,
-        FOUR: 4,
-        FIVE: 5
-    };
+  const numericRating = ratingMap[rating] || 0;
 
-    const numericRating = ratingMap[rating] || 0;
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    i < numericRating ? (
+      <FaStar key={i} className="star-icon" />
+    ) : (
+      <FaRegStar key={i} className="star-icon" />
+    )
+  );
 
-    const stars = Array.from({ length: 5 }, (_, i) =>
-        i < numericRating ? <FaStar key={i} className="star-icon" /> : <FaRegStar key={i} className="star-icon" />
-    );
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
-    const handleBackdropClick = (e) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
-    return (
-        <div
-            className="review-modal-backdrop"
-            onClick={handleBackdropClick}
-            data-testid="review-detail-modal-backdrop"
+  return (
+    <div
+      className="review-modal-backdrop"
+      onClick={handleBackdropClick}
+      data-testid="review-detail-modal-backdrop"
+    >
+      <div className="review-modal-content enlarged" data-testid="review-detail-modal">
+        <button
+          className="review-modal-close"
+          onClick={onClose}
+          aria-label="Close modal"
+          data-testid="review-detail-close-button"
         >
-            <div className="review-modal-content enlarged" data-testid="review-detail-modal">
-                <button
-                    className="review-modal-close"
-                    onClick={onClose}
-                    aria-label="Close modal"
-                    data-testid="review-detail-close-button"
-                >
-                    <FaTimes />
-                </button>
+          <FaTimes />
+        </button>
 
-                <div className="review-card enlarged">
-                    <img
-                        src={imgSrc}
-                        alt={photo?.filename}
-                        onError={handleError}
-                        data-testid="review-detail-image"
-                    />
+        <div className="review-card enlarged">
+          <img
+            src={imgSrc}
+            alt={photo?.filename}
+            onError={handleError}
+            data-testid="review-detail-image"
+          />
 
-                    <p className="client-name" data-testid="review-detail-client">
-                        {clientName}
-                    </p>
+          <p className="client-name" data-testid="review-detail-client">
+            {clientName}
+          </p>
 
-                    <div className="stars enlarged" data-testid="review-detail-stars">
-                        {stars}
-                    </div>
+          <div className="stars enlarged" data-testid="review-detail-stars">
+            {stars}
+          </div>
 
-                    <p className="comment enlarged" data-testid="review-detail-comment">
-                        {comment}
-                    </p>
-                </div>
-            </div>
+          <p className="comment enlarged" data-testid="review-detail-comment">
+            {comment}
+          </p>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default ReviewDetailModal;

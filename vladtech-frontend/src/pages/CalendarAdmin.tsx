@@ -1,18 +1,29 @@
-import { useState } from "react";
-import { Calendar } from "../components/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/card";
-import { Button } from "../components/button";
-import { Input } from "../components/input";
-import { Label } from "../components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/dialog";
-import { Badge } from "../components/badge";
-import { ArrowLeft, Plus, Calendar as CalendarIcon, Users, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
-import { motion } from "motion/react";
-import { useTranslation } from "react-i18next";
-import { enUS, fr } from "date-fns/locale";
-
+import { useState } from 'react';
+import { Calendar } from '../components/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
+import { Button } from '../components/button';
+import { Input } from '../components/input';
+import { Label } from '../components/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/dialog';
+import { Badge } from '../components/badge';
+import { ArrowLeft, Plus, Calendar as CalendarIcon, Users, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
+import { enUS, fr } from 'date-fns/locale';
 
 interface Project {
   id: string;
@@ -20,7 +31,7 @@ interface Project {
   client: string;
   team: string;
   dueDate: Date;
-  status: "pending" | "in-progress" | "completed";
+  status: 'pending' | 'in-progress' | 'completed';
 }
 
 interface CalendarAdminProps {
@@ -28,50 +39,50 @@ interface CalendarAdminProps {
 }
 
 const mockTeams = [
-  "Team Alpha - Construction",
-  "Team Beta - Engineering",
-  "Team Gamma - Technology",
-  "Team Delta - Design",
+  'Team Alpha - Construction',
+  'Team Beta - Engineering',
+  'Team Gamma - Technology',
+  'Team Delta - Design',
 ];
 
 export default function CalendarAdmin({ onNavigate }: CalendarAdminProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { i18n } = useTranslation();
   const lang = i18n.resolvedLanguage || i18n.language;
-const dfLocale = i18n.language === "fr" ? fr : enUS;
+  const dfLocale = i18n.language === 'fr' ? fr : enUS;
   const [projects, setProjects] = useState<Project[]>([
     {
-      id: "1",
-      title: "Office Building Renovation",
-      client: "ABC Corp",
-      team: "Team Alpha - Construction",
+      id: '1',
+      title: 'Office Building Renovation',
+      client: 'ABC Corp',
+      team: 'Team Alpha - Construction',
       dueDate: new Date(2025, 10, 15),
-      status: "in-progress",
+      status: 'in-progress',
     },
     {
-      id: "2",
-      title: "Smart Home Integration",
-      client: "Tech Homes Inc",
-      team: "Team Gamma - Technology",
+      id: '2',
+      title: 'Smart Home Integration',
+      client: 'Tech Homes Inc',
+      team: 'Team Gamma - Technology',
       dueDate: new Date(2025, 10, 20),
-      status: "pending",
+      status: 'pending',
     },
     {
-      id: "3",
-      title: "Bridge Structural Analysis",
-      client: "City Infrastructure",
-      team: "Team Beta - Engineering",
+      id: '3',
+      title: 'Bridge Structural Analysis',
+      client: 'City Infrastructure',
+      team: 'Team Beta - Engineering',
       dueDate: new Date(2025, 10, 8),
-      status: "completed",
+      status: 'completed',
     },
   ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState({
-    title: "",
-    client: "",
-    team: "",
+    title: '',
+    client: '',
+    team: '',
     dueDate: new Date(),
-    status: "pending" as const,
+    status: 'pending' as const,
   });
 
   const handleAddProject = () => {
@@ -84,11 +95,11 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
         },
       ]);
       setNewProject({
-        title: "",
-        client: "",
-        team: "",
+        title: '',
+        client: '',
+        team: '',
         dueDate: new Date(),
-        status: "pending",
+        status: 'pending',
       });
       setIsDialogOpen(false);
     }
@@ -96,7 +107,7 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
 
   const getProjectsForDate = (date: Date) => {
     return projects.filter(
-      (project) => format(project.dueDate, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+      (project) => format(project.dueDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
     );
   };
 
@@ -104,12 +115,12 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-yellow-400 text-black border-yellow-500";
-      case "in-progress":
-        return "bg-yellow-400/50 text-black border-yellow-400/70";
+      case 'completed':
+        return 'bg-yellow-400 text-black border-yellow-500';
+      case 'in-progress':
+        return 'bg-yellow-400/50 text-black border-yellow-400/70';
       default:
-        return "bg-yellow-400/20 text-white border-yellow-400/40";
+        return 'bg-yellow-400/20 text-white border-yellow-400/40';
     }
   };
 
@@ -121,7 +132,7 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => onNavigate("home")}
+                onClick={() => onNavigate('home')}
                 variant="ghost"
                 className="text-white hover:text-yellow-400 hover:bg-white/10"
               >
@@ -143,7 +154,9 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-white/70">Project Title</Label>
+                    <Label htmlFor="title" className="text-white/70">
+                      Project Title
+                    </Label>
                     <Input
                       id="title"
                       value={newProject.title}
@@ -153,7 +166,9 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="client" className="text-white/70">Client Name</Label>
+                    <Label htmlFor="client" className="text-white/70">
+                      Client Name
+                    </Label>
                     <Input
                       id="client"
                       value={newProject.client}
@@ -163,7 +178,9 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="team" className="text-white/70">Assign Team</Label>
+                    <Label htmlFor="team" className="text-white/70">
+                      Assign Team
+                    </Label>
                     <Select
                       value={newProject.team}
                       onValueChange={(value) => setNewProject({ ...newProject, team: value })}
@@ -173,7 +190,11 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                       </SelectTrigger>
                       <SelectContent className="bg-black border-yellow-400/30">
                         {mockTeams.map((team) => (
-                          <SelectItem key={team} value={team} className="text-white focus:bg-yellow-400/20 focus:text-white">
+                          <SelectItem
+                            key={team}
+                            value={team}
+                            className="text-white focus:bg-yellow-400/20 focus:text-white"
+                          >
                             {team}
                           </SelectItem>
                         ))}
@@ -183,14 +204,13 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                   <div className="space-y-2">
                     <Label className="text-white/70">Due Date</Label>
                     <Calendar
-  key={lang}
-  mode="single"
-  selected={newProject.dueDate}
-  onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
-  locale={dfLocale}
-  className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
-/>
-
+                      key={lang}
+                      mode="single"
+                      selected={newProject.dueDate}
+                      onSelect={(date) => date && setNewProject({ ...newProject, dueDate: date })}
+                      locale={dfLocale}
+                      className="rounded-md border border-yellow-400/20 bg-white/5 text-white"
+                    />
                   </div>
                   <Button
                     onClick={handleAddProject}
@@ -226,22 +246,26 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                 </CardHeader>
                 <CardContent>
                   <Calendar
-  key={lang}
-  mode="single"
-  selected={date}
-  onSelect={setDate}
-  locale={dfLocale}
-  className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
-  modifiers={{ hasProject: projects.map((p) => p.dueDate) }}
-  modifiersStyles={{
-    hasProject: { backgroundColor: "#facc15", color: "black", fontWeight: "bold" },
-  }}
-/>
+                    key={lang}
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    locale={dfLocale}
+                    className="rounded-md border border-yellow-400/20 w-full bg-black/30 text-white"
+                    modifiers={{ hasProject: projects.map((p) => p.dueDate) }}
+                    modifiersStyles={{
+                      hasProject: {
+                        backgroundColor: '#facc15',
+                        color: 'black',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  />
 
                   <div className="mt-6 p-4 bg-yellow-400/10 rounded-lg border border-yellow-400/30">
                     <p className="text-sm text-white/70">
-                      <strong className="text-yellow-400">Tip:</strong> Dates highlighted in yellow have scheduled projects. Click a
-                      date to view details.
+                      <strong className="text-yellow-400">Tip:</strong> Dates highlighted in yellow
+                      have scheduled projects. Click a date to view details.
                     </p>
                   </div>
                 </CardContent>
@@ -260,7 +284,7 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
               <Card className="relative bg-white/5 backdrop-blur-xl border-yellow-400/20 shadow-2xl">
                 <CardHeader>
                   <CardTitle className="text-xl text-white tracking-wide">
-                    {date ? format(date, "MMMM d, yyyy", { locale: dfLocale }) : "SELECT A DATE"}
+                    {date ? format(date, 'MMMM d, yyyy', { locale: dfLocale }) : 'SELECT A DATE'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -326,7 +350,7 @@ const dfLocale = i18n.language === "fr" ? fr : enUS;
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-300 mb-2">
-                          Due: {format(project.dueDate, "MMM d, yyyy", { locale: dfLocale })}
+                          Due: {format(project.dueDate, 'MMM d, yyyy', { locale: dfLocale })}
                         </p>
                         <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
                       </div>

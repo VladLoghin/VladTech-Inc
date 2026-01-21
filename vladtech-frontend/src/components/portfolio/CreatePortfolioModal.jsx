@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useTranslation } from "react-i18next";
-import { createPortfolioItem } from "../../api/portfolio/portfolioService";
-import { X, Upload } from "lucide-react";
-import { api } from "../../api/http";
+import { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useTranslation } from 'react-i18next';
+import { createPortfolioItem } from '../../api/portfolio/portfolioService';
+import { X, Upload } from 'lucide-react';
+import { api } from '../../api/http';
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
-    title: "",
+    title: '',
     imageFile: null,
     rating: 5.0,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData({ ...formData, imageFile: file });
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -32,43 +32,42 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setIsSubmitting(true);
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: 'https://vladtech/api' },
+      });
 
-    // Upload image first
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", formData.imageFile);
+      // Upload image first
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', formData.imageFile);
 
-    const uploadResponse = await api.post("/portfolio/upload", formDataUpload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        // DO NOT set Content-Type manually for FormData
-      },
-    });
+      const uploadResponse = await api.post('/portfolio/upload', formDataUpload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // DO NOT set Content-Type manually for FormData
+        },
+      });
 
-    const { imageUrl } = uploadResponse.data;
+      const { imageUrl } = uploadResponse.data;
 
-    // Create portfolio item with uploaded image path
-    await createPortfolioItem(formData.title, imageUrl, formData.rating, token);
+      // Create portfolio item with uploaded image path
+      await createPortfolioItem(formData.title, imageUrl, formData.rating, token);
 
-    setFormData({ title: "", imageFile: null, rating: 5.0 });
-    setImagePreview(null);
-    onSuccess?.();
-    onClose();
-  } catch (err) {
-    console.error("Error creating portfolio item:", err);
-    setError("Failed to create portfolio item. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+      setFormData({ title: '', imageFile: null, rating: 5.0 });
+      setImagePreview(null);
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      console.error('Error creating portfolio item:', err);
+      setError('Failed to create portfolio item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -98,9 +97,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
@@ -119,25 +116,14 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                 id="image-upload"
                 required
               />
-              <label
-                htmlFor="image-upload"
-                className="cursor-pointer flex flex-col items-center"
-              >
+              <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
                 {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="max-h-48 rounded-lg mb-2"
-                  />
+                  <img src={imagePreview} alt="Preview" className="max-h-48 rounded-lg mb-2" />
                 ) : (
                   <>
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-600">
-                      {t('portfolio.clickUpload')}
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1">
-                      {t('portfolio.fileFormat')}
-                    </span>
+                    <span className="text-sm text-gray-600">{t('portfolio.clickUpload')}</span>
+                    <span className="text-xs text-gray-500 mt-1">{t('portfolio.fileFormat')}</span>
                   </>
                 )}
               </label>
@@ -154,9 +140,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
               min="0"
               max="5"
               value={formData.rating}
-              onChange={(e) =>
-                setFormData({ ...formData, rating: parseFloat(e.target.value) })
-              }
+              onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
@@ -177,7 +161,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
               className="flex-1 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-semibold disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating..." : t('portfolio.create')}
+              {isSubmitting ? 'Creating...' : t('portfolio.create')}
             </button>
           </div>
         </form>

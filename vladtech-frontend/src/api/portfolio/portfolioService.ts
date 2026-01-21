@@ -1,8 +1,7 @@
 //import axios from "axios";
-import { api } from "../http";
+import { api } from '../http';
 
-
-const API_BASE = "/portfolio";
+const API_BASE = '/portfolio';
 
 export interface AddCommentRequest {
   text: string;
@@ -24,20 +23,20 @@ export const addComment = async (
   try {
     const response = await api.post(
       `${API_BASE}/${portfolioId}/comments`,
-      { 
+      {
         text: commentText,
-        authorName: authorName 
+        authorName: authorName,
       },
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
     return response.data;
   } catch (error) {
-    console.error("Error adding comment:", error);
+    console.error('Error adding comment:', error);
     throw error;
   }
 };
@@ -47,7 +46,7 @@ export const getAllPortfolioItems = async () => {
     const response = await api.get(API_BASE);
     return response.data;
   } catch (error) {
-    console.error("Error fetching portfolio items:", error);
+    console.error('Error fetching portfolio items:', error);
     throw error;
   }
 };
@@ -57,7 +56,7 @@ export const getPortfolioItemById = async (portfolioId: string) => {
     const response = await api.get(`${API_BASE}/${portfolioId}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching portfolio item:", error);
+    console.error('Error fetching portfolio item:', error);
     throw error;
   }
 };
@@ -79,21 +78,18 @@ export const createPortfolioItem = async (
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
     return response.data;
   } catch (error) {
-    console.error("Error creating portfolio item:", error);
+    console.error('Error creating portfolio item:', error);
     throw error;
   }
 };
 
-export const deletePortfolioItem = async (
-  portfolioId: string,
-  accessToken: string
-) => {
+export const deletePortfolioItem = async (portfolioId: string, accessToken: string) => {
   try {
     await api.delete(`${API_BASE}/${portfolioId}`, {
       headers: {
@@ -101,7 +97,7 @@ export const deletePortfolioItem = async (
       },
     });
   } catch (error) {
-    console.error("Error deleting portfolio item:", error);
+    console.error('Error deleting portfolio item:', error);
     throw error;
   }
 };

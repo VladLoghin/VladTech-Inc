@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { api } from "../../api/http";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useTranslation } from "react-i18next";
+import { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { api } from '../../api/http';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useTranslation } from 'react-i18next';
 
 const RoleFinderModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
@@ -11,17 +11,17 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [selectedRole, setSelectedRole] = useState("clients");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeQuery, setActiveQuery] = useState("");
+  const [error, setError] = useState('');
+  const [selectedRole, setSelectedRole] = useState('clients');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeQuery, setActiveQuery] = useState('');
 
   const perPage = 25;
 
   const roleEndpoints = {
-    clients: "/users/clients",
-    employees: "/users/employees",
-    admins: "/users/admins",
+    clients: '/users/clients',
+    employees: '/users/employees',
+    admins: '/users/admins',
   };
 
   const roleLabels = {
@@ -30,53 +30,51 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
     admins: t('roleFinder.admin'),
   };
 
-  const fetchUsers = async (page, query = "") => {
+  const fetchUsers = async (page, query = '') => {
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const token = await getAccessTokenSilently({
-        authorizationParams: { audience: "https://vladtech/api" },
+        authorizationParams: { audience: 'https://vladtech/api' },
       });
 
       const headers = { Authorization: `Bearer ${token}` };
 
       const response = query.trim()
-        ? await api.get("/users/search", {
-          headers,
-          params: {
-            query,
-            role: selectedRole,
-            page,
-            perPage,
-          },
-        })
+        ? await api.get('/users/search', {
+            headers,
+            params: {
+              query,
+              role: selectedRole,
+              page,
+              perPage,
+            },
+          })
         : await api.get(roleEndpoints[selectedRole], {
-          headers,
-          params: { page, perPage },
-        });
+            headers,
+            params: { page, perPage },
+          });
 
       setUsers(response.data.users || []);
       setTotalUsers(response.data.total || 0);
     } catch (err) {
-      console.error("Error fetching users:", err);
-      setError("Failed to load users");
+      console.error('Error fetching users:', err);
+      setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-   
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0);
-      setActiveQuery("");
-      setSearchQuery("");
+      setActiveQuery('');
+      setSearchQuery('');
       fetchUsers(0);
     }
   }, [isOpen, selectedRole]);
 
-   
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchUsers(currentPage, activeQuery);
@@ -87,11 +85,11 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
 
   const getRoleBadgeColor = (roleName) => {
     const colors = {
-      Admin: "bg-red-100 text-red-800 border-red-200",
-      Employee: "bg-blue-100 text-blue-800 border-blue-200",
-      Client: "bg-green-100 text-green-800 border-green-200",
+      Admin: 'bg-red-100 text-red-800 border-red-200',
+      Employee: 'bg-blue-100 text-blue-800 border-blue-200',
+      Client: 'bg-green-100 text-green-800 border-green-200',
     };
-    return colors[roleName] || "bg-gray-100 text-gray-800 border-gray-200";
+    return colors[roleName] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const handleSearch = (e) => {
@@ -102,8 +100,8 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
   };
 
   const handleClearSearch = () => {
-    setSearchQuery("");
-    setActiveQuery("");
+    setSearchQuery('');
+    setActiveQuery('');
     setCurrentPage(0);
     fetchUsers(0);
   };
@@ -120,10 +118,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
               {t('roleFinder.usersFound', { count: totalUsers })}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-lg transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -131,29 +126,30 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
         <div className="p-6 border-b border-black/10 space-y-4">
           <div className="flex gap-2">
             <button
-              onClick={() => setSelectedRole("clients")}
-              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "clients"
-                  ? "bg-green-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
-                }`}
+              onClick={() => setSelectedRole('clients')}
+              className={`px-4 py-2 rounded-lg transition-all ${
+                selectedRole === 'clients'
+                  ? 'bg-green-400 text-black'
+                  : 'bg-black/5 hover:bg-black/10'
+              }`}
             >
               {t('roleFinder.clients')}
             </button>
             <button
-              onClick={() => setSelectedRole("employees")}
-              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "employees"
-                  ? "bg-blue-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
-                }`}
+              onClick={() => setSelectedRole('employees')}
+              className={`px-4 py-2 rounded-lg transition-all ${
+                selectedRole === 'employees'
+                  ? 'bg-blue-400 text-black'
+                  : 'bg-black/5 hover:bg-black/10'
+              }`}
             >
               {t('roleFinder.employees')}
             </button>
             <button
-              onClick={() => setSelectedRole("admins")}
-              className={`px-4 py-2 rounded-lg transition-all ${selectedRole === "admins"
-                  ? "bg-red-400 text-black"
-                  : "bg-black/5 hover:bg-black/10"
-                }`}
+              onClick={() => setSelectedRole('admins')}
+              className={`px-4 py-2 rounded-lg transition-all ${
+                selectedRole === 'admins' ? 'bg-red-400 text-black' : 'bg-black/5 hover:bg-black/10'
+              }`}
             >
               {t('roleFinder.admins')}
             </button>
@@ -204,9 +200,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
               </button>
             </div>
           ) : users.length === 0 ? (
-            <div className="text-center py-12 text-black/60">
-              No users found
-            </div>
+            <div className="text-center py-12 text-black/60">No users found</div>
           ) : (
             <div className="space-y-3">
               {users.map((user, index) => (
@@ -216,9 +210,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <p className="font-semibold text-lg">
-                        {user.name || "No name"}
-                      </p>
+                      <p className="font-semibold text-lg">{user.name || 'No name'}</p>
                       <p className="text-sm text-black/60">{user.email}</p>
                       <p className="text-xs text-black/40 mt-1">
                         ID: {encodeURIComponent(user.user_id)}
@@ -237,11 +229,7 @@ const RoleFinderModal = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                     {user.picture && (
-                      <img
-                        src={user.picture}
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full"
-                      />
+                      <img src={user.picture} alt={user.name} className="w-12 h-12 rounded-full" />
                     )}
                   </div>
                 </div>

@@ -1,26 +1,26 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import { useState, useEffect, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import Navbar from "../components/Navbar.jsx";
+import { useAuth0 } from '@auth0/auth0-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import Navbar from '../components/Navbar.jsx';
 //import axios from "axios";
 // import NewProjectModal from "../components/projects/NewProjectModal.jsx";
-import ProjectList from "../components/projects/ProjectList.jsx";
-import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
-import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
-import RoleAssignmentModal from "../components/userManagement/RoleAssignmentModal.jsx";
-import ProjectModal from "../components/projects/ProjectModal.jsx";
-import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
-import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
-import { api } from "../api/http";
+import ProjectList from '../components/projects/ProjectList.jsx';
+import AdminProjectCalendar from '../components/AdminProjectCalendar.jsx';
+import RoleFinderModal from '../components/userManagement/RoleFinderModal.jsx';
+import RoleAssignmentModal from '../components/userManagement/RoleAssignmentModal.jsx';
+import ProjectModal from '../components/projects/ProjectModal.jsx';
+import CreatePortfolioModal from '../components/portfolio/CreatePortfolioModal.jsx';
+import DeletePortfolioModal from '../components/portfolio/DeletePortfolioModal.jsx';
+import { api } from '../api/http';
 
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const { t, i18n } = useTranslation();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
-  const [activeTab, setActiveTab] = useState("active"); // "active" or "archived"
+  const [activeTab, setActiveTab] = useState('active'); // "active" or "archived"
   // const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
@@ -29,8 +29,7 @@ const Admin = () => {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [employeeIndex, setEmployeeIndex] = useState({});
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
-  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] =
-    useState(false);
+  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -40,26 +39,26 @@ const Admin = () => {
   const fetchActiveProjects = async () => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await api.get("/projects/active", {
+      const response = await api.get('/projects/active', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(response.data);
     } catch (error) {
-      console.error("Error fetching active projects:", error);
-      setMessage("Failed to fetch active projects.");
+      console.error('Error fetching active projects:', error);
+      setMessage('Failed to fetch active projects.');
     }
   };
 
   const fetchArchivedProjects = async () => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await api.get("/projects/archived", {
+      const response = await api.get('/projects/archived', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setArchivedProjects(response.data);
     } catch (error) {
-      console.error("Error fetching archived projects:", error);
-      setMessage("Failed to fetch archived projects.");
+      console.error('Error fetching archived projects:', error);
+      setMessage('Failed to fetch archived projects.');
     }
   };
 
@@ -67,7 +66,6 @@ const Admin = () => {
     await fetchActiveProjects();
     await fetchArchivedProjects();
   };
-
 
   const handleCompleteProject = async (project) => {
     try {
@@ -81,8 +79,8 @@ const Admin = () => {
       setMessage(`Project "${project.name}" has been marked as complete.`);
       await fetchProjects();
     } catch (error) {
-      console.error("Error completing project:", error);
-      setMessage("Failed to complete project.");
+      console.error('Error completing project:', error);
+      setMessage('Failed to complete project.');
     }
   };
 
@@ -98,8 +96,8 @@ const Admin = () => {
       setMessage(`Project "${project.name}" has been reactivated.`);
       await fetchProjects();
     } catch (error) {
-      console.error("Error reactivating project:", error);
-      setMessage("Failed to reactivate project.");
+      console.error('Error reactivating project:', error);
+      setMessage('Failed to reactivate project.');
     }
   };
 
@@ -110,7 +108,7 @@ const Admin = () => {
       setIsMessageVisible(true);
       const timer = setTimeout(() => {
         setIsMessageVisible(false);
-        setTimeout(() => setMessage(""), 300); // Wait for fade out animation
+        setTimeout(() => setMessage(''), 300); // Wait for fade out animation
       }, 4700);
       return () => clearTimeout(timer);
     }
@@ -120,7 +118,7 @@ const Admin = () => {
     const loadEmployees = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const res = await api.get("/employee/list", {
+        const res = await api.get('/employee/list', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -134,13 +132,12 @@ const Admin = () => {
 
         setEmployeeIndex(index);
       } catch (err) {
-        console.error("Error fetching employees for index", err);
+        console.error('Error fetching employees for index', err);
       }
     };
 
     loadEmployees();
   }, [getAccessTokenSilently]);
-
 
   useEffect(() => {
     const loadInitialProjects = async () => {
@@ -161,21 +158,20 @@ const Admin = () => {
   }, [projects, selectedDate]);
 
   const formatSelectedDate = (dateStr) => {
-    if (!dateStr) return "";
+    if (!dateStr) return '';
 
-    const [year, month, day] = dateStr.split("-");
+    const [year, month, day] = dateStr.split('-');
     const date = new Date(Number(year), Number(month) - 1, Number(day));
 
-    const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
+    const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA';
 
     return date.toLocaleDateString(locale, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
     });
   };
-
 
   return (
     <>
@@ -184,9 +180,7 @@ const Admin = () => {
 
       <div className="p-8 bg-white min-h-screen pt-32">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">
-            {t('admin.title')}
-          </h1>
+          <h1 className="text-4xl font-bold tracking-tight">{t('admin.title')}</h1>
 
           <div className="flex gap-3">
             <button
@@ -218,15 +212,16 @@ const Admin = () => {
 
         {message && (
           <div
-            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-              }`}
+            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${
+              isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            }`}
           >
             <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
               <span className="text-lg font-medium">{message}</span>
               <button
                 onClick={() => {
                   setIsMessageVisible(false);
-                  setTimeout(() => setMessage(""), 300);
+                  setTimeout(() => setMessage(''), 300);
                 }}
                 className="ml-4 text-yellow-600 hover:text-yellow-800 font-bold text-xl leading-none"
               >
@@ -250,19 +245,19 @@ const Admin = () => {
         <RoleAssignmentModal
           isOpen={isRoleAssignmentModalOpen}
           onClose={() => setIsRoleAssignmentModalOpen(false)}
-          onSuccess={() => setMessage("Role assigned successfully!")}
+          onSuccess={() => setMessage('Role assigned successfully!')}
         />
 
         <CreatePortfolioModal
           isOpen={isPortfolioModalOpen}
           onClose={() => setIsPortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item created successfully!")}
+          onSuccess={() => setMessage('Portfolio item created successfully!')}
         />
 
         <DeletePortfolioModal
           isOpen={isDeletePortfolioModalOpen}
           onClose={() => setIsDeletePortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item deleted successfully!")}
+          onSuccess={() => setMessage('Portfolio item deleted successfully!')}
         />
 
         {/* New project modal */}
@@ -272,7 +267,7 @@ const Admin = () => {
             setIsProjectModalOpen(false);
             setEditProject(null);
           }}
-          mode={editProject ? "edit" : "create"}
+          mode={editProject ? 'edit' : 'create'}
           initialData={editProject}
           onSubmitSuccess={fetchProjects}
           defaultDate={selectedDate}
@@ -281,28 +276,19 @@ const Admin = () => {
         {/* TOP: calendar (left) + selected-date projects (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Calendar: pass projects so days can show events */}
-          <AdminProjectCalendar
-            projects={projects}
-            onDateSelect={setSelectedDate}
-          />
+          <AdminProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
           {/* Selected date detail card */}
           <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
             <h2 className="text-2xl font-bold mb-2">
-              {selectedDate
-                ? formatSelectedDate(selectedDate)
-                : t('admin.selectDate')}
+              {selectedDate ? formatSelectedDate(selectedDate) : t('admin.selectDate')}
             </h2>
 
             <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
-              {!selectedDate && (
-                <p className="text-black/60">{t('admin.pickDay')}</p>
-              )}
+              {!selectedDate && <p className="text-black/60">{t('admin.pickDay')}</p>}
 
               {selectedDate && projectsForSelectedDate.length === 0 && (
-                <p className="text-black/60">
-                  {t('admin.noProjects')}
-                </p>
+                <p className="text-black/60">{t('admin.noProjects')}</p>
               )}
 
               {projectsForSelectedDate.map((project) => (
@@ -312,9 +298,7 @@ const Admin = () => {
                 >
                   <div>
                     <p className="font-semibold">{project.name}</p>
-                    <p className="text-xs text-black/60">
-                      ID: {project.projectIdentifier}
-                    </p>
+                    <p className="text-xs text-black/60">ID: {project.projectIdentifier}</p>
                     <p className="text-xs text-black/60">
                       {project.startDate} - {project.dueDate}
                     </p>
@@ -345,27 +329,29 @@ const Admin = () => {
             {/* Tab Toggle */}
             <div className="flex border-2 border-black rounded-lg overflow-hidden">
               <button
-                onClick={() => setActiveTab("active")}
-                className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                onClick={() => setActiveTab('active')}
+                className={`px-6 py-2 font-semibold transition-all ${
+                  activeTab === 'active'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
               >
                 {t('admin.active')} ({projects.length})
               </button>
               <button
-                onClick={() => setActiveTab("archived")}
-                className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                onClick={() => setActiveTab('archived')}
+                className={`px-6 py-2 font-semibold transition-all ${
+                  activeTab === 'archived'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
               >
                 {t('admin.archived')} ({archivedProjects.length})
               </button>
             </div>
           </div>
 
-          {activeTab === "active" ? (
+          {activeTab === 'active' ? (
             <ProjectList
               projects={projects}
               onEdit={handleEditProject}

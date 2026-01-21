@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 //import axios from "axios";
-import { useAuth0 } from "@auth0/auth0-react";
-import { api } from "../../api/http";
+import { useAuth0 } from '@auth0/auth0-react';
+import { api } from '../../api/http';
 
 const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -11,41 +11,41 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   const [currentPage, setCurrentPage] = useState(0);
   const [totalClients, setTotalClients] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeQuery, setActiveQuery] = useState("");
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeQuery, setActiveQuery] = useState('');
 
   const perPage = 25;
 
-  const fetchClients = async (page, query = "") => {
+  const fetchClients = async (page, query = '') => {
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const token = await getAccessTokenSilently({
-        authorizationParams: { audience: "https://vladtech/api" },
+        authorizationParams: { audience: 'https://vladtech/api' },
       });
 
       const commonConfig = {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page, perPage, role: "clients" },
+        params: { page, perPage, role: 'clients' },
       };
 
       const response = query.trim()
-        ? await api.get("/users/search", {
-          ...commonConfig,
-          params: {
-            ...commonConfig.params,
-            query, // axios will encode it
-          },
-        })
-        : await api.get("/users/clients", commonConfig);
+        ? await api.get('/users/search', {
+            ...commonConfig,
+            params: {
+              ...commonConfig.params,
+              query, // axios will encode it
+            },
+          })
+        : await api.get('/users/clients', commonConfig);
 
       setClients(response.data.users || []);
       setTotalClients(response.data.total || 0);
     } catch (err) {
-      console.error("Error fetching clients:", err);
-      setError("Failed to load clients");
+      console.error('Error fetching clients:', err);
+      setError('Failed to load clients');
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
 
     try {
       const token = await getAccessTokenSilently({
-        authorizationParams: { audience: "https://vladtech/api" },
+        authorizationParams: { audience: 'https://vladtech/api' },
       });
 
       const response = await api.get(`/users/${selectedClientId}`, {
@@ -65,22 +65,20 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
 
       setSelectedClient(response.data);
     } catch (err) {
-      console.error("Error fetching selected client:", err);
+      console.error('Error fetching selected client:', err);
     }
   };
 
-   
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0);
-      setActiveQuery("");
-      setSearchQuery("");
+      setActiveQuery('');
+      setSearchQuery('');
       fetchClients(0);
       fetchSelectedClient();
     }
   }, [isOpen, selectedClientId]);
 
-   
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchClients(currentPage, activeQuery);
@@ -97,8 +95,8 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   };
 
   const handleClearSearch = () => {
-    setSearchQuery("");
-    setActiveQuery("");
+    setSearchQuery('');
+    setActiveQuery('');
     setCurrentPage(0);
     fetchClients(0);
   };
@@ -115,7 +113,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
   const getDisplayClients = () => {
     if (!selectedClient) return clients;
 
-    const filteredClients = clients.filter(c => c.user_id !== selectedClientId);
+    const filteredClients = clients.filter((c) => c.user_id !== selectedClientId);
     return [selectedClient, ...filteredClients];
   };
 
@@ -129,14 +127,9 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Select Client</h2>
-            <p className="text-sm text-black/60 mt-1">
-              {totalClients} clients found
-            </p>
+            <p className="text-sm text-black/60 mt-1">{totalClients} clients found</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-lg transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -187,9 +180,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
               </button>
             </div>
           ) : displayClients.length === 0 ? (
-            <div className="text-center py-12 text-black/60">
-              No clients found
-            </div>
+            <div className="text-center py-12 text-black/60">No clients found</div>
           ) : (
             <div className="space-y-3">
               {displayClients.map((client, index) => {
@@ -198,17 +189,14 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                   <button
                     key={client.user_id || index}
                     onClick={() => handleSelectClient(client)}
-                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
-                        ? "bg-yellow-100 border-yellow-400 border-2"
-                        : "border-black/10"
-                      }`}
+                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${
+                      isSelected ? 'bg-yellow-100 border-yellow-400 border-2' : 'border-black/10'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-lg">
-                            {client.name || "No name"}
-                          </p>
+                          <p className="font-semibold text-lg">{client.name || 'No name'}</p>
                           {isSelected && (
                             <span className="text-xs bg-yellow-400 px-2 py-1 rounded font-semibold">
                               Currently Selected

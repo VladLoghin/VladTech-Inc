@@ -1,22 +1,22 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const SecondaryNavbar = () => {
-    return (
-        <>
-            <nav className="secondary-navbar">
-                <ul className="nav-links">
-                    <li>
-                        <Link to="/portfolio">Portfolio</Link>
-                    </li>
-                    <li>
-                        <Link to="/reviews">Reviews</Link>
-                    </li>
-                </ul>
-            </nav>
+  return (
+    <>
+      <nav className="secondary-navbar">
+        <ul className="nav-links">
+          <li>
+            <Link to="/portfolio">Portfolio</Link>
+          </li>
+          <li>
+            <Link to="/reviews">Reviews</Link>
+          </li>
+        </ul>
+      </nav>
 
-            <style>
-                {`
+      <style>
+        {`
                 .secondary-navbar {
                     background-color: #000;
                     color: #fff;
@@ -52,9 +52,9 @@ const SecondaryNavbar = () => {
                     }
                 }
                 `}
-            </style>
-        </>
-    );
+      </style>
+    </>
+  );
 };
 
 export default SecondaryNavbar;

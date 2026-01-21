@@ -1,13 +1,19 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/card";
-import { Button } from "../components/button";
-import { Input } from "../components/input";
-import { Label } from "../components/label";
-import { Textarea } from "../components/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
-import { ArrowLeft, Plus, Trash2, Calculator, DollarSign, FileText } from "lucide-react";
-import { Separator } from "../components/separator";
-import { motion } from "motion/react";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
+import { Button } from '../components/button';
+import { Input } from '../components/input';
+import { Label } from '../components/label';
+import { Textarea } from '../components/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/select';
+import { ArrowLeft, Plus, Trash2, Calculator, DollarSign, FileText } from 'lucide-react';
+import { Separator } from '../components/separator';
+import { motion } from 'motion/react';
 
 interface LineItem {
   id: string;
@@ -22,12 +28,12 @@ interface EstimationsProps {
 }
 
 export default function Estimations({ onNavigate }: EstimationsProps) {
-  const [projectName, setProjectName] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [projectType, setProjectType] = useState("");
-  const [notes, setNotes] = useState("");
+  const [projectName, setProjectName] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [projectType, setProjectType] = useState('');
+  const [notes, setNotes] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: "1", description: "", quantity: 1, unitCost: 0, total: 0 },
+    { id: '1', description: '', quantity: 1, unitCost: 0, total: 0 },
   ]);
   const [taxRate, setTaxRate] = useState(8.5);
   const [discount, setDiscount] = useState(0);
@@ -37,7 +43,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
       ...lineItems,
       {
         id: Date.now().toString(),
-        description: "",
+        description: '',
         quantity: 1,
         unitCost: 0,
         total: 0,
@@ -56,7 +62,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
       lineItems.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
-          if (field === "quantity" || field === "unitCost") {
+          if (field === 'quantity' || field === 'unitCost') {
             updated.total = Number(updated.quantity) * Number(updated.unitCost);
           }
           return updated;
@@ -87,16 +93,16 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
       grandTotal,
       createdAt: new Date().toISOString(),
     };
-    console.log("Estimate saved:", estimate);
-    alert("Estimate saved successfully! Check console for details.");
+    console.log('Estimate saved:', estimate);
+    alert('Estimate saved successfully! Check console for details.');
   };
 
   const handleClear = () => {
-    setProjectName("");
-    setClientName("");
-    setProjectType("");
-    setNotes("");
-    setLineItems([{ id: "1", description: "", quantity: 1, unitCost: 0, total: 0 }]);
+    setProjectName('');
+    setClientName('');
+    setProjectType('');
+    setNotes('');
+    setLineItems([{ id: '1', description: '', quantity: 1, unitCost: 0, total: 0 }]);
     setTaxRate(8.5);
     setDiscount(0);
   };
@@ -109,7 +115,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => onNavigate("home")}
+                onClick={() => onNavigate('home')}
                 variant="ghost"
                 className="text-white hover:text-yellow-400 hover:bg-white/10"
               >
@@ -161,7 +167,9 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                   {/* Project Information */}
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="projectName" className="text-white/70">Project Name</Label>
+                      <Label htmlFor="projectName" className="text-white/70">
+                        Project Name
+                      </Label>
                       <Input
                         id="projectName"
                         value={projectName}
@@ -171,7 +179,9 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="clientName" className="text-white/70">Client Name</Label>
+                      <Label htmlFor="clientName" className="text-white/70">
+                        Client Name
+                      </Label>
                       <Input
                         id="clientName"
                         value={clientName}
@@ -183,17 +193,44 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="projectType" className="text-white/70">Project Type</Label>
+                    <Label htmlFor="projectType" className="text-white/70">
+                      Project Type
+                    </Label>
                     <Select value={projectType} onValueChange={setProjectType}>
                       <SelectTrigger className="bg-white/5 border-yellow-400/20 text-white">
                         <SelectValue placeholder="Select project type" />
                       </SelectTrigger>
                       <SelectContent className="bg-black border-yellow-400/30">
-                        <SelectItem value="construction" className="text-white focus:bg-yellow-400/20 focus:text-white">Construction</SelectItem>
-                        <SelectItem value="renovation" className="text-white focus:bg-yellow-400/20 focus:text-white">Renovation</SelectItem>
-                        <SelectItem value="engineering" className="text-white focus:bg-yellow-400/20 focus:text-white">Engineering</SelectItem>
-                        <SelectItem value="technology" className="text-white focus:bg-yellow-400/20 focus:text-white">Technology Integration</SelectItem>
-                        <SelectItem value="consulting" className="text-white focus:bg-yellow-400/20 focus:text-white">Consulting</SelectItem>
+                        <SelectItem
+                          value="construction"
+                          className="text-white focus:bg-yellow-400/20 focus:text-white"
+                        >
+                          Construction
+                        </SelectItem>
+                        <SelectItem
+                          value="renovation"
+                          className="text-white focus:bg-yellow-400/20 focus:text-white"
+                        >
+                          Renovation
+                        </SelectItem>
+                        <SelectItem
+                          value="engineering"
+                          className="text-white focus:bg-yellow-400/20 focus:text-white"
+                        >
+                          Engineering
+                        </SelectItem>
+                        <SelectItem
+                          value="technology"
+                          className="text-white focus:bg-yellow-400/20 focus:text-white"
+                        >
+                          Technology Integration
+                        </SelectItem>
+                        <SelectItem
+                          value="consulting"
+                          className="text-white focus:bg-yellow-400/20 focus:text-white"
+                        >
+                          Consulting
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -228,7 +265,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                               id={`desc-${item.id}`}
                               value={item.description}
                               onChange={(e) =>
-                                updateLineItem(item.id, "description", e.target.value)
+                                updateLineItem(item.id, 'description', e.target.value)
                               }
                               placeholder="Item description"
                               className="bg-white/5 border-yellow-400/20 text-white placeholder:text-white/30"
@@ -244,7 +281,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                               min="0"
                               value={item.quantity}
                               onChange={(e) =>
-                                updateLineItem(item.id, "quantity", Number(e.target.value))
+                                updateLineItem(item.id, 'quantity', Number(e.target.value))
                               }
                               className="bg-white/5 border-yellow-400/20 text-white"
                             />
@@ -260,7 +297,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                               step="0.01"
                               value={item.unitCost}
                               onChange={(e) =>
-                                updateLineItem(item.id, "unitCost", Number(e.target.value))
+                                updateLineItem(item.id, 'unitCost', Number(e.target.value))
                               }
                               className="bg-white/5 border-yellow-400/20 text-white"
                             />
@@ -291,7 +328,9 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
 
                   {/* Notes */}
                   <div className="space-y-2">
-                    <Label htmlFor="notes" className="text-white/70">Additional Notes</Label>
+                    <Label htmlFor="notes" className="text-white/70">
+                      Additional Notes
+                    </Label>
                     <Textarea
                       id="notes"
                       value={notes}
@@ -328,7 +367,9 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="discount" className="text-white/70">Discount (%)</Label>
+                      <Label htmlFor="discount" className="text-white/70">
+                        Discount (%)
+                      </Label>
                       <Input
                         id="discount"
                         type="number"
@@ -351,7 +392,9 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
                     <Separator className="bg-yellow-400/20" />
 
                     <div className="space-y-2">
-                      <Label htmlFor="taxRate" className="text-white/70">Tax Rate (%)</Label>
+                      <Label htmlFor="taxRate" className="text-white/70">
+                        Tax Rate (%)
+                      </Label>
                       <Input
                         id="taxRate"
                         type="number"
@@ -373,9 +416,7 @@ export default function Estimations({ onNavigate }: EstimationsProps) {
 
                     <div className="flex justify-between items-center p-4 bg-yellow-400 rounded-lg">
                       <span className="text-xl tracking-wide text-black">GRAND TOTAL:</span>
-                      <span className="text-2xl text-black">
-                        ${grandTotal.toFixed(2)}
-                      </span>
+                      <span className="text-2xl text-black">${grandTotal.toFixed(2)}</span>
                     </div>
                   </CardContent>
                 </Card>

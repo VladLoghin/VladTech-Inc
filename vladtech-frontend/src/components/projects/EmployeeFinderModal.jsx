@@ -1,34 +1,28 @@
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 //import axios from "axios";
-import { useAuth0 } from "@auth0/auth0-react";
-import { api } from "../../api/http";
+import { useAuth0 } from '@auth0/auth0-react';
+import { api } from '../../api/http';
 
-const EmployeeFinderModal = ({
-  isOpen,
-  onClose,
-  selectedEmployeeIds = [],
-  onToggleEmployee,
-}) => {
+const EmployeeFinderModal = ({ isOpen, onClose, selectedEmployeeIds = [], onToggleEmployee }) => {
   const { getAccessTokenSilently } = useAuth0();
   const [employees, setEmployees] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeQuery, setActiveQuery] = useState("");
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeQuery, setActiveQuery] = useState('');
 
   const perPage = 25;
 
-
-  const fetchEmployees = async (page, query = "") => {
+  const fetchEmployees = async (page, query = '') => {
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const token = await getAccessTokenSilently({
-        authorizationParams: { audience: "https://vladtech/api" },
+        authorizationParams: { audience: 'https://vladtech/api' },
       });
 
       const headers = {
@@ -36,51 +30,47 @@ const EmployeeFinderModal = ({
       };
 
       const response = query.trim()
-        ? await api.get("/users/search", {
-          headers,
-          params: {
-            query,
-            role: "employees",
-            page,
-            perPage,
-          },
-        })
-        : await api.get("/users/employees", {
-          headers,
-          params: {
-            page,
-            perPage,
-          },
-        });
+        ? await api.get('/users/search', {
+            headers,
+            params: {
+              query,
+              role: 'employees',
+              page,
+              perPage,
+            },
+          })
+        : await api.get('/users/employees', {
+            headers,
+            params: {
+              page,
+              perPage,
+            },
+          });
 
       setEmployees(response.data.users ?? []);
       setTotalEmployees(response.data.total ?? 0);
     } catch (err) {
-      console.error("Error fetching employees:", err);
-      setError("Failed to load employees");
+      console.error('Error fetching employees:', err);
+      setError('Failed to load employees');
     } finally {
       setLoading(false);
     }
   };
 
-   
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0);
-      setActiveQuery("");
-      setSearchQuery("");
+      setActiveQuery('');
+      setSearchQuery('');
       fetchEmployees(0);
     }
   }, [isOpen]);
 
-
-   
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchEmployees(currentPage, activeQuery);
     }
   }, [currentPage, isOpen, activeQuery]);
-
 
   const totalPages = Math.ceil(totalEmployees / perPage);
 
@@ -92,8 +82,8 @@ const EmployeeFinderModal = ({
   };
 
   const handleClearSearch = () => {
-    setSearchQuery("");
-    setActiveQuery("");
+    setSearchQuery('');
+    setActiveQuery('');
     setCurrentPage(0);
     fetchEmployees(0);
   };
@@ -108,25 +98,17 @@ const EmployeeFinderModal = ({
 
   if (!isOpen) return null;
 
-  const isEmployeeSelected = (userId) =>
-    selectedEmployeeIds?.includes(userId);
+  const isEmployeeSelected = (userId) => selectedEmployeeIds?.includes(userId);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Select Employee
-            </h2>
-            <p className="text-sm text-black/60 mt-1">
-              {totalEmployees} employees found
-            </p>
+            <h2 className="text-2xl font-bold tracking-tight">Select Employee</h2>
+            <p className="text-sm text-black/60 mt-1">{totalEmployees} employees found</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-lg transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -179,9 +161,7 @@ const EmployeeFinderModal = ({
               </button>
             </div>
           ) : employees.length === 0 ? (
-            <div className="text-center py-12 text-black/60">
-              No employees found
-            </div>
+            <div className="text-center py-12 text-black/60">No employees found</div>
           ) : (
             <div className="space-y-3">
               {employees.map((emp, index) => {
@@ -190,17 +170,14 @@ const EmployeeFinderModal = ({
                   <button
                     key={emp.user_id || index}
                     onClick={() => handleSelectEmployee(emp)}
-                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${isSelected
-                        ? "bg-yellow-100 border-yellow-400 border-2"
-                        : "border-black/10"
-                      }`}
+                    className={`w-full border rounded-lg p-4 hover:bg-yellow-50 transition-colors text-left ${
+                      isSelected ? 'bg-yellow-100 border-yellow-400 border-2' : 'border-black/10'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-lg">
-                            {emp.name || "No name"}
-                          </p>
+                          <p className="font-semibold text-lg">{emp.name || 'No name'}</p>
                           {isSelected && (
                             <span className="text-xs bg-yellow-400 px-2 py-1 rounded font-semibold">
                               Selected
@@ -214,11 +191,7 @@ const EmployeeFinderModal = ({
                       </div>
 
                       {emp.picture && (
-                        <img
-                          src={emp.picture}
-                          alt={emp.name}
-                          className="w-12 h-12 rounded-full"
-                        />
+                        <img src={emp.picture} alt={emp.name} className="w-12 h-12 rounded-full" />
                       )}
                     </div>
                   </button>
@@ -228,10 +201,8 @@ const EmployeeFinderModal = ({
           )}
         </div>
 
-
         {/* Pagination + Confirm */}
         <div className="border-t border-black/10 p-6 flex items-center justify-between">
-
           {/* Previous */}
           <button
             onClick={() => setCurrentPage(currentPage - 1)}
@@ -264,9 +235,7 @@ const EmployeeFinderModal = ({
           >
             Confirm
           </button>
-
         </div>
-
       </div>
     </div>
   );

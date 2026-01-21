@@ -1,73 +1,73 @@
-import {BrowserRouter as Router, Routes, Route, useLocation, useNavigate} from "react-router-dom";
-import Auth0ProviderWithConfig from "./auth/Auth0ProviderWithConfig";
-import { LanguageProvider } from "./context/LanguageContext";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import Auth0ProviderWithConfig from './auth/Auth0ProviderWithConfig';
+import { LanguageProvider } from './context/LanguageContext';
 
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import Admin from "./pages/Admin";
-import Employee from "./pages/Employee";
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import Employee from './pages/Employee';
 //import Client from "./pages/Client";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./auth/ProtectedRoute";
-import ReviewsPage from "./pages/Reviews.jsx";
-import PortfolioGallery from "./pages/PortfolioGallery";
+import Navbar from './components/Navbar';
+import ProtectedRoute from './auth/ProtectedRoute';
+import ReviewsPage from './pages/Reviews.jsx';
+import PortfolioGallery from './pages/PortfolioGallery';
 
 function Layout({ children }) {
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
-  const isPortfolioPage = location.pathname === "/portfolio";
-  const isReviewsPage = location.pathname === "/reviews";
+  const isHomePage = location.pathname === '/';
+  const isPortfolioPage = location.pathname === '/portfolio';
+  const isReviewsPage = location.pathname === '/reviews';
   const navigate = useNavigate();
 
   return (
-      <LanguageProvider>
-        <Auth0ProviderWithConfig navigate={navigate}>
-          {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
-          {children}
-        </Auth0ProviderWithConfig>
-      </LanguageProvider>
+    <LanguageProvider>
+      <Auth0ProviderWithConfig navigate={navigate}>
+        {!isHomePage && !isPortfolioPage && !isReviewsPage && <Navbar />}
+        {children}
+      </Auth0ProviderWithConfig>
+    </LanguageProvider>
   );
 }
 
 function App() {
   return (
-      <Router>
-        <Layout>
-      <Routes>
-        {/* Public Route */}
-        <Route path="/" element={<Home />} />
+    <Router>
+      <Layout>
+        <Routes>
+          {/* Public Route */}
+          <Route path="/" element={<Home />} />
 
-        {/* Any authenticated user */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+          {/* Any authenticated user */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Admin-only */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute roles={["Admin"]}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
+          {/* Admin-only */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={['Admin']}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Employee-only */}
-        <Route
-          path="/employee"
-          element={
-            <ProtectedRoute roles={["Employee"]}>
-              <Employee />
-            </ProtectedRoute>
-          }
-        />
+          {/* Employee-only */}
+          <Route
+            path="/employee"
+            element={
+              <ProtectedRoute roles={['Employee']}>
+                <Employee />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Client-only 
+          {/* Client-only 
         <Route
           path="/client"
           element={
@@ -76,16 +76,10 @@ function App() {
             </ProtectedRoute>
           }
         />*/}
-        <Route
-            path="/reviews"
-            element={<ReviewsPage />}
-        />
-        <Route
-            path="/portfolio"
-            element={<PortfolioGallery />}
-        />
-      </Routes>
-        </Layout>
+          <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/portfolio" element={<PortfolioGallery />} />
+        </Routes>
+      </Layout>
     </Router>
   );
 }
