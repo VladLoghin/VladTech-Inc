@@ -27,10 +27,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceImplTest {
 
-    @Mock
-    private UserManagementService userManagementService;
+        @Mock
+        private UserManagementService userManagementService;
 
-    @Mock
+        @Mock
         private ProjectRepository projectRepository;
 
         @Mock
@@ -62,7 +62,7 @@ class ProjectServiceImplTest {
                                 projectResponseMapper,
                                 projectEmailMapper,
                                 projectEmailSender,
-                        userManagementService);
+                                userManagementService);
                 projectService.self = projectServiceMock;
 
                 project = new Project();
@@ -240,11 +240,23 @@ class ProjectServiceImplTest {
         @Test
         void updateProject_ShouldUpdateAndReturnProject() {
                 // Arrange
+                ProjectRequestModel requestModel = new ProjectRequestModel();
+                requestModel.setName("Updated Project"); // changed name
+                requestModel.setEstimatedCost(java.math.BigDecimal.valueOf(2000.00));
+                requestModel.setEstimatedCostCurrency("EUR");
+
                 when(projectRepository.findByProjectIdentifier("PROJ-1"))
                                 .thenReturn(Optional.of(project));
                 when(projectRepository.save(any(Project.class)))
-                                .thenReturn(project);
-                when(projectResponseMapper.entityToResponseModel(project))
+                                .thenAnswer(invocation -> {
+                                        Project p = invocation.getArgument(0);
+                                        // verify logic inside save
+                                        assertEquals("Updated Project", p.getName());
+                                        assertEquals(java.math.BigDecimal.valueOf(2000.00), p.getEstimatedCost());
+                                        assertEquals("EUR", p.getEstimatedCostCurrency());
+                                        return p;
+                                });
+                when(projectResponseMapper.entityToResponseModel(any(Project.class)))
                                 .thenReturn(responseModel);
 
                 // Act
@@ -252,7 +264,6 @@ class ProjectServiceImplTest {
 
                 // Assert
                 assertNotNull(result);
-                assertEquals("Test Project", result.getName());
                 verify(projectRepository, times(1)).findByProjectIdentifier("PROJ-1");
                 verify(projectRepository, times(1)).save(any(Project.class));
                 verify(projectServiceMock, times(1)).sendEmailNotificationAsync(any(Project.class), eq("Updated"));
@@ -833,229 +844,224 @@ class ProjectServiceImplTest {
                 assertNotNull(result);
                 assertTrue(result.isEmpty());
         }
-    // ---------- updateProjectStatusForEmployee tests ----------
+        // ---------- updateProjectStatusForEmployee tests ----------
 
-    @Test
-    void updateProjectStatusForEmployee_pendingToInProgress_ok_whenEmployeeAssigned() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
+        @Test
+        void updateProjectStatusForEmployee_pendingToInProgress_ok_whenEmployeeAssigned() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
-        existing.setStatus(ProjectStatus.PENDING);
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                existing.setStatus(ProjectStatus.PENDING);
 
-        Project saved = new Project();
-        saved.setProjectIdentifier(projectId);
-        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
-        saved.setStatus(ProjectStatus.IN_PROGRESS);
+                Project saved = new Project();
+                saved.setProjectIdentifier(projectId);
+                saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                saved.setStatus(ProjectStatus.IN_PROGRESS);
 
-        ProjectResponseModel mapped = new ProjectResponseModel();
-        mapped.setProjectIdentifier(projectId);
-        mapped.setStatus("IN_PROGRESS");
+                ProjectResponseModel mapped = new ProjectResponseModel();
+                mapped.setProjectIdentifier(projectId);
+                mapped.setStatus("IN_PROGRESS");
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
-        when(projectRepository.save(any(Project.class))).thenReturn(saved);
-        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(mapped);
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class))).thenReturn(saved);
+                when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(mapped);
 
-        ProjectResponseModel result =
-                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS);
+                ProjectResponseModel result = projectService.updateProjectStatusForEmployee(projectId, employeeId,
+                                ProjectStatus.IN_PROGRESS);
 
-        assertNotNull(result);
-        assertEquals("IN_PROGRESS", result.getStatus());
-        assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
-        verify(projectRepository).save(existing);
-    }
+                assertNotNull(result);
+                assertEquals("IN_PROGRESS", result.getStatus());
+                assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
+                verify(projectRepository).save(existing);
+        }
 
-    @Test
-    void updateProjectStatusForEmployee_setsPendingWhenCurrentStatusNull_thenAllowsToInProgress() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
+        @Test
+        void updateProjectStatusForEmployee_setsPendingWhenCurrentStatusNull_thenAllowsToInProgress() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
-        existing.setStatus(null); // important
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                existing.setStatus(null); // important
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
-        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+                when(projectResponseMapper.entityToResponseModel(any(Project.class)))
+                                .thenReturn(new ProjectResponseModel());
 
-        assertDoesNotThrow(() ->
-                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS)
-        );
+                assertDoesNotThrow(() -> projectService.updateProjectStatusForEmployee(projectId, employeeId,
+                                ProjectStatus.IN_PROGRESS));
 
-        assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
-        verify(projectRepository).save(existing);
-    }
+                assertEquals(ProjectStatus.IN_PROGRESS, existing.getStatus());
+                verify(projectRepository).save(existing);
+        }
 
-    @Test
-    void updateProjectStatusForEmployee_throwsWhenEmployeeNotAssigned() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
+        @Test
+        void updateProjectStatusForEmployee_throwsWhenEmployeeNotAssigned() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|someoneElse")));
-        existing.setStatus(ProjectStatus.PENDING);
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|someoneElse")));
+                existing.setStatus(ProjectStatus.PENDING);
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS)
-        );
+                RuntimeException ex = assertThrows(RuntimeException.class, () -> projectService
+                                .updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.IN_PROGRESS));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("not allowed"));
-        verify(projectRepository, never()).save(any());
-    }
+                assertTrue(ex.getMessage().toLowerCase().contains("not allowed"));
+                verify(projectRepository, never()).save(any());
+        }
 
-    @Test
-    void updateProjectStatusForEmployee_throwsWhenInvalidTransition_pendingToCompleted() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
+        @Test
+        void updateProjectStatusForEmployee_throwsWhenInvalidTransition_pendingToCompleted() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
-        existing.setStatus(ProjectStatus.PENDING);
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                existing.setStatus(ProjectStatus.PENDING);
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.COMPLETED)
-        );
+                RuntimeException ex = assertThrows(RuntimeException.class, () -> projectService
+                                .updateProjectStatusForEmployee(projectId, employeeId, ProjectStatus.COMPLETED));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("invalid status transition"));
-        verify(projectRepository, never()).save(any());
-    }
+                assertTrue(ex.getMessage().toLowerCase().contains("invalid status transition"));
+                verify(projectRepository, never()).save(any());
+        }
 
-    @Test
-    void updateProjectStatusForEmployee_blankEmployeeId_throwsInvalidEmployeeIdException() {
-        String projectId = "PROJ-1";
+        @Test
+        void updateProjectStatusForEmployee_blankEmployeeId_throwsInvalidEmployeeIdException() {
+                String projectId = "PROJ-1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|emp1")));
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|emp1")));
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
 
-        assertThrows(InvalidEmployeeIdException.class, () ->
-                projectService.updateProjectStatusForEmployee(projectId, "   ", ProjectStatus.IN_PROGRESS)
-        );
+                assertThrows(InvalidEmployeeIdException.class, () -> projectService
+                                .updateProjectStatusForEmployee(projectId, "   ", ProjectStatus.IN_PROGRESS));
 
-        verify(projectRepository, never()).save(any());
-    }
+                verify(projectRepository, never()).save(any());
+        }
 
-    @Test
-    void updateProjectStatusForEmployee_projectNotFound_throwsProjectNotFoundException() {
-        when(projectRepository.findByProjectIdentifier("PROJ-404")).thenReturn(Optional.empty());
+        @Test
+        void updateProjectStatusForEmployee_projectNotFound_throwsProjectNotFoundException() {
+                when(projectRepository.findByProjectIdentifier("PROJ-404")).thenReturn(Optional.empty());
 
-        assertThrows(ProjectNotFoundException.class, () ->
-                projectService.updateProjectStatusForEmployee("PROJ-404", "auth0|emp1", ProjectStatus.IN_PROGRESS)
-        );
-    }
+                assertThrows(ProjectNotFoundException.class, () -> projectService
+                                .updateProjectStatusForEmployee("PROJ-404", "auth0|emp1", ProjectStatus.IN_PROGRESS));
+        }
 
-    // ---------- assignEmployee email flow tests ----------
+        // ---------- assignEmployee email flow tests ----------
 
-    @Test
-    void assignEmployee_whenListIsNull_createsList_andSendsAssignedEmail() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
-        String employeeEmail = "emp1@x.com";
+        @Test
+        void assignEmployee_whenListIsNull_createsList_andSendsAssignedEmail() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
+                String employeeEmail = "emp1@x.com";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(null); // important branch
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(null); // important branch
 
-        Project saved = new Project();
-        saved.setProjectIdentifier(projectId);
-        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                Project saved = new Project();
+                saved.setProjectIdentifier(projectId);
+                saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
-        when(projectRepository.save(any(Project.class))).thenReturn(saved);
-        when(userManagementService.getUserEmailById(employeeId)).thenReturn(employeeEmail);
-        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class))).thenReturn(saved);
+                when(userManagementService.getUserEmailById(employeeId)).thenReturn(employeeEmail);
+                when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
 
-        projectService.assignEmployee(projectId, employeeId);
+                projectService.assignEmployee(projectId, employeeId);
 
-        assertNotNull(existing.getAssignedEmployeeIds());
-        assertTrue(existing.getAssignedEmployeeIds().contains(employeeId));
+                assertNotNull(existing.getAssignedEmployeeIds());
+                assertTrue(existing.getAssignedEmployeeIds().contains(employeeId));
 
-        verify(userManagementService).getUserEmailById(employeeId);
-        verify(projectServiceMock).sendEmployeeAssignedEmailAsync(any(Project.class), eq(employeeEmail));
-    }
+                verify(userManagementService).getUserEmailById(employeeId);
+                verify(projectServiceMock).sendEmployeeAssignedEmailAsync(any(Project.class), eq(employeeEmail));
+        }
 
-    @Test
-    void assignEmployee_sendsAssignedEmail_evenWhenResolvedEmailBlank() {
-        String projectId = "PROJ-1";
-        String employeeId = "auth0|emp1";
+        @Test
+        void assignEmployee_sendsAssignedEmail_evenWhenResolvedEmailBlank() {
+                String projectId = "PROJ-1";
+                String employeeId = "auth0|emp1";
 
-        Project existing = new Project();
-        existing.setProjectIdentifier(projectId);
-        existing.setAssignedEmployeeIds(new ArrayList<>());
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setAssignedEmployeeIds(new ArrayList<>());
 
-        Project saved = new Project();
-        saved.setProjectIdentifier(projectId);
-        saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+                Project saved = new Project();
+                saved.setProjectIdentifier(projectId);
+                saved.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
 
-        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
-        when(projectRepository.save(any(Project.class))).thenReturn(saved);
+                when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class))).thenReturn(saved);
 
-        String blankEmail = "   ";
-        when(userManagementService.getUserEmailById(employeeId)).thenReturn(blankEmail);
+                String blankEmail = "   ";
+                when(userManagementService.getUserEmailById(employeeId)).thenReturn(blankEmail);
 
-        when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
+                when(projectResponseMapper.entityToResponseModel(saved)).thenReturn(new ProjectResponseModel());
 
-        projectService.assignEmployee(projectId, employeeId);
+                projectService.assignEmployee(projectId, employeeId);
 
-        // production behavior: it still calls the async method, even with blank email
-        verify(projectServiceMock, times(1))
-                .sendEmployeeAssignedEmailAsync(any(Project.class), eq(blankEmail));
-    }
+                // production behavior: it still calls the async method, even with blank email
+                verify(projectServiceMock, times(1))
+                                .sendEmployeeAssignedEmailAsync(any(Project.class), eq(blankEmail));
+        }
 
+        // ---------- sendEmployeeAssignedEmailAsync tests ----------
 
-    // ---------- sendEmployeeAssignedEmailAsync tests ----------
+        @Test
+        void sendEmployeeAssignedEmailAsync_sendsEmail_whenMapperReturnsEmail() {
+                ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
 
-    @Test
-    void sendEmployeeAssignedEmailAsync_sendsEmail_whenMapperReturnsEmail() {
-        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+                when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
 
-        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
+                projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
 
-        projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
+                verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
+                verify(projectEmailSender).send(email);
+        }
 
-        verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
-        verify(projectEmailSender).send(email);
-    }
+        @Test
+        void sendEmployeeAssignedEmailAsync_doesNothing_whenEmailNullOrBlank() {
+                projectService.sendEmployeeAssignedEmailAsync(project, null);
+                projectService.sendEmployeeAssignedEmailAsync(project, "   ");
 
-    @Test
-    void sendEmployeeAssignedEmailAsync_doesNothing_whenEmailNullOrBlank() {
-        projectService.sendEmployeeAssignedEmailAsync(project, null);
-        projectService.sendEmployeeAssignedEmailAsync(project, "   ");
+                verify(projectEmailMapper, never()).toEmployeeAssignedEmail(any(), any());
+                verify(projectEmailSender, never()).send(any());
+        }
 
-        verify(projectEmailMapper, never()).toEmployeeAssignedEmail(any(), any());
-        verify(projectEmailSender, never()).send(any());
-    }
+        @Test
+        void sendEmployeeAssignedEmailAsync_doesNotSend_whenMapperReturnsNull() {
+                when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(null);
 
-    @Test
-    void sendEmployeeAssignedEmailAsync_doesNotSend_whenMapperReturnsNull() {
-        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(null);
+                projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
 
-        projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com");
+                verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
+                verify(projectEmailSender, never()).send(any());
+        }
 
-        verify(projectEmailMapper).toEmployeeAssignedEmail(project, "emp@x.com");
-        verify(projectEmailSender, never()).send(any());
-    }
+        @Test
+        void sendEmployeeAssignedEmailAsync_handlesException_whenSenderThrows() {
+                ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
+                when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
+                doThrow(new RuntimeException("boom")).when(projectEmailSender).send(email);
 
-    @Test
-    void sendEmployeeAssignedEmailAsync_handlesException_whenSenderThrows() {
-        ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
-        when(projectEmailMapper.toEmployeeAssignedEmail(project, "emp@x.com")).thenReturn(email);
-        doThrow(new RuntimeException("boom")).when(projectEmailSender).send(email);
+                assertDoesNotThrow(() -> projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com"));
 
-        assertDoesNotThrow(() -> projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com"));
-
-        verify(projectEmailSender).send(email);
-    }
+                verify(projectEmailSender).send(email);
+        }
 
 }

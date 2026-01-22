@@ -16,7 +16,7 @@ const resources = {
       "add": "ADD",
       "yes": "Yes",
       "no": "No",
-      
+
       // Navigation
       "nav.portfolio": "PORTFOLIO",
       "nav.about": "ABOUT",
@@ -27,7 +27,7 @@ const resources = {
       "nav.dashboard": "DASHBOARD",
       "nav.login": "LOGIN",
       "nav.logout": "LOGOUT",
-      
+
       // HomePage
       "home.innovate": "INNOVATE",
       "home.build": "BUILD",
@@ -64,7 +64,7 @@ const resources = {
       "home.createEstimate": "CREATE ESTIMATE",
       "home.expertiseText": "Based in the heart of innovation with expertise spanning construction, engineering, and technology integration for tomorrow's infrastructure.",
       "home.executionText": "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
-      
+
       // Admin Page
       "admin.title": "Admin Area - Only for Admin Role",
       "admin.createPortfolio": "Create Portfolio",
@@ -86,7 +86,7 @@ const resources = {
       "admin.failedFetchArchived": "Failed to fetch archived projects.",
       "admin.failedComplete": "Failed to complete project.",
       "admin.failedReactivate": "Failed to reactivate project.",
-      
+
       // Role Manager Modal
       "roleManager.title": "Role Manager",
       "roleManager.changesRecorded": "{{count}} changes recorded",
@@ -125,7 +125,7 @@ const resources = {
       "roleManager.pageOfTotal": "Page {{current}} of {{total}} ({{totalItems}} total)",
       "roleManager.failedToLoadChangelog": "Failed to load changelog",
       "roleManager.failedToLoadUsers": "Failed to load users",
-      
+
       // Employee Page
       "employee.title": "Employee Tools",
       "employee.myProjects": "My Projects",
@@ -136,13 +136,13 @@ const resources = {
       "employee.noProjectsAssigned": "You are not currently assigned to any projects.",
       "employee.errorLoading": "Error loading projects",
       "employee.myCalendar": "My Project Calendar",
-      
+
       // Dashboard Page
       "dashboard.title": "User Dashboard",
       "dashboard.welcome": "Welcome",
       "dashboard.profile": "Profile",
       "dashboard.settings": "Settings",
-      
+
       // Contact
       "contact.title": "Contact Us",
       "contact.getInTouch": "Get in Touch",
@@ -158,7 +158,7 @@ const resources = {
       "contact.send": "Send Message",
       "contact.success": "Message sent successfully!",
       "contact.error": "Failed to send message.",
-      
+
       // Estimates
       "estimate.title": "Request Estimate",
       "estimate.enterDetails": "Enter Estimate Details",
@@ -173,7 +173,7 @@ const resources = {
       "estimate.isRequired": "is required",
       "estimate.greaterThanZero": "must be greater than 0",
       "estimate.validNumber": "must be a valid number",
-      
+
       // Project Modal
       "project.newProject": "New Project",
       "project.editProject": "Edit Project",
@@ -206,16 +206,19 @@ const resources = {
       "project.create": "Create",
       "project.save": "Save",
       "project.none": "None",
-"project.noProjectsFound": "No projects found.",
-"project.id": "ID",
-"project.clientLabel": "Client",
-"project.addressLabel": "Address",
-"project.archivedAt": "Archived",
-"project.assignedEmployees": "Assigned Employees",
-"project.updateStatus": "Update Status",
-"calendar.today": "today",
+      "project.noProjectsFound": "No projects found.",
+      "project.id": "ID",
+      "project.clientLabel": "Client",
+      "project.addressLabel": "Address",
+      "project.archivedAt": "Archived",
+      "project.assignedEmployees": "Assigned Employees",
+      "project.updateStatus": "Update Status",
+      "project.estimatedCost": "Final Cost",
+      "project.currency": "Currency",
+      "project.costPositiveError": "Cost must be a positive number",
+      "calendar.today": "today",
 
-      
+
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
       "portfolio.deleteItem": "Delete Portfolio Item",
@@ -227,7 +230,7 @@ const resources = {
       "portfolio.ratingRange": "Rating from 0.0 to 5.0",
       "portfolio.comments": "comments",
       "portfolio.create": "Create",
-      
+
       // Role Finder Modal
       "roleFinder.title": "Role Finder",
       "roleFinder.usersFound": "{{count}} users found",
@@ -257,7 +260,7 @@ const resources = {
       "add": "AJOUTER",
       "yes": "Oui",
       "no": "Non",
-      
+
       // Navigation
       "nav.portfolio": "PORTFOLIO",
       "nav.about": "À PROPOS",
@@ -268,7 +271,7 @@ const resources = {
       "nav.dashboard": "TABLEAU DE BORD",
       "nav.login": "CONNEXION",
       "nav.logout": "DÉCONNEXION",
-      
+
       // HomePage
       "home.innovate": "INNOVER",
       "home.build": "CONSTRUIRE",
@@ -305,7 +308,7 @@ const resources = {
       "home.createEstimate": "ESTIMER",
       "home.expertiseText": "Basé au cœur de l'innovation avec une expertise couvrant la construction, l'ingénierie et l'intégration technologique pour les infrastructures de demain.",
       "home.executionText": "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
-      
+
       // Admin Page
       "admin.title": "Zone Admin - Réservé au rôle Admin",
       "admin.createPortfolio": "Créer un Portfolio",
@@ -327,7 +330,7 @@ const resources = {
       "admin.failedFetchArchived": "Échec de la récupération des projets archivés.",
       "admin.failedComplete": "Échec de l'achèvement du projet.",
       "admin.failedReactivate": "Échec de la réactivation du projet.",
-      
+
       // Role Manager Modal
       "roleManager.title": "Entretien de Role",
       "roleManager.changesRecorded": "{{count}} modifications enregistrées",
@@ -366,7 +369,7 @@ const resources = {
       "roleManager.pageOfTotal": "Page {{current}} sur {{total}} ({{totalItems}} au total)",
       "roleManager.failedToLoadChangelog": "Échec du chargement de l'historique",
       "roleManager.failedToLoadUsers": "Échec du chargement des utilisateurs",
-      
+
       // Employee Page
       "employee.title": "Outils Employé",
       "employee.myProjects": "Mes Projets",
@@ -377,13 +380,13 @@ const resources = {
       "employee.noProjectsAssigned": "Vous n'êtes actuellement assigné à aucun projet.",
       "employee.errorLoading": "Erreur lors du chargement des projets",
       "employee.myCalendar": "Mon Calendrier Projet",
-      
+
       // Dashboard Page
       "dashboard.title": "Tableau de Bord Utilisateur",
       "dashboard.welcome": "Bienvenue",
       "dashboard.profile": "Profil",
       "dashboard.settings": "Paramètres",
-      
+
       // Contact
       "contact.title": "Contactez-Nous",
       "contact.getInTouch": "Entrer en Contact",
@@ -399,7 +402,7 @@ const resources = {
       "contact.send": "Envoyer le Message",
       "contact.success": "Message envoyé avec succès!",
       "contact.error": "Échec de l'envoi du message.",
-      
+
       // Estimates
       "estimate.title": "Demander un Devis",
       "estimate.enterDetails": "Entrez les détails de l'estimation",
@@ -414,7 +417,7 @@ const resources = {
       "estimate.isRequired": "est requis",
       "estimate.greaterThanZero": "doit être supérieur à 0",
       "estimate.validNumber": "doit être un nombre valide",
-      
+
       // Project Modal
       "project.newProject": "Nouveau Projet",
       "project.editProject": "Modifier le Projet",
@@ -447,16 +450,19 @@ const resources = {
       "project.create": "Créer",
       "project.save": "Sauvegarder",
       "project.none": "Aucun",
-"project.noProjectsFound": "Aucun projet trouvé.",
-"project.id": "ID",
-"project.clientLabel": "Client",
-"project.addressLabel": "Adresse",
-"project.archivedAt": "Archivé",
-"project.assignedEmployees": "Employés assignés",
-"project.updateStatus": "Mettre à jour le statut",
-"calendar.today": "aujourd’hui",
+      "project.noProjectsFound": "Aucun projet trouvé.",
+      "project.id": "ID",
+      "project.clientLabel": "Client",
+      "project.addressLabel": "Adresse",
+      "project.archivedAt": "Archivé",
+      "project.assignedEmployees": "Employés assignés",
+      "project.updateStatus": "Mettre à jour le statut",
+      "project.estimatedCost": "Coût Final",
+      "project.currency": "Devise",
+      "project.costPositiveError": "Le coût doit être un nombre positif",
+      "calendar.today": "aujourd’hui",
 
-      
+
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
       "portfolio.deleteItem": "Supprimer un Élément de Portfolio",
@@ -468,7 +474,7 @@ const resources = {
       "portfolio.ratingRange": "Évaluation de 0.0 à 5.0",
       "portfolio.comments": "commentaires",
       "portfolio.create": "Créer",
-      
+
       // Role Finder Modal
       "roleFinder.title": "Recherche de Rôle",
       "roleFinder.usersFound": "{{count}} utilisateurs trouvés",

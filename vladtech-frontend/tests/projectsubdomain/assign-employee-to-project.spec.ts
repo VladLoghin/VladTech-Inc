@@ -20,7 +20,7 @@ test.describe('Admin assigns employee to project', () => {
 
     // Wait for the ProjectModal to appear
     const projectModalTitle = page.getByRole('heading', {
-      name: /Update Project|New Project/i,
+      name: /Edit Project|New Project/i,
     });
     await expect(projectModalTitle).toBeVisible();
 

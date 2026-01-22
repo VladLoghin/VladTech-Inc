@@ -14,7 +14,7 @@ test('edit project modal assign client', async ({ page, loginAs, createProject }
   await expect(projectCard).toBeVisible({ timeout: 5000 });
   await projectCard.getByRole('button', { name: 'Edit' }).click();
 
-  await expect(page.getByRole('heading', { name: 'Update Project' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Edit Project' })).toBeVisible();
 
   // Clear existing client if any
   const clearButton = page.getByRole('button', { name: 'Clear' }).first();

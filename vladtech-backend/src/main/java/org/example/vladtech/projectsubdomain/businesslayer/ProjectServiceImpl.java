@@ -52,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectRequestMapper projectRequestMapper,
             ProjectResponseMapper projectResponseMapper,
             ProjectEmailMapper projectEmailMapper,
-            ProjectEmailSender projectEmailSender,UserManagementService userManagementService) {
+            ProjectEmailSender projectEmailSender, UserManagementService userManagementService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -107,6 +107,8 @@ public class ProjectServiceImpl implements ProjectService {
         existingProject.setDescription(projectRequestModel.getDescription());
         existingProject.setStartDate(projectRequestModel.getStartDate());
         existingProject.setDueDate(projectRequestModel.getDueDate());
+        existingProject.setEstimatedCost(projectRequestModel.getEstimatedCost());
+        existingProject.setEstimatedCostCurrency(projectRequestModel.getEstimatedCostCurrency());
 
         if (projectRequestModel.getAddress() != null) {
             existingProject.setAddress(new Address(
@@ -195,8 +197,6 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             log.info("[ASSIGN] employee already assigned, skipping email");
         }
-
-
 
         return projectResponseMapper.entityToResponseModel(project);
     }
@@ -307,8 +307,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         try {
-            ProjectNotificationEmail email =
-                    projectEmailMapper.toEmployeeAssignedEmail(project, employeeEmail);
+            ProjectNotificationEmail email = projectEmailMapper.toEmployeeAssignedEmail(project, employeeEmail);
 
             if (email != null) {
                 projectEmailSender.send(email);
@@ -325,8 +324,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseModel updateProjectStatusForEmployee(
             String projectIdentifier,
             String employeeId,
-            ProjectStatus newStatus
-    ) {
+            ProjectStatus newStatus) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
 
@@ -351,7 +349,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isValidStatusTransition(ProjectStatus current, ProjectStatus next) {
-        if (current == next) return true;
+        if (current == next)
+            return true;
 
         return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
                 || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);

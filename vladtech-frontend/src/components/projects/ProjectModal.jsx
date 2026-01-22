@@ -23,6 +23,8 @@ const EMPTY_FORM = {
     country: "",
     postalCode: "",
   },
+  estimatedCost: "",
+  estimatedCostCurrency: "CAD",
 };
 
 const ProjectModal = ({
@@ -57,9 +59,10 @@ const ProjectModal = ({
           streetAddress: initialData.address?.streetAddress || "",
           city: initialData.address?.city || "",
           province: initialData.address?.province || "",
-          country: initialData.address?.country || "",
           postalCode: initialData.address?.postalCode || "",
         },
+        estimatedCost: initialData.estimatedCost || "",
+        estimatedCostCurrency: initialData.estimatedCostCurrency || "CAD",
       });
     }
   }, [isEdit, initialData]);
@@ -74,40 +77,43 @@ const ProjectModal = ({
       }));
     }
   }, [defaultDate, isEdit]);
-  
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Project name is required";
     if (!formData.dueDate) newErrors.dueDate = "Due date is required";
     if (!formData.projectType) newErrors.projectType = "Project type is required";
     if (!formData.address.city.trim()) newErrors.city = "City is required";
+    if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
+      newErrors.estimatedCost = t("project.costPositiveError");
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) => {
-  for (const id of employeeIds) {
-    const encodedId = encodeURIComponent(id); // auth0|xxx → auth0%7Cxxx
+  const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) => {
+    for (const id of employeeIds) {
+      const encodedId = encodeURIComponent(id); // auth0|xxx → auth0%7Cxxx
 
-    try {
-      await api.post(
-        `/projects/${projectIdentifier}/assign/${encodedId}`,
-        null,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      try {
+        await api.post(
+          `/projects/${projectIdentifier}/assign/${encodedId}`,
+          null,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      console.log("ASSIGN SUCCESS:", projectIdentifier, id);
-    } catch (e) {
-      console.error(
-        "ASSIGN FAILED:",
-        id,
-        e?.response?.status,
-        e?.response?.data
-      );
+        console.log("ASSIGN SUCCESS:", projectIdentifier, id);
+      } catch (e) {
+        console.error(
+          "ASSIGN FAILED:",
+          id,
+          e?.response?.status,
+          e?.response?.data
+        );
+      }
     }
-  }
-};
+  };
 
 
 
@@ -117,55 +123,61 @@ const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) =
 
     try {
       const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
+        authorizationParams: {
+          audience: "https://vladtech/api",
+        },
+      });
 
       if (isEdit) {
-  const before = initialData?.assignedEmployeeIds || [];
-  const after = formData.assignedEmployeeIds || [];
-  const newlyAdded = after.filter((id) => !before.includes(id));
+        const before = initialData?.assignedEmployeeIds || [];
+        const after = formData.assignedEmployeeIds || [];
+        const newlyAdded = after.filter((id) => !before.includes(id));
 
-  const payload = { ...formData };
-  delete payload.assignedEmployeeIds;
-  delete payload.assignedEmployeeEmails;
+        const payload = { ...formData };
+        if (payload.estimatedCost === "") {
+          payload.estimatedCost = null;
+        }
+        delete payload.assignedEmployeeIds;
+        delete payload.assignedEmployeeEmails;
 
-  await api.put(
-    `/projects/${formData.projectIdentifier}`,
-    payload,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+        await api.put(
+          `/projects/${formData.projectIdentifier}`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  if (newlyAdded.length > 0) {
-    await assignEmployeesToProject(formData.projectIdentifier, newlyAdded, token);
-  }
-} else {
-  const employeeIds = formData.assignedEmployeeIds || [];
+        if (newlyAdded.length > 0) {
+          await assignEmployeesToProject(formData.projectIdentifier, newlyAdded, token);
+        }
+      } else {
+        const employeeIds = formData.assignedEmployeeIds || [];
 
-  // 1) create project WITHOUT employees
-  const payload = { ...formData };
-  delete payload.assignedEmployeeIds;
-  delete payload.assignedEmployeeEmails;
+        // 1) create project WITHOUT employees
+        const payload = { ...formData };
+        if (payload.estimatedCost === "") {
+          payload.estimatedCost = null;
+        }
+        delete payload.assignedEmployeeIds;
+        delete payload.assignedEmployeeEmails;
 
-  const createRes = await api.post("/projects", payload, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+        const createRes = await api.post("/projects", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  // 2) get the new identifier from backend response
-  const projectIdentifier = createRes?.data?.projectIdentifier;
+        // 2) get the new identifier from backend response
+        const projectIdentifier = createRes?.data?.projectIdentifier;
 
-  if (!projectIdentifier) {
-    console.error("Create response missing projectIdentifier:", createRes?.data);
-    setSubmitError("Project created but missing projectIdentifier in response.");
-    return;
-  }
+        if (!projectIdentifier) {
+          console.error("Create response missing projectIdentifier:", createRes?.data);
+          setSubmitError("Project created but missing projectIdentifier in response.");
+          return;
+        }
 
-  // 3) trigger email by assigning employees
-  if (employeeIds.length > 0) {
-    await assignEmployeesToProject(projectIdentifier, employeeIds, token);
-  }
-}
+        // 3) trigger email by assigning employees
+        if (employeeIds.length > 0) {
+          await assignEmployeesToProject(projectIdentifier, employeeIds, token);
+        }
+      }
 
 
 
@@ -181,7 +193,27 @@ const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) =
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name.includes(".")) {
+    if (name === "estimatedCostCurrency") {
+      setFormData((prev) => {
+        const oldCurrency = prev.estimatedCostCurrency;
+        const newCurrency = value;
+        let newCost = prev.estimatedCost;
+
+        if (newCost && oldCurrency !== newCurrency) {
+          const costNum = parseFloat(newCost);
+          if (!isNaN(costNum)) {
+            // Simple fixed conversion rates
+            if (oldCurrency === "CAD" && newCurrency === "USD") {
+              newCost = (costNum / 1.4).toFixed(2);
+            } else if (oldCurrency === "USD" && newCurrency === "CAD") {
+              newCost = (costNum * 1.4).toFixed(2);
+            }
+          }
+        }
+
+        return { ...prev, [name]: value, estimatedCost: newCost };
+      });
+    } else if (name.includes(".")) {
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
@@ -210,38 +242,38 @@ const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) =
     }));
   };
 
-const handleSelectEmployee = (employee) => {
-  setSelectedEmployee((prev) => {
-    const exists = prev.some((e) => e.id === employee.id);
-    let updated;
+  const handleSelectEmployee = (employee) => {
+    setSelectedEmployee((prev) => {
+      const exists = prev.some((e) => e.id === employee.id);
+      let updated;
 
-    if (exists) {
-     
-      updated = prev.filter((e) => e.id !== employee.id);
-    } else {
-      
-      updated = [...prev, employee];
-    }
+      if (exists) {
 
-    setFormData((prevForm) => ({
-      ...prevForm,
-      assignedEmployeeIds: updated.map((e) => e.id),
-      
-      assignedEmployeeEmails: updated.map((e) => e.email),
+        updated = prev.filter((e) => e.id !== employee.id);
+      } else {
+
+        updated = [...prev, employee];
+      }
+
+      setFormData((prevForm) => ({
+        ...prevForm,
+        assignedEmployeeIds: updated.map((e) => e.id),
+
+        assignedEmployeeEmails: updated.map((e) => e.email),
+      }));
+
+      return updated;
+    });
+  };
+
+  const handleClearEmployee = () => {
+    setSelectedEmployee([]);
+    setFormData((prev) => ({
+      ...prev,
+      assignedEmployeeIds: [],
+      assignedEmployeeEmails: [],
     }));
-
-    return updated;
-  });
-};
-
-const handleClearEmployee = () => {
-  setSelectedEmployee([]);
-  setFormData((prev) => ({
-    ...prev,
-    assignedEmployeeIds: [],
-    assignedEmployeeEmails: [],
-  }));
-};
+  };
 
 
   const handleClose = () => {
@@ -315,38 +347,38 @@ const handleClearEmployee = () => {
               </div>
             </div>
 
-                        {/* Employee picker */}
-<div className="mb-5">
-  <label className="block text-sm font-semibold text-black mb-2">
-    {t('project.employee')}
-  </label>
-  <div className="flex gap-2">
-    <button
-      type="button"
-      onClick={() => setIsEmployeeModalOpen(true)}
-      className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
-    >
-      {selectedEmployee.length > 0 ? (
-  <div className="text-sm text-black/80">
-    {selectedEmployee.map((e) => e.email).join(", ")}
-  </div>
-) : (
-  t('project.selectEmployees')
-)}
+            {/* Employee picker */}
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-black mb-2">
+                {t('project.employee')}
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEmployeeModalOpen(true)}
+                  className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
+                >
+                  {selectedEmployee.length > 0 ? (
+                    <div className="text-sm text-black/80">
+                      {selectedEmployee.map((e) => e.email).join(", ")}
+                    </div>
+                  ) : (
+                    t('project.selectEmployees')
+                  )}
 
-    </button>
+                </button>
 
-    {formData.assignedEmployeeIds?.length > 0 && (
-      <button
-        type="button"
-        onClick={handleClearEmployee}
-        className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
-      >
-        Clear
-      </button>
-    )}
-  </div>
-</div>
+                {formData.assignedEmployeeIds?.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearEmployee}
+                    className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
 
 
 
@@ -425,6 +457,36 @@ const handleClearEmployee = () => {
               )}
             </div>
 
+            <div className="mb-5">
+              <label className="block text-sm font-semibold mb-2">
+                {t('project.estimatedCost')}
+              </label>
+              <div className="flex gap-2">
+                <select
+                  name="estimatedCostCurrency"
+                  value={formData.estimatedCostCurrency}
+                  onChange={handleChange}
+                  className="w-24 px-4 py-3 border-2 border-black/20 rounded-lg bg-white"
+                >
+                  <option value="CAD">CAD</option>
+                  <option value="USD">USD</option>
+                </select>
+                <input
+                  type="number"
+                  name="estimatedCost"
+                  value={formData.estimatedCost}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg"
+                />
+              </div>
+              {errors.estimatedCost && (
+                <span className="text-red-600 text-sm">{errors.estimatedCost}</span>
+              )}
+            </div>
+
             <div className="mb-6">
               <label className="block text-sm font-semibold mb-2">
                 {t('project.description')}
@@ -463,11 +525,11 @@ const handleClearEmployee = () => {
         selectedClientId={formData.clientId}
       />
       <EmployeeFinderModal
-  isOpen={isEmployeeModalOpen}
-  onClose={() => setIsEmployeeModalOpen(false)}
-  selectedEmployeeIds={formData.assignedEmployeeIds}
-  onToggleEmployee={handleSelectEmployee}
-/>
+        isOpen={isEmployeeModalOpen}
+        onClose={() => setIsEmployeeModalOpen(false)}
+        selectedEmployeeIds={formData.assignedEmployeeIds}
+        onToggleEmployee={handleSelectEmployee}
+      />
     </>
   );
 };

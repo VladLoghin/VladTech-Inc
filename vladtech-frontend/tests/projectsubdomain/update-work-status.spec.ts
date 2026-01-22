@@ -86,7 +86,7 @@ async function gotoEmployeeTools(page: Page) {
     await safeClick(employeeBtn);
   }
 
-  await expect(page.getByRole('heading', { name: /employee area/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: /employee tools/i })).toBeVisible({ timeout: 15000 });
 }
 
 async function clickLogout(page: Page) {
@@ -109,7 +109,7 @@ async function clickLogout(page: Page) {
   }
 
   // Wait until we’re back at home and LOGIN exists again
-  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 }).catch(() => {});
+  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 }).catch(() => { });
   await page.waitForTimeout(800);
 }
 

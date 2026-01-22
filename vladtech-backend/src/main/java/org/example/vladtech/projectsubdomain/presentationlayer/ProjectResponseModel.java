@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,4 +31,6 @@ public class ProjectResponseModel {
     private String status;
     private String state;
     private LocalDateTime archivedAt;
+    private BigDecimal estimatedCost;
+    private String estimatedCostCurrency;
 }
