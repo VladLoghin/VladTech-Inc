@@ -1,6 +1,6 @@
 // Admin.jsx
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
@@ -36,29 +36,21 @@ const Admin = () => {
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
 
-  // NEW: View Information modal state
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [infoProject, setInfoProject] = useState(null);
+  // ✅ token helper used by ProjectList to load images with auth
+  const getApiToken = useCallback(async () => {
+    return await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+  }, [getAccessTokenSilently]);
 
   const handleEditProject = (project) => {
     setEditProject(project);
     setIsProjectModalOpen(true);
   };
 
-  // NEW: open info modal
-  const handleViewInfo = (project) => {
-    setInfoProject(project);
-    setIsInfoModalOpen(true);
-  };
-
-  const closeInfoModal = () => {
-    setIsInfoModalOpen(false);
-    setInfoProject(null);
-  };
-
   const fetchActiveProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       const response = await api.get("/projects/active", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -71,7 +63,7 @@ const Admin = () => {
 
   const fetchArchivedProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       const response = await api.get("/projects/archived", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -89,7 +81,7 @@ const Admin = () => {
 
   const handleCompleteProject = async (project) => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       await api.put(
         `/projects/${project.projectIdentifier}/complete`,
         {},
@@ -106,7 +98,7 @@ const Admin = () => {
 
   const handleReactivateProject = async (project) => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       await api.put(
         `/projects/${project.projectIdentifier}/reactivate`,
         {},
@@ -135,7 +127,7 @@ const Admin = () => {
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getApiToken();
         const res = await api.get("/employee/list", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -155,7 +147,7 @@ const Admin = () => {
     };
 
     loadEmployees();
-  }, [getAccessTokenSilently]);
+  }, [getApiToken]);
 
   useEffect(() => {
     const loadInitialProjects = async () => {
@@ -164,7 +156,7 @@ const Admin = () => {
     };
 
     loadInitialProjects();
-  }, [getAccessTokenSilently]);
+  }, [getApiToken]);
 
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
@@ -179,7 +171,6 @@ const Admin = () => {
 
     const [year, month, day] = dateStr.split("-");
     const date = new Date(Number(year), Number(month) - 1, Number(day));
-
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
     return date.toLocaleDateString(locale, {
@@ -189,18 +180,6 @@ const Admin = () => {
       year: "numeric",
     });
   };
-
-  // NEW: resolve image URL safely (relative -> prefix baseURL)
-  const resolvePhotoUrl = (url) => {
-    if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    const base = api?.defaults?.baseURL || "";
-    return `${base}${url}`;
-  };
-
-  // NEW: pull latest info from project.photos[0]
-  const latestInfo = infoProject?.photos?.[0] || null;
-  const latestPhotoSrc = latestInfo?.photoUrl ? resolvePhotoUrl(latestInfo.photoUrl) : "";
 
   return (
     <>
@@ -291,54 +270,6 @@ const Admin = () => {
           defaultDate={selectedDate}
         />
 
-        {/* NEW: View Information Modal (Admin) */}
-        {isInfoModalOpen && infoProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-            <div className="bg-white w-full max-w-lg rounded-xl border-2 border-black p-6 relative">
-              <button
-                onClick={closeInfoModal}
-                className="absolute right-4 top-3 text-xl font-bold text-black/70 hover:text-black"
-                aria-label="Close"
-              >
-                ×
-              </button>
-
-              <h2 className="text-2xl font-bold mb-2">
-                {t("project.viewInformation") || "View Information"}
-              </h2>
-
-              <p className="text-sm text-black/60 mb-4">
-                <span className="font-semibold">{infoProject.name}</span>{" "}
-                <span className="font-mono">({infoProject.projectIdentifier})</span>
-              </p>
-
-              {!latestInfo ? (
-                <p className="text-black/70">{t("project.noInformation") || "No information uploaded yet."}</p>
-              ) : (
-                <>
-                  <div className="mb-4">
-                    <p className="font-semibold mb-1">{t("project.comments") || "Comments"}</p>
-                    <p className="text-black/80 whitespace-pre-wrap">
-                      {latestInfo.description || t("project.noComments") || "No comments."}
-                    </p>
-                  </div>
-
-                  {latestPhotoSrc && (
-                    <div className="mb-2">
-                      <p className="font-semibold mb-2">{t("project.photo") || "Photo"}</p>
-                      <img
-                        src={latestPhotoSrc}
-                        alt="Project info"
-                        className="w-full rounded-lg border border-black/20"
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <AdminProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
@@ -416,11 +347,8 @@ const Admin = () => {
               employeeIndex={employeeIndex}
               showEdit={true}
               showComplete={true}
-              // NEW: pass view info handler
-              showViewInfo={true}
-              onViewInfo={handleViewInfo}
               showViewInformation={true}
-apiBaseUrl={api.defaults?.baseURL}
+              getToken={getApiToken}   // ✅ IMPORTANT
             />
           ) : (
             <ProjectList
@@ -430,11 +358,8 @@ apiBaseUrl={api.defaults?.baseURL}
               showEdit={false}
               showComplete={false}
               showReactivate={true}
-              // NEW: pass view info handler
-              showViewInfo={true}
-              onViewInfo={handleViewInfo}
               showViewInformation={true}
-apiBaseUrl={api.defaults?.baseURL}
+              getToken={getApiToken}   // ✅ IMPORTANT
             />
           )}
         </section>

@@ -1,7 +1,7 @@
-// ProjectList.jsx
+// src/components/projects/ProjectList.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../../api/http"; // adjust path if needed
+import { api } from "../../api/http";
 
 const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex, t) => {
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
@@ -22,22 +22,20 @@ const formatArchivedAt = (archivedAt, locale) => {
   });
 };
 
-// ✅ IMPORTANT: normalize backend paths to avoid /api/api
-const normalizeApiPath = (baseURL, url) => {
-  if (!url) return "";
+// ✅ When axios baseURL = "/api", requests should be "/uploads/..." not "/api/uploads/..."
+const toAxiosRelativePath = (photoUrl) => {
+  if (!photoUrl) return "";
+  if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) return photoUrl;
 
-  // If it's absolute already, keep it
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // Ensure it starts with "/"
+  let path = photoUrl.startsWith("/") ? photoUrl : `/${photoUrl}`;
 
-  const base = (baseURL || "").replace(/\/+$/, ""); // remove trailing /
-  let path = url.startsWith("/") ? url : `/${url}`;
-
-  // If base already ends with /api, and path starts with /api/, remove the leading /api
-  if (base.endsWith("/api") && path.startsWith("/api/")) {
-    path = path.slice(4); // remove "/api"
+  // If backend returned "/api/uploads/..", remove the leading "/api"
+  if (path.startsWith("/api/")) {
+    path = path.slice(4); // removes "/api"
   }
 
-  return path; // return as relative path for axios instance
+  return path; // now like "/uploads/projects/<id>"
 };
 
 const ModalShell = ({ title, onClose, children }) => {
@@ -77,7 +75,7 @@ const ProjectList = ({
   onUploadInformation,
   showViewInformation = false,
 
-  // ✅ NEW: used for Authorization header when loading image
+  // ✅ REQUIRED so Admin can load protected image endpoints
   getToken, // async () => string
 }) => {
   const { t, i18n } = useTranslation();
@@ -91,7 +89,6 @@ const ProjectList = ({
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // View image state
   const [imageSrc, setImageSrc] = useState("");
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState("");
@@ -130,7 +127,7 @@ const ProjectList = ({
     }
   };
 
-  // ✅ FIX: fetch image as blob WITH auth header, using normalized path (no /api/api)
+  // ✅ Load protected image as blob with auth header
   useEffect(() => {
     let objectUrl = "";
 
@@ -145,12 +142,16 @@ const ProjectList = ({
       try {
         setImageLoading(true);
 
-        const token = await getToken?.();
+        if (!getToken) {
+          throw new Error("Missing token provider (getToken prop)");
+        }
+
+        const token = await getToken();
         if (!token) throw new Error("Missing token");
 
-        const safePath = normalizeApiPath(api.defaults?.baseURL, latestInfo.photoUrl);
+        const path = toAxiosRelativePath(latestInfo.photoUrl);
 
-        const res = await api.get(safePath, {
+        const res = await api.get(path, {
           responseType: "blob",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -301,7 +302,6 @@ const ProjectList = ({
         })}
       </div>
 
-      {/* UPLOAD MODAL */}
       {uploadOpen && (
         <ModalShell
           title={t("project.uploadInformation", { defaultValue: "Upload Information" })}
@@ -367,7 +367,6 @@ const ProjectList = ({
         </ModalShell>
       )}
 
-      {/* VIEW MODAL */}
       {viewOpen && (
         <ModalShell
           title={t("project.viewInformation", { defaultValue: "View Information" })}
