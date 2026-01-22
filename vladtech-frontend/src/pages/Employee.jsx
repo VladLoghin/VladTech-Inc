@@ -11,6 +11,7 @@ import i18n from "../i18n";
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
   const { t } = useTranslation();
+
   const [message] = useState("");
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
@@ -99,8 +100,7 @@ const Employee = () => {
     }
   };
 
-  // NEW: upload latest photo
-  const handleUploadPhoto = async (project, file) => {
+  const handleUploadInformation = async (project, file, comments) => {
     try {
       const token = await getAccessTokenSilently({
         authorizationParams: { audience: "https://vladtech/api" },
@@ -108,6 +108,7 @@ const Employee = () => {
 
       const form = new FormData();
       form.append("photo", file);
+      form.append("comments", comments || ""); // backend should map this to description
 
       await api.post(`/employee/projects/${project.projectIdentifier}/photo`, form, {
         headers: {
@@ -118,13 +119,12 @@ const Employee = () => {
 
       await loadMyProjects();
     } catch (error) {
-      console.error("Error uploading project photo:", error);
+      console.error("Error uploading information:", error);
     }
   };
 
   return (
     <>
-      {/* Navigation Bar */}
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
@@ -147,7 +147,6 @@ const Employee = () => {
 
           {!projectsLoading && !projectsError && (
             <>
-              {/* TOP: calendar (left) + projects on selected date (right) */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <EmployeeProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
@@ -188,7 +187,6 @@ const Employee = () => {
                 </div>
               </div>
 
-              {/* BOTTOM: scrollable list of all assigned projects */}
               <div className="mt-10">
                 <h3 className="text-2xl font-bold mb-4 tracking-tight">
                   {t("employee.myProjects")}
@@ -201,8 +199,14 @@ const Employee = () => {
                     employeeIndex={{}}
                     showStatusControl={true}
                     onUpdateStatus={handleUpdateStatus}
-                    showUploadPhoto={true}
-                    onUploadPhoto={handleUploadPhoto}
+                    showUploadInformation={true}
+                    showViewInformation={true}
+                    onUploadInformation={handleUploadInformation}
+                    getToken={() =>
+                      getAccessTokenSilently({
+                        authorizationParams: { audience: "https://vladtech/api" },
+                      })
+                    }
                   />
                 </div>
               </div>

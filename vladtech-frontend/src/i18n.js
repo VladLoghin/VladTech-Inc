@@ -174,6 +174,18 @@ const resources = {
       "estimate.greaterThanZero": "must be greater than 0",
       "estimate.validNumber": "must be a valid number",
       
+      "project.uploadInformation": "Upload Information",
+"project.viewInformation": "View Information",
+"project.noInformationYet": "No information uploaded yet.",
+"project.informationAvailable": "Information uploaded.",
+"project.comments": "Comments",
+"project.noComments": "No comments.",
+"project.commentsPlaceholder": "Write what you did today...",
+"project.choosePhoto": "Choose a photo",
+"project.noFileChosen": "No file chosen",
+"project.workProof": "Work proof",
+"project.imageFailedToLoad": "Image failed to load.",
+
       // Project Modal
       "project.newProject": "New Project",
       "project.editProject": "Edit Project",
@@ -218,7 +230,16 @@ const resources = {
 "project.uploading": "Uploading...",
 "project.uploadSuccess": "Photo uploaded!",
 "project.uploadFail": "Upload failed",
-
+"uploadInformation": "Upload Information",
+    "viewInformation": "View Information",
+    "noInformationYet": "No information uploaded yet.",
+    "informationAvailable": "Information uploaded.",
+    "comments": "Comments",
+    "noComments": "No comments.",
+    "commentsPlaceholder": "Write what you did today...",
+    "choosePhoto": "Choose a photo",
+    "uploading": "Uploading...",
+    "workProof": "Work proof",
       
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
@@ -419,6 +440,18 @@ const resources = {
       "estimate.greaterThanZero": "doit être supérieur à 0",
       "estimate.validNumber": "doit être un nombre valide",
       
+      "project.uploadInformation": "Téléverser les informations",
+"project.viewInformation": "Voir les informations",
+"project.noInformationYet": "Aucune information n’a été téléversée.",
+"project.informationAvailable": "Informations disponibles.",
+"project.comments": "Commentaires",
+"project.noComments": "Aucun commentaire.",
+"project.commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
+"project.choosePhoto": "Choisir une photo",
+"project.noFileChosen": "Aucun fichier choisi",
+"project.workProof": "Preuve du travail",
+"project.imageFailedToLoad": "Impossible d’afficher l’image.",
+
       // Project Modal
       "project.newProject": "Nouveau Projet",
       "project.editProject": "Modifier le Projet",
@@ -463,7 +496,16 @@ const resources = {
 "project.uploading": "Téléversement...",
 "project.uploadSuccess": "Photo téléversée!",
 "project.uploadFail": "Échec du téléversement",
-
+"uploadInformation": "Téléverser les informations",
+    "viewInformation": "Voir les informations",
+    "noInformationYet": "Aucune information n’a été téléversée.",
+    "informationAvailable": "Informations disponibles.",
+    "comments": "Commentaires",
+    "noComments": "Aucun commentaire.",
+    "commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
+    "choosePhoto": "Choisir une photo",
+    "uploading": "Téléversement...",
+    "workProof": "Preuve du travail",
       
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",

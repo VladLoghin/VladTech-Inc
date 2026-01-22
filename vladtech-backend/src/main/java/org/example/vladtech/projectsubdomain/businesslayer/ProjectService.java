@@ -50,6 +50,6 @@ public interface ProjectService {
 
     ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId, ProjectStatus newStatus);
 
-    ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo);
+    ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo , String comment);
 
 }

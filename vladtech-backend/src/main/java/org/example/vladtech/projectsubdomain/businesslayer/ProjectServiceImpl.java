@@ -32,7 +32,6 @@ import org.example.vladtech.filestorageservice.FileStorageService;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPhoto;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 
 @Slf4j
 @Service
@@ -363,17 +362,31 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo) {
+    public ProjectResponseModel uploadLatestPhotoForEmployee(
+            String projectIdentifier,
+            String employeeId,
+            MultipartFile photo,
+            String comment
+    ) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
+        }
 
         // must be assigned
         if (project.getAssignedEmployeeIds() == null || !project.getAssignedEmployeeIds().contains(employeeId)) {
             throw new RuntimeException("You are not assigned to this project");
         }
 
-        // delete old latest photo if you want (optional but nice)
-        if (project.getPhotos() != null && !project.getPhotos().isEmpty()) {
+        // ensure photos list exists
+        if (project.getPhotos() == null) {
+            project.setPhotos(new ArrayList<>());
+        }
+
+        // delete old latest photo (optional)
+        if (!project.getPhotos().isEmpty()) {
             String oldId = project.getPhotos().get(0).getPhotoId();
             try { fileStorageService.delete(oldId); } catch (Exception ignored) {}
         }
@@ -385,16 +398,18 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException("Failed to upload photo", e);
         }
 
-        String url = "/api/uploads/projects/" + projectIdentifier + "/" + photoId;
+        // IMPORTANT: make sure you actually have an endpoint that serves /api/uploads/projects/{photoId}
+        String url = "/api/uploads/projects/" + photoId;
 
-        ProjectPhoto latest = new ProjectPhoto(photoId, url, null);
+        ProjectPhoto latest = new ProjectPhoto(photoId, url, comment);
 
-        project.getPhotos().clear();     // option A: keep only latest
+        // option A: keep only latest
+        project.getPhotos().clear();
         project.getPhotos().add(latest);
 
         Project saved = projectRepository.save(project);
-
-        return projectResponseMapper.entityToResponseModel(saved); // or however you map
+        return projectResponseMapper.entityToResponseModel(saved);
     }
+
 
 }

@@ -56,11 +56,13 @@ public class EmployeeController {
     public ResponseEntity<ProjectResponseModel> uploadLatestProjectPhoto(
             @PathVariable String projectIdentifier,
             @RequestParam("photo") MultipartFile photo,
+            @RequestParam(value = "comments", required = false) String comments,
             @AuthenticationPrincipal Jwt jwt
     ) {
         String employeeId = jwt.getSubject();
         return ResponseEntity.ok(
-                projectService.uploadLatestPhotoForEmployee(projectIdentifier, employeeId, photo)
+                projectService.uploadLatestPhotoForEmployee(projectIdentifier, employeeId, photo, comments)
         );
     }
+
 }
