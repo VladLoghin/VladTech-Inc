@@ -59,9 +59,8 @@ const ProjectList = ({
         return (
           <div
             key={project.projectIdentifier}
-            className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
-              isArchived ? "bg-gray-50 opacity-75" : ""
-            }`}
+            className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative ${isArchived ? "bg-gray-50 opacity-75" : ""
+              }`}
           >
             <div className="absolute right-4 top-4 flex gap-2">
               {showReactivate && isArchived && (
@@ -101,11 +100,10 @@ const ProjectList = ({
               <h3 className="text-lg font-semibold">{project.name}</h3>
               {project.state && (
                 <span
-                  className={`text-xs px-2 py-1 rounded font-medium ${
-                    isArchived
+                  className={`text-xs px-2 py-1 rounded font-medium ${isArchived
                       ? "bg-gray-200 text-gray-700"
                       : "bg-green-100 text-green-700"
-                  }`}
+                    }`}
                 >
                   {isArchived ? t("project.archived") : t("project.active")}
                 </span>
@@ -136,6 +134,18 @@ const ProjectList = ({
                 <span className="bg-yellow-100 px-2 py-1 rounded">
                   {project.projectType}
                 </span>
+              </p>
+
+              <p>
+                <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
+                {project.estimatedCost ? (
+                  new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency: project.estimatedCostCurrency || "CAD",
+                  }).format(project.estimatedCost)
+                ) : (
+                  <span className="text-gray-400">N/A</span>
+                )}
               </p>
 
               <p>
@@ -183,19 +193,18 @@ const ProjectList = ({
             <p>
               <strong className="text-black/60">{t("project.status")}:</strong>{" "}
               <span
-                className={`px-2 py-1 rounded ${
-                  (project.status || "PENDING") === "COMPLETED"
+                className={`px-2 py-1 rounded ${(project.status || "PENDING") === "COMPLETED"
                     ? "bg-green-100 text-green-800"
                     : (project.status || "PENDING") === "IN_PROGRESS"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-yellow-100 text-yellow-800"
-                }`}
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
               >
                 {project.status === "COMPLETED"
                   ? t("project.completed")
                   : project.status === "IN_PROGRESS"
-                  ? t("project.inProgress")
-                  : t("project.pending")}
+                    ? t("project.inProgress")
+                    : t("project.pending")}
               </span>
             </p>
 

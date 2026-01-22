@@ -27,6 +27,8 @@ public class ProjectRequestMapper {
         project.setProjectType(mapProjectType(requestModel.getProjectType()));
         project.setAssignedEmployeeIds(requestModel.getAssignedEmployeeIds());
         project.setAssignedEmployeeEmails(requestModel.getAssignedEmployeeEmails());
+        project.setEstimatedCost(requestModel.getEstimatedCost());
+        project.setEstimatedCostCurrency(requestModel.getEstimatedCostCurrency());
         return project;
     }
 
@@ -48,7 +50,6 @@ public class ProjectRequestMapper {
                 addressRequestModel.getCity(),
                 addressRequestModel.getProvince(),
                 addressRequestModel.getCountry(),
-                addressRequestModel.getPostalCode()
-        );
+                addressRequestModel.getPostalCode());
     }
 }

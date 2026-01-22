@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,4 +25,6 @@ public class ProjectRequestModel {
     private String projectType;
     private List<String> assignedEmployeeIds;
     private List<String> assignedEmployeeEmails = new ArrayList<>();
+    private BigDecimal estimatedCost;
+    private String estimatedCostCurrency;
 }
