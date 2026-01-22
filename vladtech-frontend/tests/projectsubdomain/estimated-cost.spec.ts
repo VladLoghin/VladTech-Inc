@@ -56,8 +56,7 @@ test('admin creates and edits project with estimated cost', async ({ page, login
 
     await expect(projectCard).toBeVisible({ timeout: 15000 });
 
-    // Verify cost display
-    await expect(projectCard).toContainText('Estimated Cost');
+    await expect(projectCard).toContainText('Final Cost');
     // Loose check for number to handle potential locale formatting differences (e.g. US$5,000.00 vs 5 000,00 $)
     await expect(projectCard).toContainText('5,000');
 
@@ -87,6 +86,6 @@ test('admin creates and edits project with estimated cost', async ({ page, login
     // Give it a moment to update DOM
     await page.waitForTimeout(500);
 
-    await expect(projectCard).toContainText('Estimated Cost');
+    await expect(projectCard).toContainText('Final Cost');
     await expect(projectCard).toContainText('2,500.5');
 });
