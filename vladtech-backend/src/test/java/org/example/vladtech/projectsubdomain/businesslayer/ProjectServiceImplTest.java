@@ -53,8 +53,11 @@ class ProjectServiceImplTest {
         private Project project;
         private ProjectRequestModel requestModel;
         private ProjectResponseModel responseModel;
+    @Mock
+    private org.example.vladtech.filestorageservice.FileStorageService fileStorageService;
 
-        @BeforeEach
+
+    @BeforeEach
         void setUp() {
                 projectService = new ProjectServiceImpl(
                                 projectRepository,
@@ -62,7 +65,7 @@ class ProjectServiceImplTest {
                                 projectResponseMapper,
                                 projectEmailMapper,
                                 projectEmailSender,
-                        userManagementService);
+                        userManagementService,fileStorageService);
                 projectService.self = projectServiceMock;
 
                 project = new Project();

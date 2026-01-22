@@ -1,3 +1,4 @@
+// ProjectList.jsx
 import { useTranslation } from "react-i18next";
 
 const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex, t) => {
@@ -18,7 +19,6 @@ const formatArchivedAt = (archivedAt, locale) => {
   if (!archivedAt) return null;
   const date = new Date(archivedAt);
 
-  // locale controls English/French month/day words
   return date.toLocaleString(locale, {
     year: "numeric",
     month: "short",
@@ -39,11 +39,19 @@ const ProjectList = ({
   showReactivate = false,
   showStatusControl = false,
   onUpdateStatus,
+
+  // NEW (only adds what’s needed)
+  showUploadPhoto = false,
+  onUploadPhoto,
 }) => {
   const { t, i18n } = useTranslation();
-
-  // pick a locale for date formatting
   const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
+
+  const openFilePicker = (projectIdentifier) => {
+    if (!projectIdentifier) return;
+    const el = document.getElementById(`upload-${projectIdentifier}`);
+    el?.click();
+  };
 
   return (
     <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
@@ -139,7 +147,9 @@ const ProjectList = ({
               </p>
 
               <p>
-                <strong className="text-black/60">{t("project.startDate")}:</strong>{" "}
+                <strong className="text-black/60">
+                  {t("project.startDate")}:
+                </strong>{" "}
                 {project.startDate}
               </p>
 
@@ -231,6 +241,30 @@ const ProjectList = ({
                 <strong className="text-black/60">{t("project.photos")}:</strong>{" "}
                 {project.photos.length}
               </p>
+            )}
+
+            {/* NEW: Upload latest photo (only adds what’s needed) */}
+            {showUploadPhoto && !isArchived && (
+              <div className="mt-3">
+                <input
+                  id={`upload-${project.projectIdentifier}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onUploadPhoto?.(project, file);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => openFilePicker(project.projectIdentifier)}
+                  className="px-5 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold"
+                >
+                  {t("project.uploadPhoto")}
+                </button>
+              </div>
             )}
           </div>
         );

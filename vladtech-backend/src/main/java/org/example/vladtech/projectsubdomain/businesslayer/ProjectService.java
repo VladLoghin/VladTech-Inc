@@ -7,6 +7,7 @@ import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseMode
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import java.util.List;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public interface ProjectService {
@@ -48,5 +49,7 @@ public interface ProjectService {
     void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
 
     ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId, ProjectStatus newStatus);
+
+    ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo);
 
 }

@@ -28,7 +28,10 @@ import java.util.ArrayList;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
 import org.example.vladtech.auth.service.UserManagementService;
-import java.util.List;
+import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPhoto;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 
 @Slf4j
@@ -42,6 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectEmailMapper projectEmailMapper;
     private final ProjectEmailSender projectEmailSender;
     private final UserManagementService userManagementService;
+    private final FileStorageService fileStorageService;
 
     @Lazy
     @Autowired
@@ -52,13 +56,14 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectRequestMapper projectRequestMapper,
             ProjectResponseMapper projectResponseMapper,
             ProjectEmailMapper projectEmailMapper,
-            ProjectEmailSender projectEmailSender,UserManagementService userManagementService) {
+            ProjectEmailSender projectEmailSender,UserManagementService userManagementService, FileStorageService fileStorageService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
         this.projectEmailMapper = projectEmailMapper;
         this.projectEmailSender = projectEmailSender;
         this.userManagementService = userManagementService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -355,6 +360,41 @@ public class ProjectServiceImpl implements ProjectService {
 
         return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
                 || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);
+    }
+
+    @Override
+    public ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // must be assigned
+        if (project.getAssignedEmployeeIds() == null || !project.getAssignedEmployeeIds().contains(employeeId)) {
+            throw new RuntimeException("You are not assigned to this project");
+        }
+
+        // delete old latest photo if you want (optional but nice)
+        if (project.getPhotos() != null && !project.getPhotos().isEmpty()) {
+            String oldId = project.getPhotos().get(0).getPhotoId();
+            try { fileStorageService.delete(oldId); } catch (Exception ignored) {}
+        }
+
+        String photoId;
+        try {
+            photoId = fileStorageService.save(photo);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload photo", e);
+        }
+
+        String url = "/api/uploads/projects/" + projectIdentifier + "/" + photoId;
+
+        ProjectPhoto latest = new ProjectPhoto(photoId, url, null);
+
+        project.getPhotos().clear();     // option A: keep only latest
+        project.getPhotos().add(latest);
+
+        Project saved = projectRepository.save(project);
+
+        return projectResponseMapper.entityToResponseModel(saved); // or however you map
     }
 
 }

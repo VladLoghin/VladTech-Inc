@@ -214,6 +214,10 @@ const resources = {
 "project.assignedEmployees": "Assigned Employees",
 "project.updateStatus": "Update Status",
 "calendar.today": "today",
+"project.uploadPhoto": "Upload Photo",
+"project.uploading": "Uploading...",
+"project.uploadSuccess": "Photo uploaded!",
+"project.uploadFail": "Upload failed",
 
       
       // Portfolio Modals
@@ -455,6 +459,10 @@ const resources = {
 "project.assignedEmployees": "Employés assignés",
 "project.updateStatus": "Mettre à jour le statut",
 "calendar.today": "aujourd’hui",
+"project.uploadPhoto": "Téléverser une photo",
+"project.uploading": "Téléversement...",
+"project.uploadSuccess": "Photo téléversée!",
+"project.uploadFail": "Échec du téléversement",
 
       
       // Portfolio Modals
