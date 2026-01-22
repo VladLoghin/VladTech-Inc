@@ -134,6 +134,9 @@ const ProjectModal = ({
         const newlyAdded = after.filter((id) => !before.includes(id));
 
         const payload = { ...formData };
+        if (payload.estimatedCost === "") {
+          payload.estimatedCost = null;
+        }
         delete payload.assignedEmployeeIds;
         delete payload.assignedEmployeeEmails;
 
@@ -151,6 +154,9 @@ const ProjectModal = ({
 
         // 1) create project WITHOUT employees
         const payload = { ...formData };
+        if (payload.estimatedCost === "") {
+          payload.estimatedCost = null;
+        }
         delete payload.assignedEmployeeIds;
         delete payload.assignedEmployeeEmails;
 
