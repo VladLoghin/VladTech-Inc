@@ -193,7 +193,27 @@ const ProjectModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name.includes(".")) {
+    if (name === "estimatedCostCurrency") {
+      setFormData((prev) => {
+        const oldCurrency = prev.estimatedCostCurrency;
+        const newCurrency = value;
+        let newCost = prev.estimatedCost;
+
+        if (newCost && oldCurrency !== newCurrency) {
+          const costNum = parseFloat(newCost);
+          if (!isNaN(costNum)) {
+            // Simple fixed conversion rates
+            if (oldCurrency === "CAD" && newCurrency === "USD") {
+              newCost = (costNum / 1.4).toFixed(2);
+            } else if (oldCurrency === "USD" && newCurrency === "CAD") {
+              newCost = (costNum * 1.4).toFixed(2);
+            }
+          }
+        }
+
+        return { ...prev, [name]: value, estimatedCost: newCost };
+      });
+    } else if (name.includes(".")) {
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,

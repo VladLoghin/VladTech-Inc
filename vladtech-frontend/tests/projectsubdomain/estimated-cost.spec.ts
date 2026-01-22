@@ -68,8 +68,14 @@ test('admin creates and edits project with estimated cost', async ({ page, login
     // Wait for modal
     await expect(page.getByRole('heading', { name: /edit project/i })).toBeVisible();
 
-    // Change to CAD and 2500
+    // Verify auto-conversion from USD to CAD
+    // Current is 5000 USD. Switching to CAD should make it 5000 * 1.4 = 7000.
     await page.locator('select[name="estimatedCostCurrency"]').selectOption('CAD');
+
+    // Check if input value updated (exact 7000.00)
+    await expect(page.locator('input[name="estimatedCost"]')).toHaveValue('7000.00');
+
+    // Change to a specific value to save - e.g. 2500.50 CAD
     await page.locator('input[name="estimatedCost"]').fill('2500.50');
 
     // Save
