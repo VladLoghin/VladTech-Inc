@@ -2,6 +2,7 @@ package org.example.vladtech.projectsubdomain.mappinglayer;
 
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Address;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.presentationlayer.AddressRequestModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestModel;
@@ -29,7 +30,19 @@ public class ProjectRequestMapper {
         project.setAssignedEmployeeEmails(requestModel.getAssignedEmployeeEmails());
         project.setEstimatedCost(requestModel.getEstimatedCost());
         project.setEstimatedCostCurrency(requestModel.getEstimatedCostCurrency());
+        project.setPriority(mapPriority(requestModel.getPriority()));
         return project;
+    }
+
+    private ProjectPriority mapPriority(String priority) {
+        if (priority == null || priority.isEmpty()) {
+            return ProjectPriority.MEDIUM;
+        }
+        try {
+            return ProjectPriority.valueOf(priority.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ProjectPriority.MEDIUM;
+        }
     }
 
     private ProjectType mapProjectType(String type) {

@@ -139,4 +139,67 @@ class ProjectRequestMapperTest {
         assertEquals("Canada", project.getAddress().getCountry());
         assertEquals("H1A1A1", project.getAddress().getPostalCode());
     }
+
+    // ========== Priority Mapping Tests ==========
+
+    @Test
+    void requestModelToEntity_ShouldMapPriorityLow() {
+        requestModel.setPriority("LOW");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.LOW, project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldMapPriorityMedium() {
+        requestModel.setPriority("MEDIUM");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.MEDIUM,
+                project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldMapPriorityHigh() {
+        requestModel.setPriority("HIGH");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.HIGH, project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldMapPriorityUrgent() {
+        requestModel.setPriority("URGENT");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.URGENT,
+                project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldDefaultToMediumWhenPriorityIsNull() {
+        requestModel.setPriority(null);
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.MEDIUM,
+                project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldDefaultToMediumWhenPriorityIsEmpty() {
+        requestModel.setPriority("");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.MEDIUM,
+                project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldDefaultToMediumWhenPriorityIsInvalid() {
+        requestModel.setPriority("INVALID_VALUE");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.MEDIUM,
+                project.getPriority());
+    }
+
+    @Test
+    void requestModelToEntity_ShouldHandleLowercasePriority() {
+        requestModel.setPriority("high");
+        Project project = mapper.requestModelToEntity(requestModel);
+        assertEquals(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority.HIGH, project.getPriority());
+    }
 }

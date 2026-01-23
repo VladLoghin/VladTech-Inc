@@ -1064,4 +1064,111 @@ class ProjectServiceImplTest {
                 verify(projectEmailSender).send(email);
         }
 
+        // ========== Priority Update Tests ==========
+
+        @Test
+        void updateProject_ShouldUpdatePriority_WhenPriorityProvided() {
+                // Arrange
+                String projectId = "PROJ-1";
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setPriority(ProjectPriority.LOW);
+
+                ProjectRequestModel updateRequest = new ProjectRequestModel();
+                updateRequest.setPriority("HIGH");
+
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class)))
+                                .thenAnswer(invocation -> {
+                                        Project toSave = invocation.getArgument(0);
+                                        assertEquals(ProjectPriority.HIGH, toSave.getPriority());
+                                        return toSave;
+                                });
+                when(projectResponseMapper.entityToResponseModel(any()))
+                                .thenReturn(new ProjectResponseModel());
+
+                // Act
+                ProjectResponseModel result = projectService.updateProject(projectId, updateRequest);
+
+                // Assert
+                assertNotNull(result);
+                assertEquals(ProjectPriority.HIGH, existing.getPriority());
+        }
+
+        @Test
+        void updateProject_ShouldKeepExistingPriority_WhenPriorityIsNull() {
+                // Arrange
+                String projectId = "PROJ-1";
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setPriority(ProjectPriority.URGENT);
+
+                ProjectRequestModel updateRequest = new ProjectRequestModel();
+                updateRequest.setPriority(null);
+
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+                when(projectResponseMapper.entityToResponseModel(any()))
+                                .thenReturn(new ProjectResponseModel());
+
+                // Act
+                projectService.updateProject(projectId, updateRequest);
+
+                // Assert
+                assertEquals(ProjectPriority.URGENT, existing.getPriority());
+        }
+
+        @Test
+        void updateProject_ShouldKeepExistingPriority_WhenPriorityIsEmpty() {
+                // Arrange
+                String projectId = "PROJ-1";
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setPriority(ProjectPriority.MEDIUM);
+
+                ProjectRequestModel updateRequest = new ProjectRequestModel();
+                updateRequest.setPriority("");
+
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+                when(projectResponseMapper.entityToResponseModel(any()))
+                                .thenReturn(new ProjectResponseModel());
+
+                // Act
+                projectService.updateProject(projectId, updateRequest);
+
+                // Assert
+                assertEquals(ProjectPriority.MEDIUM, existing.getPriority());
+        }
+
+        @Test
+        void updateProject_ShouldHandleLowercasePriority() {
+                // Arrange
+                String projectId = "PROJ-1";
+                Project existing = new Project();
+                existing.setProjectIdentifier(projectId);
+                existing.setPriority(ProjectPriority.LOW);
+
+                ProjectRequestModel updateRequest = new ProjectRequestModel();
+                updateRequest.setPriority("urgent");
+
+                when(projectRepository.findByProjectIdentifier(projectId))
+                                .thenReturn(Optional.of(existing));
+                when(projectRepository.save(any(Project.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
+                when(projectResponseMapper.entityToResponseModel(any()))
+                                .thenReturn(new ProjectResponseModel());
+
+                // Act
+                projectService.updateProject(projectId, updateRequest);
+
+                // Assert
+                assertEquals(ProjectPriority.URGENT, existing.getPriority());
+        }
+
 }

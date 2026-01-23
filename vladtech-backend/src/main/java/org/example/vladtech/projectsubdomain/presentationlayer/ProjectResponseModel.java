@@ -33,4 +33,5 @@ public class ProjectResponseModel {
     private LocalDateTime archivedAt;
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
+    private String priority;
 }

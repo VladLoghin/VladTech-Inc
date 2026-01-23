@@ -101,8 +101,8 @@ const ProjectList = ({
               {project.state && (
                 <span
                   className={`text-xs px-2 py-1 rounded font-medium ${isArchived
-                      ? "bg-gray-200 text-gray-700"
-                      : "bg-green-100 text-green-700"
+                    ? "bg-gray-200 text-gray-700"
+                    : "bg-green-100 text-green-700"
                     }`}
                 >
                   {isArchived ? t("project.archived") : t("project.active")}
@@ -133,6 +133,30 @@ const ProjectList = ({
                 </strong>{" "}
                 <span className="bg-yellow-100 px-2 py-1 rounded">
                   {project.projectType}
+                </span>
+              </p>
+
+              <p>
+                <strong className="text-black/60">
+                  {t("project.priority")}:
+                </strong>{" "}
+                <span
+                  className={`px-2 py-1 rounded ${project.priority === "URGENT"
+                      ? "bg-red-100 text-red-800"
+                      : project.priority === "HIGH"
+                        ? "bg-orange-100 text-orange-800"
+                        : project.priority === "LOW"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-blue-100 text-blue-800"
+                    }`}
+                >
+                  {project.priority === "URGENT"
+                    ? t("project.priorityUrgent")
+                    : project.priority === "HIGH"
+                      ? t("project.priorityHigh")
+                      : project.priority === "LOW"
+                        ? t("project.priorityLow")
+                        : t("project.priorityMedium")}
                 </span>
               </p>
 
@@ -194,10 +218,10 @@ const ProjectList = ({
               <strong className="text-black/60">{t("project.status")}:</strong>{" "}
               <span
                 className={`px-2 py-1 rounded ${(project.status || "PENDING") === "COMPLETED"
-                    ? "bg-green-100 text-green-800"
-                    : (project.status || "PENDING") === "IN_PROGRESS"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-yellow-100 text-yellow-800"
+                  ? "bg-green-100 text-green-800"
+                  : (project.status || "PENDING") === "IN_PROGRESS"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-yellow-100 text-yellow-800"
                   }`}
               >
                 {project.status === "COMPLETED"

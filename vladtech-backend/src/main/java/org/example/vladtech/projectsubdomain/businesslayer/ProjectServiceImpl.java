@@ -119,11 +119,17 @@ public class ProjectServiceImpl implements ProjectService {
                     projectRequestModel.getAddress().getPostalCode()));
         }
 
-        if (projectRequestModel.getProjectType() != null) {
+        if (projectRequestModel.getProjectType() != null && !projectRequestModel.getProjectType().isEmpty()) {
             ProjectType projectType = new ProjectType();
             projectType
                     .setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
             existingProject.setProjectType(projectType);
+        }
+
+        if (projectRequestModel.getPriority() != null && !projectRequestModel.getPriority().isEmpty()) {
+            existingProject.setPriority(
+                    org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority
+                            .valueOf(projectRequestModel.getPriority().toUpperCase()));
         }
 
         if (projectRequestModel.getAssignedEmployeeIds() != null) {

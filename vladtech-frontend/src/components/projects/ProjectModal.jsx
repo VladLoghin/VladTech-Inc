@@ -25,6 +25,7 @@ const EMPTY_FORM = {
   },
   estimatedCost: "",
   estimatedCostCurrency: "CAD",
+  priority: "MEDIUM",
 };
 
 const ProjectModal = ({
@@ -63,6 +64,7 @@ const ProjectModal = ({
         },
         estimatedCost: initialData.estimatedCost || "",
         estimatedCostCurrency: initialData.estimatedCostCurrency || "CAD",
+        priority: initialData.priority || "MEDIUM",
       });
     }
   }, [isEdit, initialData]);
@@ -455,6 +457,23 @@ const ProjectModal = ({
               {errors.projectType && (
                 <span className="text-red-600 text-sm">{errors.projectType}</span>
               )}
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-semibold mb-2">
+                {t('project.priority')}
+              </label>
+              <select
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
+              >
+                <option value="LOW">{t('project.priorityLow')}</option>
+                <option value="MEDIUM">{t('project.priorityMedium')}</option>
+                <option value="HIGH">{t('project.priorityHigh')}</option>
+                <option value="URGENT">{t('project.priorityUrgent')}</option>
+              </select>
             </div>
 
             <div className="mb-5">

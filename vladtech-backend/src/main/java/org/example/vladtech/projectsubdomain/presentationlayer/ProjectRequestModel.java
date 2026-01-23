@@ -27,4 +27,5 @@ public class ProjectRequestModel {
     private List<String> assignedEmployeeEmails = new ArrayList<>();
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
+    private String priority;
 }

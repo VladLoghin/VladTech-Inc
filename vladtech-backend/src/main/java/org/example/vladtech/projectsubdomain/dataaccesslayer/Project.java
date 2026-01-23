@@ -37,4 +37,5 @@ public class Project {
     private LocalDateTime archivedAt;
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
+    private ProjectPriority priority = ProjectPriority.MEDIUM;
 }
