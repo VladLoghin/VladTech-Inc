@@ -39,6 +39,8 @@ public class ProjectResponseMapper {
                 : "PENDING");
         responseModel.setState(project.getState() != null ? project.getState().name() : null);
         responseModel.setArchivedAt(project.getArchivedAt());
+        responseModel.setEstimatedCost(project.getEstimatedCost());
+        responseModel.setEstimatedCostCurrency(project.getEstimatedCostCurrency());
         return responseModel;
     }
 

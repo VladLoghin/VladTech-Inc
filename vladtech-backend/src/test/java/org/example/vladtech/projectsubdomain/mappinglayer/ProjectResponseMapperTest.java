@@ -56,6 +56,9 @@ class ProjectResponseMapperTest {
 
     @Test
     void entityToResponseModel_ShouldMapAllFields() {
+        project.setEstimatedCost(java.math.BigDecimal.valueOf(5000.00));
+        project.setEstimatedCostCurrency("USD");
+
         // Act
         ProjectResponseModel response = mapper.entityToResponseModel(project);
 
@@ -74,6 +77,8 @@ class ProjectResponseMapperTest {
         assertEquals("123 Main St", response.getAddress().getStreetAddress());
         assertEquals(2, response.getAssignedEmployeeIds().size());
         assertEquals(1, response.getPhotos().size());
+        assertEquals(java.math.BigDecimal.valueOf(5000.00), response.getEstimatedCost());
+        assertEquals("USD", response.getEstimatedCostCurrency());
     }
 
     @Test

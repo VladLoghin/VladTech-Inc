@@ -38,6 +38,23 @@ const toAxiosRelativePath = (photoUrl) => {
   return path; // now like "/uploads/projects/<id>"
 };
 
+const formatMoney = (amount, currency, locale) => {
+  if (amount === null || amount === undefined || amount === "") return null;
+  const num = typeof amount === "number" ? amount : Number(amount);
+  if (Number.isNaN(num)) return null;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency || "CAD",
+  }).format(num);
+};
+
+const getStatusBadgeClasses = (status) => {
+  const s = status || "PENDING";
+  if (s === "COMPLETED") return "bg-green-100 text-green-800";
+  if (s === "IN_PROGRESS") return "bg-blue-100 text-blue-800";
+  return "bg-yellow-100 text-yellow-800";
+};
+
 const ModalShell = ({ title, onClose, children }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
@@ -184,6 +201,12 @@ const ProjectList = ({
           const isArchived = project.state === "COMPLETE";
           const hasInfo = (project.photos || []).length > 0;
 
+          const estimatedCostFormatted = formatMoney(
+            project.estimatedCost,
+            project.estimatedCostCurrency || "CAD",
+            locale
+          );
+
           return (
             <div
               key={project.projectIdentifier}
@@ -192,6 +215,7 @@ const ProjectList = ({
               }`}
             >
               <div className="absolute right-4 top-4 flex gap-2 flex-wrap justify-end">
+                {/* Upload / View Information (your work) */}
                 {showUploadInformation && !isArchived && (
                   <button
                     type="button"
@@ -212,6 +236,7 @@ const ProjectList = ({
                   </button>
                 )}
 
+                {/* Complete / Reactivate / Edit (teammate + existing behavior) */}
                 {showReactivate && isArchived && (
                   <button
                     type="button"
@@ -268,6 +293,15 @@ const ProjectList = ({
                 </p>
 
                 <p>
+                  <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
+                  {estimatedCostFormatted ? (
+                    <span>{estimatedCostFormatted}</span>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
+                </p>
+
+                <p>
                   <strong className="text-black/60">{t("project.startDate")}:</strong> {project.startDate}
                 </p>
 
@@ -281,6 +315,26 @@ const ProjectList = ({
                     <span className="text-gray-600">{formatArchivedAt(project.archivedAt, locale)}</span>
                   </p>
                 )}
+
+                {/* Assigned employees (your existing helper) */}
+                {project.assignedEmployeeIds?.length > 0 && (
+                  <p className="md:col-span-2">
+                    <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
+                    {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex, t)}
+                  </p>
+                )}
+
+                {/* Status badge (teammate) */}
+                <p className="md:col-span-2">
+                  <strong className="text-black/60">{t("project.status")}:</strong>{" "}
+                  <span className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}>
+                    {project.status === "COMPLETED"
+                      ? t("project.completed")
+                      : project.status === "IN_PROGRESS"
+                      ? t("project.inProgress")
+                      : t("project.pending")}
+                  </span>
+                </p>
               </div>
 
               {showViewInformation && (
@@ -288,13 +342,6 @@ const ProjectList = ({
                   {hasInfo
                     ? t("project.informationAvailable", { defaultValue: "Information uploaded." })
                     : t("project.noInformationYet", { defaultValue: "No information uploaded yet." })}
-                </p>
-              )}
-
-              {project.assignedEmployeeIds?.length > 0 && (
-                <p className="mt-2 text-sm">
-                  <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
-                  {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex, t)}
                 </p>
               )}
             </div>

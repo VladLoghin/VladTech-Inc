@@ -6,17 +6,17 @@ const resources = {
   en: {
     translation: {
       // Common
-      "loading": "Loading...",
-      "submit": "Submit",
-      "close": "Close",
-      "cancel": "Cancel",
-      "save": "Save",
-      "delete": "Delete",
-      "edit": "Edit",
-      "add": "ADD",
-      "yes": "Yes",
-      "no": "No",
-      
+      loading: "Loading...",
+      submit: "Submit",
+      close: "Close",
+      cancel: "Cancel",
+      save: "Save",
+      delete: "Delete",
+      edit: "Edit",
+      add: "ADD",
+      yes: "Yes",
+      no: "No",
+
       // Navigation
       "nav.portfolio": "PORTFOLIO",
       "nav.about": "ABOUT",
@@ -27,7 +27,7 @@ const resources = {
       "nav.dashboard": "DASHBOARD",
       "nav.login": "LOGIN",
       "nav.logout": "LOGOUT",
-      
+
       // HomePage
       "home.innovate": "INNOVATE",
       "home.build": "BUILD",
@@ -41,11 +41,15 @@ const resources = {
       "home.whoWeAre": "Who We Are",
       "home.leadingProvider": "Leading provider of cutting-edge construction and engineering solutions.",
       "home.ourMission": "Our Mission",
-      "home.missionText": "To revolutionize construction through technology, delivering projects that exceed expectations in quality, efficiency, and sustainability.",
+      "home.missionText":
+        "To revolutionize construction through technology, delivering projects that exceed expectations in quality, efficiency, and sustainability.",
       "home.ourApproach": "Our Approach",
-      "home.approachText": "Combining traditional craftsmanship with modern innovation, we create spaces that inspire and endure.",
-      "home.aboutParagraph1": "At VLADTECH, we're committed to transforming your vision into reality. With decades of combined experience in construction, engineering, and technology integration, our team delivers excellence in every project.",
-      "home.aboutParagraph2": "We believe in innovation, quality, and building lasting relationships with our clients. From concept to completion, we're with you every step of the way.",
+      "home.approachText":
+        "Combining traditional craftsmanship with modern innovation, we create spaces that inspire and endure.",
+      "home.aboutParagraph1":
+        "At VLADTECH, we're committed to transforming your vision into reality. With decades of combined experience in construction, engineering, and technology integration, our team delivers excellence in every project.",
+      "home.aboutParagraph2":
+        "We believe in innovation, quality, and building lasting relationships with our clients. From concept to completion, we're with you every step of the way.",
       "home.featuredWork": "Featured Work",
       "home.viewGallery": "View Full Gallery",
       "home.metrics": "METRICS",
@@ -62,9 +66,11 @@ const resources = {
       "home.yourIdeas": "Your Ideas. We Realize.",
       "home.portfolio": "PORTFOLIO",
       "home.createEstimate": "CREATE ESTIMATE",
-      "home.expertiseText": "Based in the heart of innovation with expertise spanning construction, engineering, and technology integration for tomorrow's infrastructure.",
-      "home.executionText": "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
-      
+      "home.expertiseText":
+        "Based in the heart of innovation with expertise spanning construction, engineering, and technology integration for tomorrow's infrastructure.",
+      "home.executionText":
+        "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
+
       // Admin Page
       "admin.title": "Admin Area - Only for Admin Role",
       "admin.createPortfolio": "Create Portfolio",
@@ -78,15 +84,15 @@ const resources = {
       "admin.selectDate": "Select a date on the calendar",
       "admin.pickDay": "Pick a day to see its projects.",
       "admin.noProjects": "No projects scheduled for this date.",
-      "admin.projectCompleted": "Project \"{{name}}\" has been marked as complete.",
-      "admin.projectReactivated": "Project \"{{name}}\" has been reactivated.",
+      "admin.projectCompleted": 'Project "{{name}}" has been marked as complete.',
+      "admin.projectReactivated": 'Project "{{name}}" has been reactivated.',
       "admin.portfolioCreated": "Portfolio item created successfully!",
       "admin.portfolioDeleted": "Portfolio item deleted successfully!",
       "admin.failedFetchActive": "Failed to fetch active projects.",
       "admin.failedFetchArchived": "Failed to fetch archived projects.",
       "admin.failedComplete": "Failed to complete project.",
       "admin.failedReactivate": "Failed to reactivate project.",
-      
+
       // Role Manager Modal
       "roleManager.title": "Role Manager",
       "roleManager.changesRecorded": "{{count}} changes recorded",
@@ -125,7 +131,7 @@ const resources = {
       "roleManager.pageOfTotal": "Page {{current}} of {{total}} ({{totalItems}} total)",
       "roleManager.failedToLoadChangelog": "Failed to load changelog",
       "roleManager.failedToLoadUsers": "Failed to load users",
-      
+
       // Employee Page
       "employee.title": "Employee Tools",
       "employee.myProjects": "My Projects",
@@ -136,13 +142,13 @@ const resources = {
       "employee.noProjectsAssigned": "You are not currently assigned to any projects.",
       "employee.errorLoading": "Error loading projects",
       "employee.myCalendar": "My Project Calendar",
-      
+
       // Dashboard Page
       "dashboard.title": "User Dashboard",
       "dashboard.welcome": "Welcome",
       "dashboard.profile": "Profile",
       "dashboard.settings": "Settings",
-      
+
       // Contact
       "contact.title": "Contact Us",
       "contact.getInTouch": "Get in Touch",
@@ -158,7 +164,7 @@ const resources = {
       "contact.send": "Send Message",
       "contact.success": "Message sent successfully!",
       "contact.error": "Failed to send message.",
-      
+
       // Estimates
       "estimate.title": "Request Estimate",
       "estimate.enterDetails": "Enter Estimate Details",
@@ -173,18 +179,19 @@ const resources = {
       "estimate.isRequired": "is required",
       "estimate.greaterThanZero": "must be greater than 0",
       "estimate.validNumber": "must be a valid number",
-      
+
+      // Project list / upload info (kept from your conflict)
       "project.uploadInformation": "Upload Information",
-"project.viewInformation": "View Information",
-"project.noInformationYet": "No information uploaded yet.",
-"project.informationAvailable": "Information uploaded.",
-"project.comments": "Comments",
-"project.noComments": "No comments.",
-"project.commentsPlaceholder": "Write what you did today...",
-"project.choosePhoto": "Choose a photo",
-"project.noFileChosen": "No file chosen",
-"project.workProof": "Work proof",
-"project.imageFailedToLoad": "Image failed to load.",
+      "project.viewInformation": "View Information",
+      "project.noInformationYet": "No information uploaded yet.",
+      "project.informationAvailable": "Information uploaded.",
+      "project.comments": "Comments",
+      "project.noComments": "No comments.",
+      "project.commentsPlaceholder": "Write what you did today...",
+      "project.choosePhoto": "Choose a photo",
+      "project.noFileChosen": "No file chosen",
+      "project.workProof": "Work proof",
+      "project.imageFailedToLoad": "Image failed to load.",
 
       // Project Modal
       "project.newProject": "New Project",
@@ -218,29 +225,22 @@ const resources = {
       "project.create": "Create",
       "project.save": "Save",
       "project.none": "None",
-"project.noProjectsFound": "No projects found.",
-"project.id": "ID",
-"project.clientLabel": "Client",
-"project.addressLabel": "Address",
-"project.archivedAt": "Archived",
-"project.assignedEmployees": "Assigned Employees",
-"project.updateStatus": "Update Status",
-"calendar.today": "today",
-"project.uploadPhoto": "Upload Photo",
-"project.uploading": "Uploading...",
-"project.uploadSuccess": "Photo uploaded!",
-"project.uploadFail": "Upload failed",
-"uploadInformation": "Upload Information",
-    "viewInformation": "View Information",
-    "noInformationYet": "No information uploaded yet.",
-    "informationAvailable": "Information uploaded.",
-    "comments": "Comments",
-    "noComments": "No comments.",
-    "commentsPlaceholder": "Write what you did today...",
-    "choosePhoto": "Choose a photo",
-    "uploading": "Uploading...",
-    "workProof": "Work proof",
-      
+      "project.noProjectsFound": "No projects found.",
+      "project.id": "ID",
+      "project.clientLabel": "Client",
+      "project.addressLabel": "Address",
+      "project.archivedAt": "Archived",
+      "project.assignedEmployees": "Assigned Employees",
+      "project.updateStatus": "Update Status",
+
+      // Cost fields (kept from main)
+      "project.estimatedCost": "Final Cost",
+      "project.currency": "Currency",
+      "project.costPositiveError": "Cost must be a positive number",
+
+      // Calendar
+      "calendar.today": "today",
+
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
       "portfolio.deleteItem": "Delete Portfolio Item",
@@ -252,7 +252,7 @@ const resources = {
       "portfolio.ratingRange": "Rating from 0.0 to 5.0",
       "portfolio.comments": "comments",
       "portfolio.create": "Create",
-      
+
       // Role Finder Modal
       "roleFinder.title": "Role Finder",
       "roleFinder.usersFound": "{{count}} users found",
@@ -267,22 +267,22 @@ const resources = {
       "roleFinder.previous": "Previous",
       "roleFinder.next": "Next",
       "roleFinder.pageOf": "Page {{current}} of {{total}}",
-    }
+    },
   },
   fr: {
     translation: {
       // Common
-      "loading": "Chargement...",
-      "submit": "Soumettre",
-      "close": "Fermer",
-      "cancel": "Annuler",
-      "save": "Sauvegarder",
-      "delete": "Supprimer",
-      "edit": "Modifier",
-      "add": "AJOUTER",
-      "yes": "Oui",
-      "no": "Non",
-      
+      loading: "Chargement...",
+      submit: "Soumettre",
+      close: "Fermer",
+      cancel: "Annuler",
+      save: "Sauvegarder",
+      delete: "Supprimer",
+      edit: "Modifier",
+      add: "AJOUTER",
+      yes: "Oui",
+      no: "Non",
+
       // Navigation
       "nav.portfolio": "PORTFOLIO",
       "nav.about": "À PROPOS",
@@ -293,7 +293,7 @@ const resources = {
       "nav.dashboard": "TABLEAU DE BORD",
       "nav.login": "CONNEXION",
       "nav.logout": "DÉCONNEXION",
-      
+
       // HomePage
       "home.innovate": "INNOVER",
       "home.build": "CONSTRUIRE",
@@ -305,13 +305,18 @@ const resources = {
       "home.transformingVision": "Transformer la Vision en Réalité",
       "home.about": "À PROPOS",
       "home.whoWeAre": "Qui Nous Sommes",
-      "home.leadingProvider": "Premier fournisseur de solutions de construction et d'ingénierie de pointe.",
+      "home.leadingProvider":
+        "Premier fournisseur de solutions de construction et d'ingénierie de pointe.",
       "home.ourMission": "Notre Mission",
-      "home.missionText": "Révolutionner la construction grâce à la technologie, en livrant des projets qui dépassent les attentes en qualité, efficacité et durabilité.",
+      "home.missionText":
+        "Révolutionner la construction grâce à la technologie, en livrant des projets qui dépassent les attentes en qualité, efficacité et durabilité.",
       "home.ourApproach": "Notre Approche",
-      "home.approachText": "Combinant l'artisanat traditionnel avec l'innovation moderne, nous créons des espaces qui inspirent et perdurent.",
-      "home.aboutParagraph1": "Chez VLADTECH, nous nous engageons à transformer votre vision en réalité. Avec des décennies d'expérience combinée en construction, ingénierie et intégration technologique, notre équipe offre l'excellence dans chaque projet.",
-      "home.aboutParagraph2": "Nous croyons en l'innovation, la qualité et l'établissement de relations durables avec nos clients. Du concept à l'achèvement, nous sommes avec vous à chaque étape.",
+      "home.approachText":
+        "Combinant l'artisanat traditionnel avec l'innovation moderne, nous créons des espaces qui inspirent et perdurent.",
+      "home.aboutParagraph1":
+        "Chez VLADTECH, nous nous engageons à transformer votre vision en réalité. Avec des décennies d'expérience combinée en construction, ingénierie et intégration technologique, notre équipe offre l'excellence dans chaque projet.",
+      "home.aboutParagraph2":
+        "Nous croyons en l'innovation, la qualité et l'établissement de relations durables avec nos clients. Du concept à l'achèvement, nous sommes avec vous à chaque étape.",
       "home.featuredWork": "Portfolio",
       "home.viewGallery": "Voir la Galerie Complète",
       "home.metrics": "MÉTRIQUES",
@@ -328,9 +333,11 @@ const resources = {
       "home.yourIdeas": "Vos Idées. Nous Réalisons.",
       "home.portfolio": "PORTFOLIO",
       "home.createEstimate": "ESTIMER",
-      "home.expertiseText": "Basé au cœur de l'innovation avec une expertise couvrant la construction, l'ingénierie et l'intégration technologique pour les infrastructures de demain.",
-      "home.executionText": "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
-      
+      "home.expertiseText":
+        "Basé au cœur de l'innovation avec une expertise couvrant la construction, l'ingénierie et l'intégration technologique pour les infrastructures de demain.",
+      "home.executionText":
+        "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
+
       // Admin Page
       "admin.title": "Zone Admin - Réservé au rôle Admin",
       "admin.createPortfolio": "Créer un Portfolio",
@@ -344,15 +351,15 @@ const resources = {
       "admin.selectDate": "Sélectionnez une date sur le calendrier",
       "admin.pickDay": "Choisissez un jour pour voir ses projets.",
       "admin.noProjects": "Aucun projet prévu pour cette date.",
-      "admin.projectCompleted": "Le projet \"{{name}}\" a été marqué comme terminé.",
-      "admin.projectReactivated": "Le projet \"{{name}}\" a été réactivé.",
+      "admin.projectCompleted": 'Le projet "{{name}}" a été marqué comme terminé.',
+      "admin.projectReactivated": 'Le projet "{{name}}" a été réactivé.',
       "admin.portfolioCreated": "Élément de portfolio créé avec succès!",
       "admin.portfolioDeleted": "Élément de portfolio supprimé avec succès!",
       "admin.failedFetchActive": "Échec de la récupération des projets actifs.",
       "admin.failedFetchArchived": "Échec de la récupération des projets archivés.",
       "admin.failedComplete": "Échec de l'achèvement du projet.",
       "admin.failedReactivate": "Échec de la réactivation du projet.",
-      
+
       // Role Manager Modal
       "roleManager.title": "Entretien de Role",
       "roleManager.changesRecorded": "{{count}} modifications enregistrées",
@@ -391,7 +398,7 @@ const resources = {
       "roleManager.pageOfTotal": "Page {{current}} sur {{total}} ({{totalItems}} au total)",
       "roleManager.failedToLoadChangelog": "Échec du chargement de l'historique",
       "roleManager.failedToLoadUsers": "Échec du chargement des utilisateurs",
-      
+
       // Employee Page
       "employee.title": "Outils Employé",
       "employee.myProjects": "Mes Projets",
@@ -402,13 +409,13 @@ const resources = {
       "employee.noProjectsAssigned": "Vous n'êtes actuellement assigné à aucun projet.",
       "employee.errorLoading": "Erreur lors du chargement des projets",
       "employee.myCalendar": "Mon Calendrier Projet",
-      
+
       // Dashboard Page
       "dashboard.title": "Tableau de Bord Utilisateur",
       "dashboard.welcome": "Bienvenue",
       "dashboard.profile": "Profil",
       "dashboard.settings": "Paramètres",
-      
+
       // Contact
       "contact.title": "Contactez-Nous",
       "contact.getInTouch": "Entrer en Contact",
@@ -424,7 +431,7 @@ const resources = {
       "contact.send": "Envoyer le Message",
       "contact.success": "Message envoyé avec succès!",
       "contact.error": "Échec de l'envoi du message.",
-      
+
       // Estimates
       "estimate.title": "Demander un Devis",
       "estimate.enterDetails": "Entrez les détails de l'estimation",
@@ -439,18 +446,19 @@ const resources = {
       "estimate.isRequired": "est requis",
       "estimate.greaterThanZero": "doit être supérieur à 0",
       "estimate.validNumber": "doit être un nombre valide",
-      
+
+      // Project list / upload info (kept from your conflict)
       "project.uploadInformation": "Téléverser les informations",
-"project.viewInformation": "Voir les informations",
-"project.noInformationYet": "Aucune information n’a été téléversée.",
-"project.informationAvailable": "Informations disponibles.",
-"project.comments": "Commentaires",
-"project.noComments": "Aucun commentaire.",
-"project.commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
-"project.choosePhoto": "Choisir une photo",
-"project.noFileChosen": "Aucun fichier choisi",
-"project.workProof": "Preuve du travail",
-"project.imageFailedToLoad": "Impossible d’afficher l’image.",
+      "project.viewInformation": "Voir les informations",
+      "project.noInformationYet": "Aucune information n’a été téléversée.",
+      "project.informationAvailable": "Informations disponibles.",
+      "project.comments": "Commentaires",
+      "project.noComments": "Aucun commentaire.",
+      "project.commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
+      "project.choosePhoto": "Choisir une photo",
+      "project.noFileChosen": "Aucun fichier choisi",
+      "project.workProof": "Preuve du travail",
+      "project.imageFailedToLoad": "Impossible d’afficher l’image.",
 
       // Project Modal
       "project.newProject": "Nouveau Projet",
@@ -484,29 +492,22 @@ const resources = {
       "project.create": "Créer",
       "project.save": "Sauvegarder",
       "project.none": "Aucun",
-"project.noProjectsFound": "Aucun projet trouvé.",
-"project.id": "ID",
-"project.clientLabel": "Client",
-"project.addressLabel": "Adresse",
-"project.archivedAt": "Archivé",
-"project.assignedEmployees": "Employés assignés",
-"project.updateStatus": "Mettre à jour le statut",
-"calendar.today": "aujourd’hui",
-"project.uploadPhoto": "Téléverser une photo",
-"project.uploading": "Téléversement...",
-"project.uploadSuccess": "Photo téléversée!",
-"project.uploadFail": "Échec du téléversement",
-"uploadInformation": "Téléverser les informations",
-    "viewInformation": "Voir les informations",
-    "noInformationYet": "Aucune information n’a été téléversée.",
-    "informationAvailable": "Informations disponibles.",
-    "comments": "Commentaires",
-    "noComments": "Aucun commentaire.",
-    "commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
-    "choosePhoto": "Choisir une photo",
-    "uploading": "Téléversement...",
-    "workProof": "Preuve du travail",
-      
+      "project.noProjectsFound": "Aucun projet trouvé.",
+      "project.id": "ID",
+      "project.clientLabel": "Client",
+      "project.addressLabel": "Adresse",
+      "project.archivedAt": "Archivé",
+      "project.assignedEmployees": "Employés assignés",
+      "project.updateStatus": "Mettre à jour le statut",
+
+      // Cost fields (kept from main)
+      "project.estimatedCost": "Coût Final",
+      "project.currency": "Devise",
+      "project.costPositiveError": "Le coût doit être un nombre positif",
+
+      // Calendar
+      "calendar.today": "aujourd’hui",
+
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
       "portfolio.deleteItem": "Supprimer un Élément de Portfolio",
@@ -518,7 +519,7 @@ const resources = {
       "portfolio.ratingRange": "Évaluation de 0.0 à 5.0",
       "portfolio.comments": "commentaires",
       "portfolio.create": "Créer",
-      
+
       // Role Finder Modal
       "roleFinder.title": "Recherche de Rôle",
       "roleFinder.usersFound": "{{count}} utilisateurs trouvés",
@@ -533,19 +534,17 @@ const resources = {
       "roleFinder.previous": "Précédent",
       "roleFinder.next": "Suivant",
       "roleFinder.pageOf": "Page {{current}} sur {{total}}",
-    }
-  }
+    },
+  },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: localStorage.getItem('language') || 'en',
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: localStorage.getItem("language") || "en",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;

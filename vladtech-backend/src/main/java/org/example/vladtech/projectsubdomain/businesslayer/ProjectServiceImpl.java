@@ -52,10 +52,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-            ProjectRequestMapper projectRequestMapper,
-            ProjectResponseMapper projectResponseMapper,
-            ProjectEmailMapper projectEmailMapper,
-            ProjectEmailSender projectEmailSender,UserManagementService userManagementService, FileStorageService fileStorageService) {
+                              ProjectRequestMapper projectRequestMapper,
+                              ProjectResponseMapper projectResponseMapper,
+                              ProjectEmailMapper projectEmailMapper,
+                              ProjectEmailSender projectEmailSender,
+                              UserManagementService userManagementService,
+                              FileStorageService fileStorageService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -112,6 +114,10 @@ public class ProjectServiceImpl implements ProjectService {
         existingProject.setStartDate(projectRequestModel.getStartDate());
         existingProject.setDueDate(projectRequestModel.getDueDate());
 
+        // keep cost fields (teammate work)
+        existingProject.setEstimatedCost(projectRequestModel.getEstimatedCost());
+        existingProject.setEstimatedCostCurrency(projectRequestModel.getEstimatedCostCurrency());
+
         if (projectRequestModel.getAddress() != null) {
             existingProject.setAddress(new Address(
                     projectRequestModel.getAddress().getStreetAddress(),
@@ -123,8 +129,9 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (projectRequestModel.getProjectType() != null) {
             ProjectType projectType = new ProjectType();
-            projectType
-                    .setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
+            projectType.setType(ProjectType.ProjectTypeEnum.valueOf(
+                    projectRequestModel.getProjectType().toUpperCase()
+            ));
             existingProject.setProjectType(projectType);
         }
 
@@ -199,8 +206,6 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             log.info("[ASSIGN] employee already assigned, skipping email");
         }
-
-
 
         return projectResponseMapper.entityToResponseModel(project);
     }
@@ -311,8 +316,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         try {
-            ProjectNotificationEmail email =
-                    projectEmailMapper.toEmployeeAssignedEmail(project, employeeEmail);
+            ProjectNotificationEmail email = projectEmailMapper.toEmployeeAssignedEmail(project, employeeEmail);
 
             if (email != null) {
                 projectEmailSender.send(email);
@@ -329,8 +333,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponseModel updateProjectStatusForEmployee(
             String projectIdentifier,
             String employeeId,
-            ProjectStatus newStatus
-    ) {
+            ProjectStatus newStatus) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
 
@@ -388,7 +391,10 @@ public class ProjectServiceImpl implements ProjectService {
         // delete old latest photo (optional)
         if (!project.getPhotos().isEmpty()) {
             String oldId = project.getPhotos().get(0).getPhotoId();
-            try { fileStorageService.delete(oldId); } catch (Exception ignored) {}
+            try {
+                fileStorageService.delete(oldId);
+            } catch (Exception ignored) {
+            }
         }
 
         String photoId;
@@ -410,6 +416,4 @@ public class ProjectServiceImpl implements ProjectService {
         Project saved = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(saved);
     }
-
-
 }

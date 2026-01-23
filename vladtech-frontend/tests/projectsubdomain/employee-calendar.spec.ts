@@ -8,7 +8,7 @@ test('employee clicks January 15 on calendar (employee dashboard)', async ({ pag
   // Go to employee dashboard
   await page.goto('http://localhost:5173/employee');
 
-  await expect(page.getByRole('heading', { name: /employee area/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /employee tools/i })).toBeVisible();
 
   // Calendar is FullCalendar in your app (fc-daygrid). Click the Jan 15 cell.
   // This targets the day cell by its data-date attribute.

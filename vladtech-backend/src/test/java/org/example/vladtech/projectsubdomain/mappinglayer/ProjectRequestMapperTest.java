@@ -42,6 +42,9 @@ class ProjectRequestMapperTest {
 
     @Test
     void requestModelToEntity_ShouldMapAllFields() {
+        requestModel.setEstimatedCost(java.math.BigDecimal.valueOf(1000.50));
+        requestModel.setEstimatedCostCurrency("CAD");
+
         Project project = mapper.requestModelToEntity(requestModel);
 
         assertNotNull(project);
@@ -56,6 +59,8 @@ class ProjectRequestMapperTest {
         assertEquals(ProjectType.ProjectTypeEnum.SCHEDULED, project.getProjectType().getType());
         assertNotNull(project.getAddress());
         assertEquals("123 Main St", project.getAddress().getStreetAddress());
+        assertEquals(java.math.BigDecimal.valueOf(1000.50), project.getEstimatedCost());
+        assertEquals("CAD", project.getEstimatedCostCurrency());
     }
 
     @Test
