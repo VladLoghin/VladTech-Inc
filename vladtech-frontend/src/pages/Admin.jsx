@@ -8,6 +8,7 @@ import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
 import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
 import RoleAssignmentModal from "../components/userManagement/RoleAssignmentModal.jsx";
 import ProjectModal from "../components/projects/ProjectModal.jsx";
+import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
 import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
 import { api } from "../api/http";
@@ -21,6 +22,7 @@ const Admin = () => {
 
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
+  const [projectStats, setProjectStats] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
 
   const [selectedDate, setSelectedDate] = useState(null);
@@ -77,6 +79,19 @@ const Admin = () => {
   const fetchProjects = async () => {
     await fetchActiveProjects();
     await fetchArchivedProjects();
+    await fetchProjectStats();
+  };
+
+  const fetchProjectStats = async () => {
+    try {
+      const token = await getApiToken();
+      const response = await api.get("/projects/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjectStats(response.data);
+    } catch (error) {
+      console.error("Error fetching project stats:", error);
+    }
   };
 
   const handleCompleteProject = async (project) => {
@@ -89,6 +104,7 @@ const Admin = () => {
       );
 
       setMessage(`Project "${project.name}" has been marked as complete.`);
+      await fetchProjectStats(); // Explicitly update stats immediate
       await fetchProjects();
     } catch (error) {
       console.error("Error completing project:", error);
@@ -153,6 +169,7 @@ const Admin = () => {
     const loadInitialProjects = async () => {
       await fetchActiveProjects();
       await fetchArchivedProjects();
+      await fetchProjectStats();
     };
 
     loadInitialProjects();
@@ -186,10 +203,10 @@ const Admin = () => {
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
           <h1 className="text-4xl font-bold tracking-tight">{t("admin.title")}</h1>
 
-          <div className="flex gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-3 w-full lg:w-auto">
             <button
               onClick={() => setIsPortfolioModalOpen(true)}
               className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
@@ -269,6 +286,11 @@ const Admin = () => {
           onSubmitSuccess={fetchProjects}
           defaultDate={selectedDate}
         />
+
+        {/* Stats Section */}
+        <section className="mb-8">
+          <ProjectStatsCards stats={projectStats} />
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <AdminProjectCalendar projects={projects} onDateSelect={setSelectedDate} />

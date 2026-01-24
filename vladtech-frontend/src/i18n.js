@@ -72,7 +72,7 @@ const resources = {
         "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
 
       // Admin Page
-      "admin.title": "Admin Area",
+      "admin.title": "Admin Panel",
       "admin.createPortfolio": "Create Portfolio",
       "admin.deletePortfolio": "Delete Portfolio",
       "admin.roleFinder": "Role Finder",
@@ -92,6 +92,13 @@ const resources = {
       "admin.failedFetchArchived": "Failed to fetch archived projects.",
       "admin.failedComplete": "Failed to complete project.",
       "admin.failedReactivate": "Failed to reactivate project.",
+      "admin.stats.total": "Total Projects",
+      "admin.stats.pending": "Pending",
+      "admin.stats.inProgress": "In Progress",
+      "admin.stats.completed": "Completed",
+      "admin.stats.overdue": "Overdue",
+      "admin.stats.activeProjectsDistribution": "Active Projects Distribution",
+      "admin.stats.statusBreakdown": "Status Breakdown",
 
       // Role Manager Modal
       "roleManager.title": "Role Manager",
@@ -344,7 +351,7 @@ const resources = {
         "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
 
       // Admin Page
-      "admin.title": "Zone Admin",
+      "admin.title": "Panneau Admin",
       "admin.createPortfolio": "Créer un Portfolio",
       "admin.deletePortfolio": "Supprimer un Portfolio",
       "admin.roleFinder": "Recherche de Rôle",
@@ -364,6 +371,13 @@ const resources = {
       "admin.failedFetchArchived": "Échec de la récupération des projets archivés.",
       "admin.failedComplete": "Échec de l'achèvement du projet.",
       "admin.failedReactivate": "Échec de la réactivation du projet.",
+      "admin.stats.total": "Total des Projets",
+      "admin.stats.pending": "En Attente",
+      "admin.stats.inProgress": "En Cours",
+      "admin.stats.completed": "Terminés",
+      "admin.stats.overdue": "En Retard",
+      "admin.stats.activeProjectsDistribution": "Répartition des Projets Actifs",
+      "admin.stats.statusBreakdown": "Répartition par Statut",
 
       // Role Manager Modal
       "roleManager.title": "Entretien de Role",

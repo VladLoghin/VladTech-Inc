@@ -284,12 +284,12 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectStatsResponseModel getProjectStats() {
         return ProjectStatsResponseModel.builder()
                 .totalProjects(projectRepository.count())
-                .pendingCount(projectRepository.countByStatus(ProjectStatus.PENDING))
-                .inProgressCount(projectRepository.countByStatus(ProjectStatus.IN_PROGRESS))
-                .completedCount(projectRepository.countByStatus(ProjectStatus.COMPLETED))
-                .activeCount(projectRepository.countByState(ProjectState.ACTIVE))
+                .pendingCount(projectRepository.countByStatusAndStateNot(ProjectStatus.PENDING, ProjectState.COMPLETE))
+                .inProgressCount(projectRepository.countByStatusAndStateNot(ProjectStatus.IN_PROGRESS, ProjectState.COMPLETE))
+                .completedCount(projectRepository.countByStatusAndStateNot(ProjectStatus.COMPLETED, ProjectState.COMPLETE))
+                .activeCount(projectRepository.countByStateNot(ProjectState.COMPLETE)) 
                 .archivedCount(projectRepository.countByState(ProjectState.COMPLETE))
-                .overdueCount(projectRepository.countByDueDateBeforeAndStatusNot(LocalDate.now(), ProjectStatus.COMPLETED))
+                .overdueCount(projectRepository.countByDueDateBeforeAndStatusNotAndStateNot(LocalDate.now(), ProjectStatus.COMPLETED, ProjectState.COMPLETE))
                 .build();
     }
 

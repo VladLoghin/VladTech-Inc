@@ -13,6 +13,11 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     long countByStatus(ProjectStatus status);
 
     long countByState(ProjectState state);
-
-    long countByDueDateBeforeAndStatusNot(java.time.LocalDate date, ProjectStatus status);
+    
+    // New methods to filter out archived projects (State is NOT COMPLETE)
+    long countByStateNot(ProjectState state); // Use with ProjectState.COMPLETE to get Active projects (Null or ACTIVE)
+    
+    long countByStatusAndStateNot(ProjectStatus status, ProjectState state); // Count specific status among active projects
+    
+    long countByDueDateBeforeAndStatusNotAndStateNot(java.time.LocalDate date, ProjectStatus status, ProjectState state); // Overdue active projects
 }
