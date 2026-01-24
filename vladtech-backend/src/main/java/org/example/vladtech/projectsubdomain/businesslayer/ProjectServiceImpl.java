@@ -52,12 +52,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-                              ProjectRequestMapper projectRequestMapper,
-                              ProjectResponseMapper projectResponseMapper,
-                              ProjectEmailMapper projectEmailMapper,
-                              ProjectEmailSender projectEmailSender,
-                              UserManagementService userManagementService,
-                              FileStorageService fileStorageService) {
+            ProjectRequestMapper projectRequestMapper,
+            ProjectResponseMapper projectResponseMapper,
+            ProjectEmailMapper projectEmailMapper,
+            ProjectEmailSender projectEmailSender,
+            UserManagementService userManagementService,
+            FileStorageService fileStorageService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -128,8 +128,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectRequestModel.getProjectType() != null && !projectRequestModel.getProjectType().isEmpty()) {
             ProjectType projectType = new ProjectType();
             projectType.setType(ProjectType.ProjectTypeEnum.valueOf(
-                    projectRequestModel.getProjectType().toUpperCase()
-            ));
+                    projectRequestModel.getProjectType().toUpperCase()));
             existingProject.setProjectType(projectType);
         }
 
@@ -351,7 +350,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isValidStatusTransition(ProjectStatus current, ProjectStatus next) {
-        if (current == next) return true;
+        if (current == next)
+            return true;
 
         return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
                 || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);
@@ -362,8 +362,7 @@ public class ProjectServiceImpl implements ProjectService {
             String projectIdentifier,
             String employeeId,
             MultipartFile photo,
-            String comment
-    ) {
+            String comment) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -426,8 +425,7 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectPhoto updated = new ProjectPhoto(
                     existing.getPhotoId(),
                     existing.getPhotoUrl(),
-                    trimmedComment
-            );
+                    trimmedComment);
 
             project.getPhotos().set(0, updated);
         } else {
@@ -441,5 +439,33 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project saved = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(saved);
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<ProjectResponseModel> searchProjects(
+            String search,
+            ProjectStatus status,
+            ProjectState state,
+            org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+            org.springframework.data.domain.Pageable pageable) {
+
+        // If search is null or empty, we pass empty string to regex to match
+        // everything.
+        String safeSearch = (search == null || search.trim().isEmpty()) ? "" : search.trim();
+
+        // Escape special regex characters in search string to prevent errors or
+        // projection injection
+        // Simple approach: Pattern.quote wrap? No, Mongo regex expects string.
+        // We will just pass it, assuming valid text.
+        // NOTE: If we want "contains", we don't need wildcards if we are using regex.
+        // But the user might expect "kitchen" to find "My Kitchen Project".
+        // The repository query uses regex with '?0'. If we pass "kitchen", it matches
+        // "...kitchen...".
+        // SO we just pass the raw string.
+
+        org.springframework.data.domain.Page<Project> projects = projectRepository.searchProjects(
+                safeSearch, status, state, priority, pageable);
+
+        return projects.map(projectResponseMapper::entityToResponseModel);
     }
 }

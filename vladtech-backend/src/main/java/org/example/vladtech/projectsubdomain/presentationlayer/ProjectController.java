@@ -7,6 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -16,6 +21,20 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProjectResponseModel>> searchProjects(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) ProjectState state,
+            @RequestParam(required = false) ProjectPriority priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(projectService.searchProjects(
+                q, status, state, priority,
+                org.springframework.data.domain.PageRequest.of(page, size)));
+    }
 
     @PreAuthorize("hasAuthority('Admin')")
     @GetMapping
