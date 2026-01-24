@@ -50,12 +50,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-                              ProjectRequestMapper projectRequestMapper,
-                              ProjectResponseMapper projectResponseMapper,
-                              ProjectEmailMapper projectEmailMapper,
-                              ProjectEmailSender projectEmailSender,
-                              UserManagementService userManagementService,
-                              FileStorageService fileStorageService) {
+            ProjectRequestMapper projectRequestMapper,
+            ProjectResponseMapper projectResponseMapper,
+            ProjectEmailMapper projectEmailMapper,
+            ProjectEmailSender projectEmailSender,
+            UserManagementService userManagementService,
+            FileStorageService fileStorageService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -126,8 +126,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectRequestModel.getProjectType() != null && !projectRequestModel.getProjectType().isEmpty()) {
             ProjectType projectType = new ProjectType();
             projectType.setType(ProjectType.ProjectTypeEnum.valueOf(
-                    projectRequestModel.getProjectType().toUpperCase()
-            ));
+                    projectRequestModel.getProjectType().toUpperCase()));
             existingProject.setProjectType(projectType);
         }
 
@@ -362,7 +361,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isValidStatusTransition(ProjectStatus current, ProjectStatus next) {
-        if (current == next) return true;
+        if (current == next)
+            return true;
 
         return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
                 || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);
@@ -373,8 +373,7 @@ public class ProjectServiceImpl implements ProjectService {
             String projectIdentifier,
             String employeeId,
             MultipartFile photo,
-            String comment
-    ) {
+            String comment) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -437,8 +436,7 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectPhoto updated = new ProjectPhoto(
                     existing.getPhotoId(),
                     existing.getPhotoUrl(),
-                    trimmedComment
-            );
+                    trimmedComment);
 
             project.getPhotos().set(0, updated);
         } else {
@@ -452,5 +450,55 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project saved = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(saved);
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<ProjectResponseModel> searchProjects(
+            String name,
+            String projectIdentifier,
+            String clientName,
+            ProjectStatus status,
+            ProjectState state,
+            org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+            java.time.LocalDate startDate,
+            java.time.LocalDate dueDate,
+            String projectType,
+            String costStatus,
+            String assignedEmployeeId,
+            org.springframework.data.domain.Pageable pageable) {
+
+        log.info("Searching projects. costStatus='{}'", costStatus);
+
+        String safeName = (name == null) ? "" : name.trim();
+        String safeId = (projectIdentifier == null) ? "" : projectIdentifier.trim();
+        String safeClient = (clientName == null) ? "" : clientName.trim();
+        String safeCostStatus = (costStatus == null) ? "" : costStatus.trim();
+        String safeEmployeeId = (assignedEmployeeId == null) ? "" : assignedEmployeeId.trim();
+
+        org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum safeType = null;
+        if (projectType != null && !projectType.trim().isEmpty()) {
+            try {
+                safeType = org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum
+                        .valueOf(projectType.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                safeType = null;
+            }
+        }
+
+        org.springframework.data.domain.Page<Project> projects = projectRepository.searchProjects(
+                safeName,
+                safeId,
+                safeClient,
+                status,
+                state,
+                priority,
+                startDate,
+                dueDate,
+                safeType,
+                safeCostStatus,
+                safeEmployeeId,
+                pageable);
+
+        return projects.map(projectResponseMapper::entityToResponseModel);
     }
 }
