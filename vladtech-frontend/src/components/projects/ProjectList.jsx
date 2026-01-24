@@ -27,13 +27,15 @@ const toAxiosRelativePath = (photoUrl) => {
   if (!photoUrl) return "";
   if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) return photoUrl;
 
+  // Ensure it starts with "/"
   let path = photoUrl.startsWith("/") ? photoUrl : `/${photoUrl}`;
 
+  // If backend returned "/api/uploads/..", remove the leading "/api"
   if (path.startsWith("/api/")) {
-    path = path.slice(4);
+    path = path.slice(4); // removes "/api"
   }
 
-  return path;
+  return path; // now like "/uploads/projects/<id>"
 };
 
 const formatMoney = (amount, currency, locale) => {
@@ -90,6 +92,7 @@ const ProjectList = ({
   onUploadInformation,
   showViewInformation = false,
 
+  // ✅ REQUIRED so Admin can load protected image endpoints
   getToken, // async () => string
 }) => {
   const { t, i18n } = useTranslation();
@@ -130,19 +133,10 @@ const ProjectList = ({
     setViewOpen(true);
   };
 
-  const canSubmit = useMemo(() => {
-    const hasComment = (comments || "").trim().length > 0;
-    const hasFile = !!file;
-    return hasComment || hasFile;
-  }, [comments, file]);
-
   const submitUpload = async () => {
-    if (!activeProject) return;
-    if (!canSubmit) return;
-
+    if (!activeProject || !file) return;
     try {
       setUploading(true);
-      // ✅ file can be null now
       await onUploadInformation?.(activeProject, file, comments);
       setUploadOpen(false);
     } finally {
@@ -160,7 +154,6 @@ const ProjectList = ({
       setImageSrc("");
       setImageError("");
 
-      // ✅ if there is no photoUrl, do not try to load an image
       if (!latestInfo?.photoUrl) return;
 
       try {
@@ -301,7 +294,11 @@ const ProjectList = ({
 
                 <p>
                   <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
-                  {estimatedCostFormatted ? <span>{estimatedCostFormatted}</span> : <span className="text-gray-400">N/A</span>}
+                  {estimatedCostFormatted ? (
+                    <span>{estimatedCostFormatted}</span>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
                 </p>
 
                 <p>
@@ -319,6 +316,7 @@ const ProjectList = ({
                   </p>
                 )}
 
+                {/* Assigned employees (your existing helper) */}
                 {project.assignedEmployeeIds?.length > 0 && (
                   <p className="md:col-span-2">
                     <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
@@ -326,15 +324,28 @@ const ProjectList = ({
                   </p>
                 )}
 
+                {/* Status badge/control */}
                 <p className="md:col-span-2">
                   <strong className="text-black/60">{t("project.status")}:</strong>{" "}
-                  <span className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}>
-                    {project.status === "COMPLETED"
-                      ? t("project.completed")
-                      : project.status === "IN_PROGRESS"
-                      ? t("project.inProgress")
-                      : t("project.pending")}
-                  </span>
+                  {showStatusControl ? (
+                    <select
+                      value={project.status || "PENDING"}
+                      onChange={(e) => onUpdateStatus?.(project, e.target.value)}
+                      className={`px-2 py-1 rounded border-none outline-none ${getStatusBadgeClasses(project.status)}`}
+                    >
+                      <option value="PENDING">{t("project.pending")}</option>
+                      <option value="IN_PROGRESS">{t("project.inProgress")}</option>
+                      <option value="COMPLETED">{t("project.completed")}</option>
+                    </select>
+                  ) : (
+                    <span className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}>
+                      {project.status === "COMPLETED"
+                        ? t("project.completed")
+                        : project.status === "IN_PROGRESS"
+                        ? t("project.inProgress")
+                        : t("project.pending")}
+                    </span>
+                  )}
                 </p>
               </div>
 
@@ -383,7 +394,7 @@ const ProjectList = ({
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
 
-              <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
                 <label
                   htmlFor={fileInputId}
                   className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-black/80"
@@ -394,31 +405,15 @@ const ProjectList = ({
                 <span className="text-sm text-black/60">
                   {file ? file.name : t("project.noFileChosen", { defaultValue: "No file chosen" })}
                 </span>
-
-                {file && (
-                  <button
-                    type="button"
-                    onClick={() => setFile(null)}
-                    className="px-3 py-2 border-2 border-black rounded-lg text-sm font-semibold hover:bg-black hover:text-white transition-all"
-                  >
-                    {t("cancel", { defaultValue: "Cancel" })}
-                  </button>
-                )}
               </div>
-
-              <p className="text-xs text-black/50 mt-2">
-                {t("project.uploadHint", {
-                  defaultValue: "You can submit a photo, a comment, or both.",
-                })}
-              </p>
             </div>
 
             <button
               type="button"
               onClick={submitUpload}
-              disabled={!canSubmit || uploading}
+              disabled={!file || uploading}
               className={`w-full px-4 py-2 rounded-lg font-semibold ${
-                !canSubmit || uploading
+                !file || uploading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-yellow-400 text-black hover:bg-yellow-500"
               }`}
@@ -447,13 +442,7 @@ const ProjectList = ({
                   {t("project.workProof", { defaultValue: "Work proof" })}
                 </p>
 
-                {!latestInfo.photoUrl && (
-                  <p className="text-black/60 text-sm">
-                    {t("project.noPhotoProvided", { defaultValue: "No photo was provided." })}
-                  </p>
-                )}
-
-                {latestInfo.photoUrl && imageLoading && (
+                {imageLoading && (
                   <p className="text-black/60">
                     {t("project.loadingImage", { defaultValue: "Loading image..." })}
                   </p>
