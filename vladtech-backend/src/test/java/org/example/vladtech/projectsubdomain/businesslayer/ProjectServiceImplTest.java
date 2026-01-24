@@ -1492,7 +1492,7 @@ class ProjectServiceImplTest {
         String projectIdentifier = "  PROJ-1  ";
         String clientName = "  Client  ";
         String costStatus = "  Status  ";
-        String assignedEmployeeId = "  EMP-1  ";
+        String assignedEmployeeId = "  auth0|emp-1  "; // Contains pipe
         String projectType = "  scheduled  "; // Lowercase with spaces
 
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 10);
@@ -1505,7 +1505,7 @@ class ProjectServiceImplTest {
                 any(), any(), any(), any(), any(),
                 eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED), // Expect uppercased & trimmed
                 eq("Status"),    // Expect trimmed
-                eq("EMP-1"),     // Expect trimmed
+                eq("auth0|emp-1"),     // Expect trimmed (no encoding)
                 eq(pageable)))
                 .thenReturn(emptyPage);
 
@@ -1524,7 +1524,7 @@ class ProjectServiceImplTest {
                 any(), any(), any(), any(), any(),
                 eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED),
                 eq("Status"),
-                eq("EMP-1"),
+                eq("auth0|emp-1"),
                 eq(pageable));
     }
 }

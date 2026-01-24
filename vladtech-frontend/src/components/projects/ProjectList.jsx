@@ -5,7 +5,11 @@ import { api } from "../../api/http";
 const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex, t) => {
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
   return assignedEmployeeIds
-    .map((id) => employeeIndex?.[id]?.email || employeeIndex?.[id]?.name || id)
+    .map((id) => {
+      const resolved = employeeIndex?.[id]?.email || employeeIndex?.[id]?.name;
+      if (resolved) return resolved;
+      return id.replace(/^auth0\|/, "");
+    })
     .join(", ");
 };
 

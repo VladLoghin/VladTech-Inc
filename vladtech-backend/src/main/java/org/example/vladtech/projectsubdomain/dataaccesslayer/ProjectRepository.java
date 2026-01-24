@@ -47,7 +47,7 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
                         "       ] } } " +
                         "   ] } " +
                         " ] }, " +
-                        " { $expr: { $cond: { if: { $eq: [ ?10, '' ] }, then: true, else: { $in: [ ?10, '$assignedEmployeeIds' ] } } } } "
+                        " { $expr: { $cond: { if: { $eq: [ ?10, '' ] }, then: true, else: { $gt: [ { $size: { $filter: { input: { $ifNull: ['$assignedEmployeeIds', []] }, as: 'id', cond: { $regexMatch: { input: '$$id', regex: ?10, options: 'i' } } } } }, 0 ] } } } } "
                         +
                         "] " +
                         "}")
