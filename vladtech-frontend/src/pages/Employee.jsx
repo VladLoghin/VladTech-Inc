@@ -16,7 +16,7 @@ const Employee = () => {
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const loadMyProjects = async () => {
     setProjectsLoading(true);
@@ -52,7 +52,6 @@ const Employee = () => {
 
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
-
     return projects.filter((p) => {
       if (!p.startDate) return false;
       const end = p.dueDate || p.startDate;
@@ -65,7 +64,6 @@ const Employee = () => {
 
     const [year, month, day] = dateStr.split("-");
     const date = new Date(Number(year), Number(month) - 1, Number(day));
-
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
     return date.toLocaleDateString(locale, {
@@ -90,9 +88,7 @@ const Employee = () => {
 
       setProjects((prev) =>
         prev.map((p) =>
-          p.projectIdentifier === project.projectIdentifier
-            ? { ...p, status: newStatus }
-            : p
+          p.projectIdentifier === project.projectIdentifier ? { ...p, status: newStatus } : p
         )
       );
     } catch (error) {
@@ -106,9 +102,26 @@ const Employee = () => {
         authorizationParams: { audience: "https://vladtech/api" },
       });
 
+      const trimmed = (comments || "").trim();
+      const hasFile = !!file;
+      const hasComment = trimmed.length > 0;
+
+      // ✅ Must have at least one
+      if (!hasFile && !hasComment) return;
+
       const form = new FormData();
-      form.append("photo", file);
-      form.append("comments", comments || ""); // backend should map this to description
+
+      // ✅ Only append photo if it exists
+      if (hasFile) {
+        form.append("photo", file);
+      }
+
+      // ✅ Always send comments field, backend treats it optional
+      if (hasComment) {
+        form.append("comments", trimmed);
+      } else {
+        form.append("comments", "");
+      }
 
       await api.post(`/employee/projects/${project.projectIdentifier}/photo`, form, {
         headers: {
@@ -139,10 +152,7 @@ const Employee = () => {
         )}
 
         <section className="mt-10">
-          {projectsLoading && (
-            <p className="text-black/60">{t("employee.loadingProjects")}</p>
-          )}
-
+          {projectsLoading && <p className="text-black/60">{t("employee.loadingProjects")}</p>}
           {projectsError && <p className="text-red-600">{projectsError}</p>}
 
           {!projectsLoading && !projectsError && (
@@ -156,9 +166,7 @@ const Employee = () => {
                   </h3>
 
                   <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
-                    {!selectedDate && (
-                      <p className="text-black/60">{t("employee.pickDay")}</p>
-                    )}
+                    {!selectedDate && <p className="text-black/60">{t("employee.pickDay")}</p>}
 
                     {selectedDate && projectsForSelectedDate.length === 0 && (
                       <p className="text-black/60">{t("employee.noProjects")}</p>
@@ -170,9 +178,7 @@ const Employee = () => {
                         className="border border-black/20 rounded-lg p-4 bg-gray-50"
                       >
                         <p className="font-semibold">{project.name}</p>
-                        <p className="text-xs text-black/60">
-                          ID: {project.projectIdentifier}
-                        </p>
+                        <p className="text-xs text-black/60">ID: {project.projectIdentifier}</p>
                         <p className="text-xs text-black/60">
                           {project.startDate} - {project.dueDate}
                         </p>
@@ -188,9 +194,7 @@ const Employee = () => {
               </div>
 
               <div className="mt-10">
-                <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                  {t("employee.myProjects")}
-                </h3>
+                <h3 className="text-2xl font-bold mb-4 tracking-tight">{t("employee.myProjects")}</h3>
 
                 <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
                   <ProjectList

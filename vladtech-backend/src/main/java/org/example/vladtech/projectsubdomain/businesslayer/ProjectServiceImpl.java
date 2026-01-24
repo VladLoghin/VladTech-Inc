@@ -31,11 +31,11 @@ import org.example.vladtech.auth.service.UserManagementService;
 import org.example.vladtech.filestorageservice.FileStorageService;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPhoto;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 
 @Slf4j
 @Service
-// @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -83,8 +83,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
-
-        // project.setProjectIdentifier(UUID.randomUUID().toString());
 
         long count = projectRepository.count();
         project.setProjectIdentifier("PROJ-" + (count + 1));
@@ -146,14 +144,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL
-    /////////////////////////////////////////////////////////////////////////////////////// THE
-    /////////////////////////////////////////////////////////////////////////////////////// OTHER
-    /////////////////////////////////////////////////////////////////////////////////////// ONES
-    /////////////////////////////////////////////////////////////////////////////////////// OUT
-    /////////////////////////////////////////////////////////////////////////////////////// IN
-    /////////////////////////////////////////////////////////////////////////////////////// OTHER
-    /////////////////////////////////////////////////////////////////////////////////////// TICKETS
     @Async
     @Override
     public void sendEmailNotificationAsync(Project project, String operation) {
@@ -243,8 +233,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         String locationSummary = null;
         if (address != null) {
-            // keep it simple for now, you can tweak later
-            // example: "Montreal, QC" or "123 Main St, Montreal"
             locationSummary = String.format("%s, %s",
                     address.getCity(),
                     address.getProvince());
@@ -261,7 +249,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
         List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
-
         return projectResponseMapper.entityListToResponseModelList(projects);
     }
 
@@ -378,40 +365,73 @@ public class ProjectServiceImpl implements ProjectService {
             throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
         }
 
-        // must be assigned
         if (project.getAssignedEmployeeIds() == null || !project.getAssignedEmployeeIds().contains(employeeId)) {
             throw new RuntimeException("You are not assigned to this project");
         }
 
-        // ensure photos list exists
+        String trimmedComment = (comment == null) ? "" : comment.trim();
+        boolean hasComment = !trimmedComment.isEmpty();
+        boolean hasPhoto = (photo != null && !photo.isEmpty());
+
+        // ✅ must have at least one
+        if (!hasPhoto && !hasComment) {
+            throw new RuntimeException("Must provide a photo, a comment, or both");
+        }
+
         if (project.getPhotos() == null) {
             project.setPhotos(new ArrayList<>());
         }
 
-        // delete old latest photo (optional)
-        if (!project.getPhotos().isEmpty()) {
-            String oldId = project.getPhotos().get(0).getPhotoId();
-            try {
-                fileStorageService.delete(oldId);
-            } catch (Exception ignored) {
+        // CASE 1: Photo uploaded (with optional comment)
+        if (hasPhoto) {
+            // delete old photo only when a new photo is uploaded
+            if (!project.getPhotos().isEmpty() && project.getPhotos().get(0) != null) {
+                String oldId = project.getPhotos().get(0).getPhotoId();
+                if (oldId != null && !oldId.isBlank()) {
+                    try {
+                        fileStorageService.delete(oldId);
+                    } catch (Exception ignored) {
+                    }
+                }
             }
+
+            String photoId;
+            try {
+                photoId = fileStorageService.save(photo);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload photo", e);
+            }
+
+            String url = "/api/uploads/projects/" + photoId;
+
+            ProjectPhoto latest = new ProjectPhoto(photoId, url, hasComment ? trimmedComment : "");
+
+            project.getPhotos().clear();
+            project.getPhotos().add(latest);
+
+            Project saved = projectRepository.save(project);
+            return projectResponseMapper.entityToResponseModel(saved);
         }
 
-        String photoId;
-        try {
-            photoId = fileStorageService.save(photo);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload photo", e);
+        // CASE 2: Comment only (no photo)
+        if (!project.getPhotos().isEmpty() && project.getPhotos().get(0) != null) {
+            // update existing latest entry description, keep photo
+            ProjectPhoto existing = project.getPhotos().get(0);
+            ProjectPhoto updated = new ProjectPhoto(
+                    existing.getPhotoId(),
+                    existing.getPhotoUrl(),
+                    trimmedComment
+            );
+
+            project.getPhotos().set(0, updated);
+        } else {
+            // no existing photo, store a "note-only" entry with no photoUrl
+            String noteId = "note-" + System.currentTimeMillis();
+            ProjectPhoto note = new ProjectPhoto(noteId, "", trimmedComment);
+
+            project.getPhotos().clear();
+            project.getPhotos().add(note);
         }
-
-        // IMPORTANT: make sure you actually have an endpoint that serves /api/uploads/projects/{photoId}
-        String url = "/api/uploads/projects/" + photoId;
-
-        ProjectPhoto latest = new ProjectPhoto(photoId, url, comment);
-
-        // option A: keep only latest
-        project.getPhotos().clear();
-        project.getPhotos().add(latest);
 
         Project saved = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(saved);
