@@ -1,4 +1,3 @@
-// src/components/projects/ProjectList.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
@@ -210,12 +209,11 @@ const ProjectList = ({
           return (
             <div
               key={project.projectIdentifier}
-              className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
-                isArchived ? "bg-gray-50 opacity-75" : ""
-              }`}
+              className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative ${isArchived ? "bg-gray-50 opacity-75" : ""
+                }`}
             >
               <div className="absolute right-4 top-4 flex gap-2 flex-wrap justify-end">
-                {/* Upload / View Information (your work) */}
+                {/* Upload / View Information */}
                 {showUploadInformation && !isArchived && (
                   <button
                     type="button"
@@ -236,7 +234,7 @@ const ProjectList = ({
                   </button>
                 )}
 
-                {/* Complete / Reactivate / Edit (teammate + existing behavior) */}
+                {/* Complete / Reactivate / Edit */}
                 {showReactivate && isArchived && (
                   <button
                     type="button"
@@ -272,9 +270,8 @@ const ProjectList = ({
                 <h3 className="text-lg font-semibold">{project.name}</h3>
                 {project.state && (
                   <span
-                    className={`text-xs px-2 py-1 rounded font-medium ${
-                      isArchived ? "bg-gray-200 text-gray-700" : "bg-green-100 text-green-700"
-                    }`}
+                    className={`text-xs px-2 py-1 rounded font-medium ${isArchived ? "bg-gray-200 text-gray-700" : "bg-green-100 text-green-700"
+                      }`}
                   >
                     {isArchived ? t("project.archived") : t("project.active")}
                   </span>
@@ -287,9 +284,44 @@ const ProjectList = ({
                   <span className="font-mono">{project.projectIdentifier}</span>
                 </p>
 
+                {project.clientName && (
+                  <p>
+                    <strong className="text-black/60">
+                      {t("project.clientLabel")}:
+                    </strong>{" "}
+                    <span className="bg-blue-100 px-2 py-1 rounded">
+                      {project.clientName}
+                    </span>
+                  </p>
+                )}
+
                 <p>
                   <strong className="text-black/60">{t("project.projectType")}:</strong>{" "}
                   <span className="bg-yellow-100 px-2 py-1 rounded">{project.projectType}</span>
+                </p>
+
+                <p>
+                  <strong className="text-black/60">
+                    {t("project.priority")}:
+                  </strong>{" "}
+                  <span
+                    className={`px-2 py-1 rounded ${project.priority === "URGENT"
+                      ? "bg-red-100 text-red-800"
+                      : project.priority === "HIGH"
+                        ? "bg-orange-100 text-orange-800"
+                        : project.priority === "LOW"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                  >
+                    {project.priority === "URGENT"
+                      ? t("project.priorityUrgent")
+                      : project.priority === "HIGH"
+                        ? t("project.priorityHigh")
+                        : project.priority === "LOW"
+                          ? t("project.priorityLow")
+                          : t("project.priorityMedium")}
+                  </span>
                 </p>
 
                 <p>
@@ -316,7 +348,7 @@ const ProjectList = ({
                   </p>
                 )}
 
-                {/* Assigned employees (your existing helper) */}
+                {/* Assigned employees */}
                 {project.assignedEmployeeIds?.length > 0 && (
                   <p className="md:col-span-2">
                     <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
@@ -342,8 +374,8 @@ const ProjectList = ({
                       {project.status === "COMPLETED"
                         ? t("project.completed")
                         : project.status === "IN_PROGRESS"
-                        ? t("project.inProgress")
-                        : t("project.pending")}
+                          ? t("project.inProgress")
+                          : t("project.pending")}
                     </span>
                   )}
                 </p>
@@ -412,11 +444,10 @@ const ProjectList = ({
               type="button"
               onClick={submitUpload}
               disabled={!file || uploading}
-              className={`w-full px-4 py-2 rounded-lg font-semibold ${
-                !file || uploading
+              className={`w-full px-4 py-2 rounded-lg font-semibold ${!file || uploading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-yellow-400 text-black hover:bg-yellow-500"
-              }`}
+                }`}
             >
               {uploading
                 ? t("project.uploading", { defaultValue: "Uploading..." })

@@ -232,6 +232,11 @@ const resources = {
       "project.archivedAt": "Archived",
       "project.assignedEmployees": "Assigned Employees",
       "project.updateStatus": "Update Status",
+      "project.priority": "Priority",
+      "project.priorityLow": "LOW",
+      "project.priorityMedium": "MEDIUM",
+      "project.priorityHigh": "HIGH",
+      "project.priorityUrgent": "URGENT",
 
       // Cost fields (kept from main)
       "project.estimatedCost": "Final Cost",
@@ -499,6 +504,11 @@ const resources = {
       "project.archivedAt": "Archivé",
       "project.assignedEmployees": "Employés assignés",
       "project.updateStatus": "Mettre à jour le statut",
+      "project.priority": "Priorité",
+      "project.priorityLow": "FAIBLE",
+      "project.priorityMedium": "MOYEN",
+      "project.priorityHigh": "ÉLEVÉ",
+      "project.priorityUrgent": "URGENT",
 
       // Cost fields (kept from main)
       "project.estimatedCost": "Coût Final",

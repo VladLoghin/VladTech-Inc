@@ -513,7 +513,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- getProjectsForCalendar / mapToCalendarEntry tests ----------
-
     @Test
     void getProjectsForCalendar_mapsProjectsToCalendarEntries_withLocation() {
         Project p1 = new Project();
@@ -635,7 +634,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- Archive Feature Tests ----------
-
     @Test
     void completeProject_ShouldSetStateToCompleteAndSetArchivedAt() {
         // Arrange
@@ -761,7 +759,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- reactivateProject Tests ----------
-
     @Test
     void reactivateProject_ShouldSetStateToActiveAndClearArchivedAt() {
         // Arrange
@@ -812,7 +809,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- getProjectsForEmployee Tests ----------
-
     @Test
     void getProjectsForEmployee_ShouldReturnProjectsAssignedToEmployee() {
         // Arrange
@@ -859,7 +855,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- updateProjectStatusForEmployee tests ----------
-
     @Test
     void updateProjectStatusForEmployee_pendingToInProgress_ok_whenEmployeeAssigned() {
         String projectId = "PROJ-1";
@@ -977,7 +972,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- assignEmployee email flow tests ----------
-
     @Test
     void assignEmployee_whenListIsNull_createsList_andSendsAssignedEmail() {
         String projectId = "PROJ-1";
@@ -1035,7 +1029,6 @@ class ProjectServiceImplTest {
     }
 
     // ---------- sendEmployeeAssignedEmailAsync tests ----------
-
     @Test
     void sendEmployeeAssignedEmailAsync_sendsEmail_whenMapperReturnsEmail() {
         ProjectNotificationEmail email = mock(ProjectNotificationEmail.class);
@@ -1081,15 +1074,14 @@ class ProjectServiceImplTest {
     // ---------------------------------------------------------------------------------
     // ADDED TESTS for uploadLatestPhotoForEmployee(...)
     // ---------------------------------------------------------------------------------
-
     @Test
     void uploadLatestPhotoForEmployee_projectNotFound_throwsRuntime() {
         when(projectRepository.findByProjectIdentifier("PROJ-404")).thenReturn(Optional.empty());
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.uploadLatestPhotoForEmployee("PROJ-404", "auth0|emp1", photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class, ()
+                -> projectService.uploadLatestPhotoForEmployee("PROJ-404", "auth0|emp1", photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("project not found"));
         verify(projectRepository, never()).save(any());
@@ -1105,8 +1097,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        assertThrows(InvalidEmployeeIdException.class, () ->
-                projectService.uploadLatestPhotoForEmployee("PROJ-1", "   ", photo, "hi"));
+        assertThrows(InvalidEmployeeIdException.class, ()
+                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "   ", photo, "hi"));
 
         verify(projectRepository, never()).save(any());
     }
@@ -1121,8 +1113,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class, ()
+                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("not assigned"));
         verify(projectRepository, never()).save(any());
@@ -1138,8 +1130,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile emptyPhoto = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", new byte[0]);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", emptyPhoto, "   "));
+        RuntimeException ex = assertThrows(RuntimeException.class, ()
+                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", emptyPhoto, "   "));
 
         assertTrue(ex.getMessage().toLowerCase().contains("must provide"));
         verify(projectRepository, never()).save(any());
@@ -1327,10 +1319,116 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class, ()
+                -> projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("failed to upload"));
         verify(projectRepository, never()).save(any());
+    }
+
+    // ========== Priority Update Tests ==========
+    @Test
+    void updateProject_ShouldUpdatePriority_WhenPriorityProvided() {
+        // Arrange
+        String projectId = "PROJ-1";
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setPriority(ProjectPriority.LOW);
+
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setPriority("HIGH");
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> {
+                    Project toSave = invocation.getArgument(0);
+                    assertEquals(ProjectPriority.HIGH, toSave.getPriority());
+                    return toSave;
+                });
+        when(projectResponseMapper.entityToResponseModel(any()))
+                .thenReturn(new ProjectResponseModel());
+
+        // Act
+        ProjectResponseModel result = projectService.updateProject(projectId, updateRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(ProjectPriority.HIGH, existing.getPriority());
+    }
+
+    @Test
+    void updateProject_ShouldKeepExistingPriority_WhenPriorityIsNull() {
+        // Arrange
+        String projectId = "PROJ-1";
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setPriority(ProjectPriority.URGENT);
+
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setPriority(null);
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any()))
+                .thenReturn(new ProjectResponseModel());
+
+        // Act
+        projectService.updateProject(projectId, updateRequest);
+
+        // Assert
+        assertEquals(ProjectPriority.URGENT, existing.getPriority());
+    }
+
+    @Test
+    void updateProject_ShouldKeepExistingPriority_WhenPriorityIsEmpty() {
+        // Arrange
+        String projectId = "PROJ-1";
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setPriority(ProjectPriority.MEDIUM);
+
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setPriority("");
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any()))
+                .thenReturn(new ProjectResponseModel());
+
+        // Act
+        projectService.updateProject(projectId, updateRequest);
+
+        // Assert
+        assertEquals(ProjectPriority.MEDIUM, existing.getPriority());
+    }
+
+    @Test
+    void updateProject_ShouldHandleLowercasePriority() {
+        // Arrange
+        String projectId = "PROJ-1";
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setPriority(ProjectPriority.LOW);
+
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setPriority("urgent");
+
+        when(projectRepository.findByProjectIdentifier(projectId))
+                .thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any()))
+                .thenReturn(new ProjectResponseModel());
+
+        // Act
+        projectService.updateProject(projectId, updateRequest);
+
+        // Assert
+        assertEquals(ProjectPriority.URGENT, existing.getPriority());
     }
 }

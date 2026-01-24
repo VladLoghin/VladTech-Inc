@@ -208,4 +208,41 @@ class ProjectResponseMapperTest {
         assertNotNull(responses);
         assertTrue(responses.isEmpty());
     }
+
+    // ========== Priority Mapping Tests ==========
+
+    @Test
+    void entityToResponseModel_ShouldMapPriorityLow() {
+        project.setPriority(ProjectPriority.LOW);
+        ProjectResponseModel response = mapper.entityToResponseModel(project);
+        assertEquals("LOW", response.getPriority());
+    }
+
+    @Test
+    void entityToResponseModel_ShouldMapPriorityMedium() {
+        project.setPriority(ProjectPriority.MEDIUM);
+        ProjectResponseModel response = mapper.entityToResponseModel(project);
+        assertEquals("MEDIUM", response.getPriority());
+    }
+
+    @Test
+    void entityToResponseModel_ShouldMapPriorityHigh() {
+        project.setPriority(ProjectPriority.HIGH);
+        ProjectResponseModel response = mapper.entityToResponseModel(project);
+        assertEquals("HIGH", response.getPriority());
+    }
+
+    @Test
+    void entityToResponseModel_ShouldMapPriorityUrgent() {
+        project.setPriority(ProjectPriority.URGENT);
+        ProjectResponseModel response = mapper.entityToResponseModel(project);
+        assertEquals("URGENT", response.getPriority());
+    }
+
+    @Test
+    void entityToResponseModel_ShouldDefaultToMediumWhenPriorityIsNull() {
+        project.setPriority(null);
+        ProjectResponseModel response = mapper.entityToResponseModel(project);
+        assertEquals("MEDIUM", response.getPriority());
+    }
 }
