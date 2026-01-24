@@ -31,9 +31,9 @@ test('create project status pending', async ({ page, loginAs }) => {
     const timestamp = Date.now();
     const projectName = `Status Test ${timestamp}`;
 
-    await page.locator('input[name="name"]').fill(projectName);
-    await page.locator('input[name="address.city"]').fill('Montreal');
-    await page.locator('input[name="dueDate"]').fill('2025-12-31');
+    await page.locator('form input[name="name"]').fill(projectName);
+    await page.locator('form input[name="address.city"]').fill('Montreal');
+    await page.locator('form input[name="dueDate"]').fill('2025-12-31');
 
     // Scroll down in the modal
     await page.evaluate(() => {
@@ -42,9 +42,9 @@ test('create project status pending', async ({ page, loginAs }) => {
     });
     await page.waitForTimeout(300);
 
-    await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
-    await page.locator('input[name="startDate"]').fill('2025-01-15');
-    await page.locator('textarea[name="description"]').fill('Testing PENDING status');
+    await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
+    await page.locator('form input[name="startDate"]').fill('2025-01-15');
+    await page.locator('form textarea[name="description"]').fill('Testing PENDING status');
 
     // Click "Create" button
     await page.getByRole('button', { name: /^create$/i }).click();
@@ -54,6 +54,13 @@ test('create project status pending', async ({ page, loginAs }) => {
 
     // Wait for UI to update
     await page.waitForTimeout(2000);
+
+    // Wait for UI to update
+    await page.waitForTimeout(2000);
+
+    // Search for project to handle pagination
+    await page.locator('input[name="search"]').fill(projectName);
+    await page.keyboard.press('Enter');
 
     // Find the newly created project card
     const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });

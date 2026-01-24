@@ -1,5 +1,5 @@
 // tests/projectsubdomain/update-work-status.spec.ts
-import { test, expect, Page, Locator } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
 
 async function safeClick(locator: Locator) {
   await locator.scrollIntoViewIfNeeded();
@@ -127,23 +127,28 @@ test('admin creates project, assigns employee, employee updates status', async (
   await safeClick(page.getByRole('button', { name: 'ADD' }));
 
   // Fill modal (based on your recorded locators)
-  await page.locator('input[name="name"]').fill(projectName);
+  await page.locator('form input[name="name"]').fill(projectName);
 
   // Select employees
   await safeClick(page.getByRole('button', { name: /select employees/i }));
   await safeClick(page.getByRole('button', { name: /cunninghamemployee4399@gmail/i }));
   await safeClick(page.getByRole('button', { name: /confirm/i }));
 
-  await page.locator('input[name="address.streetAddress"]').fill('test');
-  await page.locator('input[name="address.city"]').fill('test');
+  await page.locator('form input[name="address.streetAddress"]').fill('test');
+  await page.locator('form input[name="address.city"]').fill('test');
 
   // due date (your recording uses dueDate only)
-  await page.locator('input[name="dueDate"]').fill('2026-01-31');
+  await page.locator('form input[name="dueDate"]').fill('2026-01-31');
 
   // project type dropdown (first combobox in modal)
   await page.getByRole('combobox').first().selectOption('SCHEDULED');
 
   await safeClick(page.getByRole('button', { name: 'Create', exact: true }));
+
+  // Search for project to handle pagination
+  await page.waitForTimeout(1000);
+  await page.locator('input[name="search"]').fill(projectName);
+  await page.keyboard.press('Enter');
 
   // Optional: ensure the created project appears (avoid strict mode issue by using heading)
   await expect(page.getByRole('heading', { name: projectName }).first()).toBeVisible({ timeout: 15000 });

@@ -7,49 +7,65 @@ import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseMode
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import java.util.List;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.springframework.web.multipart.MultipartFile;
-
 
 public interface ProjectService {
 
-    List<ProjectResponseModel> getAllProjects();
+        List<ProjectResponseModel> getAllProjects();
 
-    ProjectResponseModel getProjectByIdentifier(String projectIdentifier);
+        ProjectResponseModel getProjectByIdentifier(String projectIdentifier);
 
-    ProjectResponseModel createProject(ProjectRequestModel projectRequestModel);
+        ProjectResponseModel createProject(ProjectRequestModel projectRequestModel);
 
-    ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel);
+        ProjectResponseModel updateProject(String projectIdentifier, ProjectRequestModel projectRequestModel);
 
-    void deleteProject(String projectIdentifier);
+        void deleteProject(String projectIdentifier);
 
-    ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId);
+        ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId);
 
-    List<PhotoResponseModel> getProjectPhotos(String projectIdentifier);
+        List<PhotoResponseModel> getProjectPhotos(String projectIdentifier);
 
-    ProjectResponseModel addProjectPhoto(String projectIdentifier, PhotoResponseModel photoResponseModel);
+        ProjectResponseModel addProjectPhoto(String projectIdentifier, PhotoResponseModel photoResponseModel);
 
-    void deleteProjectPhoto(String projectIdentifier, String photoId);
+        void deleteProjectPhoto(String projectIdentifier, String photoId);
 
-    long getProjectCount();
+        long getProjectCount();
 
-    List<ProjectCalendarEntryResponseModel> getProjectsForCalendar();
+        List<ProjectCalendarEntryResponseModel> getProjectsForCalendar();
 
-    void sendEmailNotificationAsync(Project project, String operation);
+        void sendEmailNotificationAsync(Project project, String operation);
 
-    List<ProjectResponseModel> getProjectsForEmployee(String employeeId);
+        List<ProjectResponseModel> getProjectsForEmployee(String employeeId);
 
-    ProjectResponseModel completeProject(String projectIdentifier);
+        ProjectResponseModel completeProject(String projectIdentifier);
 
-    ProjectResponseModel reactivateProject(String projectIdentifier);
+        ProjectResponseModel reactivateProject(String projectIdentifier);
 
-    List<ProjectResponseModel> getActiveProjects();
+        List<ProjectResponseModel> getActiveProjects();
 
-    List<ProjectResponseModel> getArchivedProjects();
+        List<ProjectResponseModel> getArchivedProjects();
 
-    void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
+        void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
 
-    ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId, ProjectStatus newStatus);
+        ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId,
+                        ProjectStatus newStatus);
 
-    ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId, MultipartFile photo , String comment);
+        ProjectResponseModel uploadLatestPhotoForEmployee(String projectIdentifier, String employeeId,
+                        MultipartFile photo,
+                        String comment);
 
+        org.springframework.data.domain.Page<ProjectResponseModel> searchProjects(
+                        String name,
+                        String projectIdentifier,
+                        String clientName,
+                        ProjectStatus status,
+                        ProjectState state,
+                        org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+                        java.time.LocalDate startDate,
+                        java.time.LocalDate dueDate,
+                        String projectType,
+                        String costStatus,
+                        String assignedEmployeeId,
+                        org.springframework.data.domain.Pageable pageable);
 }

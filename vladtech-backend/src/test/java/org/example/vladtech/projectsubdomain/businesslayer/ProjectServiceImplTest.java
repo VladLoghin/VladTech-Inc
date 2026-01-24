@@ -72,8 +72,7 @@ class ProjectServiceImplTest {
                 projectEmailMapper,
                 projectEmailSender,
                 userManagementService,
-                fileStorageService
-        );
+                fileStorageService);
 
         projectService.self = projectServiceMock;
 
@@ -105,7 +104,8 @@ class ProjectServiceImplTest {
         requestModel.setDueDate(LocalDate.now().plusDays(30));
         requestModel.setProjectType("SCHEDULED");
 
-        AddressRequestModel addressRequest = new AddressRequestModel("123 Main St", "Montreal", "Quebec", "Canada", "H1A1A1");
+        AddressRequestModel addressRequest = new AddressRequestModel("123 Main St", "Montreal", "Quebec", "Canada",
+                "H1A1A1");
         requestModel.setAddress(addressRequest);
 
         responseModel = new ProjectResponseModel();
@@ -1080,8 +1080,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, ()
-                -> projectService.uploadLatestPhotoForEmployee("PROJ-404", "auth0|emp1", photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> projectService.uploadLatestPhotoForEmployee("PROJ-404", "auth0|emp1", photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("project not found"));
         verify(projectRepository, never()).save(any());
@@ -1097,8 +1097,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        assertThrows(InvalidEmployeeIdException.class, ()
-                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "   ", photo, "hi"));
+        assertThrows(InvalidEmployeeIdException.class,
+                () -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "   ", photo, "hi"));
 
         verify(projectRepository, never()).save(any());
     }
@@ -1113,8 +1113,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, ()
-                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("not assigned"));
         verify(projectRepository, never()).save(any());
@@ -1130,8 +1130,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile emptyPhoto = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", new byte[0]);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, ()
-                -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", emptyPhoto, "   "));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", emptyPhoto, "   "));
 
         assertTrue(ex.getMessage().toLowerCase().contains("must provide"));
         verify(projectRepository, never()).save(any());
@@ -1146,14 +1146,14 @@ class ProjectServiceImplTest {
         existing.setProjectIdentifier(projectId);
         existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
         existing.setPhotos(new ArrayList<>(List.of(
-                new ProjectPhoto("old-1", "/api/uploads/projects/old-1", "old desc")
-        )));
+                new ProjectPhoto("old-1", "/api/uploads/projects/old-1", "old desc"))));
 
         when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
         when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
         when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
 
-        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null, "  new comment  ");
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null,
+                "  new comment  ");
 
         assertNotNull(result);
         verify(projectRepository).save(existing);
@@ -1180,7 +1180,8 @@ class ProjectServiceImplTest {
         when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
         when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
 
-        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null, "note only");
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null,
+                "note only");
 
         assertNotNull(result);
         verify(projectRepository).save(existing);
@@ -1205,8 +1206,7 @@ class ProjectServiceImplTest {
         existing.setProjectIdentifier(projectId);
         existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
         existing.setPhotos(new ArrayList<>(List.of(
-                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc")
-        )));
+                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc"))));
 
         when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
         try {
@@ -1255,8 +1255,7 @@ class ProjectServiceImplTest {
         existing.setProjectIdentifier(projectId);
         existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
         existing.setPhotos(new ArrayList<>(List.of(
-                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc")
-        )));
+                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc"))));
 
         when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
 
@@ -1319,8 +1318,8 @@ class ProjectServiceImplTest {
 
         MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, ()
-                -> projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "hi"));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "hi"));
 
         assertTrue(ex.getMessage().toLowerCase().contains("failed to upload"));
         verify(projectRepository, never()).save(any());
@@ -1430,5 +1429,102 @@ class ProjectServiceImplTest {
 
         // Assert
         assertEquals(ProjectPriority.URGENT, existing.getPriority());
+    }
+    @Test
+    void searchProjects_ShouldReturnFilteredProjects() {
+        // Arrange
+        String name = "Test Project";
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 10);
+        List<Project> projects = Collections.singletonList(project);
+        org.springframework.data.domain.Page<Project> projectPage = new org.springframework.data.domain.PageImpl<>(projects);
+
+        when(projectRepository.searchProjects(
+                eq(name), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(projectPage);
+
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+
+        // Act
+        org.springframework.data.domain.Page<ProjectResponseModel> result = projectService.searchProjects(
+                name, null, null, null, null, null,
+                null, null, null, null, null, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("PROJ-1", result.getContent().get(0).getProjectIdentifier());
+
+        verify(projectRepository, times(1)).searchProjects(
+                eq(name), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), eq(pageable));
+    }
+
+    @Test
+    void searchProjects_ShouldHandleInvalidProjectTypeAndDefaultToNull() {
+        // Arrange
+        String projectType = "INVALID_TYPE"; // Invalid enum value
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 10);
+        org.springframework.data.domain.Page<Project> emptyPage = new org.springframework.data.domain.PageImpl<>(Collections.emptyList());
+
+        when(projectRepository.searchProjects(
+                any(), any(), any(), any(), any(), any(),
+                any(), any(), eq(null), // Expect null safeType
+                any(), any(), eq(pageable)))
+                .thenReturn(emptyPage);
+
+        // Act
+        projectService.searchProjects(
+                null, null, null, null, null, null,
+                null, null, projectType, null, null, pageable);
+
+        // Assert
+        verify(projectRepository, times(1)).searchProjects(
+                any(), any(), any(), any(), any(), any(),
+                any(), any(), eq(null), // verify null was passed
+                any(), any(), eq(pageable));
+    }
+
+    @Test
+    void searchProjects_ShouldTrimInputs_And_UpperCaseProjectType() {
+        // Arrange
+        String name = "  Test Name  ";
+        String projectIdentifier = "  PROJ-1  ";
+        String clientName = "  Client  ";
+        String costStatus = "  Status  ";
+        String assignedEmployeeId = "  auth0|emp-1  "; // Contains pipe
+        String projectType = "  scheduled  "; // Lowercase with spaces
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 10);
+        org.springframework.data.domain.Page<Project> emptyPage = new org.springframework.data.domain.PageImpl<>(Collections.emptyList());
+
+        when(projectRepository.searchProjects(
+                eq("Test Name"), // Expect trimmed
+                eq("PROJ-1"),    // Expect trimmed
+                eq("Client"),    // Expect trimmed
+                any(), any(), any(), any(), any(),
+                eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED), // Expect uppercased & trimmed
+                eq("Status"),    // Expect trimmed
+                eq("auth0|emp-1"),     // Expect trimmed (no encoding)
+                eq(pageable)))
+                .thenReturn(emptyPage);
+
+        // Act
+        projectService.searchProjects(
+                name, projectIdentifier, clientName,
+                null, null, null, null, null,
+                projectType, costStatus, assignedEmployeeId,
+                pageable);
+
+        // Assert
+        verify(projectRepository, times(1)).searchProjects(
+                eq("Test Name"),
+                eq("PROJ-1"),
+                eq("Client"),
+                any(), any(), any(), any(), any(),
+                eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED),
+                eq("Status"),
+                eq("auth0|emp-1"),
+                eq(pageable));
     }
 }
