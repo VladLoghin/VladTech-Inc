@@ -1,3 +1,4 @@
+//Current ProjectServiceImplTest.java
 package org.example.vladtech.projectsubdomain.businesslayer;
 
 import org.example.vladtech.auth.service.UserManagementService;
@@ -15,7 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -1072,5 +1076,261 @@ class ProjectServiceImplTest {
         assertDoesNotThrow(() -> projectService.sendEmployeeAssignedEmailAsync(project, "emp@x.com"));
 
         verify(projectEmailSender).send(email);
+    }
+
+    // ---------------------------------------------------------------------------------
+    // ADDED TESTS for uploadLatestPhotoForEmployee(...)
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    void uploadLatestPhotoForEmployee_projectNotFound_throwsRuntime() {
+        when(projectRepository.findByProjectIdentifier("PROJ-404")).thenReturn(Optional.empty());
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.uploadLatestPhotoForEmployee("PROJ-404", "auth0|emp1", photo, "hi"));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("project not found"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_blankEmployeeId_throwsInvalidEmployeeIdException() {
+        Project existing = new Project();
+        existing.setProjectIdentifier("PROJ-1");
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|emp1")));
+
+        when(projectRepository.findByProjectIdentifier("PROJ-1")).thenReturn(Optional.of(existing));
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        assertThrows(InvalidEmployeeIdException.class, () ->
+                projectService.uploadLatestPhotoForEmployee("PROJ-1", "   ", photo, "hi"));
+
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_employeeNotAssigned_throwsRuntime() {
+        Project existing = new Project();
+        existing.setProjectIdentifier("PROJ-1");
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|someoneElse")));
+
+        when(projectRepository.findByProjectIdentifier("PROJ-1")).thenReturn(Optional.of(existing));
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", photo, "hi"));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("not assigned"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_noPhotoNoComment_throwsRuntime() {
+        Project existing = new Project();
+        existing.setProjectIdentifier("PROJ-1");
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of("auth0|emp1")));
+
+        when(projectRepository.findByProjectIdentifier("PROJ-1")).thenReturn(Optional.of(existing));
+
+        MockMultipartFile emptyPhoto = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", new byte[0]);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.uploadLatestPhotoForEmployee("PROJ-1", "auth0|emp1", emptyPhoto, "   "));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("must provide"));
+        verify(projectRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_commentOnly_updatesExistingLatestPhotoDescription() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setPhotos(new ArrayList<>(List.of(
+                new ProjectPhoto("old-1", "/api/uploads/projects/old-1", "old desc")
+        )));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null, "  new comment  ");
+
+        assertNotNull(result);
+        verify(projectRepository).save(existing);
+
+        assertEquals(1, existing.getPhotos().size());
+        assertEquals("old-1", existing.getPhotos().get(0).getPhotoId());
+        assertEquals("/api/uploads/projects/old-1", existing.getPhotos().get(0).getPhotoUrl());
+        assertEquals("new comment", existing.getPhotos().get(0).getDescription());
+
+        verifyNoInteractions(fileStorageService);
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_commentOnly_noExistingPhoto_createsNoteEntry() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setPhotos(new ArrayList<>()); // no existing
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, null, "note only");
+
+        assertNotNull(result);
+        verify(projectRepository).save(existing);
+
+        assertEquals(1, existing.getPhotos().size());
+        assertNotNull(existing.getPhotos().get(0).getPhotoId());
+        assertTrue(existing.getPhotos().get(0).getPhotoId().startsWith("note-"));
+        assertEquals("", existing.getPhotos().get(0).getPhotoUrl());
+        assertEquals("note only", existing.getPhotos().get(0).getDescription());
+
+        verifyNoInteractions(fileStorageService);
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_photoOnly_replacesOld_deletesOldId_andSavesNew() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+        String oldId = "old-111";
+        String newId = "new-222";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setPhotos(new ArrayList<>(List.of(
+                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc")
+        )));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+        try {
+            when(fileStorageService.save(any())).thenReturn(newId);
+        } catch (IOException e) {
+            fail("stubbing should not throw");
+        }
+        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, null);
+
+        assertNotNull(result);
+
+        // delete() throws FileNotFoundException (checked) -> wrap verify
+        try {
+            verify(fileStorageService).delete(oldId);
+        } catch (FileNotFoundException e) {
+            fail("verify(delete) should not throw");
+        }
+
+        try {
+            verify(fileStorageService).save(any());
+        } catch (IOException e) {
+            fail("verify(save) should not throw");
+        }
+
+        verify(projectRepository).save(existing);
+
+        assertEquals(1, existing.getPhotos().size());
+        assertEquals(newId, existing.getPhotos().get(0).getPhotoId());
+        assertEquals("/api/uploads/projects/" + newId, existing.getPhotos().get(0).getPhotoUrl());
+        assertEquals("", existing.getPhotos().get(0).getDescription());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_whenOldDeleteThrows_isIgnored_andStillSavesNew() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+        String oldId = "old-111";
+        String newId = "new-222";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setPhotos(new ArrayList<>(List.of(
+                new ProjectPhoto(oldId, "/api/uploads/projects/" + oldId, "old desc")
+        )));
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+
+        // service catches Exception ignored around delete
+        try {
+            doThrow(new FileNotFoundException("nope")).when(fileStorageService).delete(oldId);
+        } catch (FileNotFoundException e) {
+            fail("stubbing delete should not throw");
+        }
+
+        try {
+            when(fileStorageService.save(any())).thenReturn(newId);
+        } catch (IOException e) {
+            fail("stubbing save should not throw");
+        }
+
+        when(projectRepository.save(any(Project.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(projectResponseMapper.entityToResponseModel(any(Project.class))).thenReturn(new ProjectResponseModel());
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        ProjectResponseModel result = projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "");
+
+        assertNotNull(result);
+
+        try {
+            verify(fileStorageService).delete(oldId);
+        } catch (FileNotFoundException e) {
+            fail("verify(delete) should not throw");
+        }
+
+        try {
+            verify(fileStorageService).save(any());
+        } catch (IOException e) {
+            fail("verify(save) should not throw");
+        }
+
+        verify(projectRepository).save(existing);
+        assertEquals(1, existing.getPhotos().size());
+        assertEquals(newId, existing.getPhotos().get(0).getPhotoId());
+    }
+
+    @Test
+    void uploadLatestPhotoForEmployee_saveThrowsIOException_throwsRuntime_andDoesNotSaveProject() {
+        String projectId = "PROJ-1";
+        String employeeId = "auth0|emp1";
+
+        Project existing = new Project();
+        existing.setProjectIdentifier(projectId);
+        existing.setAssignedEmployeeIds(new ArrayList<>(List.of(employeeId)));
+        existing.setPhotos(new ArrayList<>()); // no old photo
+
+        when(projectRepository.findByProjectIdentifier(projectId)).thenReturn(Optional.of(existing));
+
+        try {
+            when(fileStorageService.save(any())).thenThrow(new IOException("boom"));
+        } catch (IOException e) {
+            fail("stubbing should not throw");
+        }
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "pic.jpg", "image/jpeg", "img".getBytes());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                projectService.uploadLatestPhotoForEmployee(projectId, employeeId, photo, "hi"));
+
+        assertTrue(ex.getMessage().toLowerCase().contains("failed to upload"));
+        verify(projectRepository, never()).save(any());
     }
 }
