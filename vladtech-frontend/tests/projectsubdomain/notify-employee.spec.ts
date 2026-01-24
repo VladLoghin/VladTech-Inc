@@ -54,7 +54,7 @@ async function gotoAdminPanel(page: Page) {
     await safeClick(page.getByRole('button', { name: /admin panel/i }).first());
   }
 
-  await expect(page.getByRole('heading', { name: /admin area/i })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('heading', { name: /admin panel/i })).toBeVisible({ timeout: 20000 });
 }
 
 // ---------- MailHog helpers ----------
