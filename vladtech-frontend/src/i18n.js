@@ -72,7 +72,7 @@ const resources = {
         "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
 
       // Admin Page
-      "admin.title": "Admin Area - Only for Admin Role",
+      "admin.title": "Admin Area",
       "admin.createPortfolio": "Create Portfolio",
       "admin.deletePortfolio": "Delete Portfolio",
       "admin.roleFinder": "Role Finder",
@@ -344,7 +344,7 @@ const resources = {
         "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
 
       // Admin Page
-      "admin.title": "Zone Admin - Réservé au rôle Admin",
+      "admin.title": "Zone Admin",
       "admin.createPortfolio": "Créer un Portfolio",
       "admin.deletePortfolio": "Supprimer un Portfolio",
       "admin.roleFinder": "Recherche de Rôle",

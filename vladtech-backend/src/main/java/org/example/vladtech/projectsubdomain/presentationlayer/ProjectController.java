@@ -112,6 +112,12 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasAuthority('Admin')")
+    @GetMapping("/stats")
+    public ResponseEntity<ProjectStatsResponseModel> getProjectStats() {
+        return ResponseEntity.ok(projectService.getProjectStats());
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/archived")
     public ResponseEntity<List<ProjectResponseModel>> getArchivedProjects() {
         return ResponseEntity.ok(projectService.getArchivedProjects());

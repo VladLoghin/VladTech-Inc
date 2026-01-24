@@ -9,4 +9,10 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
 
     Optional<Project> findByProjectIdentifier(String projectIdentifier);
     List<Project> findByAssignedEmployeeIdsContains(String employeeId);
+
+    long countByStatus(ProjectStatus status);
+
+    long countByState(ProjectState state);
+
+    long countByDueDateBeforeAndStatusNot(java.time.LocalDate date, ProjectStatus status);
 }

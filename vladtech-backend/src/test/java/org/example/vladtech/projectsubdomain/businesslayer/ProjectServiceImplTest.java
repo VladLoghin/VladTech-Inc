@@ -429,6 +429,39 @@ class ProjectServiceImplTest {
     }
 
     @Test
+    void getProjectStats_ShouldReturnCorrectStats() {
+        // Arrange
+        when(projectRepository.count()).thenReturn(10L);
+        when(projectRepository.countByStatus(ProjectStatus.PENDING)).thenReturn(2L);
+        when(projectRepository.countByStatus(ProjectStatus.IN_PROGRESS)).thenReturn(3L);
+        when(projectRepository.countByStatus(ProjectStatus.COMPLETED)).thenReturn(5L);
+        when(projectRepository.countByState(ProjectState.ACTIVE)).thenReturn(5L);
+        when(projectRepository.countByState(ProjectState.COMPLETE)).thenReturn(5L);
+        when(projectRepository.countByDueDateBeforeAndStatusNot(any(LocalDate.class), eq(ProjectStatus.COMPLETED))).thenReturn(1L);
+
+        // Act
+        ProjectStatsResponseModel result = projectService.getProjectStats();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(10L, result.getTotalProjects());
+        assertEquals(2L, result.getPendingCount());
+        assertEquals(3L, result.getInProgressCount());
+        assertEquals(5L, result.getCompletedCount());
+        assertEquals(5L, result.getActiveCount());
+        assertEquals(5L, result.getArchivedCount());
+        assertEquals(1L, result.getOverdueCount());
+
+        verify(projectRepository, times(1)).count();
+        verify(projectRepository, times(1)).countByStatus(ProjectStatus.PENDING);
+        verify(projectRepository, times(1)).countByStatus(ProjectStatus.IN_PROGRESS);
+        verify(projectRepository, times(1)).countByStatus(ProjectStatus.COMPLETED);
+        verify(projectRepository, times(1)).countByState(ProjectState.ACTIVE);
+        verify(projectRepository, times(1)).countByState(ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByDueDateBeforeAndStatusNot(any(LocalDate.class), eq(ProjectStatus.COMPLETED));
+    }
+
+    @Test
     void assignEmployee_addsNewEmployeeAndSaves() {
         String projectId = "PROJ-1";
         String employeeId = "auth0|emp-1";

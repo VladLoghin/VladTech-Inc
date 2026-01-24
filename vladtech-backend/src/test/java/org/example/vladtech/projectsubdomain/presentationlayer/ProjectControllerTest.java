@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(ProjectController.class)
 @AutoConfigureMockMvc(addFilters = false) // <-- This disables Spring Security for tests
@@ -225,6 +226,31 @@ class ProjectControllerTest {
                                 .andExpect(content().string("7"));
 
                 verify(projectService, times(1)).getProjectCount();
+        }
+
+        @Test
+        void getProjectStats_ShouldReturnOkWithStats() throws Exception {
+                // Arrange
+                ProjectStatsResponseModel stats = ProjectStatsResponseModel.builder()
+                                .totalProjects(10)
+                                .pendingCount(2)
+                                .inProgressCount(3)
+                                .completedCount(5)
+                                .activeCount(5)
+                                .archivedCount(5)
+                                .overdueCount(1)
+                                .build();
+                when(projectService.getProjectStats()).thenReturn(stats);
+
+                // Act & Assert
+                mockMvc.perform(get("/api/projects/stats"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.totalProjects").value(10))
+                                .andExpect(jsonPath("$.pendingCount").value(2))
+                                .andExpect(jsonPath("$.inProgressCount").value(3));
+
+                verify(projectService, times(1)).getProjectStats();
         }
 
         // ---------- Archive Feature Tests ----------

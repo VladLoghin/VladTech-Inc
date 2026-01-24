@@ -13,15 +13,13 @@ import org.example.vladtech.projectsubdomain.exceptions.ProjectNotFoundException
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectEmailMapper;
-import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestModel;
-import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseModel;
-import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
+import org.example.vladtech.projectsubdomain.presentationlayer.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
@@ -280,6 +278,19 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project savedProject = projectRepository.save(project);
         return projectResponseMapper.entityToResponseModel(savedProject);
+    }
+
+    @Override
+    public ProjectStatsResponseModel getProjectStats() {
+        return ProjectStatsResponseModel.builder()
+                .totalProjects(projectRepository.count())
+                .pendingCount(projectRepository.countByStatus(ProjectStatus.PENDING))
+                .inProgressCount(projectRepository.countByStatus(ProjectStatus.IN_PROGRESS))
+                .completedCount(projectRepository.countByStatus(ProjectStatus.COMPLETED))
+                .activeCount(projectRepository.countByState(ProjectState.ACTIVE))
+                .archivedCount(projectRepository.countByState(ProjectState.COMPLETE))
+                .overdueCount(projectRepository.countByDueDateBeforeAndStatusNot(LocalDate.now(), ProjectStatus.COMPLETED))
+                .build();
     }
 
     @Override
