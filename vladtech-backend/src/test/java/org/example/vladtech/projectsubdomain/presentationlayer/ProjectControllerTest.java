@@ -317,4 +317,28 @@ class ProjectControllerTest {
 
                 verify(projectService, times(1)).getProjectsForCalendar();
         }
+        @Test
+        void searchProjects_ShouldReturnOkWithProjectList() throws Exception {
+                // Arrange
+                org.springframework.data.domain.Page<ProjectResponseModel> page = new org.springframework.data.domain.PageImpl<>(
+                                Collections.singletonList(responseModel));
+
+                when(projectService.searchProjects(
+                                any(), any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any(), any()))
+                                .thenReturn(page);
+
+                // Act & Assert
+                mockMvc.perform(get("/api/projects/search")
+                                .param("name", "Test")
+                                .param("page", "0")
+                                .param("size", "10"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.content[0].projectIdentifier").value("PROJ-1"));
+
+                verify(projectService, times(1)).searchProjects(
+                                any(), any(), any(), any(), any(), any(),
+                                any(), any(), any(), any(), any(), any());
+        }
 }
