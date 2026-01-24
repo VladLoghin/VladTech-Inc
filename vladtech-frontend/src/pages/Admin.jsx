@@ -1,9 +1,8 @@
+// Admin.jsx
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
-//import axios from "axios";
-// import NewProjectModal from "../components/projects/NewProjectModal.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import AdminProjectCalendar from "../components/AdminProjectCalendar.jsx";
 import RoleFinderModal from "../components/userManagement/RoleFinderModal.jsx";
@@ -16,21 +15,33 @@ import { api } from "../api/http";
 const Admin = () => {
   const { getAccessTokenSilently } = useAuth0();
   const { t, i18n } = useTranslation();
+
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
+
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
-  const [activeTab, setActiveTab] = useState("active"); // "active" or "archived"
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
+  const [activeTab, setActiveTab] = useState("active");
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
   const [isRoleAssignmentModalOpen, setIsRoleAssignmentModalOpen] = useState(false);
+
   const [editProject, setEditProject] = useState(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
   const [employeeIndex, setEmployeeIndex] = useState({});
+
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
-  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] =
-    useState(false);
+  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
+
+  // ✅ token helper used by ProjectList to load images with auth
+  const getApiToken = useCallback(async () => {
+    return await getAccessTokenSilently({
+      authorizationParams: { audience: "https://vladtech/api" },
+    });
+  }, [getAccessTokenSilently]);
 
   const handleEditProject = (project) => {
     setEditProject(project);
@@ -39,7 +50,7 @@ const Admin = () => {
 
   const fetchActiveProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       const response = await api.get("/projects/active", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -52,7 +63,7 @@ const Admin = () => {
 
   const fetchArchivedProjects = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       const response = await api.get("/projects/archived", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -68,10 +79,9 @@ const Admin = () => {
     await fetchArchivedProjects();
   };
 
-
   const handleCompleteProject = async (project) => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       await api.put(
         `/projects/${project.projectIdentifier}/complete`,
         {},
@@ -88,7 +98,7 @@ const Admin = () => {
 
   const handleReactivateProject = async (project) => {
     try {
-      const token = await getAccessTokenSilently();
+      const token = await getApiToken();
       await api.put(
         `/projects/${project.projectIdentifier}/reactivate`,
         {},
@@ -103,14 +113,12 @@ const Admin = () => {
     }
   };
 
-  // Auto-dismiss message after 5 seconds with fade out
-
   useEffect(() => {
     if (message) {
       setIsMessageVisible(true);
       const timer = setTimeout(() => {
         setIsMessageVisible(false);
-        setTimeout(() => setMessage(""), 300); // Wait for fade out animation
+        setTimeout(() => setMessage(""), 300);
       }, 4700);
       return () => clearTimeout(timer);
     }
@@ -119,7 +127,7 @@ const Admin = () => {
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getApiToken();
         const res = await api.get("/employee/list", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -139,8 +147,7 @@ const Admin = () => {
     };
 
     loadEmployees();
-  }, [getAccessTokenSilently]);
-
+  }, [getApiToken]);
 
   useEffect(() => {
     const loadInitialProjects = async () => {
@@ -149,9 +156,8 @@ const Admin = () => {
     };
 
     loadInitialProjects();
-  }, [getAccessTokenSilently]);
+  }, [getApiToken]);
 
-  // Projects that cover the selected date (startDate <= date <= dueDate)
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
     return projects.filter((p) => {
@@ -165,7 +171,6 @@ const Admin = () => {
 
     const [year, month, day] = dateStr.split("-");
     const date = new Date(Number(year), Number(month) - 1, Number(day));
-
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
     return date.toLocaleDateString(locale, {
@@ -176,50 +181,47 @@ const Admin = () => {
     });
   };
 
-
   return (
     <>
-      {/* Navigation Bar */}
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">
-            {t('admin.title')}
-          </h1>
+          <h1 className="text-4xl font-bold tracking-tight">{t("admin.title")}</h1>
 
           <div className="flex gap-3">
             <button
               onClick={() => setIsPortfolioModalOpen(true)}
               className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
             >
-              {t('admin.createPortfolio')}
+              {t("admin.createPortfolio")}
             </button>
             <button
               onClick={() => setIsDeletePortfolioModalOpen(true)}
               className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
             >
-              {t('admin.deletePortfolio')}
+              {t("admin.deletePortfolio")}
             </button>
             <button
               onClick={() => setIsRoleFinderModalOpen(true)}
               className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
             >
-              {t('admin.roleFinder')}
+              {t("admin.roleFinder")}
             </button>
             <button
               onClick={() => setIsRoleAssignmentModalOpen(true)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
             >
-              {t('admin.roleManager')}
+              {t("admin.roleManager")}
             </button>
           </div>
         </div>
 
         {message && (
           <div
-            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-              }`}
+            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${
+              isMessageVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
           >
             <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
               <span className="text-lg font-medium">{message}</span>
@@ -236,16 +238,7 @@ const Admin = () => {
           </div>
         )}
 
-        <style>{`
-        .animate-bounce-in {
-          animation: bounce-in 0.4s ease-out forwards;
-        }
-      `}</style>
-
-        <RoleFinderModal
-          isOpen={isRoleFinderModalOpen}
-          onClose={() => setIsRoleFinderModalOpen(false)}
-        />
+        <RoleFinderModal isOpen={isRoleFinderModalOpen} onClose={() => setIsRoleFinderModalOpen(false)} />
 
         <RoleAssignmentModal
           isOpen={isRoleAssignmentModalOpen}
@@ -265,7 +258,6 @@ const Admin = () => {
           onSuccess={() => setMessage("Portfolio item deleted successfully!")}
         />
 
-        {/* New project modal */}
         <ProjectModal
           isOpen={isProjectModalOpen}
           onClose={() => {
@@ -278,31 +270,19 @@ const Admin = () => {
           defaultDate={selectedDate}
         />
 
-        {/* TOP: calendar (left) + selected-date projects (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          {/* Calendar: pass projects so days can show events */}
-          <AdminProjectCalendar
-            projects={projects}
-            onDateSelect={setSelectedDate}
-          />
+          <AdminProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
-          {/* Selected date detail card */}
           <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
             <h2 className="text-2xl font-bold mb-2">
-              {selectedDate
-                ? formatSelectedDate(selectedDate)
-                : t('admin.selectDate')}
+              {selectedDate ? formatSelectedDate(selectedDate) : t("admin.selectDate")}
             </h2>
 
             <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
-              {!selectedDate && (
-                <p className="text-black/60">{t('admin.pickDay')}</p>
-              )}
+              {!selectedDate && <p className="text-black/60">{t("admin.pickDay")}</p>}
 
               {selectedDate && projectsForSelectedDate.length === 0 && (
-                <p className="text-black/60">
-                  {t('admin.noProjects')}
-                </p>
+                <p className="text-black/60">{t("admin.noProjects")}</p>
               )}
 
               {projectsForSelectedDate.map((project) => (
@@ -312,9 +292,7 @@ const Admin = () => {
                 >
                   <div>
                     <p className="font-semibold">{project.name}</p>
-                    <p className="text-xs text-black/60">
-                      ID: {project.projectIdentifier}
-                    </p>
+                    <p className="text-xs text-black/60">ID: {project.projectIdentifier}</p>
                     <p className="text-xs text-black/60">
                       {project.startDate} - {project.dueDate}
                     </p>
@@ -332,35 +310,31 @@ const Admin = () => {
               className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-lg font-semibold shadow-lg"
               onClick={() => setIsProjectModalOpen(true)}
             >
-              {t('add')}
+              {t("add")}
             </button>
           </div>
         </div>
 
-        {/* BOTTOM: Projects with Tab Toggle */}
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold tracking-tight">{t('admin.projects')}</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t("admin.projects")}</h2>
 
-            {/* Tab Toggle */}
             <div className="flex border-2 border-black rounded-lg overflow-hidden">
               <button
                 onClick={() => setActiveTab("active")}
-                className={`px-6 py-2 font-semibold transition-all ${activeTab === "active"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                className={`px-6 py-2 font-semibold transition-all ${
+                  activeTab === "active" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"
+                }`}
               >
-                {t('admin.active')} ({projects.length})
+                {t("admin.active")} ({projects.length})
               </button>
               <button
                 onClick={() => setActiveTab("archived")}
-                className={`px-6 py-2 font-semibold transition-all ${activeTab === "archived"
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                className={`px-6 py-2 font-semibold transition-all ${
+                  activeTab === "archived" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"
+                }`}
               >
-                {t('admin.archived')} ({archivedProjects.length})
+                {t("admin.archived")} ({archivedProjects.length})
               </button>
             </div>
           </div>
@@ -373,6 +347,8 @@ const Admin = () => {
               employeeIndex={employeeIndex}
               showEdit={true}
               showComplete={true}
+              showViewInformation={true}
+              getToken={getApiToken}   // ✅ IMPORTANT
             />
           ) : (
             <ProjectList
@@ -382,6 +358,8 @@ const Admin = () => {
               showEdit={false}
               showComplete={false}
               showReactivate={true}
+              showViewInformation={true}
+              getToken={getApiToken}   // ✅ IMPORTANT
             />
           )}
         </section>

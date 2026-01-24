@@ -20,5 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
+
+        registry.addMapping("/api/uploads/projects/**")
+                .allowedOrigins("http://localhost:3000", "http://localhost:5173", "https://vladtech-inc-fudvj.ondigitalocean.app")
+                .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 }

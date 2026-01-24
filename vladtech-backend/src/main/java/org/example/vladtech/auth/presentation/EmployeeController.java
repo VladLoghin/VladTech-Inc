@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,6 +49,20 @@ public class EmployeeController {
         ProjectStatus newStatus = ProjectStatus.valueOf(request.getStatus().toUpperCase());
         return ResponseEntity.ok(
                 projectService.updateProjectStatusForEmployee(projectIdentifier, employeeId, newStatus)
+        );
+    }
+
+    @PreAuthorize("hasAuthority('Employee')")
+    @PostMapping("/projects/{projectIdentifier}/photo")
+    public ResponseEntity<ProjectResponseModel> uploadLatestProjectPhoto(
+            @PathVariable String projectIdentifier,
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            @RequestParam(value = "comments", required = false) String comments,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String employeeId = jwt.getSubject();
+        return ResponseEntity.ok(
+                projectService.uploadLatestPhotoForEmployee(projectIdentifier, employeeId, photo, comments)
         );
     }
 }
