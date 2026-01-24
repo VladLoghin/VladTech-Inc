@@ -64,7 +64,7 @@ async function gotoAdminPanel(page: Page) {
     await safeClick(adminBtn);
   }
 
-  await expect(page.getByRole('heading', { name: /admin area/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: /admin panel/i })).toBeVisible({ timeout: 15000 });
 }
 
 async function gotoEmployeeTools(page: Page) {
