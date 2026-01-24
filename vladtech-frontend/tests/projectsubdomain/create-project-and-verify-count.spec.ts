@@ -63,9 +63,9 @@ test('create project and verify count', async ({ page, loginAs }) => {
   const timestamp = Date.now();
   const projectName = `Playwright Test ${timestamp}`;
 
-  await page.locator('input[name="name"]').fill(projectName);
-  await page.locator('input[name="address.city"]').fill('Montreal');
-  await page.locator('input[name="dueDate"]').fill('2025-12-31');
+  await page.locator('form input[name="name"]').fill(projectName);
+  await page.locator('form input[name="address.city"]').fill('Montreal');
+  await page.locator('form input[name="dueDate"]').fill('2025-12-31');
 
   await page.evaluate(() => {
     const modal = document.querySelector('.overflow-y-auto');
@@ -73,9 +73,9 @@ test('create project and verify count', async ({ page, loginAs }) => {
   });
   await page.waitForTimeout(300);
 
-  await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
-  await page.locator('input[name="startDate"]').fill('2025-01-15');
-  await page.locator('textarea[name="description"]').fill('Automated test project created by Playwright');
+  await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
+  await page.locator('form input[name="startDate"]').fill('2025-01-15');
+  await page.locator('form textarea[name="description"]').fill('Automated test project created by Playwright');
 
   // Step 6: Click create
   await page.getByRole('button', { name: /^create$/i }).click();
@@ -86,6 +86,9 @@ test('create project and verify count', async ({ page, loginAs }) => {
 
   // Step 7: Verify new project appears in Admin List (sanity check)
   // Instead of just counting, we check if our specific project is in the list
+  await page.locator('input[name="search"]').fill(projectName);
+  await page.keyboard.press('Enter');
+
   await expect(page.locator('body')).toContainText(projectName, { timeout: 10000 });
   console.log('✅ Step 7: Verified new project is present in Admin List');
 

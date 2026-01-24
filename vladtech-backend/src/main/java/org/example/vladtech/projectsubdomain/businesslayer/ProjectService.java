@@ -56,9 +56,16 @@ public interface ProjectService {
                         String comment);
 
         org.springframework.data.domain.Page<ProjectResponseModel> searchProjects(
-                        String search,
+                        String name,
+                        String projectIdentifier,
+                        String clientName,
                         ProjectStatus status,
                         ProjectState state,
                         org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+                        java.time.LocalDate startDate,
+                        java.time.LocalDate dueDate,
+                        String projectType,
+                        String costStatus,
+                        String assignedEmployeeId,
                         org.springframework.data.domain.Pageable pageable);
 }

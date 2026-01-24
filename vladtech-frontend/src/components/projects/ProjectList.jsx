@@ -191,7 +191,7 @@ const ProjectList = ({
 
   return (
     <>
-      <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto space-y-4">
+      <div className="border-2 border-black rounded-xl bg-white p-4 space-y-4">
         {projects.length === 0 && (
           <p className="text-black/60 text-center py-8">{t("project.noProjectsFound")}</p>
         )}
@@ -209,16 +209,17 @@ const ProjectList = ({
           return (
             <div
               key={project.projectIdentifier}
-              className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative ${isArchived ? "bg-gray-50 opacity-75" : ""
+              className={`border border-black/10 rounded-lg p-4 hover:shadow-md transition-shadow relative flex flex-col ${isArchived ? "bg-gray-50 opacity-75" : ""
                 }`}
             >
-              <div className="absolute right-4 top-4 flex gap-2 flex-wrap justify-end">
+              {/* Buttons - grid layout on desktop, at bottom on mobile */}
+              <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">
                 {/* Upload / View Information */}
                 {showUploadInformation && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openUpload(project)}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold"
+                    className="px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
                     {t("project.uploadInformation", { defaultValue: "Upload Information" })}
                   </button>
@@ -228,7 +229,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => openView(project)}
-                    className="px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold"
+                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
                     {t("project.viewInformation", { defaultValue: "View Information" })}
                   </button>
@@ -239,7 +240,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onReactivate?.(project)}
-                    className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold"
+                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
                     {t("project.reactivate")}
                   </button>
@@ -249,7 +250,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onComplete?.(project)}
-                    className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold"
+                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
                     {t("project.markComplete")}
                   </button>
@@ -259,74 +260,76 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onEdit?.(project)}
-                    className="px-5 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold"
+                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
                     {t("edit")}
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-lg font-semibold">{project.name}</h3>
-                {project.state && (
-                  <span
-                    className={`text-xs px-2 py-1 rounded font-medium ${isArchived ? "bg-gray-200 text-gray-700" : "bg-green-100 text-green-700"
-                      }`}
-                  >
-                    {isArchived ? t("project.archived") : t("project.active")}
-                  </span>
-                )}
-              </div>
+              {/* Content area with margin to avoid button overlap on desktop */}
+              <div className="sm:mr-[190px] md:mr-[280px] lg:mr-[420px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-semibold">{project.name}</h3>
+                  {project.state && (
+                    <span
+                      className={`text-xs px-2 py-1 rounded font-medium ${isArchived ? "bg-gray-200 text-gray-700" : "bg-green-100 text-green-700"
+                        }`}
+                    >
+                      {isArchived ? t("project.archived") : t("project.active")}
+                    </span>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                <p>
-                  <strong className="text-black/60">{t("project.id")}:</strong>{" "}
-                  <span className="font-mono">{project.projectIdentifier}</span>
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  <p>
+                    <strong className="text-black/60">{t("project.id")}:</strong>{" "}
+                    <span className="font-mono">{project.projectIdentifier}</span>
+                  </p>
 
-                {project.clientName && (
+                  {project.clientName && (
+                    <p>
+                      <strong className="text-black/60">
+                        {t("project.clientLabel")}:
+                      </strong>{" "}
+                      <span className="bg-blue-100 px-2 py-1 rounded">
+                        {project.clientName}
+                      </span>
+                    </p>
+                  )}
+
+                  <p>
+                    <strong className="text-black/60">{t("project.projectType")}:</strong>{" "}
+                    <span className="bg-yellow-100 px-2 py-1 rounded">{project.projectType}</span>
+                  </p>
+
                   <p>
                     <strong className="text-black/60">
-                      {t("project.clientLabel")}:
+                      {t("project.priority")}:
                     </strong>{" "}
-                    <span className="bg-blue-100 px-2 py-1 rounded">
-                      {project.clientName}
+                    <span
+                      className={`px-2 py-1 rounded ${project.priority === "URGENT"
+                        ? "bg-red-100 text-red-800"
+                        : project.priority === "HIGH"
+                          ? "bg-orange-100 text-orange-800"
+                          : project.priority === "LOW"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                    >
+                      {project.priority === "URGENT"
+                        ? t("project.priorityUrgent")
+                        : project.priority === "HIGH"
+                          ? t("project.priorityHigh")
+                          : project.priority === "LOW"
+                            ? t("project.priorityLow")
+                            : t("project.priorityMedium")}
                     </span>
                   </p>
-                )}
 
-                <p>
-                  <strong className="text-black/60">{t("project.projectType")}:</strong>{" "}
-                  <span className="bg-yellow-100 px-2 py-1 rounded">{project.projectType}</span>
-                </p>
-
-                <p>
-                  <strong className="text-black/60">
-                    {t("project.priority")}:
-                  </strong>{" "}
-                  <span
-                    className={`px-2 py-1 rounded ${project.priority === "URGENT"
-                      ? "bg-red-100 text-red-800"
-                      : project.priority === "HIGH"
-                        ? "bg-orange-100 text-orange-800"
-                        : project.priority === "LOW"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                  >
-                    {project.priority === "URGENT"
-                      ? t("project.priorityUrgent")
-                      : project.priority === "HIGH"
-                        ? t("project.priorityHigh")
-                        : project.priority === "LOW"
-                          ? t("project.priorityLow")
-                          : t("project.priorityMedium")}
-                  </span>
-                </p>
-
-                <p>
-                  <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
-                  {estimatedCostFormatted ? (
+                  <p>
+                    <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
+                    {estimatedCostFormatted ? (
                     <span>{estimatedCostFormatted}</span>
                   ) : (
                     <span className="text-gray-400">N/A</span>
@@ -388,6 +391,60 @@ const ProjectList = ({
                     : t("project.noInformationYet", { defaultValue: "No information uploaded yet." })}
                 </p>
               )}
+              </div>
+
+              {/* Mobile buttons at bottom */}
+              <div className="flex sm:hidden gap-2 flex-wrap mt-4 pt-4 border-t border-black/10">
+                {showUploadInformation && !isArchived && (
+                  <button
+                    type="button"
+                    onClick={() => openUpload(project)}
+                    className="flex-1 min-w-[140px] px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm text-center"
+                  >
+                    {t("project.uploadInformation", { defaultValue: "Upload Information" })}
+                  </button>
+                )}
+
+                {showViewInformation && (
+                  <button
+                    type="button"
+                    onClick={() => openView(project)}
+                    className="flex-1 min-w-[140px] px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center"
+                  >
+                    {t("project.viewInformation", { defaultValue: "View Information" })}
+                  </button>
+                )}
+
+                {showReactivate && isArchived && (
+                  <button
+                    type="button"
+                    onClick={() => onReactivate?.(project)}
+                    className="flex-1 min-w-[140px] px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold text-sm text-center"
+                  >
+                    {t("project.reactivate")}
+                  </button>
+                )}
+
+                {showComplete && !isArchived && (
+                  <button
+                    type="button"
+                    onClick={() => onComplete?.(project)}
+                    className="flex-1 min-w-[140px] px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm text-center"
+                  >
+                    {t("project.markComplete")}
+                  </button>
+                )}
+
+                {showEdit && !isArchived && (
+                  <button
+                    type="button"
+                    onClick={() => onEdit?.(project)}
+                    className="flex-1 min-w-[140px] px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center"
+                  >
+                    {t("edit")}
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -445,8 +502,8 @@ const ProjectList = ({
               onClick={submitUpload}
               disabled={!file || uploading}
               className={`w-full px-4 py-2 rounded-lg font-semibold ${!file || uploading
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "bg-yellow-400 text-black hover:bg-yellow-500"
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                : "bg-yellow-400 text-black hover:bg-yellow-500"
                 }`}
             >
               {uploading

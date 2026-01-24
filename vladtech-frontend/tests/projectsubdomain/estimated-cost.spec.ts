@@ -27,16 +27,16 @@ test('admin creates and edits project with estimated cost', async ({ page, login
     await page.getByRole('heading', { name: /new project/i }).waitFor({ state: 'visible' });
 
     // Fill basics
-    await page.locator('input[name="name"]').fill(projectName);
-    await page.locator('input[name="address.city"]').fill('Montreal');
-    await page.locator('input[name="dueDate"]').fill('2026-12-31');
+    await page.locator('form input[name="name"]').fill(projectName);
+    await page.locator('form input[name="address.city"]').fill('Montreal');
+    await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
     // Select Project Type
-    await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
+    await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
 
     // Set Estimated Cost (The new feature!)
-    await page.locator('select[name="estimatedCostCurrency"]').selectOption('USD');
-    await page.locator('input[name="estimatedCost"]').fill('5000.00');
+    await page.locator('form select[name="estimatedCostCurrency"]').selectOption('USD');
+    await page.locator('form input[name="estimatedCost"]').fill('5000.00');
 
     // Submit
     await page.getByRole('button', { name: 'Create', exact: true }).click();
@@ -46,6 +46,10 @@ test('admin creates and edits project with estimated cost', async ({ page, login
     await page.waitForTimeout(1000); // Wait for list refresh
 
     // 4. Verify Project Card Display
+    // Search for project to handle pagination
+    await page.locator('input[name="search"]').fill(projectName);
+    await page.keyboard.press('Enter');
+
     // Use specific class selector found in ProjectList.jsx (border border-black/10 rounded-lg p-4)
     // Escaping the slash in black/10 is usually safe in CSS selectors, or we can just use partial class match or other attributes.
     // Let's use the full class string but escape the slash if needed. Playwright supports 'class=' or css .class.
@@ -69,13 +73,13 @@ test('admin creates and edits project with estimated cost', async ({ page, login
 
     // Verify auto-conversion from USD to CAD
     // Current is 5000 USD. Switching to CAD should make it 5000 * 1.4 = 7000.
-    await page.locator('select[name="estimatedCostCurrency"]').selectOption('CAD');
+    await page.locator('form select[name="estimatedCostCurrency"]').selectOption('CAD');
 
     // Check if input value updated (exact 7000.00)
-    await expect(page.locator('input[name="estimatedCost"]')).toHaveValue('7000.00');
+    await expect(page.locator('form input[name="estimatedCost"]')).toHaveValue('7000.00');
 
     // Change to a specific value to save - e.g. 2500.50 CAD
-    await page.locator('input[name="estimatedCost"]').fill('2500.50');
+    await page.locator('form input[name="estimatedCost"]').fill('2500.50');
 
     // Save
     await page.getByRole('button', { name: /save/i }).click();

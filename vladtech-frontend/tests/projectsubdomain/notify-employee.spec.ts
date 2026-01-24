@@ -60,7 +60,7 @@ async function gotoAdminPanel(page: Page) {
 // ---------- MailHog helpers ----------
 async function mailhogClear(request: any) {
   // MailHog supports DELETE /api/v1/messages
-  await request.delete(`${MAILHOG_BASE}/api/v1/messages`).catch(() => {});
+  await request.delete(`${MAILHOG_BASE}/api/v1/messages`).catch(() => { });
 }
 
 async function mailhogWaitForMessage(
@@ -99,7 +99,7 @@ async function mailhogWaitForMessage(
 
   throw new Error(
     `Timed out waiting for MailHog email to "${opts.toEmail}"` +
-      (opts.subjectIncludes ? ` with subject containing "${opts.subjectIncludes}"` : '')
+    (opts.subjectIncludes ? ` with subject containing "${opts.subjectIncludes}"` : '')
   );
 }
 
@@ -127,20 +127,28 @@ test('admin creates project, assigns employee, MailHog receives assignment email
 
   await safeClick(page.getByRole('button', { name: 'ADD' }));
 
-  await page.locator('input[name="name"]').fill(projectName);
+  await page.locator('form input[name="name"]').fill(projectName);
 
   // Assign employee (your modal has this)
   await safeClick(page.getByRole('button', { name: /select employees/i }));
   await safeClick(page.getByRole('button', { name: /cunninghamemployee4399@gmail/i }));
   await safeClick(page.getByRole('button', { name: /confirm/i }));
 
-  await page.locator('input[name="address.streetAddress"]').fill('test');
-  await page.locator('input[name="address.city"]').fill('test');
+  await page.locator('form input[name="address.streetAddress"]').fill('test');
+  await page.locator('form input[name="address.city"]').fill('test');
 
-  await page.locator('input[name="dueDate"]').fill('2026-01-31');
+  await page.locator('form input[name="dueDate"]').fill('2026-01-31');
   await page.getByRole('combobox').first().selectOption('SCHEDULED');
 
   await safeClick(page.getByRole('button', { name: 'Create', exact: true }));
+
+  // Wait for modal to close before searching
+  await expect(page.getByRole('heading', { name: /new project/i })).toBeHidden();
+  await page.waitForTimeout(1000); // Allow list refresh
+
+  // Search for project to handle pagination
+  await page.locator('input[name="search"]').fill(projectName);
+  await page.keyboard.press('Enter');
 
   // Ensure it appears
   await expect(page.getByRole('heading', { name: projectName }).first()).toBeVisible({ timeout: 20000 });

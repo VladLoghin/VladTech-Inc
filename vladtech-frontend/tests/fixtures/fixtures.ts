@@ -101,9 +101,9 @@ export const test = base.extend<{
       const timestamp = Date.now();
       const projectName = `${projectNamePrefix} ${timestamp}`;
 
-      await page.locator('input[name="name"]').fill(projectName);
-      await page.locator('input[name="address.city"]').fill('Montreal');
-      await page.locator('input[name="dueDate"]').fill('2026-12-31');
+      await page.locator('form input[name="name"]').fill(projectName);
+      await page.locator('form input[name="address.city"]').fill('Montreal');
+      await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
       // Scroll down in the modal
       await page.evaluate(() => {
@@ -112,9 +112,9 @@ export const test = base.extend<{
       });
       await page.waitForTimeout(300);
 
-      await page.locator('select[name="projectType"]').selectOption('SCHEDULED');
-      await page.locator('input[name="startDate"]').fill('2026-01-15');
-      await page.locator('textarea[name="description"]').fill('Auto-created by Playwright test');
+      await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
+      await page.locator('form input[name="startDate"]').fill('2026-01-15');
+      await page.locator('form textarea[name="description"]').fill('Auto-created by Playwright test');
 
       // Click "Create" button
       await page.getByRole('button', { name: /^create$/i }).click();
@@ -124,6 +124,17 @@ export const test = base.extend<{
 
       // Wait for UI to update
       await page.waitForTimeout(1000);
+
+      // Search for the project to ensure it is visible (handling pagination)
+      await page.waitForTimeout(500);
+      await page.locator('input[name="search"]').fill(projectName);
+      await page.keyboard.press('Enter');
+      // Also click the button just in case
+      // await page.getByRole('button', { name: /search projects/i }).click();
+
+      // Wait for filtered results to load and find the specific project card
+      const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
+      await expect(projectCard).toBeVisible({ timeout: 10000 });
 
       return projectName;
     }

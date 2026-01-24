@@ -443,28 +443,50 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public org.springframework.data.domain.Page<ProjectResponseModel> searchProjects(
-            String search,
+            String name,
+            String projectIdentifier,
+            String clientName,
             ProjectStatus status,
             ProjectState state,
             org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+            java.time.LocalDate startDate,
+            java.time.LocalDate dueDate,
+            String projectType,
+            String costStatus,
+            String assignedEmployeeId,
             org.springframework.data.domain.Pageable pageable) {
 
-        // If search is null or empty, we pass empty string to regex to match
-        // everything.
-        String safeSearch = (search == null || search.trim().isEmpty()) ? "" : search.trim();
+        log.info("Searching projects. costStatus='{}'", costStatus);
 
-        // Escape special regex characters in search string to prevent errors or
-        // projection injection
-        // Simple approach: Pattern.quote wrap? No, Mongo regex expects string.
-        // We will just pass it, assuming valid text.
-        // NOTE: If we want "contains", we don't need wildcards if we are using regex.
-        // But the user might expect "kitchen" to find "My Kitchen Project".
-        // The repository query uses regex with '?0'. If we pass "kitchen", it matches
-        // "...kitchen...".
-        // SO we just pass the raw string.
+        String safeName = (name == null) ? "" : name.trim();
+        String safeId = (projectIdentifier == null) ? "" : projectIdentifier.trim();
+        String safeClient = (clientName == null) ? "" : clientName.trim();
+        String safeCostStatus = (costStatus == null) ? "" : costStatus.trim();
+        String safeEmployeeId = (assignedEmployeeId == null) ? "" : assignedEmployeeId.trim();
+
+        org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum safeType = null;
+        if (projectType != null && !projectType.trim().isEmpty()) {
+            try {
+                safeType = org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum
+                        .valueOf(projectType.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                safeType = null;
+            }
+        }
 
         org.springframework.data.domain.Page<Project> projects = projectRepository.searchProjects(
-                safeSearch, status, state, priority, pageable);
+                safeName,
+                safeId,
+                safeClient,
+                status,
+                state,
+                priority,
+                startDate,
+                dueDate,
+                safeType,
+                safeCostStatus,
+                safeEmployeeId,
+                pageable);
 
         return projects.map(projectResponseMapper::entityToResponseModel);
     }

@@ -6,12 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
+
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -25,14 +24,24 @@ public class ProjectController {
     @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/search")
     public ResponseEntity<Page<ProjectResponseModel>> searchProjects(
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String projectIdentifier,
+            @RequestParam(required = false) String clientName,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) ProjectState state,
             @RequestParam(required = false) ProjectPriority priority,
+            @RequestParam(required = false) java.time.LocalDate startDate,
+            @RequestParam(required = false) java.time.LocalDate dueDate,
+            @RequestParam(required = false) String projectType,
+            @RequestParam(required = false) String costStatus,
+            @RequestParam(required = false) String assignedEmployeeId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(projectService.searchProjects(
-                q, status, state, priority,
+                name, projectIdentifier, clientName,
+                status, state, priority,
+                startDate, dueDate,
+                projectType, costStatus, assignedEmployeeId,
                 org.springframework.data.domain.PageRequest.of(page, size)));
     }
 
