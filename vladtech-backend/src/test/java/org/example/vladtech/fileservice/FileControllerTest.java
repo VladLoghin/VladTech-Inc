@@ -8,7 +8,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -53,7 +51,6 @@ class FileControllerTest {
         testMetadata.put("contentType", "image/jpeg");
         testMetadata.put("size", 1024L);
         testMetadata.put("uploadedAt", System.currentTimeMillis());
-
     }
 
     @Test
@@ -75,7 +72,8 @@ class FileControllerTest {
                         .with(jwt()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(testFileId))
-                .andExpect(jsonPath("$.url").value("/uploads/reviews/" + testFileId))
+                // FIX: controller returns /api/uploads/reviews/{id}
+                .andExpect(jsonPath("$.url").value("/api/uploads/reviews/" + testFileId))
                 .andExpect(jsonPath("$.filename").value("test.jpg"));
 
         verify(fileStorageService).save(any());

@@ -28,12 +28,14 @@ import java.util.ArrayList;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
 import org.example.vladtech.auth.service.UserManagementService;
-import java.util.List;
-import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectStatus;
+import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPhoto;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @Service
-// @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -42,6 +44,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectEmailMapper projectEmailMapper;
     private final ProjectEmailSender projectEmailSender;
     private final UserManagementService userManagementService;
+    private final FileStorageService fileStorageService;
 
     @Lazy
     @Autowired
@@ -49,16 +52,19 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
-            ProjectRequestMapper projectRequestMapper,
-            ProjectResponseMapper projectResponseMapper,
-            ProjectEmailMapper projectEmailMapper,
-            ProjectEmailSender projectEmailSender, UserManagementService userManagementService) {
+                              ProjectRequestMapper projectRequestMapper,
+                              ProjectResponseMapper projectResponseMapper,
+                              ProjectEmailMapper projectEmailMapper,
+                              ProjectEmailSender projectEmailSender,
+                              UserManagementService userManagementService,
+                              FileStorageService fileStorageService) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
         this.projectEmailMapper = projectEmailMapper;
         this.projectEmailSender = projectEmailSender;
         this.userManagementService = userManagementService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -77,8 +83,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
-
-        // project.setProjectIdentifier(UUID.randomUUID().toString());
 
         long count = projectRepository.count();
         project.setProjectIdentifier("PROJ-" + (count + 1));
@@ -107,6 +111,8 @@ public class ProjectServiceImpl implements ProjectService {
         existingProject.setDescription(projectRequestModel.getDescription());
         existingProject.setStartDate(projectRequestModel.getStartDate());
         existingProject.setDueDate(projectRequestModel.getDueDate());
+
+        // keep cost fields (teammate work)
         existingProject.setEstimatedCost(projectRequestModel.getEstimatedCost());
         existingProject.setEstimatedCostCurrency(projectRequestModel.getEstimatedCostCurrency());
 
@@ -121,8 +127,9 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (projectRequestModel.getProjectType() != null && !projectRequestModel.getProjectType().isEmpty()) {
             ProjectType projectType = new ProjectType();
-            projectType
-                    .setType(ProjectType.ProjectTypeEnum.valueOf(projectRequestModel.getProjectType().toUpperCase()));
+            projectType.setType(ProjectType.ProjectTypeEnum.valueOf(
+                    projectRequestModel.getProjectType().toUpperCase()
+            ));
             existingProject.setProjectType(projectType);
         }
 
@@ -143,14 +150,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(updatedProject);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////// FILL
-    /////////////////////////////////////////////////////////////////////////////////////// THE
-    /////////////////////////////////////////////////////////////////////////////////////// OTHER
-    /////////////////////////////////////////////////////////////////////////////////////// ONES
-    /////////////////////////////////////////////////////////////////////////////////////// OUT
-    /////////////////////////////////////////////////////////////////////////////////////// IN
-    /////////////////////////////////////////////////////////////////////////////////////// OTHER
-    /////////////////////////////////////////////////////////////////////////////////////// TICKETS
     @Async
     @Override
     public void sendEmailNotificationAsync(Project project, String operation) {
@@ -240,8 +239,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         String locationSummary = null;
         if (address != null) {
-            // keep it simple for now, you can tweak later
-            // example: "Montreal, QC" or "123 Main St, Montreal"
             locationSummary = String.format("%s, %s",
                     address.getCity(),
                     address.getProvince());
@@ -258,7 +255,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
         List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
-
         return projectResponseMapper.entityListToResponseModelList(projects);
     }
 
@@ -355,11 +351,95 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isValidStatusTransition(ProjectStatus current, ProjectStatus next) {
-        if (current == next)
-            return true;
+        if (current == next) return true;
 
         return (current == ProjectStatus.PENDING && next == ProjectStatus.IN_PROGRESS)
                 || (current == ProjectStatus.IN_PROGRESS && next == ProjectStatus.COMPLETED);
     }
 
+    @Override
+    public ProjectResponseModel uploadLatestPhotoForEmployee(
+            String projectIdentifier,
+            String employeeId,
+            MultipartFile photo,
+            String comment
+    ) {
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new InvalidEmployeeIdException("employeeId cannot be null or blank");
+        }
+
+        if (project.getAssignedEmployeeIds() == null || !project.getAssignedEmployeeIds().contains(employeeId)) {
+            throw new RuntimeException("You are not assigned to this project");
+        }
+
+        String trimmedComment = (comment == null) ? "" : comment.trim();
+        boolean hasComment = !trimmedComment.isEmpty();
+        boolean hasPhoto = (photo != null && !photo.isEmpty());
+
+        // ✅ must have at least one
+        if (!hasPhoto && !hasComment) {
+            throw new RuntimeException("Must provide a photo, a comment, or both");
+        }
+
+        if (project.getPhotos() == null) {
+            project.setPhotos(new ArrayList<>());
+        }
+
+        // CASE 1: Photo uploaded (with optional comment)
+        if (hasPhoto) {
+            // delete old photo only when a new photo is uploaded
+            if (!project.getPhotos().isEmpty() && project.getPhotos().get(0) != null) {
+                String oldId = project.getPhotos().get(0).getPhotoId();
+                if (oldId != null && !oldId.isBlank()) {
+                    try {
+                        fileStorageService.delete(oldId);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
+            String photoId;
+            try {
+                photoId = fileStorageService.save(photo);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload photo", e);
+            }
+
+            String url = "/api/uploads/projects/" + photoId;
+
+            ProjectPhoto latest = new ProjectPhoto(photoId, url, hasComment ? trimmedComment : "");
+
+            project.getPhotos().clear();
+            project.getPhotos().add(latest);
+
+            Project saved = projectRepository.save(project);
+            return projectResponseMapper.entityToResponseModel(saved);
+        }
+
+        // CASE 2: Comment only (no photo)
+        if (!project.getPhotos().isEmpty() && project.getPhotos().get(0) != null) {
+            // update existing latest entry description, keep photo
+            ProjectPhoto existing = project.getPhotos().get(0);
+            ProjectPhoto updated = new ProjectPhoto(
+                    existing.getPhotoId(),
+                    existing.getPhotoUrl(),
+                    trimmedComment
+            );
+
+            project.getPhotos().set(0, updated);
+        } else {
+            // no existing photo, store a "note-only" entry with no photoUrl
+            String noteId = "note-" + System.currentTimeMillis();
+            ProjectPhoto note = new ProjectPhoto(noteId, "", trimmedComment);
+
+            project.getPhotos().clear();
+            project.getPhotos().add(note);
+        }
+
+        Project saved = projectRepository.save(project);
+        return projectResponseMapper.entityToResponseModel(saved);
+    }
 }

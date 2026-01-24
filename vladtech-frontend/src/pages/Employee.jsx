@@ -1,3 +1,4 @@
+// Employee.jsx
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,31 +11,12 @@ import i18n from "../i18n";
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
   const { t } = useTranslation();
+
   const [message] = useState("");
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD"
-
-  /*const callEmployeeEndpoint = async () => {
-    try {
-      const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-
-      const response = await axios.get("http://localhost:8080/api/employee/info", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setMessage(response.data);
-    } catch (error) {
-      console.error("Error calling employee endpoint:", error);
-      setMessage("You are not authorized or endpoint failed.");
-    }
-  };
-  */
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const loadMyProjects = async () => {
     setProjectsLoading(true);
@@ -54,14 +36,13 @@ const Employee = () => {
       console.error("Error loading employee projects:", error);
       setProjectsError(
         error.response?.data?.message ||
-        `Failed to load projects (status: ${error.response?.status || "unknown"})`
+          `Failed to load projects (status: ${error.response?.status || "unknown"})`
       );
       setProjects([]);
     } finally {
       setProjectsLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -71,7 +52,6 @@ const Employee = () => {
 
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
-
     return projects.filter((p) => {
       if (!p.startDate) return false;
       const end = p.dueDate || p.startDate;
@@ -84,7 +64,6 @@ const Employee = () => {
 
     const [year, month, day] = dateStr.split("-");
     const date = new Date(Number(year), Number(month) - 1, Number(day));
-
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
     return date.toLocaleDateString(locale, {
@@ -107,12 +86,9 @@ const Employee = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // update UI locally so the dropdown reflects immediately
       setProjects((prev) =>
         prev.map((p) =>
-          p.projectIdentifier === project.projectIdentifier
-            ? { ...p, status: newStatus }
-            : p
+          p.projectIdentifier === project.projectIdentifier ? { ...p, status: newStatus } : p
         )
       );
     } catch (error) {
@@ -120,29 +96,53 @@ const Employee = () => {
     }
   };
 
+  const handleUploadInformation = async (project, file, comments) => {
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
 
+      const trimmed = (comments || "").trim();
+      const hasFile = !!file;
+      const hasComment = trimmed.length > 0;
+
+      // ✅ Must have at least one
+      if (!hasFile && !hasComment) return;
+
+      const form = new FormData();
+
+      // ✅ Only append photo if it exists
+      if (hasFile) {
+        form.append("photo", file);
+      }
+
+      // ✅ Always send comments field, backend treats it optional
+      if (hasComment) {
+        form.append("comments", trimmed);
+      } else {
+        form.append("comments", "");
+      }
+
+      await api.post(`/employee/projects/${project.projectIdentifier}/photo`, form, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      await loadMyProjects();
+    } catch (error) {
+      console.error("Error uploading information:", error);
+    }
+  };
 
   return (
     <>
-      {/* Navigation Bar */}
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">
-            {t('employee.title')}
-          </h1>
-
-          {/* 
-        <div className="flex gap-3">
-          <button
-            onClick={callEmployeeEndpoint}
-            className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-          >
-            Call Employee Endpoint
-          </button>
-        </div>
-*/}
+          <h1 className="text-4xl font-bold tracking-tight">{t("employee.title")}</h1>
         </div>
 
         {message && (
@@ -152,39 +152,24 @@ const Employee = () => {
         )}
 
         <section className="mt-10">
-          {projectsLoading && (
-            <p className="text-black/60">{t('employee.loadingProjects')}</p>
-          )}
-
-          {projectsError && (
-            <p className="text-red-600">{projectsError}</p>
-          )}
+          {projectsLoading && <p className="text-black/60">{t("employee.loadingProjects")}</p>}
+          {projectsError && <p className="text-red-600">{projectsError}</p>}
 
           {!projectsLoading && !projectsError && (
             <>
-              {/* TOP: calendar (left) + projects on selected date (right) */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <EmployeeProjectCalendar
-                  projects={projects}
-                  onDateSelect={setSelectedDate}
-                />
+                <EmployeeProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
                 <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
                   <h3 className="text-2xl font-bold mb-2">
-                    {selectedDate
-                      ? formatSelectedDate(selectedDate)
-                      : t('employee.selectDate')}
+                    {selectedDate ? formatSelectedDate(selectedDate) : t("employee.selectDate")}
                   </h3>
 
                   <div className="mt-4 max-h-80 overflow-y-auto space-y-4">
-                    {!selectedDate && (
-                      <p className="text-black/60">
-                        {t('employee.pickDay')}
-                      </p>
-                    )}
+                    {!selectedDate && <p className="text-black/60">{t("employee.pickDay")}</p>}
 
                     {selectedDate && projectsForSelectedDate.length === 0 && (
-                      <p className="text-black/60">{t('employee.noProjects')}</p>
+                      <p className="text-black/60">{t("employee.noProjects")}</p>
                     )}
 
                     {projectsForSelectedDate.map((project) => (
@@ -193,9 +178,7 @@ const Employee = () => {
                         className="border border-black/20 rounded-lg p-4 bg-gray-50"
                       >
                         <p className="font-semibold">{project.name}</p>
-                        <p className="text-xs text-black/60">
-                          ID: {project.projectIdentifier}
-                        </p>
+                        <p className="text-xs text-black/60">ID: {project.projectIdentifier}</p>
                         <p className="text-xs text-black/60">
                           {project.startDate} - {project.dueDate}
                         </p>
@@ -210,11 +193,8 @@ const Employee = () => {
                 </div>
               </div>
 
-              {/* BOTTOM: scrollable list of all assigned projects */}
               <div className="mt-10">
-                <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                  {t('employee.myProjects')}
-                </h3>
+                <h3 className="text-2xl font-bold mb-4 tracking-tight">{t("employee.myProjects")}</h3>
 
                 <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
                   <ProjectList
@@ -223,13 +203,19 @@ const Employee = () => {
                     employeeIndex={{}}
                     showStatusControl={true}
                     onUpdateStatus={handleUpdateStatus}
+                    showUploadInformation={true}
+                    showViewInformation={true}
+                    onUploadInformation={handleUploadInformation}
+                    getToken={() =>
+                      getAccessTokenSilently({
+                        authorizationParams: { audience: "https://vladtech/api" },
+                      })
+                    }
                   />
-
                 </div>
               </div>
             </>
           )}
-
         </section>
       </div>
     </>

@@ -6,16 +6,16 @@ const resources = {
   en: {
     translation: {
       // Common
-      "loading": "Loading...",
-      "submit": "Submit",
-      "close": "Close",
-      "cancel": "Cancel",
-      "save": "Save",
-      "delete": "Delete",
-      "edit": "Edit",
-      "add": "ADD",
-      "yes": "Yes",
-      "no": "No",
+      loading: "Loading...",
+      submit: "Submit",
+      close: "Close",
+      cancel: "Cancel",
+      save: "Save",
+      delete: "Delete",
+      edit: "Edit",
+      add: "ADD",
+      yes: "Yes",
+      no: "No",
 
       // Navigation
       "nav.portfolio": "PORTFOLIO",
@@ -41,11 +41,15 @@ const resources = {
       "home.whoWeAre": "Who We Are",
       "home.leadingProvider": "Leading provider of cutting-edge construction and engineering solutions.",
       "home.ourMission": "Our Mission",
-      "home.missionText": "To revolutionize construction through technology, delivering projects that exceed expectations in quality, efficiency, and sustainability.",
+      "home.missionText":
+        "To revolutionize construction through technology, delivering projects that exceed expectations in quality, efficiency, and sustainability.",
       "home.ourApproach": "Our Approach",
-      "home.approachText": "Combining traditional craftsmanship with modern innovation, we create spaces that inspire and endure.",
-      "home.aboutParagraph1": "At VLADTECH, we're committed to transforming your vision into reality. With decades of combined experience in construction, engineering, and technology integration, our team delivers excellence in every project.",
-      "home.aboutParagraph2": "We believe in innovation, quality, and building lasting relationships with our clients. From concept to completion, we're with you every step of the way.",
+      "home.approachText":
+        "Combining traditional craftsmanship with modern innovation, we create spaces that inspire and endure.",
+      "home.aboutParagraph1":
+        "At VLADTECH, we're committed to transforming your vision into reality. With decades of combined experience in construction, engineering, and technology integration, our team delivers excellence in every project.",
+      "home.aboutParagraph2":
+        "We believe in innovation, quality, and building lasting relationships with our clients. From concept to completion, we're with you every step of the way.",
       "home.featuredWork": "Featured Work",
       "home.viewGallery": "View Full Gallery",
       "home.metrics": "METRICS",
@@ -62,8 +66,10 @@ const resources = {
       "home.yourIdeas": "Your Ideas. We Realize.",
       "home.portfolio": "PORTFOLIO",
       "home.createEstimate": "CREATE ESTIMATE",
-      "home.expertiseText": "Based in the heart of innovation with expertise spanning construction, engineering, and technology integration for tomorrow's infrastructure.",
-      "home.executionText": "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
+      "home.expertiseText":
+        "Based in the heart of innovation with expertise spanning construction, engineering, and technology integration for tomorrow's infrastructure.",
+      "home.executionText":
+        "From initial idea to final execution, we work with you to craft solutions that stand the test of time. We develop. We get it done. Really.",
 
       // Admin Page
       "admin.title": "Admin Area - Only for Admin Role",
@@ -78,8 +84,8 @@ const resources = {
       "admin.selectDate": "Select a date on the calendar",
       "admin.pickDay": "Pick a day to see its projects.",
       "admin.noProjects": "No projects scheduled for this date.",
-      "admin.projectCompleted": "Project \"{{name}}\" has been marked as complete.",
-      "admin.projectReactivated": "Project \"{{name}}\" has been reactivated.",
+      "admin.projectCompleted": 'Project "{{name}}" has been marked as complete.',
+      "admin.projectReactivated": 'Project "{{name}}" has been reactivated.',
       "admin.portfolioCreated": "Portfolio item created successfully!",
       "admin.portfolioDeleted": "Portfolio item deleted successfully!",
       "admin.failedFetchActive": "Failed to fetch active projects.",
@@ -174,6 +180,19 @@ const resources = {
       "estimate.greaterThanZero": "must be greater than 0",
       "estimate.validNumber": "must be a valid number",
 
+      // Project list / upload info (kept from your conflict)
+      "project.uploadInformation": "Upload Information",
+      "project.viewInformation": "View Information",
+      "project.noInformationYet": "No information uploaded yet.",
+      "project.informationAvailable": "Information uploaded.",
+      "project.comments": "Comments",
+      "project.noComments": "No comments.",
+      "project.commentsPlaceholder": "Write what you did today...",
+      "project.choosePhoto": "Choose a photo",
+      "project.noFileChosen": "No file chosen",
+      "project.workProof": "Work proof",
+      "project.imageFailedToLoad": "Image failed to load.",
+
       // Project Modal
       "project.newProject": "New Project",
       "project.editProject": "Edit Project",
@@ -218,11 +237,14 @@ const resources = {
       "project.priorityMedium": "MEDIUM",
       "project.priorityHigh": "HIGH",
       "project.priorityUrgent": "URGENT",
+
+      // Cost fields (kept from main)
       "project.estimatedCost": "Final Cost",
       "project.currency": "Currency",
       "project.costPositiveError": "Cost must be a positive number",
-      "calendar.today": "today",
 
+      // Calendar
+      "calendar.today": "today",
 
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
@@ -250,21 +272,21 @@ const resources = {
       "roleFinder.previous": "Previous",
       "roleFinder.next": "Next",
       "roleFinder.pageOf": "Page {{current}} of {{total}}",
-    }
+    },
   },
   fr: {
     translation: {
       // Common
-      "loading": "Chargement...",
-      "submit": "Soumettre",
-      "close": "Fermer",
-      "cancel": "Annuler",
-      "save": "Sauvegarder",
-      "delete": "Supprimer",
-      "edit": "Modifier",
-      "add": "AJOUTER",
-      "yes": "Oui",
-      "no": "Non",
+      loading: "Chargement...",
+      submit: "Soumettre",
+      close: "Fermer",
+      cancel: "Annuler",
+      save: "Sauvegarder",
+      delete: "Supprimer",
+      edit: "Modifier",
+      add: "AJOUTER",
+      yes: "Oui",
+      no: "Non",
 
       // Navigation
       "nav.portfolio": "PORTFOLIO",
@@ -288,13 +310,18 @@ const resources = {
       "home.transformingVision": "Transformer la Vision en Réalité",
       "home.about": "À PROPOS",
       "home.whoWeAre": "Qui Nous Sommes",
-      "home.leadingProvider": "Premier fournisseur de solutions de construction et d'ingénierie de pointe.",
+      "home.leadingProvider":
+        "Premier fournisseur de solutions de construction et d'ingénierie de pointe.",
       "home.ourMission": "Notre Mission",
-      "home.missionText": "Révolutionner la construction grâce à la technologie, en livrant des projets qui dépassent les attentes en qualité, efficacité et durabilité.",
+      "home.missionText":
+        "Révolutionner la construction grâce à la technologie, en livrant des projets qui dépassent les attentes en qualité, efficacité et durabilité.",
       "home.ourApproach": "Notre Approche",
-      "home.approachText": "Combinant l'artisanat traditionnel avec l'innovation moderne, nous créons des espaces qui inspirent et perdurent.",
-      "home.aboutParagraph1": "Chez VLADTECH, nous nous engageons à transformer votre vision en réalité. Avec des décennies d'expérience combinée en construction, ingénierie et intégration technologique, notre équipe offre l'excellence dans chaque projet.",
-      "home.aboutParagraph2": "Nous croyons en l'innovation, la qualité et l'établissement de relations durables avec nos clients. Du concept à l'achèvement, nous sommes avec vous à chaque étape.",
+      "home.approachText":
+        "Combinant l'artisanat traditionnel avec l'innovation moderne, nous créons des espaces qui inspirent et perdurent.",
+      "home.aboutParagraph1":
+        "Chez VLADTECH, nous nous engageons à transformer votre vision en réalité. Avec des décennies d'expérience combinée en construction, ingénierie et intégration technologique, notre équipe offre l'excellence dans chaque projet.",
+      "home.aboutParagraph2":
+        "Nous croyons en l'innovation, la qualité et l'établissement de relations durables avec nos clients. Du concept à l'achèvement, nous sommes avec vous à chaque étape.",
       "home.featuredWork": "Portfolio",
       "home.viewGallery": "Voir la Galerie Complète",
       "home.metrics": "MÉTRIQUES",
@@ -311,8 +338,10 @@ const resources = {
       "home.yourIdeas": "Vos Idées. Nous Réalisons.",
       "home.portfolio": "PORTFOLIO",
       "home.createEstimate": "ESTIMER",
-      "home.expertiseText": "Basé au cœur de l'innovation avec une expertise couvrant la construction, l'ingénierie et l'intégration technologique pour les infrastructures de demain.",
-      "home.executionText": "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
+      "home.expertiseText":
+        "Basé au cœur de l'innovation avec une expertise couvrant la construction, l'ingénierie et l'intégration technologique pour les infrastructures de demain.",
+      "home.executionText":
+        "De l'idée initiale à l'exécution finale, nous travaillons avec vous pour créer des solutions qui résistent à l'épreuve du temps. Nous développons. Nous le faisons. Vraiment.",
 
       // Admin Page
       "admin.title": "Zone Admin - Réservé au rôle Admin",
@@ -327,8 +356,8 @@ const resources = {
       "admin.selectDate": "Sélectionnez une date sur le calendrier",
       "admin.pickDay": "Choisissez un jour pour voir ses projets.",
       "admin.noProjects": "Aucun projet prévu pour cette date.",
-      "admin.projectCompleted": "Le projet \"{{name}}\" a été marqué comme terminé.",
-      "admin.projectReactivated": "Le projet \"{{name}}\" a été réactivé.",
+      "admin.projectCompleted": 'Le projet "{{name}}" a été marqué comme terminé.',
+      "admin.projectReactivated": 'Le projet "{{name}}" a été réactivé.',
       "admin.portfolioCreated": "Élément de portfolio créé avec succès!",
       "admin.portfolioDeleted": "Élément de portfolio supprimé avec succès!",
       "admin.failedFetchActive": "Échec de la récupération des projets actifs.",
@@ -423,6 +452,19 @@ const resources = {
       "estimate.greaterThanZero": "doit être supérieur à 0",
       "estimate.validNumber": "doit être un nombre valide",
 
+      // Project list / upload info (kept from your conflict)
+      "project.uploadInformation": "Téléverser les informations",
+      "project.viewInformation": "Voir les informations",
+      "project.noInformationYet": "Aucune information n’a été téléversée.",
+      "project.informationAvailable": "Informations disponibles.",
+      "project.comments": "Commentaires",
+      "project.noComments": "Aucun commentaire.",
+      "project.commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
+      "project.choosePhoto": "Choisir une photo",
+      "project.noFileChosen": "Aucun fichier choisi",
+      "project.workProof": "Preuve du travail",
+      "project.imageFailedToLoad": "Impossible d’afficher l’image.",
+
       // Project Modal
       "project.newProject": "Nouveau Projet",
       "project.editProject": "Modifier le Projet",
@@ -467,11 +509,14 @@ const resources = {
       "project.priorityMedium": "MOYEN",
       "project.priorityHigh": "ÉLEVÉ",
       "project.priorityUrgent": "URGENT",
+
+      // Cost fields (kept from main)
       "project.estimatedCost": "Coût Final",
       "project.currency": "Devise",
       "project.costPositiveError": "Le coût doit être un nombre positif",
-      "calendar.today": "aujourd’hui",
 
+      // Calendar
+      "calendar.today": "aujourd’hui",
 
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
@@ -499,19 +544,17 @@ const resources = {
       "roleFinder.previous": "Précédent",
       "roleFinder.next": "Suivant",
       "roleFinder.pageOf": "Page {{current}} sur {{total}}",
-    }
-  }
+    },
+  },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: localStorage.getItem('language') || 'en',
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: localStorage.getItem("language") || "en",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;

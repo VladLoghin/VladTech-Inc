@@ -198,7 +198,7 @@ export default function HomePage({ onNavigate, onOpenContactModal, onOpenEstimat
 
   // NEW: compute dynamic company age (months/years)
   useEffect(() => {
-    const foundingDate = new Date("2024-01-01"); // adjust if needed
+    const foundingDate = new Date("2026-01-01"); // adjust if needed
     const now = new Date();
 
     const yearsDiff = now.getFullYear() - foundingDate.getFullYear();
