@@ -35,6 +35,7 @@ const ProjectModal = ({
   initialData = null,
   onSubmitSuccess,
   defaultDate,
+  employeeIndex = {},
 }) => {
   const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
@@ -43,7 +44,6 @@ const ProjectModal = ({
   const [submitError, setSubmitError] = useState("");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState([]);
 
   const isEdit = mode === "edit";
 
@@ -66,6 +66,9 @@ const ProjectModal = ({
         estimatedCostCurrency: initialData.estimatedCostCurrency || "CAD",
         priority: initialData.priority || "MEDIUM",
       });
+    } else if (!isEdit) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData(EMPTY_FORM);
     }
   }, [isEdit, initialData]);
 
@@ -80,6 +83,18 @@ const ProjectModal = ({
     }
   }, [defaultDate, isEdit]);
 
+  useEffect(() => {
+    if (isEdit && initialData?.assignedEmployeeIds && employeeIndex) {
+      const employees = initialData.assignedEmployeeIds
+        .map(id => employeeIndex[id])
+        .filter(emp => emp)
+        .map(emp => ({ id: emp.user_id || emp.id, email: emp.email, name: emp.name }));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedEmployee(employees);
+    } else if (!isEdit) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedEmployee([]);
+    }
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Project name is required";
@@ -245,35 +260,26 @@ const ProjectModal = ({
   };
 
   const handleSelectEmployee = (employee) => {
-    setSelectedEmployee((prev) => {
-      const exists = prev.some((e) => e.id === employee.id);
-      let updated;
-
+    setFormData((prevForm) => {
+      const currentIds = prevForm.assignedEmployeeIds || [];
+      const exists = currentIds.includes(employee.id);
+      let newIds;
       if (exists) {
-
-        updated = prev.filter((e) => e.id !== employee.id);
+        newIds = currentIds.filter(id => id !== employee.id);
       } else {
-
-        updated = [...prev, employee];
+        newIds = [...currentIds, employee.id];
       }
-
-      setFormData((prevForm) => ({
+      return {
         ...prevForm,
-        assignedEmployeeIds: updated.map((e) => e.id),
-
-        assignedEmployeeEmails: updated.map((e) => e.email),
-      }));
-
-      return updated;
+        assignedEmployeeIds: newIds,
+      };
     });
   };
 
   const handleClearEmployee = () => {
-    setSelectedEmployee([]);
     setFormData((prev) => ({
       ...prev,
       assignedEmployeeIds: [],
-      assignedEmployeeEmails: [],
     }));
   };
 
@@ -288,7 +294,7 @@ const ProjectModal = ({
   if (!isOpen) return null;
 
   return (
-    <>
+    <div>
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
         <div className="bg-white border-2 border-yellow-400 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
           <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">
@@ -360,12 +366,12 @@ const ProjectModal = ({
                   onClick={() => setIsEmployeeModalOpen(true)}
                   className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
                 >
-                  {selectedEmployee.length > 0 ? (
+                  {formData.assignedEmployeeIds?.length > 0 ? (
                     <div className="text-sm text-black/80">
-                      {selectedEmployee.map((e) => e.email).join(", ")}
+                      Selected
                     </div>
                   ) : (
-                    t('project.selectEmployees')
+                    'Select Employees'
                   )}
 
                 </button>
@@ -537,7 +543,7 @@ const ProjectModal = ({
         </div>
       </div>
 
-      <ClientFinderModal
+      {/* <ClientFinderModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
         onSelectClient={handleSelectClient}
@@ -548,8 +554,8 @@ const ProjectModal = ({
         onClose={() => setIsEmployeeModalOpen(false)}
         selectedEmployeeIds={formData.assignedEmployeeIds}
         onToggleEmployee={handleSelectEmployee}
-      />
-    </>
+      /> */}
+    </div>
   );
 };
 
