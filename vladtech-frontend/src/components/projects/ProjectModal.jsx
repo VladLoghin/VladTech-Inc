@@ -85,18 +85,18 @@ const ProjectModal = ({
   }, [defaultDate, isEdit]);
 
   useEffect(() => {
-    if (isEdit && initialData?.assignedEmployeeIds && employeeIndex) {
+    if (isOpen && isEdit && initialData?.assignedEmployeeIds && employeeIndex) {
       const employees = initialData.assignedEmployeeIds
         .map(id => employeeIndex[id])
         .filter(emp => emp)
         .map(emp => ({ id: emp.user_id || emp.id, email: emp.email, name: emp.name }));
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedEmployee(employees);
-    } else if (!isEdit) {
+    } else if (isOpen && !isEdit) {
        
       setSelectedEmployee([]);
     }
-  }, [isEdit, initialData, employeeIndex]);
+  }, [isOpen, isEdit, initialData, employeeIndex]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -378,20 +378,24 @@ const ProjectModal = ({
                   onClick={() => setIsEmployeeModalOpen(true)}
                   className="flex-1 px-4 py-3 border-2 border-black/20 rounded-lg text-left hover:bg-black/5 transition-colors"
                 >
-                  {selectedEmployee.length > 0 ? (
-                    selectedEmployee.map(emp => (
-                      <div key={emp.id}>
-                        <div className="font-medium">{emp.name}</div>
-                        <div className="text-sm text-black/60">{emp.email}</div>
-                      </div>
-                    ))
+                  {formData.assignedEmployeeIds?.length > 0 ? (
+                    formData.assignedEmployeeIds.map(id => {
+                      const emp = employeeIndex[id];
+                      if (!emp) return null;
+                      return (
+                        <div key={id}>
+                          <div className="font-medium">{emp.name}</div>
+                          <div className="text-sm text-black/60">{emp.email}</div>
+                        </div>
+                      );
+                    }).filter(Boolean)
                   ) : (
                     t('project.selectEmployees')
                   )}
 
                 </button>
 
-                {selectedEmployee.length > 0 && (
+                {formData.assignedEmployeeIds?.length > 0 && (
                   <button
                     type="button"
                     onClick={handleClearEmployee}
