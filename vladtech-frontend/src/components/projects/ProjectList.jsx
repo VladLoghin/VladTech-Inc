@@ -137,7 +137,7 @@ const ProjectList = ({
   };
 
   const submitUpload = async () => {
-    if (!activeProject || !file) return;
+    if (!activeProject || (!file && !comments.trim())) return;
     try {
       setUploading(true);
       await onUploadInformation?.(activeProject, file, comments);
@@ -476,7 +476,7 @@ const ProjectList = ({
 
             <div>
               <label className="block text-sm font-semibold text-black/60 mb-2">
-                {t("project.choosePhoto", { defaultValue: "Choose a photo" })}
+                {t("project.choosePhotoOptional", { defaultValue: "Choose a photo (optional)" })}
               </label>
 
               <input
@@ -492,7 +492,7 @@ const ProjectList = ({
                   htmlFor={fileInputId}
                   className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-black/80"
                 >
-                  {t("project.choosePhoto", { defaultValue: "Choose a photo" })}
+                  {t("project.choosePhotoOptional", { defaultValue: "Choose a photo (optional)" })}
                 </label>
 
                 <span className="text-sm text-black/60">
@@ -504,8 +504,8 @@ const ProjectList = ({
             <button
               type="button"
               onClick={submitUpload}
-              disabled={!file || uploading}
-              className={`w-full px-4 py-2 rounded-lg font-semibold ${!file || uploading
+              disabled={(!file && !comments.trim()) || uploading}
+              className={`w-full px-4 py-2 rounded-lg font-semibold ${(!file && !comments.trim()) || uploading
                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                 : "bg-yellow-400 text-black hover:bg-yellow-500"
                 }`}
