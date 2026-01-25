@@ -429,6 +429,39 @@ class ProjectServiceImplTest {
     }
 
     @Test
+    void getProjectStats_ShouldReturnCorrectStats() {
+        // Arrange
+        when(projectRepository.count()).thenReturn(10L);
+        when(projectRepository.countByStatusAndStateNot(ProjectStatus.PENDING, ProjectState.COMPLETE)).thenReturn(2L);
+        when(projectRepository.countByStatusAndStateNot(ProjectStatus.IN_PROGRESS, ProjectState.COMPLETE)).thenReturn(3L);
+        when(projectRepository.countByStatusAndStateNot(ProjectStatus.COMPLETED, ProjectState.COMPLETE)).thenReturn(5L);
+        when(projectRepository.countByStateNot(ProjectState.COMPLETE)).thenReturn(5L);
+        when(projectRepository.countByState(ProjectState.COMPLETE)).thenReturn(5L);
+        when(projectRepository.countByDueDateBeforeAndStatusNotAndStateNot(any(LocalDate.class), eq(ProjectStatus.COMPLETED), eq(ProjectState.COMPLETE))).thenReturn(1L);
+
+        // Act
+        ProjectStatsResponseModel result = projectService.getProjectStats();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(10L, result.getTotalProjects());
+        assertEquals(2L, result.getPendingCount());
+        assertEquals(3L, result.getInProgressCount());
+        assertEquals(5L, result.getCompletedCount());
+        assertEquals(5L, result.getActiveCount());
+        assertEquals(5L, result.getArchivedCount());
+        assertEquals(1L, result.getOverdueCount());
+
+        verify(projectRepository, times(1)).count();
+        verify(projectRepository, times(1)).countByStatusAndStateNot(ProjectStatus.PENDING, ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByStatusAndStateNot(ProjectStatus.IN_PROGRESS, ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByStatusAndStateNot(ProjectStatus.COMPLETED, ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByStateNot(ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByState(ProjectState.COMPLETE);
+        verify(projectRepository, times(1)).countByDueDateBeforeAndStatusNotAndStateNot(any(LocalDate.class), eq(ProjectStatus.COMPLETED), eq(ProjectState.COMPLETE));
+    }
+
+    @Test
     void assignEmployee_addsNewEmployeeAndSaves() {
         String projectId = "PROJ-1";
         String employeeId = "auth0|emp-1";

@@ -3,6 +3,7 @@ package org.example.vladtech.projectsubdomain.businesslayer;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.Project;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectRequestModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectResponseModel;
+import org.example.vladtech.projectsubdomain.presentationlayer.ProjectStatsResponseModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.PhotoResponseModel;
 import org.example.vladtech.projectsubdomain.presentationlayer.ProjectCalendarEntryResponseModel;
 import java.util.List;
@@ -42,7 +43,9 @@ public interface ProjectService {
 
         ProjectResponseModel reactivateProject(String projectIdentifier);
 
-        List<ProjectResponseModel> getActiveProjects();
+    ProjectStatsResponseModel getProjectStats();
+
+    List<ProjectResponseModel> getActiveProjects();
 
         List<ProjectResponseModel> getArchivedProjects();
 
