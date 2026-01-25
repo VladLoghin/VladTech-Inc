@@ -44,7 +44,7 @@ const ProjectModal = ({
   const [submitError, setSubmitError] = useState("");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState([]);
+  const [_selectedEmployee, setSelectedEmployee] = useState([]);
 
   const isEdit = mode === "edit";
 
