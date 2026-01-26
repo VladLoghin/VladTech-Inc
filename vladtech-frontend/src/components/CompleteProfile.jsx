@@ -19,7 +19,7 @@ export default function CompleteProfile({ onComplete }) {
     const token = await getAccessTokenSilently();
 
     await axios.patch(
-      `http://localhost:8080/api/user-profile/${user.sub}`,
+      `/api/user-profile/${user.sub}`,
       form,
       {
         headers: {

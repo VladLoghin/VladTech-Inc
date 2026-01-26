@@ -7,7 +7,7 @@ const CallApiButton = () => {
   const callApi = async () => {
     const token = await getAccessTokenSilently();
 
-    const res = await axios.get("http://localhost:8080/api/private", {
+    const res = await axios.get("/api/private", {
       headers: {
         Authorization: `Bearer ${token}`
       }
