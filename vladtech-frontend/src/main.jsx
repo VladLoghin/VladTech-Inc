@@ -6,5 +6,7 @@ import "./globals.css";
 import "./i18n"; // Initialize i18next
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <App />
+  <Auth0ProviderWithConfig>
+    <App />
+  </Auth0ProviderWithConfig>
 );
