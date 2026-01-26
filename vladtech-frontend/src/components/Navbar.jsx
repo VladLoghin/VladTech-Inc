@@ -7,6 +7,7 @@ import { LogIn, LogOut, Menu, X } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import UserMenu from "./UserMenu.jsx";
 import MobileUserProfile from "./MobileUserProfile.jsx";
+import { motion } from "motion/react";
 
 const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks = false }) => {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
@@ -238,6 +239,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             <MobileUserProfile
               user={user}
               isNavbarDark={isNavbarDark}
+              t={t}
             />
           )}
 
