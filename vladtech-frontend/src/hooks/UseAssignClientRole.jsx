@@ -19,7 +19,7 @@ export default function useAssignClientRole() {
         console.log("Token:", token);
 
         const res = await axios.patch(
-          `http://localhost:8080/api/role-assignment/users/${user.sub}/roles/client`,
+          `/api/role-assignment/users/${user.sub}/roles/client`,
           {},
           {
             headers: {
