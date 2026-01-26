@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react"; // eslint-disable-line no-unused-vars
 
 export default function UserMenu({ user, isNavbarDark = false, t }) {
   const [open, setOpen] = useState(false);
