@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useTranslation } from "react-i18next";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
-import { motion } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import UserMenu from "./UserMenu.jsx";
 import MobileUserProfile from "./MobileUserProfile.jsx";

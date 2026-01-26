@@ -166,11 +166,7 @@ export default function HomePage({
 
   // Compute company age
   useEffect(() => {
-<<<<<<< HEAD
     const foundingDate = new Date("2026-01-01"); // adjust if needed
-=======
-    const foundingDate = new Date("2024-01-01");
->>>>>>> 9195276 (finished fe feature)
     const now = new Date();
 
     const yearsDiff = now.getFullYear() - foundingDate.getFullYear();

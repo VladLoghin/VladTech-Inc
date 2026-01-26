@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence } from "motion/react";
 
 export default function UserMenu({ user, isNavbarDark = false, t }) {
   const [open, setOpen] = useState(false);
