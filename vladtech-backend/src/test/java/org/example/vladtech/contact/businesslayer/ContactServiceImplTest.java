@@ -44,7 +44,8 @@ class ContactServiceImplTest {
                 "Footer",
                 "Jane Client",
                 "client@example.com",
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "Jane Client"
         );
 
         when(mapper.toContactEmail(dto)).thenReturn(mappedEmail);
