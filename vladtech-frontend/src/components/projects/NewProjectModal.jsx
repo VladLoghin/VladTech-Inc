@@ -46,6 +46,15 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
       newErrors.estimatedCost = "Cost must be a positive number";
     }
 
+    if (formData.startDate && formData.dueDate) {
+      const start = new Date(formData.startDate);
+      const due = new Date(formData.dueDate);
+      if (start > due) {
+        newErrors.startDate = "Start date cannot be after due date";
+        newErrors.dueDate = "Due date cannot be before start date";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -284,6 +293,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               />
+              {errors.startDate && <span className="text-red-600 text-sm mt-1 block">{errors.startDate}</span>}
             </div>
 
             <div className="mb-5">
