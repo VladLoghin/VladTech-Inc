@@ -45,7 +45,7 @@ const Admin = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const index = {};
-      response.data.forEach((emp) => {
+      (response.data.users || response.data).forEach((emp) => {
         // emp.user_id is from auth0, often has "auth0|" prefix
         // The backend might return standard user objects. 
         // We'll index by user_id or id.
@@ -377,6 +377,7 @@ const Admin = () => {
           initialData={editProject}
           onSubmitSuccess={fetchProjects}
           defaultDate={selectedDate}
+          employeeIndex={employeeIndex}
         />
 
         {/* Stats Section */}
