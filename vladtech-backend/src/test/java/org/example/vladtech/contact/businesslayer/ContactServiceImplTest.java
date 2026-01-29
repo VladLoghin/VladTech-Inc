@@ -44,17 +44,18 @@ class ContactServiceImplTest {
                 "Footer",
                 "Jane Client",
                 "client@example.com",
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                "Jane Client"
         );
 
-        when(mapper.toContactEmail(dto)).thenReturn(mappedEmail);
+        when(mapper.toContactEmail(dto, mappedEmail.getSenderName(), mappedEmail.getClientEmail())).thenReturn(mappedEmail);
 
         // Act
-        contactService.sendContactMessage(dto);
+        contactService.sendContactMessage(dto, mappedEmail.getSenderName(), mappedEmail.getClientEmail());
 
         // Assert
-        verify(mapper).toContactEmail(dto);
-        verify(emailSender).send(mappedEmail);
+        verify(mapper).toContactEmail(dto, mappedEmail.getSenderName(), mappedEmail.getClientEmail());
+        verify(emailSender).send(mappedEmail, mappedEmail.getSenderName());
         verifyNoMoreInteractions(mapper, emailSender);
     }
 }

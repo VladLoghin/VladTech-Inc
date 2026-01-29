@@ -7,7 +7,13 @@ public class ContactRequestDto {
     private String subject;     // title
     private String message;     // main message body
 
+    private String userName;
+
     public ContactRequestDto() {
+    }
+
+    private String safe(String userName) {
+        return userName == null ? "Unknown" : userName.trim();
     }
 
     public String getEmail() {
@@ -40,5 +46,13 @@ public class ContactRequestDto {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUserName() {
+        return safe(userName);
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

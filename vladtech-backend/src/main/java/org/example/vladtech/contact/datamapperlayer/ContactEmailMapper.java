@@ -17,28 +17,29 @@ public class ContactEmailMapper {
         this.adminEmail = adminEmail;
     }
 
-    // Map the incoming DTO from the frontend to our domain object
-    public ContactEmail toContactEmail(ContactRequestDto requestDto) {
+    public ContactEmail toContactEmail(ContactRequestDto requestDto, String senderName, String senderEmail) {
         if (requestDto == null) {
             throw new IllegalArgumentException("requestDto cannot be null");
         }
 
-        String header = "New contact request from " + safe(requestDto.getName());
-        String body = requestDto.getMessage();
-        String footer = "Reply to: " + safe(requestDto.getEmail());
+        String header = "New contact request from " + safe(senderName);
+        String body = safe(requestDto.getMessage());
+        String footer = "Reply to: " + safe(senderName);
 
         return new ContactEmail(
-                adminEmail, // destinary admin inbox
-                requestDto.getSubject(), // title
-                TEMPLATE_NAME, // templateName
+                adminEmail,
+                safe(requestDto.getSubject()),
+                TEMPLATE_NAME,
                 header,
                 body,
                 footer,
-                requestDto.getName(), // senderName
-                requestDto.getEmail(), // senderEmail
-                LocalDateTime.now() // sentDate
+                safe(senderName),
+                safe(senderEmail),
+                LocalDateTime.now(),
+                safe(requestDto.getName())
         );
     }
+
 
     // Build a simple HTML version of the email
     public String toHtml(ContactEmail email) {

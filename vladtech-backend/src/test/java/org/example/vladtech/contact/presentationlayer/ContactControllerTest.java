@@ -1,22 +1,26 @@
 package org.example.vladtech.contact.presentationlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.vladtech.auth.service.UserManagementService;
 import org.example.vladtech.contact.businesslayer.ContactService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.http.MediaType;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ContactController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc // ✅ filters ON (default)
 class ContactControllerTest {
 
     @Autowired
@@ -25,28 +29,36 @@ class ContactControllerTest {
     @MockitoBean
     private ContactService contactService;
 
+    @MockitoBean
+    private UserManagementService userManagementService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     void sendContact_returnsOk() throws Exception {
-        // Arrange: build a DTO like the real API expects
         ContactRequestDto dto = new ContactRequestDto();
         dto.setEmail("client@example.com");
-        dto.setName("John Doe");
+        dto.setName("");
         dto.setSubject("Test Subject");
         dto.setMessage("Hello from test");
 
         String json = objectMapper.writeValueAsString(dto);
 
-        // Act + Assert
-        mockMvc.perform(
-                        post("/api/contact")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json)
-                )
-                .andExpect(status().isOk());
+        // Controller calls: userManagementService.getUserNameById(userId)
+        when(userManagementService.getUserNameById("auth0|test-user-123"))
+                .thenReturn(""); // force fallback to email prefix
 
-        verify(contactService).sendContactMessage(any(ContactRequestDto.class));
+        mockMvc.perform(
+                post("/api/contact")
+                        .with(jwt().jwt(j -> {
+                            j.subject("auth0|test-user-123");
+                            j.claim("email", "client@example.com");
+                        }))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect(status().isOk());
+
+        verify(contactService).sendContactMessage(any(ContactRequestDto.class), eq("client"), eq("client@example.com"));
     }
 }

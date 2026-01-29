@@ -25,9 +25,10 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    RestTemplate restTemplate() {
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -51,9 +52,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/estimates/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/uploads/**").permitAll()
-
-
-
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
@@ -62,9 +60,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
-
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {

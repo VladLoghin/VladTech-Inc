@@ -95,7 +95,6 @@ export default function HomePage({
   const [ageValue, setAgeValue] = useState<string>("10+");
   const [ageUnit, setAgeUnit] = useState<string>("MONTHS");
   const [satisfactionPercentage, setSatisfactionPercentage] = useState<number | null>(null);
-  const [publicMessage, setPublicMessage] = useState<string>("");
 
   useEffect(() => {
     const fetchProjectCount = async () => {
@@ -123,17 +122,7 @@ export default function HomePage({
     fetchSatisfactionPercentage();
   }, []);
 
-  useEffect(() => {
-    const fetchPublicMessage = async () => {
-      try {
-        const response = await api.get("/public/hello");
-        setPublicMessage(response.data);
-      } catch (error) {
-        console.error("Failed to fetch public message:", error);
-      }
-    };
-    fetchPublicMessage();
-  }, []);
+ 
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -283,11 +272,6 @@ export default function HomePage({
               {t("home.yourIdeas")}
             </p>
 
-            {publicMessage && (
-              <p className="text-lg md:text-xl text-yellow-400 tracking-wide mt-4 font-semibold">
-                {publicMessage}
-              </p>
-            )}
           </motion.div>
 
           {/* CTA Buttons */}

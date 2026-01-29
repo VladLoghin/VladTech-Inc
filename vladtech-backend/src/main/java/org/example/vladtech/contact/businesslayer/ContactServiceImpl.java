@@ -19,11 +19,11 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public void sendContactMessage(ContactRequestDto requestDto) {
-        // 1. Convert DTO (what frontend sends) → domain object
-        ContactEmail contactEmail = mapper.toContactEmail(requestDto);
+    public void sendContactMessage(ContactRequestDto requestDto, String name, String senderEmail) {
+        // Convert DTO → domain object with user's name
+        ContactEmail contactEmail = mapper.toContactEmail(requestDto, name, senderEmail);
 
-        // 2. Ask data access layer to send the email (MailHog)
-        emailSender.send(contactEmail);
+        // Send the email
+        emailSender.send(contactEmail, name);
     }
 }

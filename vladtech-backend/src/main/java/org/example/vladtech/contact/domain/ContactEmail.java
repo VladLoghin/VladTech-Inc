@@ -14,6 +14,8 @@ public class ContactEmail {
     private String clientEmail;    // actual email of the client
     private LocalDateTime sentDate;
 
+    private String name;
+
     public ContactEmail(String destinary,
                         String title,
                         String templateName,
@@ -22,7 +24,8 @@ public class ContactEmail {
                         String footer,
                         String senderName,
                         String clientEmail,
-                        LocalDateTime sentDate) {
+                        LocalDateTime sentDate,
+                        String name) {
         this.destinary = destinary;
         this.title = title;
         this.templateName = templateName;
@@ -32,6 +35,7 @@ public class ContactEmail {
         this.senderName = senderName;
         this.clientEmail = clientEmail;
         this.sentDate = sentDate;
+        this.name = name;
     }
 
     public String getDestinary() {
@@ -69,4 +73,6 @@ public class ContactEmail {
     public LocalDateTime getSentDate() {
         return sentDate;
     }
+
+    public String getName() { return name; }
 }

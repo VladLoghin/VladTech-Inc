@@ -2,6 +2,7 @@ package org.example.vladtech.contact.dataaccesslayer;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.example.vladtech.auth.dataaccess.UserProfile;
 import org.example.vladtech.contact.domain.ContactEmail;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +22,7 @@ public class SmtpContactEmailSender implements ContactEmailSender {
     }
 
     @Override
-    public void send(ContactEmail email) {
+    public void send(ContactEmail email, String name) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
@@ -35,7 +36,7 @@ public class SmtpContactEmailSender implements ContactEmailSender {
 
             helper.setTo(email.getDestinary());
             helper.setSubject(email.getTitle());
-            helper.setText(buildHtmlBody(email), true); // true = HTML
+            helper.setText(buildHtmlBody(email, name), true); // true = HTML
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
@@ -43,7 +44,7 @@ public class SmtpContactEmailSender implements ContactEmailSender {
         }
     }
 
-    private String buildHtmlBody(ContactEmail email) {
+    private String buildHtmlBody(ContactEmail email, String name) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
         sb.append("<h2>").append(email.getHeader()).append("</h2>");
@@ -51,10 +52,11 @@ public class SmtpContactEmailSender implements ContactEmailSender {
         sb.append("<hr/>");
         sb.append("<p>").append(email.getFooter()).append("</p>");
         sb.append("<p>Sent by ")
-                .append(email.getSenderName())
+                .append(name)
                 .append(" at ")
                 .append(email.getSentDate())
                 .append("</p>");
+
         sb.append("</body></html>");
         return sb.toString();
     }
