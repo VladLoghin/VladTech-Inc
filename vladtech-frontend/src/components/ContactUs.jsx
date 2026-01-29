@@ -16,7 +16,7 @@ function ContactUs({ isOpen, onClose }) {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [profileName, setProfileName] = useState("")
-  const [loadingName, setLoadingName] = useState(false)
+  const [setLoadingName] = useState(false)
 
   const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0()
   const isFormInvalid = subject.trim() === "" || details.trim() === "";
