@@ -6,6 +6,7 @@ import { Input } from "./input"
 import { Textarea } from "./textarea"
 import { Button } from "./button"
 import { Send, X } from "lucide-react"
+import { api } from "../api/http"
 
 function ContactUs({ isOpen, onClose }) {
   const { t } = useTranslation();
@@ -14,6 +15,8 @@ function ContactUs({ isOpen, onClose }) {
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+  const [profileName, setProfileName] = useState("")
+  const [loadingName, setLoadingName] = useState(false)
 
   const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0()
   const isFormInvalid = subject.trim() === "" || details.trim() === "";
@@ -21,10 +24,49 @@ function ContactUs({ isOpen, onClose }) {
   // Redirect to login if modal opens and user is not authenticated
   useEffect(() => {
     if (isOpen && !isAuthenticated) {
-      onClose(); // Close the modal first
-      loginWithRedirect(); // Redirect to login
+      onClose();
+      loginWithRedirect();
     }
   }, [isOpen, isAuthenticated, onClose, loginWithRedirect]);
+
+  // Fetch profile name when modal opens
+  useEffect(() => {
+    if (!isOpen || !user) return;
+
+    const fetchProfileName = async () => {
+      setLoadingName(true);
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: "https://vladtech/api",
+          },
+        });
+
+        const userId = user?.sub || user?.id;
+        const res = await api.get("/public/profile", {
+          params: { userId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // If response is a JSON object with name/nickname property
+        if (typeof res?.data === "object") {
+          setProfileName(res.data.name || res.data.nickname || user?.name || "");
+        } else {
+          // Fallback for string response
+          const text = res?.data ?? "";
+          const cleaned = typeof text === "string" ? text.replace(/^User Name:\s*/i, "") : "";
+          setProfileName(cleaned || user?.name || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile name:", err);
+        setProfileName(user?.name || "");
+      } finally {
+        setLoadingName(false);
+      }
+    };
+
+    fetchProfileName();
+  }, [isOpen, user, getAccessTokenSilently]);
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,19 +81,17 @@ function ContactUs({ isOpen, onClose }) {
     try {
       setIsSending(true)
 
-      // Get JWT from Auth0 for the backend
       const token = await getAccessTokenSilently({
         authorizationParams: {
           audience: "https://vladtech/api",
         },
       })
 
-      // Backend DTO fields:
-      // email, name, subject, message
+      // Use profileName from the database
       const payload = {
         subject,
         message: details,
-        name: user?.name || user?.nickname || "",
+        name: profileName || user?.name || user?.nickname || "",
         email: user?.email || "",
       }
 
@@ -71,7 +111,6 @@ function ContactUs({ isOpen, onClose }) {
       setSuccess(true)
       setSubject("")
       setDetails("")
-      // Close modal after successful send
       setTimeout(() => {
         onClose()
         setSuccess(false)

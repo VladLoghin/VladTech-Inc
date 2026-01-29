@@ -51,10 +51,11 @@ class SmtpContactEmailSenderTest {
                 "Reply to: client@example.com",
                 "Jane", // senderName
                 "client@example.com", // clientEmail
-                LocalDateTime.now());
+                LocalDateTime.now(),
+                "Jane Client");
 
         // Act
-        smtpContactEmailSender.send(email);
+        smtpContactEmailSender.send(email, email.getSenderName());
 
         // Assert: From should be the noreply email (verified sender in SMTP2GO)
         InternetAddress from = (InternetAddress) mimeMessage.getFrom()[0];

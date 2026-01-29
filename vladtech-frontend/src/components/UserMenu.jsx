@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Pencil } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react"; // eslint-disable-line no-unused-vars
+import { api } from "../api/http";
 
 export default function UserMenu({ user, isNavbarDark = false, t }) {
+  const { getAccessTokenSilently } = useAuth0();
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
+  const [loadingName, setLoadingName] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const inputRef = useRef(null);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -18,6 +26,67 @@ export default function UserMenu({ user, isNavbarDark = false, t }) {
     document.addEventListener("mousedown", onMouseDown);
     return () => document.removeEventListener("mousedown", onMouseDown);
   }, [open]);
+
+  // Fetch profile name when menu opens
+  useEffect(() => {
+    const syncProfile = async () => {
+      if (open && user) {
+        try {
+          const token = await getAccessTokenSilently();
+
+          // Sync profile first
+          await api.post("/public/sync-profile", null, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          setLoadingName(true);
+          const response = await api.get("/public/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const match = response.data.match(/User Name: (.+)/);
+          setName(match ? match[1] : "");
+        } catch (error) {
+          console.error("Failed to sync/fetch profile:", error);
+          setNameError(t?.("failedToLoadName") || "Failed to load name");
+        } finally {
+          setLoadingName(false);
+        }
+      }
+    };
+
+    syncProfile();
+  }, [open, user, getAccessTokenSilently, t]);
+
+  const handleSaveName = async () => {
+    if (!name?.trim()) {
+      setNameError(t?.("errors.invalidName") || "Name cannot be empty");
+      return;
+    }
+
+    setSavingName(true);
+    setNameError("");
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: "https://vladtech/api", // ensure audience is requested
+        },
+      });
+
+      await api.patch(
+        "/public/profile/update-name",
+        { name: name.trim() }, // ← Only send name, not userId
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setIsEditingName(false);
+    } catch (error) {
+      console.error("Failed to save name:", error);
+      setNameError(t?.("errors.saveName") || "Failed to save name");
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const initialLetter = (user?.name || user?.email || "?").charAt(0).toUpperCase();
 
@@ -38,7 +107,6 @@ export default function UserMenu({ user, isNavbarDark = false, t }) {
         )}
       </button>
 
-      {/* Only show dropdown menu if user is authenticated */}
       {user && (
         <AnimatePresence>
           {open && (
@@ -83,7 +151,10 @@ export default function UserMenu({ user, isNavbarDark = false, t }) {
                     <button
                       type="button"
                       data-testid="edit-name-button"
-                      onClick={() => setIsEditingName(true)}
+                      onClick={() => {
+                        setIsEditingName(true);
+                        setTimeout(() => inputRef.current?.focus(), 0);
+                      }}
                       className={`p-1 rounded transition-colors ${
                         isNavbarDark
                           ? "text-gray-500 hover:text-gray-300 hover:bg-white/5"
@@ -94,16 +165,64 @@ export default function UserMenu({ user, isNavbarDark = false, t }) {
                     </button>
                   </div>
                   <input
+                    ref={inputRef}
                     type="text"
                     data-testid="user-menu-name-input"
-                    disabled={!isEditingName}
-                    placeholder={isEditingName ? "Enter your name" : "Name field - coming soon"}
+                    disabled={!isEditingName || loadingName || savingName}
+                    placeholder={
+                      loadingName
+                        ? t?.("loading") || "Loading..."
+                        : isEditingName
+                        ? t?.("enterName") || "Enter your name"
+                        : t?.("nameComingSoon") || "Name field - coming soon"
+                    }
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className={`w-full px-3 py-2 rounded text-sm ${
                       isNavbarDark
                         ? "bg-white/5 border border-white/10 text-gray-300 disabled:text-gray-500"
                         : "bg-black/5 border border-black/10 text-gray-700 disabled:text-gray-400"
                     } disabled:cursor-not-allowed`}
                   />
+
+                  {isEditingName && (
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        type="button"
+                        data-testid="save-name-button"
+                        onClick={handleSaveName}
+                        disabled={savingName}
+                        className={`px-3 py-1 rounded text-xs font-medium ${
+                          isNavbarDark
+                            ? "bg-yellow-400 text-black hover:bg-yellow-300"
+                            : "bg-yellow-500 text-black hover:bg-yellow-400"
+                        } disabled:opacity-60 disabled:cursor-not-allowed`}
+                      >
+                        {savingName ? t?.("saving") || "Saving..." : t?.("save") || "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingName(false);
+                          setName(user?.name || "");
+                          setNameError("");
+                        }}
+                        className={`px-3 py-1 rounded text-xs font-medium ${
+                          isNavbarDark
+                            ? "text-gray-300 hover:bg-white/10"
+                            : "text-gray-700 hover:bg-black/5"
+                        }`}
+                      >
+                        {t?.("cancel") || "Cancel"}
+                      </button>
+                    </div>
+                  )}
+
+                  {nameError && (
+                    <p className={`mt-1 text-xs ${isNavbarDark ? "text-red-300" : "text-red-600"}`}>
+                      {nameError}
+                    </p>
+                  )}
                 </div>
               </div>
             </motion.div>

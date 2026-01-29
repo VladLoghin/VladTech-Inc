@@ -2,9 +2,12 @@ package org.example.vladtech.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.vladtech.auth.dataaccess.UserProfile;
+import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.example.vladtech.auth.presentation.EmployeeSummaryResponseModel;
@@ -12,6 +15,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.net.URI;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Service
@@ -20,6 +25,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     private final Auth0ManagementTokenService managementTokenService;
     private final RestTemplate restTemplate;
+    private final UserProfileRepository userProfileRepository;
 
     @Value("${AUTH0_DOMAIN}")
     private String domain;
@@ -305,6 +311,62 @@ public class UserManagementServiceImpl implements UserManagementService {
         return email != null ? email.toString() : null;
     }
 
+    @Transactional
+    public void syncUserProfile(String userId, String email, String name) {
+        Optional<UserProfile> existing = userProfileRepository.findById(userId);
+        
+        if (existing.isEmpty()) {
+            UserProfile profile = UserProfile.builder()
+                    .auth0Sub(userId)
+                    .email(email)
+                    .nickname(name)
+                    .build();
+            
+            userProfileRepository.save(profile);
+            log.info("Created new user profile for {}", userId);
+        } else {
+            // Update existing profile if nickname is missing
+            UserProfile profile = existing.get();
+            if (profile.getNickname() == null || profile.getNickname().isBlank()) {
+                profile.setNickname(name);
+                userProfileRepository.save(profile);
+                log.info("Updated nickname for existing user profile: {}", userId);
+            } else {
+                log.info("User profile already exists for {} with nickname: {}", userId, profile.getNickname());
+            }
+        }
+    }
 
+    @Override
+    public String getUserNameById(String userId) {
+        return userProfileRepository.findById(userId)
+                .map(UserProfile::getNickname)
+                .orElse(null);
+    }
 
+    @Transactional
+    @Override
+    public String updateUserName(String userId, String newName) {
+        log.info("Starting updateUserName for userId: {} with newName: {}", userId, newName);
+
+        // Update MongoDB only (skip Auth0 since it keeps returning 404)
+        userProfileRepository.findById(userId).ifPresentOrElse(
+            profile -> {
+                profile.setNickname(newName);
+                userProfileRepository.save(profile);
+                log.info("Updated MongoDB profile nickname for {}", userId);
+            },
+            () -> {
+                // Create if doesn't exist
+                UserProfile profile = UserProfile.builder()
+                    .auth0Sub(userId)
+                    .nickname(newName)
+                    .build();
+                userProfileRepository.save(profile);
+                log.info("Created new profile in MongoDB for {}", userId);
+            }
+        );
+        
+        return "User name updated successfully.";
+    }
 }

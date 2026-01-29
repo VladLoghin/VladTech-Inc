@@ -5,5 +5,5 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface ContactService {
 
-    void sendContactMessage(ContactRequestDto requestDto, Jwt jwt);
+    void sendContactMessage(ContactRequestDto requestDto, String name, String senderEmail);
 }

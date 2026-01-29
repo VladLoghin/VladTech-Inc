@@ -10,4 +10,8 @@ public interface UserManagementService {
     Map<String, Object> getUsersWithoutRole(String roleId, int page, int perPage);
     List<EmployeeSummaryResponseModel> getAllEmployees(int page, int perPage);
     String getUserEmailById(String userId);
+    String getUserNameById(String userId);
+    String updateUserName(String userId, String newName);
+
+    void syncUserProfile(String userId, String email, String name);
 }

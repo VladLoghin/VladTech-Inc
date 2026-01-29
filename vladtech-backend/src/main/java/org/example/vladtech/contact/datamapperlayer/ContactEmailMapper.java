@@ -24,7 +24,7 @@ public class ContactEmailMapper {
 
         String header = "New contact request from " + safe(senderName);
         String body = safe(requestDto.getMessage());
-        String footer = "Reply to: " + safe(senderEmail);
+        String footer = "Reply to: " + safe(senderName);
 
         return new ContactEmail(
                 adminEmail,

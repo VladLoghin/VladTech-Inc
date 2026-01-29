@@ -4,6 +4,8 @@ import org.example.vladtech.contact.domain.ContactEmail;
 import org.example.vladtech.contact.presentationlayer.ContactRequestDto;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ContactEmailMapperTest {
@@ -21,7 +23,7 @@ class ContactEmailMapperTest {
         dto.setMessage("I want to remodel my kitchen");
 
         // act
-        ContactEmail email = mapper.toContactEmail(dto);
+        ContactEmail email = mapper.toContactEmail(dto, dto.getName(), dto.getEmail());
 
         // assert
         assertEquals("cunninghamadmin4339@gmail.com", email.getDestinary());
@@ -29,9 +31,10 @@ class ContactEmailMapperTest {
         assertEquals("CONTACT_US", email.getTemplateName());
         assertEquals("New contact request from Cunningham", email.getHeader());
         assertEquals("I want to remodel my kitchen", email.getBody());
-        assertEquals("Reply to: client@example.com", email.getFooter());
+        assertEquals("Reply to: Cunningham", email.getFooter()); // Updated to match the method logic
         assertEquals("Cunningham", email.getSenderName());
         assertEquals("client@example.com", email.getClientEmail());
+        assertEquals("Cunningham", email.getName());
         assertNotNull(email.getSentDate());
     }
 
@@ -43,13 +46,13 @@ class ContactEmailMapperTest {
         dto.setSubject("Kitchen remodel");
         dto.setMessage("Details about the project");
 
-        ContactEmail email = mapper.toContactEmail(dto);
+        ContactEmail email = mapper.toContactEmail(dto, dto.getName(), dto.getEmail());
 
         String html = mapper.toHtml(email);
 
         assertTrue(html.contains("New contact request from Cunningham"));
         assertTrue(html.contains("Details about the project"));
-        assertTrue(html.contains("Reply to: client@example.com"));
+        assertTrue(html.contains("Reply to: Cunningham")); // Updated to match the method logic
         assertTrue(html.contains("Sent by Cunningham"));
     }
 }

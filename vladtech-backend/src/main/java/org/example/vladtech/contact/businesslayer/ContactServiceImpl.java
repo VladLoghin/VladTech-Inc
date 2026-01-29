@@ -4,8 +4,6 @@ import org.example.vladtech.contact.datamapperlayer.ContactEmailMapper;
 import org.example.vladtech.contact.dataaccesslayer.ContactEmailSender;
 import org.example.vladtech.contact.domain.ContactEmail;
 import org.example.vladtech.contact.presentationlayer.ContactRequestDto;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,19 +19,11 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public void sendContactMessage(ContactRequestDto requestDto, @AuthenticationPrincipal Jwt jwt) {
+    public void sendContactMessage(ContactRequestDto requestDto, String name, String senderEmail) {
+        // Convert DTO → domain object with user's name
+        ContactEmail contactEmail = mapper.toContactEmail(requestDto, name, senderEmail);
 
-        String email = jwt.getClaimAsString("email");
-        String name  = jwt.getClaimAsString("name");
-        if (name == null) name = jwt.getClaimAsString("nickname");
-        if (name == null) name = email;
-
-        if (email == null || email.isBlank()) {
-            throw new IllegalStateException("No 'email' claim found in JWT access token.");
-        }
-
-        ContactEmail contactEmail = mapper.toContactEmail(requestDto, name, email);
-        emailSender.send(contactEmail);
+        // Send the email
+        emailSender.send(contactEmail, name);
     }
-
 }
