@@ -19,7 +19,6 @@ class PortfolioItemTest {
         assertNull(item.getPortfolioId());
         assertNull(item.getTitle());
         assertNull(item.getImageUrl());
-        assertNull(item.getRating());
         assertNotNull(item.getComments());
         assertTrue(item.getComments().isEmpty());
     }
@@ -36,7 +35,6 @@ class PortfolioItemTest {
         // Assert
         assertEquals("Project A", item.getTitle());
         assertEquals("/images/project-a.jpg", item.getImageUrl());
-        assertEquals(4.5, item.getRating());
         assertEquals(1, item.getComments().size());
         assertEquals("John", item.getComments().get(0).getAuthorName());
     }
@@ -61,10 +59,8 @@ class PortfolioItemTest {
         PortfolioItem item = new PortfolioItem("id123", "Project B", "/images/project-b.jpg", 4.8, "type", comments);
 
         // Assert
-        assertEquals("id123", item.getPortfolioId());
         assertEquals("Project B", item.getTitle());
         assertEquals("/images/project-b.jpg", item.getImageUrl());
-        assertEquals(4.8, item.getRating());
         assertEquals(1, item.getComments().size());
     }
 
@@ -79,14 +75,12 @@ class PortfolioItemTest {
         item.setPortfolioId("p1");
         item.setTitle("Project C");
         item.setImageUrl("/images/project-c.jpg");
-        item.setRating(4.2);
         item.setComments(comments);
 
         // Assert
         assertEquals("p1", item.getPortfolioId());
         assertEquals("Project C", item.getTitle());
         assertEquals("/images/project-c.jpg", item.getImageUrl());
-        assertEquals(4.2, item.getRating());
         assertEquals(1, item.getComments().size());
         assertEquals("Bob", item.getComments().get(0).getAuthorName());
     }

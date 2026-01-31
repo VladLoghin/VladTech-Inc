@@ -1,6 +1,9 @@
 package org.example.vladtech.reviews.business;
 
+import org.example.vladtech.portfolio.data.PortfolioItem;
+import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.example.vladtech.reviews.data.Rating;
+import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.presentation.ReviewResponseModel;
 import org.example.vladtech.reviews.presentation.ReviewRequestModel;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +32,11 @@ public interface ReviewService {
 
     void deleteReview(String reviewId);
 
+    PortfolioResponseDto sendToPortfolio(String reviewId);
+
+    //PortfolioResponseDto createPortfolioFromReview(String ReviewId,String title, String imageUrl);
+
+    void resetPortfolioStatus(String reviewId);
 
 }
 

@@ -1,5 +1,6 @@
 package org.example.vladtech.reviews.presentation;
 
+import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.data.Rating;
 import org.junit.jupiter.api.Test;
@@ -398,6 +399,67 @@ class ReviewControllerTest {
 
         verify(reviewService, times(1)).deleteReview(reviewId);
         verifyNoMoreInteractions(reviewService);
+    }
+
+    @Test
+    void sendReviewToPortfolio_success() {
+        // Arrange
+        String reviewId = "review123";
+        PortfolioResponseDto responseDto = new PortfolioResponseDto();
+        responseDto.setPortfolioId("portfolio123");
+
+        when(reviewService.sendToPortfolio(reviewId)).thenReturn(responseDto);
+
+        // Act
+        ResponseEntity<?> response = reviewController.sendReviewToPortfolio(reviewId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseDto, response.getBody());
+        verify(reviewService).sendToPortfolio(reviewId);
+    }
+
+    @Test
+    void sendReviewToPortfolio_reviewNotFound() {
+        // Arrange
+        String reviewId = "review123";
+        when(reviewService.sendToPortfolio(reviewId)).thenThrow(new RuntimeException("Review not found"));
+
+        // Act
+        ResponseEntity<?> response = reviewController.sendReviewToPortfolio(reviewId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Review not found", response.getBody());
+        verify(reviewService).sendToPortfolio(reviewId);
+    }
+
+    @Test
+    void resetPortfolioStatus_success() {
+        // Arrange
+        String reviewId = "review123";
+
+        // Act
+        ResponseEntity<?> response = reviewController.resetPortfolioStatus(reviewId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(reviewService).resetPortfolioStatus(reviewId);
+    }
+
+    @Test
+    void resetPortfolioStatus_reviewNotFound() {
+        // Arrange
+        String reviewId = "review123";
+        doThrow(new RuntimeException("Review not found")).when(reviewService).resetPortfolioStatus(reviewId);
+
+        // Act
+        ResponseEntity<?> response = reviewController.resetPortfolioStatus(reviewId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Review not found", response.getBody());
+        verify(reviewService).resetPortfolioStatus(reviewId);
     }
 }
 

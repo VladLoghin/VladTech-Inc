@@ -16,6 +16,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     const roles = user?.["https://vladtech.com/roles"] || [];
     const isClient = isAuthenticated && roles.includes("Client");
     const isAdmin = isAuthenticated && roles.includes("Admin");
+    const isEmployee = isAuthenticated && roles.includes("Employee");
 
     const isOwner = isAuthenticated && user?.sub && review?.clientId === user.sub;
 
@@ -31,9 +32,12 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             (r) => r === "Admin" || r === "Employee"
         );
 
+    const canSendToPortfolio = isAuthenticated && (isAdmin || isEmployee);
 
     const [isVisible, setIsVisible] = useState(initialVisible);
     const [saving, setSaving] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [portfolioError, setPortfolioError] = useState("");
 
     const photo = photos?.[0];
     const [imgSrc, setImgSrc] = useState(
@@ -136,6 +140,46 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         }
     };
 
+    const handleSendToPortfolio = async (e) => {
+        e.stopPropagation();
+        if (!reviewId) return;
+
+        setPortfolioError("");
+
+        try {
+            setSending(true);
+
+            const token = await getAccessTokenSilently({
+                authorizationParams: { audience: "https://vladtech/api" },
+            });
+
+            const res = await api.post(
+                `/reviews/${reviewId}/send-to-portfolio`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (res.status !== 200 && res.status !== 204) {
+                throw new Error(`Send failed with status ${res.status}`);
+            }
+
+            setPortfolioError(""); // Clear any previous errors on success
+        } catch (err) {
+            console.error("Failed to send review to portfolio:", err);
+            
+            // Check if error response has message from backend
+            const errorMessage = err.response?.data?.message || err.response?.data || "Failed to send review to portfolio. Please try again.";
+            setPortfolioError(errorMessage);
+        } finally {
+            setSending(false);
+        }
+    };
+
     return (
         <div
             className="review-card"
@@ -203,6 +247,47 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             <p className="comment" data-testid="review-comment">
                 {comment}
             </p>
+
+            {canSendToPortfolio && (
+                <>
+                    <button
+                        type="button"
+                        onClick={handleSendToPortfolio}
+                        disabled={sending}
+                        style={{
+                            backgroundColor: "#2563eb",
+                            color: "white",
+                            padding: "8px 10px",
+                            borderRadius: "8px",
+                            marginTop: "10px",
+                            width: "100%",
+                            fontWeight: 700,
+                            cursor: sending ? "not-allowed" : "pointer",
+                            opacity: sending ? 0.7 : 1,
+                        }}
+                        data-testid="review-send-portfolio-button"
+                    >
+                        {sending ? "Sending..." : "Send to Portfolio"}
+                    </button>
+                    
+                    {portfolioError && (
+                        <div
+                            style={{
+                                marginTop: "8px",
+                                padding: "8px",
+                                backgroundColor: "#fee2e2",
+                                color: "#dc2626",
+                                borderRadius: "4px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                            }}
+                            data-testid="review-portfolio-error"
+                        >
+                            {portfolioError}
+                        </div>
+                    )}
+                </>
+            )}
 
             {canDelete && (
                 <button

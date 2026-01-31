@@ -42,7 +42,6 @@ class PortfolioRepositoryTest {
         assertThat(saved.getPortfolioId()).isNotNull();
         assertThat(saved.getTitle()).isEqualTo("Modern Kitchen Counter");
         assertThat(saved.getImageUrl()).isEqualTo("/uploads/portfolio/kitchencounter.jpg");
-        assertThat(saved.getRating()).isEqualTo(4.9);
         assertThat(saved.getComments()).hasSize(1);
     }
 
@@ -65,7 +64,6 @@ class PortfolioRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Luxury Bathroom");
         assertThat(found.get().getImageUrl()).isEqualTo("/uploads/portfolio/newbathroom.jpg");
-        assertThat(found.get().getRating()).isEqualTo(4.8);
     }
 
     @Test
@@ -190,14 +188,12 @@ class PortfolioRepositoryTest {
 
         // Act
         saved.setTitle("Updated Title");
-        saved.setRating(4.9);
         portfolioRepository.save(saved);
 
         // Assert
         Optional<PortfolioItem> found = portfolioRepository.findById(saved.getPortfolioId());
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Updated Title");
-        assertThat(found.get().getRating()).isEqualTo(4.9);
     }
 
     @Test

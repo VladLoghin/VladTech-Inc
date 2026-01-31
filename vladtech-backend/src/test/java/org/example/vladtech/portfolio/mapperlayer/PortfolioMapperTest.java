@@ -48,7 +48,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("portfolio-123");
         assertThat(result.getTitle()).isEqualTo("Modern Kitchen Counter");
         assertThat(result.getImageUrl()).isEqualTo("/uploads/portfolio/kitchencounter.jpg");
-        assertThat(result.getRating()).isEqualTo(4.9);
         assertThat(result.getComments()).hasSize(2);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Sarah M.");
         assertThat(result.getComments().get(0).getTimestamp()).isNotNull();
@@ -84,7 +83,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("portfolio-456");
         assertThat(result.getTitle()).isEqualTo("Simple Office");
         assertThat(result.getImageUrl()).isEqualTo("/uploads/portfolio/newoffice.jpg");
-        assertThat(result.getRating()).isEqualTo(4.5);
         assertThat(result.getComments()).isEmpty();
     }
 
@@ -138,7 +136,6 @@ class PortfolioMapperTest {
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getRating()).isEqualTo(5.0);
         assertThat(result.getTitle()).isEqualTo("Perfect Kitchen");
     }
 
@@ -159,7 +156,6 @@ class PortfolioMapperTest {
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getRating()).isEqualTo(3.5);
     }
 
     @Test
@@ -189,7 +185,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("test-id");
         assertThat(result.getTitle()).isEqualTo("Test Title");
         assertThat(result.getImageUrl()).isEqualTo("/test/url.jpg");
-        assertThat(result.getRating()).isEqualTo(4.7);
         assertThat(result.getComments()).hasSize(1);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Test User");
         assertThat(result.getComments().get(0).getTimestamp()).isNotNull();

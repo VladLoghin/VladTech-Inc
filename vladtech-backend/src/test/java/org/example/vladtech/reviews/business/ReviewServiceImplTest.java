@@ -1,6 +1,11 @@
 package org.example.vladtech.reviews.business;
 
 import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.portfolio.business.PortfolioServiceImpl;
+import org.example.vladtech.portfolio.data.PortfolioItem;
+import org.example.vladtech.portfolio.data.PortfolioRepository;
+import org.example.vladtech.portfolio.mapperlayer.PortfolioMapper;
+import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
@@ -15,8 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +42,15 @@ class ReviewServiceImplTest {
     @Mock
     private ReviewResponseMapper responseMapper;
 
+    @Mock
+    private PortfolioMapper portfolioMapper;
+
+    @Mock
+    private PortfolioServiceImpl portfolioService;
+
+    @Mock
+    private PortfolioRepository portfolioRepository;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 
@@ -44,9 +59,9 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_returnsMappedList() {
-        Review r1 = new Review("client1", "abc234", "Jamie", "appt1", true, Rating.FIVE);
+        Review r1 = new Review("client1", "abc234", "Jamie", "appt1", true, Rating.THREE, null, false);
         r1.setReviewId("r1");
-        Review r2 = new Review("client2", "abc123", "Joel", "appt2", true, Rating.THREE);
+        Review r2 = new Review("client2", "abc123", "Joel", "appt2", true, Rating.THREE, null, false);
         r2.setReviewId("r2");
 
         List<Review> repoResult = Arrays.asList(r1, r2);
@@ -73,9 +88,9 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_returnsMappedList() {
-        Review r1 = new Review("client1", "abc324", "appt1", "good", true, null);
+        Review r1 = new Review("client1", "abc324", "appt1", "good", true, null, false);
         r1.setReviewId("r1");
-        Review r2 = new Review("client2", "abc320", "appt2", "ok", true, null);
+        Review r2 = new Review("client2", "abc320", "appt2", "ok", true, null, false);
         r2.setReviewId("r2");
 
         List<Review> repoResult = Arrays.asList(r1, r2);
@@ -102,10 +117,10 @@ class ReviewServiceImplTest {
         String reviewId = "r1";
         boolean visible = false;
 
-        Review existing = new Review("client1", "abc789", "appt1", "good", true, null);
+        Review existing = new Review("client1", "abc789", "appt1", "good", true, null, false);
         existing.setReviewId(reviewId);
 
-        Review updated = new Review("client1", "abc009", "appt1", "good", visible, null);
+        Review updated = new Review("client1", "abc009", "appt1", "good", visible, null, false);
         updated.setReviewId(reviewId);
 
         ReviewResponseModel responseModel = new ReviewResponseModel(reviewId, "client1", "abc709", "appt1", "good", visible, null, null);
@@ -142,7 +157,7 @@ class ReviewServiceImplTest {
     void getReviewById_callsResponseMapperWithCorrectReview() {
         String reviewId = "r1";
 
-        Review review = new Review("client1", "abc587", "appt1", "Excellent service", true, null);
+        Review review = new Review("client1", "abc587", "appt1", "Excellent service", true, Rating.FIVE, false);
         review.setReviewId(reviewId);
 
         ReviewResponseModel expectedResponse = new ReviewResponseModel(reviewId, "client1", "abc678", "appt1", "Excellent service", true, null, null);
@@ -211,9 +226,9 @@ class ReviewServiceImplTest {
     @Test
     void getReviewsByOwnerAuth0Id_returnsMappedList() {
         String ownerAuth0Id = "owner123";
-        Review review1 = new Review("client1", "owner123", "appt1", "Great service", true, Rating.FIVE);
+        Review review1 = new Review("client1", "owner123", "appt1", "Great service", true, Rating.FIVE, false);
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "owner123", "appt2", "Good service", true, Rating.FOUR);
+        Review review2 = new Review("client2", "owner123", "appt2", "Good service", true, Rating.FOUR, false);
         review2.setReviewId("r2");
 
         List<Review> reviews = Arrays.asList(review1, review2);
@@ -239,7 +254,7 @@ class ReviewServiceImplTest {
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -262,7 +277,7 @@ class ReviewServiceImplTest {
     void getAllVisibleReviews_withClientNameOnly_returnsFilteredReviews() {
         String clientName = "client1";
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -285,7 +300,7 @@ class ReviewServiceImplTest {
     void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() {
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue);
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -306,9 +321,9 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_withoutFilters_returnsAllVisibleReviews() {
-        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE);
+        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR);
+        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false);
         review2.setReviewId("r2");
 
         List<Review> reviews = List.of(review1, review2);
@@ -334,7 +349,7 @@ class ReviewServiceImplTest {
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -357,7 +372,7 @@ class ReviewServiceImplTest {
     void getAllReviews_withClientNameOnly_returnsFilteredReviews() {
         String clientName = "client1";
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -380,7 +395,7 @@ class ReviewServiceImplTest {
     void getAllReviews_withRatingOnly_returnsFilteredReviews() {
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue);
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false);
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
@@ -401,9 +416,9 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_withoutFilters_returnsAllReviews() {
-        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE);
+        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR);
+        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false);
         review2.setReviewId("r2");
 
         List<Review> reviews = List.of(review1, review2);
@@ -552,9 +567,9 @@ class ReviewServiceImplTest {
 
     @Test
     void computeSatisfactionPercentage_withMultipleReviews_calculatesCorrectPercentage() {
-        Review review1 = new Review("client1", "auth0Id1", "appt1", "Excellent", true, Rating.FIVE);
-        Review review2 = new Review("client2", "auth0Id2", "appt2", "Good", true, Rating.FOUR);
-        Review review3 = new Review("client3", "auth0Id3", "appt3", "Average", true, Rating.THREE);
+        Review review1 = new Review("client1", "auth0Id1", "appt1", "Excellent", true, Rating.FIVE, false);
+        Review review2 = new Review("client2", "auth0Id2", "appt2", "Good", true, Rating.FOUR, false);
+        Review review3 = new Review("client3", "auth0Id3", "appt3", "Average", true, Rating.THREE, false);
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(3L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(List.of(review1, review2, review3));
@@ -589,5 +604,56 @@ class ReviewServiceImplTest {
         verify(reviewRepository, times(1)).existsById(reviewId);
         verify(reviewRepository, never()).deleteReviewByReviewId(anyString());
         verifyNoMoreInteractions(reviewRepository);
+    }
+
+    @Test
+    public PortfolioResponseDto sendToPortfolio(String reviewId) {
+        // 1) Load review
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // 2) Guard against duplicates
+        if (existing.isSentToPortfolio()) {
+            throw new RuntimeException("Review has already been sent to portfolio");
+        }
+
+        // 3) Build portfolio fields from review
+        String title = "Review by " + existing.getClientName();
+        String imageUrl = existing.getPhotos().isEmpty()
+                ? ""
+                : existing.getPhotos().get(0).getUrl();
+
+        // 4) Create + save portfolio item (WITH reviewId)
+        PortfolioItem portfolioItem = new PortfolioItem();
+        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
+        portfolioItem.setReviewId(reviewId);
+        portfolioItem.setTitle(title);
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setComments(new java.util.ArrayList<>());
+
+        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+
+        // 5) Mark review as sent
+        existing.setSentToPortfolio(true);
+        reviewRepository.save(existing);
+
+        // 6) Return response DTO
+        return portfolioMapper.entityToResponseDto(savedItem);
+    }
+
+
+    @Test
+    public void resetPortfolioStatus() {
+        String reviewId = "review123"; // Define the reviewId directly in the test
+        Review existing = new Review();
+        existing.setReviewId(reviewId);
+        existing.setSentToPortfolio(true);
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existing));
+
+        reviewService.resetPortfolioStatus(reviewId);
+
+        verify(reviewRepository).save(existing);
+        assertFalse(existing.isSentToPortfolio());
     }
 }

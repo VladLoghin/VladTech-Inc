@@ -45,10 +45,9 @@ class CreatePortfolioControllerTest {
         response.setPortfolioId("seed-id-1");
         response.setTitle("New Kitchen Renovation");
         response.setImageUrl("/uploads/portfolio/kitchen.jpg");
-        response.setRating(4.8);
         response.setComments(new ArrayList<>());
 
-        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyDouble(), anyString()))
+        when(portfolioService.createPortfolioItem(anyString(), anyString()))
                 .thenReturn(response);
     }
 
@@ -77,7 +76,7 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.comments", hasSize(0)));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq(4.8), anyString());
+                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"));
     }
 
     @Disabled("Disabled until we fix the security config and permissions in the controller class")
@@ -214,10 +213,9 @@ class CreatePortfolioControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.portfolioId").isNotEmpty())
                 .andExpect(jsonPath("$.title", is("New Kitchen Renovation"))) // note: response is stubbed!
-                .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")))
-                .andExpect(jsonPath("$.rating", is(4.8)));
+                .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), eq(4.5), anyString());
+                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"));
     }
 }

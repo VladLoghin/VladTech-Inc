@@ -26,17 +26,19 @@ public class Review {
     private Rating rating;
     private List<Photo> photos = new ArrayList<>();
     private String ownerAuth0Id;
+    private boolean sentToPortfolio = false;
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, boolean sentToPortfolio) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
         this.comment = comment;
         this.visible = visible;
         this.rating = rating;
+        this.sentToPortfolio = sentToPortfolio;
     }
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos, boolean sentToPortfolio) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
@@ -44,5 +46,6 @@ public class Review {
         this.visible = visible;
         this.rating = rating;
         this.photos = photos != null ? photos : new ArrayList<>();
+        this.sentToPortfolio = sentToPortfolio;
     }
 }

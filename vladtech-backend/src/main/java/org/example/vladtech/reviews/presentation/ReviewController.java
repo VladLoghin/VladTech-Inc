@@ -1,6 +1,7 @@
 package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Rating;
@@ -117,6 +118,27 @@ public class ReviewController {
             reviewService.deleteReview(reviewId);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @PostMapping("/{reviewId}/send-to-portfolio")
+    public ResponseEntity<?> sendReviewToPortfolio(@PathVariable String reviewId) {
+        try {
+            return ResponseEntity.ok(reviewService.sendToPortfolio(reviewId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin')")
+    @PatchMapping("/{reviewId}/set-create-portfolio")
+    public ResponseEntity<?> resetPortfolioStatus(@PathVariable String reviewId) {
+        try {
+            reviewService.resetPortfolioStatus(reviewId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

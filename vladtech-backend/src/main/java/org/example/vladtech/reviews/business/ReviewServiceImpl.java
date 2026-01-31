@@ -2,6 +2,10 @@ package org.example.vladtech.reviews.business;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.vladtech.portfolio.business.PortfolioServiceImpl;
+import org.example.vladtech.portfolio.data.PortfolioRepository;
+import org.example.vladtech.portfolio.mapperlayer.PortfolioMapper;
+import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
@@ -14,6 +18,7 @@ import org.example.vladtech.reviews.presentation.ReviewResponseModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.example.vladtech.portfolio.data.PortfolioItem;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -29,6 +34,9 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRequestMapper requestMapper;
     private final ReviewResponseMapper responseMapper;
     private final FileStorageService fileStorageService;
+    private final PortfolioServiceImpl portfolioService;
+    private final PortfolioRepository portfolioRepository;
+    private final PortfolioMapper portfolioMapper;
 
     @Override
     public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue) {
@@ -161,6 +169,51 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Review with ID " + reviewId + " does not exist");
         }
         reviewRepository.deleteReviewByReviewId(reviewId);
+    }
+
+    @Override
+    public PortfolioResponseDto sendToPortfolio(String reviewId) {
+        // 1) Load review
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // 2) Guard against duplicates
+        if (existing.isSentToPortfolio()) {
+            throw new RuntimeException("Review has already been sent to portfolio");
+        }
+
+        // 3) Build portfolio fields from review
+        String title = "Review by " + existing.getClientName();
+        String imageUrl = existing.getPhotos().isEmpty()
+                ? ""
+                : existing.getPhotos().get(0).getUrl();
+
+        // 4) Create + save portfolio item (WITH reviewId)
+        PortfolioItem portfolioItem = new PortfolioItem();
+        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
+        portfolioItem.setReviewId(reviewId);
+        portfolioItem.setTitle(title);
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setComments(new java.util.ArrayList<>());
+
+        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+
+        // 5) Mark review as sent
+        existing.setSentToPortfolio(true);
+        reviewRepository.save(existing);
+
+        // 6) Return response DTO
+        return portfolioMapper.entityToResponseDto(savedItem);
+    }
+
+
+    @Override
+    public void resetPortfolioStatus(String reviewId) {
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        existing.setSentToPortfolio(false);
+        reviewRepository.save(existing);
     }
 }
 

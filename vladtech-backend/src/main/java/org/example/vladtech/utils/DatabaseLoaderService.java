@@ -60,7 +60,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         // Check if data already exists - seed portfolio separately
         boolean projectsExist = projectRepository.count() > 0;
         boolean portfolioExists = portfolioRepository.count() > 0;
-        
+
         if (projectsExist && portfolioExists) {
             log.info("Database already contains project and portfolio data. Skipping initialization.");
             return;
@@ -118,7 +118,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         // -------------------------
         // REVIEWS + PORTFOLIO
         // -------------------------
-        
+
         // Stores a seed image file into GridFS and returns the serving URL: /uploads/reviews/{id}
         // If the seed file is missing or fails to save, returns null (front-end should show placeholder).
         Function<String, String> storeAndUrl = (filename) -> {
@@ -161,42 +161,39 @@ public class DatabaseLoaderService implements CommandLineRunner {
             }
         };
 
-        if (!projectsExist) {
-            log.info("Seeding review data...");
-            
-            createReview("client-001", "appointment-001", "Roger", "Amazing service! Highly recommend.", true, Rating.FIVE,
-                    List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
+        createReview("client-001", "appointment-001", "Roger", "Amazing service! Highly recommend.", true, Rating.FIVE,
+                List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), false);
 
-            createReview("client-002", "appointment-002", "Karen", "Good, but could be faster.", true, Rating.FOUR,
-                    List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
+        createReview("client-002", "appointment-002", "Karen", "Good, but could be faster.", true, Rating.FOUR,
+                List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), false);
 
-            createReview("client-003", "appointment-003", "Josh", "Not satisfied with the quality.", false, Rating.TWO,
-                    List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
+        createReview("client-003", "appointment-003", "Josh", "Not satisfied with the quality.", false, Rating.TWO,
+                List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), false);
 
-            createReview("client-004", "appointment-004", "Reed Richards", "Fantastic experience, will definitely come back!", true, Rating.FIVE,
-                    List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
+        createReview("client-004", "appointment-004", "Reed Richards", "Fantastic experience, will definitely come back!", true, Rating.FIVE,
+                List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), false);
 
-            createReview("client-005", "appointment-005", "Raymond", "Pretty good, but room for improvement.", true, Rating.FOUR,
-                    List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
+        createReview("client-005", "appointment-005", "Raymond", "Pretty good, but room for improvement.", true, Rating.FOUR,
+                List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), false);
 
-            createReview("client-006", "appointment-006", "John", "Average service, nothing special.", false, Rating.THREE,
-                    List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
+        createReview("client-006", "appointment-006", "John", "Average service, nothing special.", false, Rating.THREE,
+                List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), false);
 
-            createReview("client-007", "appointment-007", "Isabelle", "Excellent staff and quick service!", true, Rating.FIVE,
-                    List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
+        createReview("client-007", "appointment-007", "Isabelle", "Excellent staff and quick service!", true, Rating.FIVE,
+                List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), false);
 
-            createReview("client-008", "appointment-008", "Joshua", "Decent service, but a bit slow.", true, Rating.FOUR,
-                    List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
+        createReview("client-008", "appointment-008", "Joshua", "Decent service, but a bit slow.", true, Rating.FOUR,
+                List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), false);
 
-            createReview("client-009", "appointment-009", "Peter", "Very disappointed, would not recommend.", false, Rating.ONE,
-                    List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
+        createReview("client-009", "appointment-009", "Peter", "Very disappointed, would not recommend.", false, Rating.ONE,
+                List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), false);
 
-            createReview("client-010", "appointment-010", "Simon", "Loved the experience! Highly professional.", true, Rating.FIVE,
-                    List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
+        createReview("client-010", "appointment-010", "Simon", "Loved the experience! Highly professional.", true, Rating.FIVE,
+                List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), false);
 
             log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
         }
-        
+
         if (!portfolioExists) {
             log.info("Seeding portfolio data...");
 
@@ -388,9 +385,10 @@ public class DatabaseLoaderService implements CommandLineRunner {
                               String comment,
                               Boolean visible,
                               Rating rating,
-                              List<Photo> photos) {
+                              List<Photo> photos,
+                              boolean sentToPortfolio) {
         try {
-            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos);
+            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos, sentToPortfolio);
             reviewRepository.save(review);
             log.debug("Created review for clientId: {} and appointmentId: {}", clientId, appointmentId);
         } catch (Exception e) {

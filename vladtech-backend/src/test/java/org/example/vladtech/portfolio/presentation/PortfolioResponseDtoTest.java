@@ -19,7 +19,6 @@ class PortfolioResponseDtoTest {
         assertNull(dto.getPortfolioId());
         assertNull(dto.getTitle());
         assertNull(dto.getImageUrl());
-        assertNull(dto.getRating());
         assertNull(dto.getComments());
     }
 
@@ -32,6 +31,7 @@ class PortfolioResponseDtoTest {
         // Act
         PortfolioResponseDto dto = new PortfolioResponseDto(
             "p123",
+            null,
             "Project A",
             "/images/project-a.jpg",
             4.5,
@@ -43,7 +43,6 @@ class PortfolioResponseDtoTest {
         assertEquals("p123", dto.getPortfolioId());
         assertEquals("Project A", dto.getTitle());
         assertEquals("/images/project-a.jpg", dto.getImageUrl());
-        assertEquals(4.5, dto.getRating());
         assertEquals(1, dto.getComments().size());
     }
 
@@ -58,14 +57,12 @@ class PortfolioResponseDtoTest {
         dto.setPortfolioId("p456");
         dto.setTitle("Project B");
         dto.setImageUrl("/images/project-b.jpg");
-        dto.setRating(4.8);
         dto.setComments(comments);
 
         // Assert
         assertEquals("p456", dto.getPortfolioId());
         assertEquals("Project B", dto.getTitle());
         assertEquals("/images/project-b.jpg", dto.getImageUrl());
-        assertEquals(4.8, dto.getRating());
         assertEquals(1, dto.getComments().size());
     }
 
@@ -133,20 +130,7 @@ class PortfolioResponseDtoTest {
         assertEquals(3, dto.getComments().size());
     }
 
-    @Test
-    void testRatingBoundaries() {
-        // Test minimum rating
-        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", "Project", "/image.jpg", 0.0, null, null);
-        assertEquals(0.0, dto1.getRating());
 
-        // Test maximum rating
-        PortfolioResponseDto dto2 = new PortfolioResponseDto("p2", "Project", "/image.jpg", 5.0, null, null);
-        assertEquals(5.0, dto2.getRating());
-
-        // Test decimal rating
-        PortfolioResponseDto dto3 = new PortfolioResponseDto("p3", "Project", "/image.jpg", 4.75, null, null);
-        assertEquals(4.75, dto3.getRating());
-    }
 
     @Test
     void testTitleVariations() {

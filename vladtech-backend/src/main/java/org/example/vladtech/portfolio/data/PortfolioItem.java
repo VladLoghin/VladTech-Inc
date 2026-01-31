@@ -17,6 +17,8 @@ public class PortfolioItem {
     @Id
     private String portfolioId;
 
+    private String reviewId;
+
     private String title;
     private String imageUrl;
     private Double rating; // Star rating (e.g., 4.8)

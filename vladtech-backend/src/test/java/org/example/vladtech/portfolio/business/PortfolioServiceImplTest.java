@@ -71,13 +71,11 @@ class PortfolioServiceImplTest {
         responseDto1.setPortfolioId("portfolio-id-1");
         responseDto1.setTitle("Modern Kitchen Counter");
         responseDto1.setImageUrl("/uploads/portfolio/kitchencounter.jpg");
-        responseDto1.setRating(4.9);
 
         responseDto2 = new PortfolioResponseDto();
         responseDto2.setPortfolioId("portfolio-id-2");
         responseDto2.setTitle("Complete Kitchen Remodel");
         responseDto2.setImageUrl("/uploads/portfolio/kitchenremodel.jpg");
-        responseDto2.setRating(5.0);
     }
 
     @Test
@@ -131,7 +129,6 @@ class PortfolioServiceImplTest {
         assertThat(result.getPortfolioId()).isEqualTo("portfolio-id-1");
         assertThat(result.getTitle()).isEqualTo("Modern Kitchen Counter");
         assertThat(result.getImageUrl()).isEqualTo("/uploads/portfolio/kitchencounter.jpg");
-        assertThat(result.getRating()).isEqualTo(4.9);
 
         verify(portfolioRepository, times(1)).findById(portfolioId);
         verify(portfolioMapper, times(1)).entityToResponseDto(portfolioItem1);
@@ -166,8 +163,6 @@ class PortfolioServiceImplTest {
         assertThat(result).hasSize(2);
         assertThat(result).extracting(PortfolioResponseDto::getTitle)
                 .containsExactly("Modern Kitchen Counter", "Complete Kitchen Remodel");
-        assertThat(result).extracting(PortfolioResponseDto::getRating)
-                .containsExactly(4.9, 5.0);
     }
 
     @Test
@@ -246,13 +241,11 @@ class PortfolioServiceImplTest {
         savedItem.setPortfolioId("new-portfolio-id");
         savedItem.setTitle(title);
         savedItem.setImageUrl(imageUrl);
-        savedItem.setRating(rating);
 
         PortfolioResponseDto expectedResponse = new PortfolioResponseDto();
         expectedResponse.setPortfolioId("new-portfolio-id");
         expectedResponse.setTitle(title);
         expectedResponse.setImageUrl(imageUrl);
-        expectedResponse.setRating(rating);
 
         when(portfolioRepository.save(any(PortfolioItem.class))).thenReturn(savedItem);
         when(portfolioMapper.entityToResponseDto(savedItem)).thenReturn(expectedResponse);
@@ -265,7 +258,6 @@ class PortfolioServiceImplTest {
         assertThat(result.getPortfolioId()).isEqualTo("new-portfolio-id");
         assertThat(result.getTitle()).isEqualTo(title);
         assertThat(result.getImageUrl()).isEqualTo(imageUrl);
-        assertThat(result.getRating()).isEqualTo(rating);
 
         verify(portfolioRepository).save(any(PortfolioItem.class));
         verify(portfolioMapper).entityToResponseDto(savedItem);
@@ -313,7 +305,7 @@ class PortfolioServiceImplTest {
         // Arrange
         String type = "Kitchen";
         List<PortfolioItem> kitchenItems = List.of(portfolioItem1, portfolioItem2);
-        
+
         when(portfolioRepository.findByType(type)).thenReturn(kitchenItems);
         when(portfolioMapper.entityToResponseDto(portfolioItem1)).thenReturn(responseDto1);
         when(portfolioMapper.entityToResponseDto(portfolioItem2)).thenReturn(responseDto2);
