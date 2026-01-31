@@ -103,7 +103,6 @@ public class PortfolioController {
         PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
                 request.getTitle(),
                 request.getImageUrl(),
-                request.getRating(),
                 request.getType()
         );
 

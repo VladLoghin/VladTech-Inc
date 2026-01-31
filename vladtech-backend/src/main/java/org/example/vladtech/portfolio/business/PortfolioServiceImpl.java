@@ -80,13 +80,12 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating, String type) {
+    public PortfolioResponseDto createPortfolioItem(String title, String imageUrl, String type) {
         log.info("Creating new portfolio item with title: {} and type: {}", title, type);
 
         PortfolioItem portfolioItem = new PortfolioItem();
         portfolioItem.setTitle(title);
         portfolioItem.setImageUrl(imageUrl);
-        portfolioItem.setRating(rating);
         portfolioItem.setType(type);
         portfolioItem.setComments(new java.util.ArrayList<>());
 

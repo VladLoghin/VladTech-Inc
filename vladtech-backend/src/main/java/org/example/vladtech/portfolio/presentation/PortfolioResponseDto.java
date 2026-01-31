@@ -24,9 +24,6 @@ public class PortfolioResponseDto {
     @NotBlank(message = "Image URL cannot be empty")
     private String imageUrl;
 
-    @NotNull(message = "Rating cannot be null")
-    private Double rating;
-
     @NotBlank(message = "Type cannot be empty")
     private String type; // Interior, Kitchen, Bathroom, Exterior, Garden/Landscaping
 
