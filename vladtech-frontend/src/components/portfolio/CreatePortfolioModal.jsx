@@ -11,7 +11,6 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     title: "",
     imageFile: null,
-    rating: 5.0,
     type: "Interior",
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -22,14 +21,21 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     "Interior",
     "Kitchen",
     "Bathroom",
-    "Exterior",
-    "Garden/Landscaping"
+    "Exterior/Yard"
   ];
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setError("Image file is too large. Maximum size is 10MB. Please compress or resize the image.");
+        return;
+      }
+
       setFormData({ ...formData, imageFile: file });
+      setError(""); // Clear any previous errors
       
       // Create preview
       const reader = new FileReader();
@@ -43,6 +49,13 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
+
+  // Validate image file
+  if (!formData.imageFile) {
+    setError("Please select an image file");
+    return;
+  }
+
   setIsSubmitting(true);
 
   try {
@@ -64,9 +77,9 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     const { imageUrl } = uploadResponse.data;
 
     // Create portfolio item with uploaded image path
-    await createPortfolioItem(formData.title, imageUrl, formData.rating, formData.type, token);
+    await createPortfolioItem(formData.title, imageUrl, formData.type, token);
 
-    setFormData({ title: "", imageFile: null, rating: 5.0, type: "Interior" });
+    setFormData({ title: "", imageFile: null, type: "Interior" });
     setImagePreview(null);
     onSuccess?.();
     onClose();
@@ -146,7 +159,6 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                 onChange={handleImageChange}
                 className="hidden"
                 id="image-upload"
-                required
               />
               <label
                 htmlFor="image-upload"
@@ -171,25 +183,6 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                 )}
               </label>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold mb-2">
-              {t('portfolio.rating')} <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              min="0"
-              max="5"
-              value={formData.rating}
-              onChange={(e) =>
-                setFormData({ ...formData, rating: parseFloat(e.target.value) })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">{t('portfolio.ratingRange')}</p>
           </div>
 
           <div className="flex gap-3 pt-4">

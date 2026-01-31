@@ -66,7 +66,6 @@ export const getPortfolioItemById = async (portfolioId: string) => {
 export const createPortfolioItem = async (
   title: string,
   imageUrl: string,
-  rating: number,
   type: string,
   accessToken: string
 ) => {
@@ -76,7 +75,7 @@ export const createPortfolioItem = async (
       {
         title,
         imageUrl,
-        rating,
+        rating: 5.0,
         type,
       },
       {

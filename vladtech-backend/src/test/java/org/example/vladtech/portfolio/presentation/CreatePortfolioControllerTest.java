@@ -48,7 +48,7 @@ class CreatePortfolioControllerTest {
         response.setRating(4.8);
         response.setComments(new ArrayList<>());
 
-        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyDouble()))
+        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyDouble(), anyString()))
                 .thenReturn(response);
     }
 
@@ -58,6 +58,7 @@ class CreatePortfolioControllerTest {
         request.setTitle("New Kitchen Renovation");
         request.setImageUrl("/uploads/portfolio/kitchen.jpg");
         request.setRating(4.8);
+        request.setType("Kitchen");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt()
@@ -76,7 +77,7 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.comments", hasSize(0)));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq(4.8));
+                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq(4.8), anyString());
     }
 
     @Disabled("Disabled until we fix the security config and permissions in the controller class")
@@ -86,6 +87,7 @@ class CreatePortfolioControllerTest {
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
         request.setRating(5.0);
+        request.setType("Interior");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt()
@@ -108,6 +110,8 @@ class CreatePortfolioControllerTest {
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
         request.setRating(5.0);
+        request.setType("Bathroom");
+        request.setType("Bathroom");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt()
@@ -129,6 +133,8 @@ class CreatePortfolioControllerTest {
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
         request.setRating(5.0);
+        request.setType("Exterior");
+        request.setType("Exterior");
 
         mockMvc.perform(post("/api/portfolio")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,6 +150,8 @@ class CreatePortfolioControllerTest {
         request.setTitle("");
         request.setImageUrl("/uploads/portfolio/test.jpg");
         request.setRating(5.0);
+        request.setType("Kitchen");
+        request.setType("Kitchen");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
@@ -159,7 +167,9 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("Valid Title");
         request.setImageUrl("");
+        request.setType("Bathroom");;
         request.setRating(5.0);
+        request.setType("Bathroom");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
@@ -176,6 +186,8 @@ class CreatePortfolioControllerTest {
         request.setTitle("Valid Title");
         request.setImageUrl("/uploads/portfolio/test.jpg");
         request.setRating(null);
+        request.setType("Interior");
+        request.setType("Interior");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
@@ -192,6 +204,8 @@ class CreatePortfolioControllerTest {
         request.setTitle("Bathroom Remodel");
         request.setImageUrl("/uploads/portfolio/bathroom.jpg");
         request.setRating(4.5);
+        request.setType("Bathroom");
+        request.setType("Bathroom");
 
         mockMvc.perform(post("/api/portfolio")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
@@ -204,6 +218,6 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.rating", is(4.8)));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), eq(4.5));
+                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), eq(4.5), anyString());
     }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Star, Send, ChevronDown } from "lucide-react";
+import { X, Send, ChevronDown } from "lucide-react";
 import { Button } from "../components/button.js";
 import { Textarea } from "../components/textarea.js";
 import { motion, AnimatePresence } from "motion/react";
@@ -245,10 +245,6 @@ export default function PortfolioGallery() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="absolute bottom-4 left-4 right-4">
                   <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                    <span className="text-yellow-400">{item.rating}</span>
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -289,10 +285,6 @@ export default function PortfolioGallery() {
                 <div className="p-6 border-b border-yellow-400/20 flex items-center justify-between">
                   <div>
                     <h3 className="text-xl text-white tracking-wide">{selectedItem.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                      <span className="text-yellow-400">{selectedItem.rating} / 5.0</span>
-                    </div>
                   </div>
                   <button
                     onClick={() => setSelectedItem(null)}

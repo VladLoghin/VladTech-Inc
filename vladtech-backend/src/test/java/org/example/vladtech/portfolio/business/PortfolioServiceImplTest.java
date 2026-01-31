@@ -51,6 +51,7 @@ class PortfolioServiceImplTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
+                null,
                 List.of(
                         new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800),
                                 "Beautiful countertop!")));
@@ -60,6 +61,7 @@ class PortfolioServiceImplTest {
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
                 5.0,
+                null,
                 List.of(
                         new PortfolioComment("Emma L.", "auth0|user2", now.minusSeconds(18000),
                                 "Amazing transformation!")));
@@ -197,6 +199,7 @@ class PortfolioServiceImplTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
+                null,
                 new ArrayList<>());
         portfolioItemWithComments.setPortfolioId(portfolioId);
 
@@ -255,7 +258,7 @@ class PortfolioServiceImplTest {
         when(portfolioMapper.entityToResponseDto(savedItem)).thenReturn(expectedResponse);
 
         // Act
-        PortfolioResponseDto result = portfolioService.createPortfolioItem(title, imageUrl, rating);
+        PortfolioResponseDto result = portfolioService.createPortfolioItem(title, imageUrl, rating, null);
 
         // Assert
         assertThat(result).isNotNull();
@@ -276,6 +279,7 @@ class PortfolioServiceImplTest {
                 "Item to Delete",
                 "/uploads/portfolio/delete-me.jpg",
                 3.0,
+                null,
                 new ArrayList<>());
         itemToDelete.setPortfolioId(portfolioId);
 
@@ -302,5 +306,121 @@ class PortfolioServiceImplTest {
 
         verify(portfolioRepository).findById(portfolioId);
         verify(portfolioRepository, never()).delete(any());
+    }
+
+    @Test
+    void getPortfolioItemsByType_WhenTypeExists_ShouldReturnMatchingItems() {
+        // Arrange
+        String type = "Kitchen";
+        List<PortfolioItem> kitchenItems = List.of(portfolioItem1, portfolioItem2);
+        
+        when(portfolioRepository.findByType(type)).thenReturn(kitchenItems);
+        when(portfolioMapper.entityToResponseDto(portfolioItem1)).thenReturn(responseDto1);
+        when(portfolioMapper.entityToResponseDto(portfolioItem2)).thenReturn(responseDto2);
+
+        // Act
+        List<PortfolioResponseDto> result = portfolioService.getPortfolioItemsByType(type);
+
+        // Assert
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactly(responseDto1, responseDto2);
+        verify(portfolioRepository).findByType(type);
+        verify(portfolioMapper, times(2)).entityToResponseDto(any(PortfolioItem.class));
+    }
+
+    @Test
+    void getPortfolioItemsByType_WhenNoMatchingType_ShouldReturnEmptyList() {
+        // Arrange
+        String type = "Exterior";
+        when(portfolioRepository.findByType(type)).thenReturn(List.of());
+
+        // Act
+        List<PortfolioResponseDto> result = portfolioService.getPortfolioItemsByType(type);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(portfolioRepository).findByType(type);
+        verify(portfolioMapper, never()).entityToResponseDto(any());
+    }
+
+    @Test
+    void getPortfolioItemsByType_WithDifferentTypes_ShouldReturnCorrectItems() {
+        // Arrange
+        String bathroomType = "Bathroom";
+        PortfolioItem bathroomItem = new PortfolioItem(
+                "Luxury Bathroom",
+                "/bathroom.jpg",
+                4.8,
+                bathroomType,
+                List.of()
+        );
+        bathroomItem.setPortfolioId("bathroom-id");
+
+        PortfolioResponseDto bathroomDto = new PortfolioResponseDto();
+        bathroomDto.setPortfolioId("bathroom-id");
+        bathroomDto.setTitle("Luxury Bathroom");
+        bathroomDto.setType(bathroomType);
+
+        when(portfolioRepository.findByType(bathroomType)).thenReturn(List.of(bathroomItem));
+        when(portfolioMapper.entityToResponseDto(bathroomItem)).thenReturn(bathroomDto);
+
+        // Act
+        List<PortfolioResponseDto> result = portfolioService.getPortfolioItemsByType(bathroomType);
+
+        // Assert
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getType()).isEqualTo(bathroomType);
+        assertThat(result.get(0).getTitle()).isEqualTo("Luxury Bathroom");
+        verify(portfolioRepository).findByType(bathroomType);
+    }
+
+    @Test
+    void getPortfolioItemsByType_ShouldMapAllItemsCorrectly() {
+        // Arrange
+        String type = "Interior";
+        PortfolioItem item1 = new PortfolioItem("Living Room", "/living.jpg", 4.5, type, List.of());
+        PortfolioItem item2 = new PortfolioItem("Bedroom", "/bedroom.jpg", 4.7, type, List.of());
+        PortfolioItem item3 = new PortfolioItem("Office", "/office.jpg", 4.6, type, List.of());
+
+        PortfolioResponseDto dto1 = new PortfolioResponseDto();
+        dto1.setTitle("Living Room");
+        dto1.setType(type);
+
+        PortfolioResponseDto dto2 = new PortfolioResponseDto();
+        dto2.setTitle("Bedroom");
+        dto2.setType(type);
+
+        PortfolioResponseDto dto3 = new PortfolioResponseDto();
+        dto3.setTitle("Office");
+        dto3.setType(type);
+
+        when(portfolioRepository.findByType(type)).thenReturn(List.of(item1, item2, item3));
+        when(portfolioMapper.entityToResponseDto(item1)).thenReturn(dto1);
+        when(portfolioMapper.entityToResponseDto(item2)).thenReturn(dto2);
+        when(portfolioMapper.entityToResponseDto(item3)).thenReturn(dto3);
+
+        // Act
+        List<PortfolioResponseDto> result = portfolioService.getPortfolioItemsByType(type);
+
+        // Assert
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(PortfolioResponseDto::getTitle)
+                .containsExactly("Living Room", "Bedroom", "Office");
+        assertThat(result).allMatch(dto -> type.equals(dto.getType()));
+        verify(portfolioRepository).findByType(type);
+        verify(portfolioMapper, times(3)).entityToResponseDto(any(PortfolioItem.class));
+    }
+
+    @Test
+    void getPortfolioItemsByType_WithNullType_ShouldCallRepository() {
+        // Arrange
+        when(portfolioRepository.findByType(null)).thenReturn(List.of());
+
+        // Act
+        List<PortfolioResponseDto> result = portfolioService.getPortfolioItemsByType(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(portfolioRepository).findByType(null);
     }
 }
