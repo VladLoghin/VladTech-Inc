@@ -12,10 +12,19 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     title: "",
     imageFile: null,
     rating: 5.0,
+    type: "Interior",
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const portfolioTypes = [
+    "Interior",
+    "Kitchen",
+    "Bathroom",
+    "Exterior",
+    "Garden/Landscaping"
+  ];
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -55,9 +64,9 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
     const { imageUrl } = uploadResponse.data;
 
     // Create portfolio item with uploaded image path
-    await createPortfolioItem(formData.title, imageUrl, formData.rating, token);
+    await createPortfolioItem(formData.title, imageUrl, formData.rating, formData.type, token);
 
-    setFormData({ title: "", imageFile: null, rating: 5.0 });
+    setFormData({ title: "", imageFile: null, rating: 5.0, type: "Interior" });
     setImagePreview(null);
     onSuccess?.();
     onClose();
@@ -104,6 +113,26 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.type}
+              onChange={(e) =>
+                setFormData({ ...formData, type: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              required
+            >
+              {portfolioTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

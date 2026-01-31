@@ -42,9 +42,10 @@ export const addComment = async (
   }
 };
 
-export const getAllPortfolioItems = async () => {
+export const getAllPortfolioItems = async (type?: string) => {
   try {
-    const response = await api.get(API_BASE);
+    const params = type ? { type } : {};
+    const response = await api.get(API_BASE, { params });
     return response.data;
   } catch (error) {
     console.error("Error fetching portfolio items:", error);
@@ -66,6 +67,7 @@ export const createPortfolioItem = async (
   title: string,
   imageUrl: string,
   rating: number,
+  type: string,
   accessToken: string
 ) => {
   try {
@@ -75,6 +77,7 @@ export const createPortfolioItem = async (
         title,
         imageUrl,
         rating,
+        type,
       },
       {
         headers: {

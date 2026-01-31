@@ -168,4 +168,3 @@ class PortfolioItemTest {
         assertTrue(item.getComments().isEmpty());
     }
 }
-

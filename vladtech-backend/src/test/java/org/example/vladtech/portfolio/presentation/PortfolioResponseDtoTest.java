@@ -178,4 +178,3 @@ class PortfolioResponseDtoTest {
         assertTrue(dto3.getImageUrl().endsWith(".png"));
     }
 }
-
