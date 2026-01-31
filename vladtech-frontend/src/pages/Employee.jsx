@@ -7,6 +7,7 @@ import { api } from "../api/http";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 import i18n from "../i18n";
+import EmployeeProjectStatsCards from "../components/projects/EmployeeProjectStatsCards.jsx";
 
 const Employee = () => {
   const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
@@ -157,6 +158,9 @@ const Employee = () => {
 
           {!projectsLoading && !projectsError && (
             <>
+            <section className="mb-8">
+      <EmployeeProjectStatsCards projects={projects} />
+    </section>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <EmployeeProjectCalendar projects={projects} onDateSelect={setSelectedDate} />
 
