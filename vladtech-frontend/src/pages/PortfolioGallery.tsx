@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Star, Send } from "lucide-react";
+import { X, Send, ChevronDown } from "lucide-react";
 import { Button } from "../components/button.js";
 import { Textarea } from "../components/textarea.js";
 import { motion, AnimatePresence } from "motion/react";
@@ -14,6 +14,7 @@ interface PortfolioItem {
   title: string;
   imageUrl: string;
   rating: number;
+  type: string;
   comments: PortfolioComment[];
 }
 
@@ -24,6 +25,8 @@ interface PortfolioComment {
   text: string;
 }
 
+const PORTFOLIO_TYPES = ["All", "Interior", "Kitchen", "Bathroom", "Exterior/Yard"];
+
 export default function PortfolioGallery() {
   const navigate = useNavigate();
   const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0();
@@ -32,6 +35,8 @@ export default function PortfolioGallery() {
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedType, setSelectedType] = useState<string>("All");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Helper function to calculate time ago
   const getTimeAgo = (timestamp: string): string => {
@@ -57,8 +62,11 @@ export default function PortfolioGallery() {
   useEffect(() => {
   const fetchPortfolioItems = async () => {
     try {
-      const response = await api.get("/portfolio");
-      console.log("Portfolio data:", response.data);
+      const type = selectedType === "All" ? undefined : selectedType;
+      const response = await api.get("/portfolio", { params: type ? { type } : {} });
+      console.log("Selected type:", selectedType);
+      console.log("Portfolio data received:", response.data);
+      console.log("Number of items:", response.data.length);
       setPortfolioItems(response.data);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
@@ -68,7 +76,7 @@ export default function PortfolioGallery() {
   };
 
   fetchPortfolioItems();
-}, []);
+}, [selectedType]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +156,7 @@ export default function PortfolioGallery() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Glossy Navigation Bar */}
+      {/* Glossy Navigation Bar with Dropdown */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-yellow-400/20 shadow-2xl">
         <div className="container mx-auto px-8 py-6 flex items-center justify-between">
           <button
@@ -172,10 +180,51 @@ export default function PortfolioGallery() {
               REVIEWS
             </button>
           </div>
+
+          {/* Filter Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-medium hover:bg-yellow-500 transition-all"
+            >
+              {selectedType}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-56 bg-black border border-yellow-400/30 rounded-lg shadow-2xl overflow-hidden"
+                >
+                  {PORTFOLIO_TYPES.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setSelectedType(type);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm transition-all ${
+                        selectedType === type
+                          ? "bg-yellow-400 text-black font-semibold"
+                          : "text-white hover:bg-yellow-400/10"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </nav>
 
-      {/* Portfolio Grid - No gaps, starts right after navbar */}
+      {/* Portfolio Grid - starts right after navbar */}
       <div className="pt-[88px] h-screen overflow-y-auto">
         <div className="grid grid-cols-3 gap-0">
           {portfolioItems.map((item, index) => (
@@ -196,10 +245,6 @@ export default function PortfolioGallery() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="absolute bottom-4 left-4 right-4">
                   <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                    <span className="text-yellow-400">{item.rating}</span>
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -240,10 +285,6 @@ export default function PortfolioGallery() {
                 <div className="p-6 border-b border-yellow-400/20 flex items-center justify-between">
                   <div>
                     <h3 className="text-xl text-white tracking-wide">{selectedItem.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                      <span className="text-yellow-400">{selectedItem.rating} / 5.0</span>
-                    </div>
                   </div>
                   <button
                     onClick={() => setSelectedItem(null)}

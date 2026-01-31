@@ -23,6 +23,9 @@ public class PortfolioResponseDto {
     @NotNull(message = "Rating cannot be null")
     private Double rating;
 
+    @NotBlank(message = "Type cannot be empty")
+    private String type; // Interior, Kitchen, Bathroom, Exterior, Garden/Landscaping
+
     private List<PortfolioCommentDto> comments;
 }
 

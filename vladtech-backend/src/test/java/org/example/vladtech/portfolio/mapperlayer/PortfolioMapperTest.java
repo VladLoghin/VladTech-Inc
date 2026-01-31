@@ -35,6 +35,7 @@ class PortfolioMapperTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
+                null,
                 comments
         );
         portfolioItem.setPortfolioId("portfolio-123");
@@ -70,6 +71,7 @@ class PortfolioMapperTest {
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
                 4.5,
+                null,
                 new ArrayList<>()
         );
         portfolioItem.setPortfolioId("portfolio-456");
@@ -100,6 +102,7 @@ class PortfolioMapperTest {
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
                 4.8,
+                null,
                 comments
         );
         portfolioItem.setPortfolioId("portfolio-789");
@@ -125,6 +128,7 @@ class PortfolioMapperTest {
                 "Perfect Kitchen",
                 "/uploads/portfolio/kitchenremodel.jpg",
                 5.0,
+                null,
                 List.of()
         );
         portfolioItem.setPortfolioId("portfolio-perfect");
@@ -145,6 +149,7 @@ class PortfolioMapperTest {
                 "Basic Renovation",
                 "/uploads/portfolio/basic.jpg",
                 3.5,
+                null,
                 List.of()
         );
         portfolioItem.setPortfolioId("portfolio-basic");
@@ -172,6 +177,7 @@ class PortfolioMapperTest {
                 "Test Title",
                 "/test/url.jpg",
                 4.7,
+                null,
                 List.of(comment)
         );
         portfolioItem.setPortfolioId("test-id");

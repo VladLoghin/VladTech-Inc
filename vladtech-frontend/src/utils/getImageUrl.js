@@ -19,25 +19,36 @@ export default function getImageUrl(url, forceDownload = false) {
         // Not an absolute URL, continue processing
     }
 
-    // If it starts with /, it's already a path - just add download param if needed
+    // IMPORTANT: GridFS paths starting with /api/uploads/ or /uploads/
+    // will be proxied to backend by Vite dev server
+    // In production, nginx handles this routing
+    
+    // If it starts with /, it's already a path - ensure it goes through backend
     if (url.startsWith("/")) {
-        if (forceDownload && !url.includes("?download=")) {
-            const separator = url.includes("?") ? "&" : "?";
-            return `${url}${separator}download=true`;
+        // Convert /uploads/reviews/{id} to /api/uploads/reviews/{id}
+        // to ensure it goes through the backend API
+        let finalUrl = url;
+        if (url.startsWith("/uploads/") && !url.startsWith("/api/uploads/")) {
+            finalUrl = `/api${url}`;
         }
-        return url;
+        
+        if (forceDownload && !finalUrl.includes("?download=")) {
+            const separator = finalUrl.includes("?") ? "&" : "?";
+            return `${finalUrl}${separator}download=true`;
+        }
+        return finalUrl;
     }
 
     // If it looks like a MongoDB ObjectId (24 hex characters),
     // construct the GridFS URL
     if (/^[0-9a-fA-F]{24}$/.test(url)) {
-        const baseUrl = `/uploads/reviews/${url}`;
+        const baseUrl = `/api/uploads/reviews/${url}`;
         return forceDownload ? `${baseUrl}?download=true` : baseUrl;
     }
 
     // If it's a simple filename without path, assume it's in the reviews folder
     if (!url.includes("/") && !url.includes("\\")) {
-        const baseUrl = `/uploads/reviews/${url}`;
+        const baseUrl = `/api/uploads/reviews/${url}`;
         return forceDownload ? `${baseUrl}?download=true` : baseUrl;
     }
 
@@ -63,7 +74,7 @@ export function extractFileId(url) {
     if (!url) return null;
 
     // Match /uploads/reviews/{id} pattern
-    const match = url.match(/\/uploads\/reviews\/([0-9a-fA-F]{24})/);
+    const match = url.match(/\/(?:api\/)?uploads\/reviews\/([0-9a-fA-F]{24})/);
     return match ? match[1] : null;
 }
 
