@@ -26,6 +26,7 @@ const ReviewsPage = () => {
   const [filters, setFilters] = useState({
     clientName: "",
     rating: "",
+    type: "",
   });
 
   const rawRoles = user?.["https://vladtech.com/roles"];
@@ -74,6 +75,10 @@ const ReviewsPage = () => {
           filtered = filtered.filter(r => r.rating === filters.rating);
         }
         
+        if (filters.type) {
+          filtered = filtered.filter(r => r.type === filters.type);
+        }
+        
         setReviews(filtered);
         return;
       }
@@ -90,7 +95,7 @@ const ReviewsPage = () => {
   }, [isLoading, isClient, isStaff, showMine, filters]);
 
   const handleReset = () => {
-    setFilters({ clientName: "", rating: "" });
+    setFilters({ clientName: "", rating: "", type: "" });
   };
 
   return (
@@ -157,6 +162,20 @@ const ReviewsPage = () => {
                   <option value="THREE">★★★☆☆</option>
                   <option value="TWO">★★☆☆☆</option>
                   <option value="ONE">★☆☆☆☆</option>
+                </select>
+
+                <select
+                  value={filters.type}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, type: e.target.value }))
+                  }
+                  className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
+                >
+                  <option value="">All types</option>
+                  <option value="Interior">Interior</option>
+                  <option value="Kitchen">Kitchen</option>
+                  <option value="Bathroom">Bathroom</option>
+                  <option value="Exterior/Yard">Exterior/Yard</option>
                 </select>
 
                 <button

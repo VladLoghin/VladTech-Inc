@@ -13,6 +13,9 @@ export const getAllVisibleReviews = async (filters = {}) => {
     if (filters.rating) {
         params.rating = filters.rating;
     }
+    if (filters.type) {
+        params.type = filters.type;
+    }
 
     const res = await api.get(`${API_BASE}/visible`, { params });
     return res.data;
@@ -28,6 +31,9 @@ export const getAllReviews = async (token, filters = {}) => {
     }
     if (filters.rating) {
         params.rating = filters.rating;
+    }
+    if (filters.type) {
+        params.type = filters.type;
     }
 
     const res = await api.get(`${API_BASE}`, {

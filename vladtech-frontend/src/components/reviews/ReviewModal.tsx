@@ -16,9 +16,17 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     
     const clientId = user?.sub;
 
+    const portfolioTypes = [
+        "Interior",
+        "Kitchen",
+        "Bathroom",
+        "Exterior/Yard"
+    ];
+
     const [clientName, setClientName] = useState("");
     const [comment, setComment] = useState("");
     const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
+    const [type, setType] = useState("Interior");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<{ name?: string; comment?: string }>({});
 
@@ -52,6 +60,8 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             comment,
             visible: false,
             rating: ratingEnum,
+            sentToPortfolio: false,
+            type,
         };
 
         const formData = new FormData();
@@ -86,6 +96,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             setClientName("");
             setComment("");
             setStars(5);
+            setType("Interior");
             setImageFile(null);
         } catch (err) {
             console.error("Error submitting review:", err);
@@ -122,6 +133,24 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             required
                         />
                         {errors.comment && <p className="text-red-600 text-sm font-semibold mt-1">{errors.comment}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">
+                            Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            required
+                        >
+                            {portfolioTypes.map((portfolioType) => (
+                                <option key={portfolioType} value={portfolioType}>
+                                    {portfolioType}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex gap-1">

@@ -1,6 +1,7 @@
 package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Rating;
@@ -31,9 +32,9 @@ public class ReviewController {
     @GetMapping()
     public ResponseEntity<List<ReviewResponseModel>> getAllReviews(@AuthenticationPrincipal Jwt jwt,
                                                                    @RequestParam(required = false) String clientName,
-                                                                   @RequestParam(required = false) Rating rating
-                                                                   ) {
-        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating));
+                                                                   @RequestParam(required = false) Rating rating,
+                                                                   @RequestParam(required = false) String type) {
+        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating, type));
     }
 
 
@@ -57,8 +58,9 @@ public class ReviewController {
 
     @GetMapping("/visible")
     public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews(@RequestParam(required = false) String clientName,
-                                                                           @RequestParam(required = false) Rating rating) {
-        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating));
+                                                                           @RequestParam(required = false) Rating rating,
+                                                                          @RequestParam(required = false) String type) {
+        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating, type));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -100,7 +102,7 @@ public class ReviewController {
 
     @GetMapping("/satisfaction-percentage")
     public ResponseEntity<Double> getSatisfactionPercentage() {
-        if (reviewService.getAllVisibleReviews(null, null).isEmpty()) {
+        if (reviewService.getAllVisibleReviews(null, null, null).isEmpty()) {
             return ResponseEntity.ok(0.0);
         }
         return ResponseEntity.ok(reviewService.computeSatisfactionPercentage());
@@ -117,6 +119,27 @@ public class ReviewController {
             reviewService.deleteReview(reviewId);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @PostMapping("/{reviewId}/send-to-portfolio")
+    public ResponseEntity<?> sendReviewToPortfolio(@PathVariable String reviewId) {
+        try {
+            return ResponseEntity.ok(reviewService.sendToPortfolio(reviewId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin')")
+    @PatchMapping("/{reviewId}/set-create-portfolio")
+    public ResponseEntity<?> resetPortfolioStatus(@PathVariable String reviewId) {
+        try {
+            reviewService.resetPortfolioStatus(reviewId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

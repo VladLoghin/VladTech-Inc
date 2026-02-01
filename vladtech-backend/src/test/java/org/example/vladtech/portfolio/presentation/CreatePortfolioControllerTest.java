@@ -45,10 +45,9 @@ class CreatePortfolioControllerTest {
         response.setPortfolioId("seed-id-1");
         response.setTitle("New Kitchen Renovation");
         response.setImageUrl("/uploads/portfolio/kitchen.jpg");
-        response.setRating(4.8);
         response.setComments(new ArrayList<>());
 
-        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyDouble(), anyString()))
+        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyString()))
                 .thenReturn(response);
     }
 
@@ -57,7 +56,6 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("New Kitchen Renovation");
         request.setImageUrl("/uploads/portfolio/kitchen.jpg");
-        request.setRating(4.8);
         request.setType("Kitchen");
 
         mockMvc.perform(post("/api/portfolio")
@@ -73,11 +71,10 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.portfolioId").exists())
                 .andExpect(jsonPath("$.title", is("New Kitchen Renovation")))
                 .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")))
-                .andExpect(jsonPath("$.rating", is(4.8)))
                 .andExpect(jsonPath("$.comments", hasSize(0)));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq(4.8), anyString());
+                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), eq("Kitchen"));
     }
 
     @Disabled("Disabled until we fix the security config and permissions in the controller class")
@@ -86,7 +83,6 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
-        request.setRating(5.0);
         request.setType("Interior");
 
         mockMvc.perform(post("/api/portfolio")
@@ -109,7 +105,6 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
-        request.setRating(5.0);
         request.setType("Bathroom");
         request.setType("Bathroom");
 
@@ -132,7 +127,6 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("This should fail");
         request.setImageUrl("/uploads/portfolio/test.jpg");
-        request.setRating(5.0);
         request.setType("Exterior");
         request.setType("Exterior");
 
@@ -149,7 +143,6 @@ class CreatePortfolioControllerTest {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("");
         request.setImageUrl("/uploads/portfolio/test.jpg");
-        request.setRating(5.0);
         request.setType("Kitchen");
         request.setType("Kitchen");
 
@@ -168,7 +161,6 @@ class CreatePortfolioControllerTest {
         request.setTitle("Valid Title");
         request.setImageUrl("");
         request.setType("Bathroom");;
-        request.setRating(5.0);
         request.setType("Bathroom");
 
         mockMvc.perform(post("/api/portfolio")
@@ -180,30 +172,13 @@ class CreatePortfolioControllerTest {
         verifyNoInteractions(portfolioService);
     }
 
-    @Test
-    void createPortfolio_WithNullRating_ShouldReturnBadRequest() throws Exception {
-        PortfolioResponseDto request = new PortfolioResponseDto();
-        request.setTitle("Valid Title");
-        request.setImageUrl("/uploads/portfolio/test.jpg");
-        request.setRating(null);
-        request.setType("Interior");
-        request.setType("Interior");
 
-        mockMvc.perform(post("/api/portfolio")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(portfolioService);
-    }
 
     @Test
     void createPortfolio_WithValidData_ShouldReturnPortfolioWithId() throws Exception {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("Bathroom Remodel");
         request.setImageUrl("/uploads/portfolio/bathroom.jpg");
-        request.setRating(4.5);
         request.setType("Bathroom");
         request.setType("Bathroom");
 
@@ -214,10 +189,9 @@ class CreatePortfolioControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.portfolioId").isNotEmpty())
                 .andExpect(jsonPath("$.title", is("New Kitchen Renovation"))) // note: response is stubbed!
-                .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")))
-                .andExpect(jsonPath("$.rating", is(4.8)));
+                .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), eq(4.5), anyString());
+                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), eq("Bathroom"));
     }
 }

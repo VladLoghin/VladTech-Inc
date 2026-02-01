@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { getAllPortfolioItems, deletePortfolioItem } from "../../api/portfolio/portfolioService";
 import { X, Trash2, AlertTriangle } from "lucide-react";
 import getImageUrl from "../../utils/getImageUrl.js";
+import { api } from "../../api/http";
 
 export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { t } = useTranslation();
@@ -48,13 +49,24 @@ export default function DeletePortfolioModal({ isOpen, onClose, onSuccess }) {
 
     try {
       const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
+
+      const item = portfolioItems.find(i => i.portfolioId === portfolioId);
+      const reviewId = item?.reviewId;
+
+      // 1) Delete portfolio item first
       await deletePortfolioItem(portfolioId, token);
-      
-      // Remove from local state
+
+      // 2) Then reset review status (if linked)
+      if (reviewId) {
+        await api.patch(
+          `/reviews/${reviewId}/set-create-portfolio`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
       setPortfolioItems(portfolioItems.filter(item => item.portfolioId !== portfolioId));
       onSuccess?.();
     } catch (err) {

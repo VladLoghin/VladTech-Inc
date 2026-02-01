@@ -29,7 +29,6 @@ class PortfolioRepositoryTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 List.of(new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful!"))
         );
@@ -42,7 +41,6 @@ class PortfolioRepositoryTest {
         assertThat(saved.getPortfolioId()).isNotNull();
         assertThat(saved.getTitle()).isEqualTo("Modern Kitchen Counter");
         assertThat(saved.getImageUrl()).isEqualTo("/uploads/portfolio/kitchencounter.jpg");
-        assertThat(saved.getRating()).isEqualTo(4.9);
         assertThat(saved.getComments()).hasSize(1);
     }
 
@@ -52,7 +50,6 @@ class PortfolioRepositoryTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
-                4.8,
                 null,
                 List.of()
         );
@@ -65,7 +62,6 @@ class PortfolioRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Luxury Bathroom");
         assertThat(found.get().getImageUrl()).isEqualTo("/uploads/portfolio/newbathroom.jpg");
-        assertThat(found.get().getRating()).isEqualTo(4.8);
     }
 
     @Test
@@ -83,14 +79,12 @@ class PortfolioRepositoryTest {
         PortfolioItem item1 = new PortfolioItem(
                 "Kitchen Remodel",
                 "/uploads/portfolio/kitchen.jpg",
-                5.0,
                 null,
                 List.of()
         );
         PortfolioItem item2 = new PortfolioItem(
                 "Bathroom Renovation",
                 "/uploads/portfolio/bathroom.jpg",
-                4.7,
                 null,
                 List.of()
         );
@@ -120,7 +114,6 @@ class PortfolioRepositoryTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Office Space",
                 "/uploads/portfolio/office.jpg",
-                4.5,
                 null,
                 List.of()
         );
@@ -137,8 +130,8 @@ class PortfolioRepositoryTest {
     @Test
     void deleteAll_ShouldRemoveAllItems() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", null, List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", null, List.of());
         portfolioRepository.saveAll(List.of(item1, item2));
 
         // Act
@@ -160,7 +153,6 @@ class PortfolioRepositoryTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Premium Kitchen",
                 "/uploads/portfolio/premium.jpg",
-                5.0,
                 null,
                 comments
         );
@@ -182,7 +174,6 @@ class PortfolioRepositoryTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Original Title",
                 "/original.jpg",
-                4.0,
                 null,
                 List.of()
         );
@@ -190,22 +181,20 @@ class PortfolioRepositoryTest {
 
         // Act
         saved.setTitle("Updated Title");
-        saved.setRating(4.9);
         portfolioRepository.save(saved);
 
         // Assert
         Optional<PortfolioItem> found = portfolioRepository.findById(saved.getPortfolioId());
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Updated Title");
-        assertThat(found.get().getRating()).isEqualTo(4.9);
     }
 
     @Test
     void count_ShouldReturnCorrectNumber() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
-        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", 4.6, null, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", null, List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", null, List.of());
+        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", null, List.of());
         portfolioRepository.saveAll(List.of(item1, item2, item3));
 
         // Act
@@ -221,21 +210,18 @@ class PortfolioRepositoryTest {
         PortfolioItem kitchenItem1 = new PortfolioItem(
                 "Modern Kitchen",
                 "/kitchen1.jpg",
-                4.8,
                 "Kitchen",
                 List.of()
         );
         PortfolioItem kitchenItem2 = new PortfolioItem(
                 "Classic Kitchen",
                 "/kitchen2.jpg",
-                4.5,
                 "Kitchen",
                 List.of()
         );
         PortfolioItem bathroomItem = new PortfolioItem(
                 "Luxury Bathroom",
                 "/bathroom.jpg",
-                4.9,
                 "Bathroom",
                 List.of()
         );
@@ -257,7 +243,6 @@ class PortfolioRepositoryTest {
         PortfolioItem kitchenItem = new PortfolioItem(
                 "Kitchen Project",
                 "/kitchen.jpg",
-                4.5,
                 "Kitchen",
                 List.of()
         );
@@ -276,28 +261,24 @@ class PortfolioRepositoryTest {
         PortfolioItem interiorItem = new PortfolioItem(
                 "Living Room",
                 "/living.jpg",
-                4.7,
                 "Interior",
                 List.of()
         );
         PortfolioItem bathroomItem = new PortfolioItem(
                 "Bathroom Remodel",
                 "/bathroom.jpg",
-                4.8,
                 "Bathroom",
                 List.of()
         );
         PortfolioItem exteriorItem = new PortfolioItem(
                 "Garden Design",
                 "/garden.jpg",
-                4.6,
                 "Exterior",
                 List.of()
         );
         PortfolioItem kitchenItem = new PortfolioItem(
                 "Kitchen Renovation",
                 "/kitchen.jpg",
-                5.0,
                 "Kitchen",
                 List.of()
         );
@@ -325,7 +306,6 @@ class PortfolioRepositoryTest {
         PortfolioItem item = new PortfolioItem(
                 "Test Item",
                 "/test.jpg",
-                4.5,
                 "Kitchen",
                 List.of()
         );
@@ -344,7 +324,6 @@ class PortfolioRepositoryTest {
         PortfolioItem item = new PortfolioItem(
                 "Kitchen Project",
                 "/kitchen.jpg",
-                4.5,
                 "Kitchen",
                 List.of()
         );
