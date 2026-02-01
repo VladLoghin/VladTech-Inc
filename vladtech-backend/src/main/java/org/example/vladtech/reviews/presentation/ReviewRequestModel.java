@@ -31,5 +31,11 @@ public class ReviewRequestModel {
 
     @NotNull
     private Rating rating;
+
+    @NotNull
+    private boolean sentToPortfolio;
+
+    @NotNull
+    private String type;
 }
 

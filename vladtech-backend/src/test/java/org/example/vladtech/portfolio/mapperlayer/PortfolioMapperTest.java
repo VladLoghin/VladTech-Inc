@@ -34,7 +34,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 comments
         );
@@ -48,7 +47,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("portfolio-123");
         assertThat(result.getTitle()).isEqualTo("Modern Kitchen Counter");
         assertThat(result.getImageUrl()).isEqualTo("/uploads/portfolio/kitchencounter.jpg");
-        assertThat(result.getRating()).isEqualTo(4.9);
         assertThat(result.getComments()).hasSize(2);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Sarah M.");
         assertThat(result.getComments().get(0).getTimestamp()).isNotNull();
@@ -70,7 +68,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
-                4.5,
                 null,
                 new ArrayList<>()
         );
@@ -84,7 +81,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("portfolio-456");
         assertThat(result.getTitle()).isEqualTo("Simple Office");
         assertThat(result.getImageUrl()).isEqualTo("/uploads/portfolio/newoffice.jpg");
-        assertThat(result.getRating()).isEqualTo(4.5);
         assertThat(result.getComments()).isEmpty();
     }
 
@@ -101,7 +97,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
-                4.8,
                 null,
                 comments
         );
@@ -127,7 +122,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Perfect Kitchen",
                 "/uploads/portfolio/kitchenremodel.jpg",
-                5.0,
                 null,
                 List.of()
         );
@@ -138,7 +132,6 @@ class PortfolioMapperTest {
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getRating()).isEqualTo(5.0);
         assertThat(result.getTitle()).isEqualTo("Perfect Kitchen");
     }
 
@@ -148,7 +141,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Basic Renovation",
                 "/uploads/portfolio/basic.jpg",
-                3.5,
                 null,
                 List.of()
         );
@@ -159,7 +151,6 @@ class PortfolioMapperTest {
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getRating()).isEqualTo(3.5);
     }
 
     @Test
@@ -176,7 +167,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Test Title",
                 "/test/url.jpg",
-                4.7,
                 null,
                 List.of(comment)
         );
@@ -189,7 +179,6 @@ class PortfolioMapperTest {
         assertThat(result.getPortfolioId()).isEqualTo("test-id");
         assertThat(result.getTitle()).isEqualTo("Test Title");
         assertThat(result.getImageUrl()).isEqualTo("/test/url.jpg");
-        assertThat(result.getRating()).isEqualTo(4.7);
         assertThat(result.getComments()).hasSize(1);
         assertThat(result.getComments().get(0).getAuthorName()).isEqualTo("Test User");
         assertThat(result.getComments().get(0).getTimestamp()).isNotNull();

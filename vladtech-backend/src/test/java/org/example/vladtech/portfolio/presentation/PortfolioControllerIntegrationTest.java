@@ -56,9 +56,9 @@ class PortfolioControllerIntegrationTest {
 
         item1 = new PortfolioResponseDto(
                 "portfolio-1",
+                null,
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 List.of(
                         new PortfolioCommentDto("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!"),
@@ -68,9 +68,9 @@ class PortfolioControllerIntegrationTest {
 
         item2 = new PortfolioResponseDto(
                 "portfolio-2",
+                null,
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
-                5.0,
                 null,
                 List.of(
                         new PortfolioCommentDto("Emma L.", "auth0|user3", now.minusSeconds(18000), "Amazing transformation!")
@@ -79,9 +79,9 @@ class PortfolioControllerIntegrationTest {
 
         item3 = new PortfolioResponseDto(
                 "portfolio-3",
+                null,
                 "Luxury Bathroom Renovation",
                 "/uploads/portfolio/newbathroom.jpg",
-                4.8,
                 null,
                 List.of(
                         new PortfolioCommentDto("Lisa K.", "auth0|user4", now.minusSeconds(14400), "Stunning bathroom design.")
@@ -106,9 +106,7 @@ class PortfolioControllerIntegrationTest {
                                 "/uploads/portfolio/kitchencounter.jpg",
                                 "/uploads/portfolio/kitchenremodel.jpg",
                                 "/uploads/portfolio/newbathroom.jpg"
-                        )))
-                .andExpect(jsonPath("$[*].rating",
-                        containsInAnyOrder(4.9, 5.0, 4.8)));
+                        )));
     }
 
     @Test
@@ -118,7 +116,6 @@ class PortfolioControllerIntegrationTest {
                 .andExpect(jsonPath("$.portfolioId", is("portfolio-1")))
                 .andExpect(jsonPath("$.title", is("Modern Kitchen Counter")))
                 .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchencounter.jpg")))
-                .andExpect(jsonPath("$.rating", is(4.9)))
                 .andExpect(jsonPath("$.comments", hasSize(2)))
                 .andExpect(jsonPath("$.comments[*].authorName", containsInAnyOrder("Sarah M.", "John D.")))
                 .andExpect(jsonPath("$.comments[*].text",
@@ -134,13 +131,6 @@ class PortfolioControllerIntegrationTest {
     }
 
 
-    @Test
-    void getPortfolioItemById_ShouldReturnCorrectRating() throws Exception {
-        mockMvc.perform(get("/api/portfolio/{portfolioId}", "portfolio-2").with(jwt()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rating", is(5.0)))
-                .andExpect(jsonPath("$.title", is("Complete Kitchen Remodel")));
-    }
 
     @Test
     void getAllPortfolioItems_ShouldReturnItemsWithCorrectImageUrls() throws Exception {
@@ -158,9 +148,9 @@ class PortfolioControllerIntegrationTest {
     void getPortfolioItemById_WithNoComments_ShouldReturnEmptyCommentsList() throws Exception {
         PortfolioResponseDto noComments = new PortfolioResponseDto(
                 "portfolio-99",
+                null,
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
-                4.5,
                 null,
                 List.of()
         );
@@ -170,20 +160,19 @@ class PortfolioControllerIntegrationTest {
         mockMvc.perform(get("/api/portfolio/{portfolioId}", "portfolio-99").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.comments", hasSize(0)))
-                .andExpect(jsonPath("$.title", is("Simple Office")))
-                .andExpect(jsonPath("$.rating", is(4.5)));
+                .andExpect(jsonPath("$.title", is("Simple Office")));
     }
 
     @Test
     void getAllPortfolioItems_WithTypeFilter_Kitchen_ShouldReturnOnlyKitchenItems() throws Exception {
         // Arrange
         PortfolioResponseDto kitchenItem = new PortfolioResponseDto(
-                "portfolio-k1",
-                "Modern Kitchen",
-                "/uploads/portfolio/kitchen1.jpg",
-                4.9,
-                "Kitchen",
-                List.of()
+                "portfolio-k1", // portfolioId
+                null,           // reviewId (nullable)
+                "Modern Kitchen", // title
+                "/uploads/portfolio/kitchen1.jpg", // imageUrl
+                "Kitchen",       // type
+                List.of()        // comments
         );
         when(portfolioService.getPortfolioItemsByType("Kitchen")).thenReturn(List.of(kitchenItem));
 
@@ -206,17 +195,17 @@ class PortfolioControllerIntegrationTest {
         // Arrange
         PortfolioResponseDto bathroomItem1 = new PortfolioResponseDto(
                 "portfolio-b1",
+                null,
                 "Luxury Bathroom",
                 "/uploads/portfolio/bathroom1.jpg",
-                4.8,
                 "Bathroom",
                 List.of()
         );
         PortfolioResponseDto bathroomItem2 = new PortfolioResponseDto(
                 "portfolio-b2",
+                null,
                 "Modern Bathroom",
                 "/uploads/portfolio/bathroom2.jpg",
-                4.7,
                 "Bathroom",
                 List.of()
         );
@@ -240,9 +229,9 @@ class PortfolioControllerIntegrationTest {
         // Arrange
         PortfolioResponseDto interiorItem = new PortfolioResponseDto(
                 "portfolio-i1",
+                null,
                 "Living Room Design",
                 "/uploads/portfolio/living.jpg",
-                4.6,
                 "Interior",
                 List.of()
         );
@@ -265,9 +254,9 @@ class PortfolioControllerIntegrationTest {
         // Arrange
         PortfolioResponseDto exteriorItem = new PortfolioResponseDto(
                 "portfolio-e1",
+                null,
                 "Garden Landscaping",
                 "/uploads/portfolio/garden.jpg",
-                4.9,
                 "Exterior",
                 List.of()
         );

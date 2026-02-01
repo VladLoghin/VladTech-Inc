@@ -15,6 +15,7 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByClientNameAndRating(String clientName, Rating rating);
 
+    //Filtering queries
     List<Review> findByClientNameContainingIgnoreCase(String clientName);
 
     List<Review> findByClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
@@ -23,6 +24,27 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
 
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCase(String type);
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameAndRating(String type, String clientName, Rating rating);
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameAndRating(String type, String clientName, Rating rating);
+
+    List<Review> findByTypeContainingIgnoreCase(String type);
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(String type, Rating rating);
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(String type, String clientName, Rating rating);
+
+    List<Review> findByTypeContainingIgnoreCaseAndRating(String type, Rating rating);
+
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
+
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(String type, String clientName, Rating rating);
+
+
+    //
     List<Review> findByVisibleTrueAndRating(Rating rating);
 
     List<Review> findByRating(Rating rating);

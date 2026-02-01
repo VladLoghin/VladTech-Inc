@@ -75,7 +75,6 @@ export const createPortfolioItem = async (
       {
         title,
         imageUrl,
-        rating: 5.0,
         type,
       },
       {

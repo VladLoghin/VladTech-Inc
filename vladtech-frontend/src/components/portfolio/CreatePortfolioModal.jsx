@@ -36,7 +36,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
 
       setFormData({ ...formData, imageFile: file });
       setError(""); // Clear any previous errors
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -159,6 +159,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                 onChange={handleImageChange}
                 className="hidden"
                 id="image-upload"
+                required
               />
               <label
                 htmlFor="image-upload"
