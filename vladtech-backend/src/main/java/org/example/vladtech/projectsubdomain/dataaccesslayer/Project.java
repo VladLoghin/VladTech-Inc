@@ -38,4 +38,5 @@ public class Project {
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
     private ProjectPriority priority = ProjectPriority.MEDIUM;
+    private boolean sentToPortfolio = false;
 }

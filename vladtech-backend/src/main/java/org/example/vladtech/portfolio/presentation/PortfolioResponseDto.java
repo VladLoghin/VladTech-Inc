@@ -18,6 +18,9 @@ public class PortfolioResponseDto {
     @Nullable
     private String reviewId;
 
+    @Nullable
+    private String reviewerName; // Name of the reviewer if sent from a review
+
     @NotBlank(message = "Title cannot be empty")
     private String title;
 

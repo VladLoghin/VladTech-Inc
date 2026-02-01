@@ -245,6 +245,7 @@ public class ReviewServiceImpl implements ReviewService {
         PortfolioItem portfolioItem = new PortfolioItem();
         portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
         portfolioItem.setReviewId(reviewId);
+        portfolioItem.setReviewerName(existing.getClientName());
         portfolioItem.setTitle(title);
         portfolioItem.setImageUrl(imageUrl);
         portfolioItem.setComments(new java.util.ArrayList<>());

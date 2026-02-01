@@ -367,4 +367,110 @@ class ProjectControllerTest {
                                 any(), any(), any(), any(), any(), any(),
                                 any(), any(), any(), any(), any(), any());
         }
+
+        // ========================================
+        // Tests for sendProjectToPortfolio
+        // ========================================
+
+        @Test
+        void sendProjectToPortfolio_WithImage_ShouldReturnOk() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String type = "Kitchen";
+                
+                org.example.vladtech.portfolio.presentation.PortfolioResponseDto portfolioResponseDto = 
+                        new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+                portfolioResponseDto.setPortfolioId("portfolio-123");
+                portfolioResponseDto.setTitle("Test Project");
+                portfolioResponseDto.setImageUrl("/uploads/portfolio/test.jpg");
+                portfolioResponseDto.setType(type);
+
+                when(projectService.sendProjectToPortfolio(eq(projectIdentifier), eq(type), any()))
+                        .thenReturn(portfolioResponseDto);
+
+                // Act & Assert
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
+                                .file("image", "test image content".getBytes())
+                                .param("type", type))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.portfolioId").value("portfolio-123"))
+                        .andExpect(jsonPath("$.title").value("Test Project"))
+                        .andExpect(jsonPath("$.type").value(type));
+
+                verify(projectService, times(1)).sendProjectToPortfolio(eq(projectIdentifier), eq(type), any());
+        }
+
+        @Test
+        void sendProjectToPortfolio_WithoutImage_ShouldReturnOk() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String type = "Interior";
+                
+                org.example.vladtech.portfolio.presentation.PortfolioResponseDto portfolioResponseDto = 
+                        new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+                portfolioResponseDto.setPortfolioId("portfolio-456");
+                portfolioResponseDto.setTitle("Test Project");
+                portfolioResponseDto.setImageUrl("");
+                portfolioResponseDto.setType(type);
+
+                when(projectService.sendProjectToPortfolio(eq(projectIdentifier), eq(type), eq(null)))
+                        .thenReturn(portfolioResponseDto);
+
+                // Act & Assert
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
+                                .param("type", type))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.portfolioId").value("portfolio-456"))
+                        .andExpect(jsonPath("$.type").value(type));
+
+                verify(projectService, times(1)).sendProjectToPortfolio(eq(projectIdentifier), eq(type), any());
+        }
+
+        @Test
+        void sendProjectToPortfolio_ProjectNotFound_ShouldReturnBadRequest() throws Exception {
+                // Arrange
+                String projectIdentifier = "NONEXISTENT";
+                String type = "Bathroom";
+
+                when(projectService.sendProjectToPortfolio(eq(projectIdentifier), eq(type), any()))
+                        .thenThrow(new RuntimeException("Project not found"));
+
+                // Act & Assert
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
+                                .param("type", type))
+                                .andExpect(status().isBadRequest());
+
+                verify(projectService, times(1)).sendProjectToPortfolio(eq(projectIdentifier), eq(type), any());
+        }
+
+        @Test
+        void sendProjectToPortfolio_AllPortfolioTypes_ShouldReturnOk() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String[] types = {"Interior", "Kitchen", "Bathroom", "Exterior/Yard"};
+
+                for (String type : types) {
+                        org.example.vladtech.portfolio.presentation.PortfolioResponseDto portfolioResponseDto = 
+                                new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+                        portfolioResponseDto.setPortfolioId("portfolio-" + type);
+                        portfolioResponseDto.setType(type);
+
+                        when(projectService.sendProjectToPortfolio(eq(projectIdentifier), eq(type), any()))
+                                .thenReturn(portfolioResponseDto);
+
+                        // Act & Assert
+                        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                        .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
+                                        .param("type", type))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.type").value(type));
+                }
+
+                verify(projectService, times(types.length)).sendProjectToPortfolio(eq(projectIdentifier), any(), any());
+        }
 }

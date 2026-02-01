@@ -19,6 +19,8 @@ public class PortfolioItem {
 
     private String reviewId;
 
+    private String reviewerName; // Name of the reviewer if this item was sent from a review
+
     private String title;
     private String imageUrl;
     private String type; // Type: Interior, Kitchen, Bathroom, Exterior/Yard

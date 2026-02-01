@@ -43,6 +43,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectEmailSender projectEmailSender;
     private final UserManagementService userManagementService;
     private final FileStorageService fileStorageService;
+    private final org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository;
+    private final org.example.vladtech.portfolio.mapperlayer.PortfolioMapper portfolioMapper;
 
     @Lazy
     @Autowired
@@ -55,7 +57,9 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectEmailMapper projectEmailMapper,
             ProjectEmailSender projectEmailSender,
             UserManagementService userManagementService,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository,
+            org.example.vladtech.portfolio.mapperlayer.PortfolioMapper portfolioMapper) {
         this.projectRepository = projectRepository;
         this.projectRequestMapper = projectRequestMapper;
         this.projectResponseMapper = projectResponseMapper;
@@ -63,6 +67,8 @@ public class ProjectServiceImpl implements ProjectService {
         this.projectEmailSender = projectEmailSender;
         this.userManagementService = userManagementService;
         this.fileStorageService = fileStorageService;
+        this.portfolioRepository = portfolioRepository;
+        this.portfolioMapper = portfolioMapper;
     }
 
     @Override
@@ -500,5 +506,52 @@ public class ProjectServiceImpl implements ProjectService {
                 pageable);
 
         return projects.map(projectResponseMapper::entityToResponseModel);
+    }
+
+    @Override
+    public org.example.vladtech.portfolio.presentation.PortfolioResponseDto sendProjectToPortfolio(
+            String projectIdentifier,
+            String type,
+            MultipartFile image) {
+        
+        // Find the project
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        // Check if already sent to portfolio
+        if (project.isSentToPortfolio()) {
+            throw new RuntimeException("This project has already been sent to portfolio");
+        }
+
+        // Upload image
+        String imageUrl = "";
+        if (image != null && !image.isEmpty()) {
+            try {
+                String fileId = fileStorageService.save(image);
+                imageUrl = "/api/uploads/portfolio/" + fileId;
+            } catch (IOException e) {
+                log.error("Failed to upload image for project {}: {}", projectIdentifier, e.getMessage());
+                throw new RuntimeException("Failed to upload image", e);
+            }
+        }
+
+        // Create portfolio item
+        org.example.vladtech.portfolio.data.PortfolioItem portfolioItem = new org.example.vladtech.portfolio.data.PortfolioItem();
+        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
+        portfolioItem.setTitle(project.getName());
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setType(type);
+        portfolioItem.setComments(new java.util.ArrayList<>());
+
+        // Save to portfolio repository
+        org.example.vladtech.portfolio.data.PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+
+        // Mark project as sent to portfolio
+        project.setSentToPortfolio(true);
+        projectRepository.save(project);
+
+        log.info("Project {} sent to portfolio with type {}", projectIdentifier, type);
+
+        return portfolioMapper.entityToResponseDto(savedItem);
     }
 }

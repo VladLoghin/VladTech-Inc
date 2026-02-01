@@ -57,6 +57,12 @@ class ProjectServiceImplTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository;
+
+    @Mock
+    private org.example.vladtech.portfolio.mapperlayer.PortfolioMapper portfolioMapper;
+
     private ProjectServiceImpl projectService;
 
     private Project project;
@@ -72,7 +78,9 @@ class ProjectServiceImplTest {
                 projectEmailMapper,
                 projectEmailSender,
                 userManagementService,
-                fileStorageService);
+                fileStorageService,
+                portfolioRepository,
+                portfolioMapper);
 
         projectService.self = projectServiceMock;
 
@@ -1559,5 +1567,199 @@ class ProjectServiceImplTest {
                 eq("Status"),
                 eq("auth0|emp-1"),
                 eq(pageable));
+    }
+
+    // ========================================
+    // Tests for sendProjectToPortfolio
+    // ========================================
+
+    @Test
+    void sendProjectToPortfolio_WithImage_ShouldCreatePortfolioItem() throws IOException {
+        // Arrange
+        String projectIdentifier = "PROJ-1";
+        String type = "Kitchen";
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "test.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
+
+        given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                .willReturn(Optional.of(project));
+        given(fileStorageService.save(image))
+                .willReturn("test-file-id");
+
+        String imageUrl = "/api/uploads/portfolio/test-file-id";
+
+        org.example.vladtech.portfolio.data.PortfolioItem portfolioItem = 
+                new org.example.vladtech.portfolio.data.PortfolioItem();
+        portfolioItem.setPortfolioId("portfolio-123");
+        portfolioItem.setTitle(project.getName());
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setType(type);
+
+        given(portfolioRepository.save(any(org.example.vladtech.portfolio.data.PortfolioItem.class)))
+                .willReturn(portfolioItem);
+
+        org.example.vladtech.portfolio.presentation.PortfolioResponseDto responseDto = 
+                new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+        responseDto.setPortfolioId("portfolio-123");
+        responseDto.setTitle(project.getName());
+        responseDto.setImageUrl(imageUrl);
+        responseDto.setType(type);
+
+        given(portfolioMapper.entityToResponseDto(portfolioItem))
+                .willReturn(responseDto);
+
+        // Act
+        org.example.vladtech.portfolio.presentation.PortfolioResponseDto result = 
+                projectService.sendProjectToPortfolio(projectIdentifier, type, image);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("portfolio-123", result.getPortfolioId());
+        assertEquals(project.getName(), result.getTitle());
+        assertEquals(imageUrl, result.getImageUrl());
+        assertEquals(type, result.getType());
+
+        verify(projectRepository, times(1)).findByProjectIdentifier(projectIdentifier);
+        verify(fileStorageService, times(1)).save(image);
+        verify(portfolioRepository, times(1)).save(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
+        verify(portfolioMapper, times(1)).entityToResponseDto(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
+    }
+
+    @Test
+    void sendProjectToPortfolio_WithoutImage_ShouldCreatePortfolioItemWithEmptyImageUrl() throws IOException {
+        // Arrange
+        String projectIdentifier = "PROJ-1";
+        String type = "Interior";
+
+        given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                .willReturn(Optional.of(project));
+
+        org.example.vladtech.portfolio.data.PortfolioItem portfolioItem = 
+                new org.example.vladtech.portfolio.data.PortfolioItem();
+        portfolioItem.setPortfolioId("portfolio-456");
+        portfolioItem.setTitle(project.getName());
+        portfolioItem.setImageUrl("");
+        portfolioItem.setType(type);
+
+        given(portfolioRepository.save(any(org.example.vladtech.portfolio.data.PortfolioItem.class)))
+                .willReturn(portfolioItem);
+
+        org.example.vladtech.portfolio.presentation.PortfolioResponseDto responseDto = 
+                new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+        responseDto.setPortfolioId("portfolio-456");
+        responseDto.setTitle(project.getName());
+        responseDto.setImageUrl("");
+        responseDto.setType(type);
+
+        given(portfolioMapper.entityToResponseDto(portfolioItem))
+                .willReturn(responseDto);
+
+        // Act
+        org.example.vladtech.portfolio.presentation.PortfolioResponseDto result = 
+                projectService.sendProjectToPortfolio(projectIdentifier, type, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("portfolio-456", result.getPortfolioId());
+        assertEquals(project.getName(), result.getTitle());
+        assertEquals("", result.getImageUrl());
+        assertEquals(type, result.getType());
+
+        verify(projectRepository, times(1)).findByProjectIdentifier(projectIdentifier);
+        verify(fileStorageService, never()).save(any());
+        verify(portfolioRepository, times(1)).save(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
+    }
+
+    @Test
+    void sendProjectToPortfolio_ProjectNotFound_ShouldThrowException() throws IOException {
+        // Arrange
+        String projectIdentifier = "NONEXISTENT";
+        String type = "Bathroom";
+
+        given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                .willReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ProjectNotFoundException.class, () -> {
+            projectService.sendProjectToPortfolio(projectIdentifier, type, null);
+        });
+
+        verify(projectRepository, times(1)).findByProjectIdentifier(projectIdentifier);
+        verify(fileStorageService, never()).save(any());
+        verify(portfolioRepository, never()).save(any());
+    }
+
+    @Test
+    void sendProjectToPortfolio_ImageUploadFails_ShouldThrowRuntimeException() throws IOException {
+        // Arrange
+        String projectIdentifier = "PROJ-1";
+        String type = "Exterior/Yard";
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "test.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
+
+        given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                .willReturn(Optional.of(project));
+        given(fileStorageService.save(image))
+                .willThrow(new IOException("Storage failure"));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            projectService.sendProjectToPortfolio(projectIdentifier, type, image);
+        });
+
+        assertTrue(exception.getMessage().contains("Failed to upload image"));
+
+        verify(projectRepository, times(1)).findByProjectIdentifier(projectIdentifier);
+        verify(fileStorageService, times(1)).save(image);
+        verify(portfolioRepository, never()).save(any());
+    }
+
+    @Test
+    void sendProjectToPortfolio_DifferentPortfolioTypes_ShouldCreateCorrectType() {
+        // Arrange
+        String projectIdentifier = "PROJ-1";
+        String[] types = {"Interior", "Kitchen", "Bathroom", "Exterior/Yard"};
+
+        given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                .willReturn(Optional.of(project));
+
+        for (String type : types) {
+            org.example.vladtech.portfolio.data.PortfolioItem portfolioItem = 
+                    new org.example.vladtech.portfolio.data.PortfolioItem();
+            portfolioItem.setPortfolioId("portfolio-" + type);
+            portfolioItem.setTitle(project.getName());
+            portfolioItem.setImageUrl("");
+            portfolioItem.setType(type);
+
+            given(portfolioRepository.save(any(org.example.vladtech.portfolio.data.PortfolioItem.class)))
+                    .willReturn(portfolioItem);
+
+            org.example.vladtech.portfolio.presentation.PortfolioResponseDto responseDto = 
+                    new org.example.vladtech.portfolio.presentation.PortfolioResponseDto();
+            responseDto.setPortfolioId("portfolio-" + type);
+            responseDto.setType(type);
+
+            given(portfolioMapper.entityToResponseDto(portfolioItem))
+                    .willReturn(responseDto);
+
+            // Act
+            org.example.vladtech.portfolio.presentation.PortfolioResponseDto result = 
+                    projectService.sendProjectToPortfolio(projectIdentifier, type, null);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(type, result.getType());
+        }
+
+        verify(projectRepository, times(types.length)).findByProjectIdentifier(projectIdentifier);
+        verify(portfolioRepository, times(types.length)).save(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
     }
 }
