@@ -1725,17 +1725,25 @@ class ProjectServiceImplTest {
     @Test
     void sendProjectToPortfolio_DifferentPortfolioTypes_ShouldCreateCorrectType() {
         // Arrange
-        String projectIdentifier = "PROJ-1";
         String[] types = {"Interior", "Kitchen", "Bathroom", "Exterior/Yard"};
 
-        given(projectRepository.findByProjectIdentifier(projectIdentifier))
-                .willReturn(Optional.of(project));
+        for (int i = 0; i < types.length; i++) {
+            String type = types[i];
+            String projectIdentifier = "PROJ-" + (i + 1);
+            
+            // Create a separate project for each type
+            Project testProject = new Project();
+            testProject.setProjectIdentifier(projectIdentifier);
+            testProject.setName("Test Project " + (i + 1));
+            testProject.setSentToPortfolio(false); // Important: not yet sent to portfolio
+            
+            given(projectRepository.findByProjectIdentifier(projectIdentifier))
+                    .willReturn(Optional.of(testProject));
 
-        for (String type : types) {
             org.example.vladtech.portfolio.data.PortfolioItem portfolioItem = 
                     new org.example.vladtech.portfolio.data.PortfolioItem();
             portfolioItem.setPortfolioId("portfolio-" + type);
-            portfolioItem.setTitle(project.getName());
+            portfolioItem.setTitle(testProject.getName());
             portfolioItem.setImageUrl("");
             portfolioItem.setType(type);
 
@@ -1759,7 +1767,6 @@ class ProjectServiceImplTest {
             assertEquals(type, result.getType());
         }
 
-        verify(projectRepository, times(types.length)).findByProjectIdentifier(projectIdentifier);
         verify(portfolioRepository, times(types.length)).save(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
     }
 }
