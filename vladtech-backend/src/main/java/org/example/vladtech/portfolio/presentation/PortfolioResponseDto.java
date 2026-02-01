@@ -1,6 +1,5 @@
 package org.example.vladtech.portfolio.presentation;
 
-import com.mongodb.lang.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,6 @@ import java.util.List;
 public class PortfolioResponseDto {
     private String portfolioId;
 
-    @Nullable
     private String reviewId;
 
     @Nullable

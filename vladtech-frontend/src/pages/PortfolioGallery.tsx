@@ -178,6 +178,26 @@ export default function PortfolioGallery() {
     );
   }
 
+  // Calculate pagination
+  const totalPages = Math.ceil(portfolioItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = portfolioItems.slice(startIndex, endIndex);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Glossy Navigation Bar with Dropdown */}
@@ -253,34 +273,75 @@ export default function PortfolioGallery() {
         <div className="flex-1">
           <div className="grid grid-cols-3 gap-0">
             {currentItems.map((item, index) => (
-            <motion.div
-              key={item.portfolioId}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
-              onClick={() => setSelectedItem(item)}
-              className="cursor-pointer overflow-hidden aspect-square relative group"
-            >
-              <img
-                src={getImageUrl(item.imageUrl)}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
-              {/* Reviewer Name - Always visible in top-left corner */}
-              {item.reviewerName && (
-                <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <p className="text-white text-sm font-medium tracking-wide">{item.reviewerName}</p>
+              <motion.div
+                key={item.portfolioId}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
+                onClick={() => setSelectedItem(item)}
+                className="cursor-pointer overflow-hidden aspect-square relative group"
+              >
+                <img
+                  src={getImageUrl(item.imageUrl)}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Reviewer Name - Always visible in top-left corner */}
+                {item.reviewerName && (
+                  <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                    <p className="text-white text-sm font-medium tracking-wide">{item.reviewerName}</p>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
+                  </div>
                 </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="py-8 flex items-center justify-center gap-4 border-t border-yellow-400/20">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6 text-yellow-400" />
+            </button>
+            
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`w-10 h-10 rounded-lg transition-colors ${
+                    currentPage === page
+                      ? 'bg-yellow-400 text-black font-bold'
+                      : 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="h-6 w-6 text-yellow-400" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Pagination Controls */}
