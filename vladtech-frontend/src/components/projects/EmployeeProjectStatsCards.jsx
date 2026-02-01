@@ -19,11 +19,14 @@ const pct = (part, total) => {
 
 const Segment = ({ label, value, total, className }) => {
   const widthPct = total ? (value / total) * 100 : 0;
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between text-xs font-semibold text-black/70">
         <span>{label}</span>
-        <span>{value} ({pct(value, total)}%)</span>
+        <span>
+          {value} ({pct(value, total)}%)
+        </span>
       </div>
       <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden border border-black/10">
         <div className={`h-full ${className}`} style={{ width: `${widthPct}%` }} />
@@ -64,10 +67,7 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
 
       const days = daysBetween(now, due);
 
-      // overdue: due date is before today
       if (days < 0 && state !== "COMPLETE") overdue += 1;
-
-      // due soon: within next N days, not completed/archived
       if (days >= 0 && days <= dueSoonDays && state !== "COMPLETE") dueSoon += 1;
     });
 
@@ -88,34 +88,36 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold">
-            {t("employee.dashboard", { defaultValue: "My Dashboard" })}
+            {t("employee.dashboard.title", { defaultValue: "My Dashboard" })}
           </h2>
           <p className="text-sm text-black/60">
-            {t("employee.dashboardSubtitle", { defaultValue: "Quick overview of your assigned projects." })}
+            {t("employee.dashboard.subtitle", {
+              defaultValue: "Quick overview of your assigned projects.",
+            })}
           </p>
         </div>
 
         <div className="flex gap-3 flex-wrap">
           <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
-              {t("project.total", { defaultValue: "Total" })}
+              {t("employee.dashboard.total", { defaultValue: "Total" })}
             </p>
             <p className="text-2xl font-bold">{stats.total}</p>
           </div>
 
           <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
-              {t("project.dueSoon", { defaultValue: "Due Soon" })}
+              {t("employee.dashboard.dueSoon", { defaultValue: "Due Soon" })}
             </p>
             <p className="text-2xl font-bold">{stats.dueSoon}</p>
             <p className="text-xs text-black/50">
-              {t("project.nextDays", { defaultValue: "Next {{n}} days", n: dueSoonDays })}
+              {t("employee.dashboard.next7Days", { defaultValue: "Next 7 days" })}
             </p>
           </div>
 
           <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
-              {t("project.overdue", { defaultValue: "Overdue" })}
+              {t("employee.dashboard.overdue", { defaultValue: "Overdue" })}
             </p>
             <p className="text-2xl font-bold">{stats.overdue}</p>
           </div>
@@ -123,10 +125,9 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
       </div>
 
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Status “chart” */}
         <div className="border border-black/10 rounded-xl p-4 bg-gray-50">
           <p className="text-sm font-bold mb-3">
-            {t("project.statusBreakdown", { defaultValue: "Status breakdown" })}
+            {t("employee.dashboard.statusBreakdown", { defaultValue: "Status breakdown" })}
           </p>
 
           <div className="space-y-3">
@@ -151,21 +152,20 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
           </div>
         </div>
 
-        {/* Active vs Archived */}
         <div className="border border-black/10 rounded-xl p-4 bg-gray-50">
           <p className="text-sm font-bold mb-3">
-            {t("project.activity", { defaultValue: "Activity" })}
+            {t("employee.dashboard.activity", { defaultValue: "Activity" })}
           </p>
 
           <div className="space-y-3">
             <Segment
-              label={t("project.active", { defaultValue: "Active" })}
+              label={t("employee.dashboard.active", { defaultValue: "Active" })}
               value={stats.activeCount}
               total={stats.total}
               className="bg-black"
             />
             <Segment
-              label={t("project.archived", { defaultValue: "Archived" })}
+              label={t("employee.dashboard.archived", { defaultValue: "Archived" })}
               value={stats.archivedCount}
               total={stats.total}
               className="bg-gray-500"

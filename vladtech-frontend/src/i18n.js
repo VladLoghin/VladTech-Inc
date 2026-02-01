@@ -163,6 +163,16 @@ const resources = {
       "roleManager.failedToLoadUsers": "Failed to load users",
 
       // Employee Page
+      "employee.dashboard.title": "My Dashboard",
+"employee.dashboard.subtitle": "Quick overview of your assigned projects.",
+"employee.dashboard.total": "Total",
+"employee.dashboard.dueSoon": "Due Soon",
+"employee.dashboard.overdue": "Overdue",
+"employee.dashboard.next7Days": "Next 7 days",
+"employee.dashboard.statusBreakdown": "Status breakdown",
+"employee.dashboard.activity": "Activity",
+"employee.dashboard.active": "Active",
+"employee.dashboard.archived": "Archived",
       "employee.title": "Employee Tools",
       "employee.myProjects": "My Projects",
       "employee.selectDate": "Select a date on the calendar",
@@ -465,6 +475,17 @@ const resources = {
       "roleManager.failedToLoadUsers": "Échec du chargement des utilisateurs",
 
       // Employee Page
+      "employee.dashboard.title": "Mon tableau de bord",
+"employee.dashboard.subtitle": "Aperçu rapide de vos projets assignés.",
+"employee.dashboard.total": "Total",
+"employee.dashboard.dueSoon": "Bientôt dû",
+"employee.dashboard.overdue": "En retard",
+"employee.dashboard.next7Days": "7 prochains jours",
+"employee.dashboard.statusBreakdown": "Répartition des statuts",
+"employee.dashboard.activity": "Activité",
+"employee.dashboard.active": "Actif",
+"employee.dashboard.archived": "Archivé",
+
       "employee.title": "Outils Employé",
       "employee.myProjects": "Mes Projets",
       "employee.selectDate": "Sélectionnez une date sur le calendrier",
