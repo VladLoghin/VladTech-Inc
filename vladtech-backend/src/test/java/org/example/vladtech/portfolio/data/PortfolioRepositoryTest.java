@@ -30,6 +30,7 @@ class PortfolioRepositoryTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
+                null,
                 List.of(new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful!"))
         );
 
@@ -52,6 +53,7 @@ class PortfolioRepositoryTest {
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
                 4.8,
+                null,
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -82,12 +84,14 @@ class PortfolioRepositoryTest {
                 "Kitchen Remodel",
                 "/uploads/portfolio/kitchen.jpg",
                 5.0,
+                null,
                 List.of()
         );
         PortfolioItem item2 = new PortfolioItem(
                 "Bathroom Renovation",
                 "/uploads/portfolio/bathroom.jpg",
                 4.7,
+                null,
                 List.of()
         );
         portfolioRepository.saveAll(List.of(item1, item2));
@@ -117,6 +121,7 @@ class PortfolioRepositoryTest {
                 "Office Space",
                 "/uploads/portfolio/office.jpg",
                 4.5,
+                null,
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -132,8 +137,8 @@ class PortfolioRepositoryTest {
     @Test
     void deleteAll_ShouldRemoveAllItems() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
         portfolioRepository.saveAll(List.of(item1, item2));
 
         // Act
@@ -156,6 +161,7 @@ class PortfolioRepositoryTest {
                 "Premium Kitchen",
                 "/uploads/portfolio/premium.jpg",
                 5.0,
+                null,
                 comments
         );
 
@@ -177,6 +183,7 @@ class PortfolioRepositoryTest {
                 "Original Title",
                 "/original.jpg",
                 4.0,
+                null,
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -196,9 +203,9 @@ class PortfolioRepositoryTest {
     @Test
     void count_ShouldReturnCorrectNumber() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, List.of());
-        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", 4.6, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
+        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", 4.6, null, List.of());
         portfolioRepository.saveAll(List.of(item1, item2, item3));
 
         // Act
@@ -206,6 +213,148 @@ class PortfolioRepositoryTest {
 
         // Assert
         assertThat(count).isEqualTo(3);
+    }
+
+    @Test
+    void findByType_WhenTypeExists_ShouldReturnMatchingItems() {
+        // Arrange
+        PortfolioItem kitchenItem1 = new PortfolioItem(
+                "Modern Kitchen",
+                "/kitchen1.jpg",
+                4.8,
+                "Kitchen",
+                List.of()
+        );
+        PortfolioItem kitchenItem2 = new PortfolioItem(
+                "Classic Kitchen",
+                "/kitchen2.jpg",
+                4.5,
+                "Kitchen",
+                List.of()
+        );
+        PortfolioItem bathroomItem = new PortfolioItem(
+                "Luxury Bathroom",
+                "/bathroom.jpg",
+                4.9,
+                "Bathroom",
+                List.of()
+        );
+        portfolioRepository.saveAll(List.of(kitchenItem1, kitchenItem2, bathroomItem));
+
+        // Act
+        List<PortfolioItem> result = portfolioRepository.findByType("Kitchen");
+
+        // Assert
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(PortfolioItem::getTitle)
+                .containsExactlyInAnyOrder("Modern Kitchen", "Classic Kitchen");
+        assertThat(result).allMatch(item -> "Kitchen".equals(item.getType()));
+    }
+
+    @Test
+    void findByType_WhenNoMatchingType_ShouldReturnEmptyList() {
+        // Arrange
+        PortfolioItem kitchenItem = new PortfolioItem(
+                "Kitchen Project",
+                "/kitchen.jpg",
+                4.5,
+                "Kitchen",
+                List.of()
+        );
+        portfolioRepository.save(kitchenItem);
+
+        // Act
+        List<PortfolioItem> result = portfolioRepository.findByType("Exterior");
+
+        // Assert
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByType_WithMultipleTypes_ShouldReturnOnlyMatchingType() {
+        // Arrange
+        PortfolioItem interiorItem = new PortfolioItem(
+                "Living Room",
+                "/living.jpg",
+                4.7,
+                "Interior",
+                List.of()
+        );
+        PortfolioItem bathroomItem = new PortfolioItem(
+                "Bathroom Remodel",
+                "/bathroom.jpg",
+                4.8,
+                "Bathroom",
+                List.of()
+        );
+        PortfolioItem exteriorItem = new PortfolioItem(
+                "Garden Design",
+                "/garden.jpg",
+                4.6,
+                "Exterior",
+                List.of()
+        );
+        PortfolioItem kitchenItem = new PortfolioItem(
+                "Kitchen Renovation",
+                "/kitchen.jpg",
+                5.0,
+                "Kitchen",
+                List.of()
+        );
+        portfolioRepository.saveAll(List.of(interiorItem, bathroomItem, exteriorItem, kitchenItem));
+
+        // Act
+        List<PortfolioItem> bathroomResults = portfolioRepository.findByType("Bathroom");
+        List<PortfolioItem> exteriorResults = portfolioRepository.findByType("Exterior");
+        List<PortfolioItem> kitchenResults = portfolioRepository.findByType("Kitchen");
+
+        // Assert
+        assertThat(bathroomResults).hasSize(1);
+        assertThat(bathroomResults.get(0).getTitle()).isEqualTo("Bathroom Remodel");
+
+        assertThat(exteriorResults).hasSize(1);
+        assertThat(exteriorResults.get(0).getTitle()).isEqualTo("Garden Design");
+
+        assertThat(kitchenResults).hasSize(1);
+        assertThat(kitchenResults.get(0).getTitle()).isEqualTo("Kitchen Renovation");
+    }
+
+    @Test
+    void findByType_WhenTypeIsNull_ShouldReturnEmpty() {
+        // Arrange
+        PortfolioItem item = new PortfolioItem(
+                "Test Item",
+                "/test.jpg",
+                4.5,
+                "Kitchen",
+                List.of()
+        );
+        portfolioRepository.save(item);
+
+        // Act
+        List<PortfolioItem> result = portfolioRepository.findByType(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findByType_CaseSensitive_ShouldMatchExactCase() {
+        // Arrange
+        PortfolioItem item = new PortfolioItem(
+                "Kitchen Project",
+                "/kitchen.jpg",
+                4.5,
+                "Kitchen",
+                List.of()
+        );
+        portfolioRepository.save(item);
+
+        // Act
+        List<PortfolioItem> result = portfolioRepository.findByType("kitchen");
+
+        // Assert - MongoDB findByType is case-sensitive by default
+        assertThat(result).isEmpty();
     }
 }
 

@@ -72,9 +72,17 @@ public class PortfolioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PortfolioResponseDto>> getAllPortfolioItems() {
-        log.info("GET request to /api/portfolio - Fetching all portfolio items");
-        List<PortfolioResponseDto> portfolioItems = portfolioService.getAllPortfolioItems();
+    public ResponseEntity<List<PortfolioResponseDto>> getAllPortfolioItems(
+            @RequestParam(required = false) String type) {
+        log.info("GET request to /api/portfolio - Fetching portfolio items" + (type != null ? " with type: " + type : ""));
+        
+        List<PortfolioResponseDto> portfolioItems;
+        if (type != null && !type.trim().isEmpty()) {
+            portfolioItems = portfolioService.getPortfolioItemsByType(type);
+        } else {
+            portfolioItems = portfolioService.getAllPortfolioItems();
+        }
+        
         return ResponseEntity.ok(portfolioItems);
     }
 
@@ -89,12 +97,13 @@ public class PortfolioController {
     @PostMapping
     public ResponseEntity<PortfolioResponseDto> createPortfolioItem(
             @Valid @RequestBody PortfolioResponseDto request) {
-        log.info("POST request to /api/portfolio - Creating new portfolio item: {}", request.getTitle());
+        log.info("POST request to /api/portfolio - Creating new portfolio item: {} with type: {}", request.getTitle(), request.getType());
 
         PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
                 request.getTitle(),
                 request.getImageUrl(),
-                request.getRating()
+                request.getRating(),
+                request.getType()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);

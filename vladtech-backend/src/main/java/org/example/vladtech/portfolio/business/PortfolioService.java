@@ -7,8 +7,9 @@ import java.util.List;
 
 public interface PortfolioService {
     List<PortfolioResponseDto> getAllPortfolioItems();
+    List<PortfolioResponseDto> getPortfolioItemsByType(String type);
     PortfolioResponseDto getPortfolioItemById(String portfolioId);
     PortfolioCommentDto addComment(String portfolioId, String commentText, String userId, String userName);
-    PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating);
+    PortfolioResponseDto createPortfolioItem(String title, String imageUrl, Double rating, String type);
     void deletePortfolioItem(String portfolioId);
 }

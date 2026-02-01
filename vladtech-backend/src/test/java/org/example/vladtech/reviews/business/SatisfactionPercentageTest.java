@@ -145,4 +145,3 @@ class SatisfactionPercentageTest {
         assertEquals(5, Rating.FIVE.getValue());
     }
 }
-

@@ -23,6 +23,9 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +59,7 @@ class PortfolioControllerIntegrationTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
+                null,
                 List.of(
                         new PortfolioCommentDto("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!"),
                         new PortfolioCommentDto("John D.", "auth0|user2", now.minusSeconds(3600), "Love the modern design.")
@@ -67,6 +71,7 @@ class PortfolioControllerIntegrationTest {
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
                 5.0,
+                null,
                 List.of(
                         new PortfolioCommentDto("Emma L.", "auth0|user3", now.minusSeconds(18000), "Amazing transformation!")
                 )
@@ -77,6 +82,7 @@ class PortfolioControllerIntegrationTest {
                 "Luxury Bathroom Renovation",
                 "/uploads/portfolio/newbathroom.jpg",
                 4.8,
+                null,
                 List.of(
                         new PortfolioCommentDto("Lisa K.", "auth0|user4", now.minusSeconds(14400), "Stunning bathroom design.")
                 )
@@ -155,6 +161,7 @@ class PortfolioControllerIntegrationTest {
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
                 4.5,
+                null,
                 List.of()
         );
 
@@ -165,6 +172,175 @@ class PortfolioControllerIntegrationTest {
                 .andExpect(jsonPath("$.comments", hasSize(0)))
                 .andExpect(jsonPath("$.title", is("Simple Office")))
                 .andExpect(jsonPath("$.rating", is(4.5)));
+    }
+
+    @Test
+    void getAllPortfolioItems_WithTypeFilter_Kitchen_ShouldReturnOnlyKitchenItems() throws Exception {
+        // Arrange
+        PortfolioResponseDto kitchenItem = new PortfolioResponseDto(
+                "portfolio-k1",
+                "Modern Kitchen",
+                "/uploads/portfolio/kitchen1.jpg",
+                4.9,
+                "Kitchen",
+                List.of()
+        );
+        when(portfolioService.getPortfolioItemsByType("Kitchen")).thenReturn(List.of(kitchenItem));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "Kitchen")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].type", is("Kitchen")))
+                .andExpect(jsonPath("$[0].title", is("Modern Kitchen")))
+                .andExpect(jsonPath("$[0].portfolioId", is("portfolio-k1")));
+
+        verify(portfolioService).getPortfolioItemsByType("Kitchen");
+        verify(portfolioService, never()).getAllPortfolioItems();
+    }
+
+    @Test
+    void getAllPortfolioItems_WithTypeFilter_Bathroom_ShouldReturnOnlyBathroomItems() throws Exception {
+        // Arrange
+        PortfolioResponseDto bathroomItem1 = new PortfolioResponseDto(
+                "portfolio-b1",
+                "Luxury Bathroom",
+                "/uploads/portfolio/bathroom1.jpg",
+                4.8,
+                "Bathroom",
+                List.of()
+        );
+        PortfolioResponseDto bathroomItem2 = new PortfolioResponseDto(
+                "portfolio-b2",
+                "Modern Bathroom",
+                "/uploads/portfolio/bathroom2.jpg",
+                4.7,
+                "Bathroom",
+                List.of()
+        );
+        when(portfolioService.getPortfolioItemsByType("Bathroom"))
+                .thenReturn(List.of(bathroomItem1, bathroomItem2));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "Bathroom")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].type", everyItem(is("Bathroom"))))
+                .andExpect(jsonPath("$[*].title", containsInAnyOrder("Luxury Bathroom", "Modern Bathroom")));
+
+        verify(portfolioService).getPortfolioItemsByType("Bathroom");
+    }
+
+    @Test
+    void getAllPortfolioItems_WithTypeFilter_Interior_ShouldReturnOnlyInteriorItems() throws Exception {
+        // Arrange
+        PortfolioResponseDto interiorItem = new PortfolioResponseDto(
+                "portfolio-i1",
+                "Living Room Design",
+                "/uploads/portfolio/living.jpg",
+                4.6,
+                "Interior",
+                List.of()
+        );
+        when(portfolioService.getPortfolioItemsByType("Interior")).thenReturn(List.of(interiorItem));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "Interior")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].type", is("Interior")))
+                .andExpect(jsonPath("$[0].title", is("Living Room Design")));
+
+        verify(portfolioService).getPortfolioItemsByType("Interior");
+    }
+
+    @Test
+    void getAllPortfolioItems_WithTypeFilter_Exterior_ShouldReturnOnlyExteriorItems() throws Exception {
+        // Arrange
+        PortfolioResponseDto exteriorItem = new PortfolioResponseDto(
+                "portfolio-e1",
+                "Garden Landscaping",
+                "/uploads/portfolio/garden.jpg",
+                4.9,
+                "Exterior",
+                List.of()
+        );
+        when(portfolioService.getPortfolioItemsByType("Exterior")).thenReturn(List.of(exteriorItem));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "Exterior")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].type", is("Exterior")))
+                .andExpect(jsonPath("$[0].title", is("Garden Landscaping")));
+
+        verify(portfolioService).getPortfolioItemsByType("Exterior");
+    }
+
+    @Test
+    void getAllPortfolioItems_WithNonExistentType_ShouldReturnEmptyList() throws Exception {
+        // Arrange
+        when(portfolioService.getPortfolioItemsByType("NonExistent")).thenReturn(List.of());
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "NonExistent")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(portfolioService).getPortfolioItemsByType("NonExistent");
+    }
+
+    @Test
+    void getAllPortfolioItems_WithEmptyTypeParameter_ShouldReturnAllItems() throws Exception {
+        // Arrange
+        when(portfolioService.getAllPortfolioItems()).thenReturn(List.of(item1, item2, item3));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        verify(portfolioService).getAllPortfolioItems();
+        verify(portfolioService, never()).getPortfolioItemsByType(anyString());
+    }
+
+    @Test
+    void getAllPortfolioItems_WithWhitespaceTypeParameter_ShouldReturnAllItems() throws Exception {
+        // Arrange
+        when(portfolioService.getAllPortfolioItems()).thenReturn(List.of(item1, item2, item3));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio")
+                        .param("type", "   ")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        verify(portfolioService).getAllPortfolioItems();
+        verify(portfolioService, never()).getPortfolioItemsByType(anyString());
+    }
+
+    @Test
+    void getAllPortfolioItems_WithoutTypeParameter_ShouldReturnAllItems() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/portfolio").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        verify(portfolioService).getAllPortfolioItems();
+        verify(portfolioService, never()).getPortfolioItemsByType(anyString());
     }
 
     /**
