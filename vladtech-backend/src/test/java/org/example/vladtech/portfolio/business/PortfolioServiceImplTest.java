@@ -232,7 +232,6 @@ class PortfolioServiceImplTest {
         // Arrange
         String title = "New Kitchen Project";
         String imageUrl = "/uploads/portfolio/new-kitchen.jpg";
-        Double rating = 4.5;
 
         PortfolioItem savedItem = new PortfolioItem();
         savedItem.setPortfolioId("new-portfolio-id");
@@ -301,7 +300,7 @@ class PortfolioServiceImplTest {
         // Arrange
         String type = "Kitchen";
         List<PortfolioItem> kitchenItems = List.of(portfolioItem1, portfolioItem2);
-
+        
         when(portfolioRepository.findByType(type)).thenReturn(kitchenItems);
         when(portfolioMapper.entityToResponseDto(portfolioItem1)).thenReturn(responseDto1);
         when(portfolioMapper.entityToResponseDto(portfolioItem2)).thenReturn(responseDto2);

@@ -60,7 +60,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         // Check if data already exists - seed portfolio separately
         boolean projectsExist = projectRepository.count() > 0;
         boolean portfolioExists = portfolioRepository.count() > 0;
-
+        
         if (projectsExist && portfolioExists) {
             log.info("Database already contains project and portfolio data. Skipping initialization.");
             return;
@@ -118,7 +118,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         // -------------------------
         // REVIEWS + PORTFOLIO
         // -------------------------
-
+        
         // Stores a seed image file into GridFS and returns the serving URL: /uploads/reviews/{id}
         // If the seed file is missing or fails to save, returns null (front-end should show placeholder).
         Function<String, String> storeAndUrl = (filename) -> {
@@ -163,40 +163,40 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         if (!projectsExist) {
             log.info("Seeding review data...");
-
+            
             createReview("client-001", "appointment-001", "Roger", "Amazing service! Highly recommend.", true, Rating.FIVE,
-                    List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
 
             createReview("client-002", "appointment-002", "Karen", "Good, but could be faster.", true, Rating.FOUR,
-                    List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), false,"Kitchen");
+                    List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
 
             createReview("client-003", "appointment-003", "Josh", "Not satisfied with the quality.", false, Rating.TWO,
-                    List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
 
             createReview("client-004", "appointment-004", "Reed Richards", "Fantastic experience, will definitely come back!", true, Rating.FIVE,
-                    List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
 
             createReview("client-005", "appointment-005", "Raymond", "Pretty good, but room for improvement.", true, Rating.FOUR,
-                    List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
 
             createReview("client-006", "appointment-006", "John", "Average service, nothing special.", false, Rating.THREE,
-                    List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))));
 
             createReview("client-007", "appointment-007", "Isabelle", "Excellent staff and quick service!", true, Rating.FIVE,
-                    List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))));
 
             createReview("client-008", "appointment-008", "Joshua", "Decent service, but a bit slow.", true, Rating.FOUR,
-                    List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))));
 
             createReview("client-009", "appointment-009", "Peter", "Very disappointed, would not recommend.", false, Rating.ONE,
-                    List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))));
 
             createReview("client-010", "appointment-010", "Simon", "Loved the experience! Highly professional.", true, Rating.FIVE,
-                    List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), false, "Kitchen");
+                    List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))));
 
             log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
         }
-
+        
         if (!portfolioExists) {
             log.info("Seeding portfolio data...");
 
@@ -204,81 +204,81 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
             // Kitchen projects
             createPortfolioItem("Modern Kitchen Counter", storeAndUrl.apply("Kitchen_Counter.jpg"), "Kitchen",
-                    List.of(
-                            new PortfolioComment("Sarah M.", "sample-user-1", now.minusSeconds(10800), "Beautiful countertop! The finish is perfect."),
-                            new PortfolioComment("John D.", "sample-user-2", now.minusSeconds(3600), "Love the modern design and clean look.")
-                    ));
+                List.of(
+                        new PortfolioComment("Sarah M.", "sample-user-1", now.minusSeconds(10800), "Beautiful countertop! The finish is perfect."),
+                        new PortfolioComment("John D.", "sample-user-2", now.minusSeconds(3600), "Love the modern design and clean look.")
+                ));
 
-            createPortfolioItem("Complete Kitchen Remodel", storeAndUrl.apply("Kitchen_Remodel.jpg"), "Kitchen",
-                    List.of(
-                            new PortfolioComment("Emma L.", "sample-user-3", now.minusSeconds(18000), "Amazing transformation! Best kitchen renovation I've seen."),
-                            new PortfolioComment("Michael R.", "sample-user-4", now.minusSeconds(7200), "The attention to detail is outstanding.")
-                    ));
+        createPortfolioItem("Complete Kitchen Remodel", storeAndUrl.apply("Kitchen_Remodel.jpg"), "Kitchen",
+                List.of(
+                        new PortfolioComment("Emma L.", "sample-user-3", now.minusSeconds(18000), "Amazing transformation! Best kitchen renovation I've seen."),
+                        new PortfolioComment("Michael R.", "sample-user-4", now.minusSeconds(7200), "The attention to detail is outstanding.")
+                ));
 
-            createPortfolioItem("Kitchen Renewal", storeAndUrl.apply("Kitchen_Renewal.jpg"), "Kitchen",
-                    List.of(
-                            new PortfolioComment("James T.", "sample-user-13", now.minusSeconds(25200), "Exceeded our expectations!"),
-                            new PortfolioComment("Amanda P.", "sample-user-14", now.minusSeconds(14400), "Love the new cabinets and lighting.")
-                    ));
+        createPortfolioItem("Kitchen Renewal", storeAndUrl.apply("Kitchen_Renewal.jpg"), "Kitchen",
+                List.of(
+                        new PortfolioComment("James T.", "sample-user-13", now.minusSeconds(25200), "Exceeded our expectations!"),
+                        new PortfolioComment("Amanda P.", "sample-user-14", now.minusSeconds(14400), "Love the new cabinets and lighting.")
+                ));
 
-            createPortfolioItem("Contemporary Kitchen Design", storeAndUrl.apply("Kitchen2.jpg"), "Kitchen",
-                    List.of(
-                            new PortfolioComment("Robert K.", "sample-user-15", now.minusSeconds(36000), "Sleek and modern design."),
-                            new PortfolioComment("Michelle S.", "sample-user-16", now.minusSeconds(21600), "Perfect use of space!")
-                    ));
+        createPortfolioItem("Contemporary Kitchen Design", storeAndUrl.apply("Kitchen2.jpg"), "Kitchen",
+                List.of(
+                        new PortfolioComment("Robert K.", "sample-user-15", now.minusSeconds(36000), "Sleek and modern design."),
+                        new PortfolioComment("Michelle S.", "sample-user-16", now.minusSeconds(21600), "Perfect use of space!")
+                ));
 
-            // Bathroom projects
-            createPortfolioItem("Luxury Bathroom Renovation", storeAndUrl.apply("Bathroom_Remodel.jpg"), "Bathroom",
-                    List.of(
-                            new PortfolioComment("Lisa K.", "sample-user-5", now.minusSeconds(14400), "Stunning bathroom design. Very elegant!"),
-                            new PortfolioComment("David P.", "sample-user-6", now.minusSeconds(21600), "The tile work is absolutely beautiful.")
-                    ));
+        // Bathroom projects
+        createPortfolioItem("Luxury Bathroom Renovation", storeAndUrl.apply("Bathroom_Remodel.jpg"), "Bathroom",
+                List.of(
+                        new PortfolioComment("Lisa K.", "sample-user-5", now.minusSeconds(14400), "Stunning bathroom design. Very elegant!"),
+                        new PortfolioComment("David P.", "sample-user-6", now.minusSeconds(21600), "The tile work is absolutely beautiful.")
+                ));
 
-            createPortfolioItem("Modern Bathroom Makeover", storeAndUrl.apply("NewLook_Bathroom.jpg"), "Bathroom",
-                    List.of(
-                            new PortfolioComment("Rachel B.", "sample-user-9", now.minusSeconds(86400), "Perfect execution! Love the new look."),
-                            new PortfolioComment("Chris M.", "sample-user-10", now.minusSeconds(43200), "High-quality work throughout.")
-                    ));
+        createPortfolioItem("Modern Bathroom Makeover", storeAndUrl.apply("NewLook_Bathroom.jpg"), "Bathroom",
+                List.of(
+                        new PortfolioComment("Rachel B.", "sample-user-9", now.minusSeconds(86400), "Perfect execution! Love the new look."),
+                        new PortfolioComment("Chris M.", "sample-user-10", now.minusSeconds(43200), "High-quality work throughout.")
+                ));
 
-            // Interior projects
-            createPortfolioItem("Living Room Transformation", storeAndUrl.apply("Livingroom.jpg"), "Interior",
-                    List.of(
-                            new PortfolioComment("Anna S.", "sample-user-7", now.minusSeconds(10800), "Great use of space and natural lighting."),
-                            new PortfolioComment("Tom W.", "sample-user-8", now.minusSeconds(28800), "Very professional and modern design.")
-                    ));
+        // Interior projects
+        createPortfolioItem("Living Room Transformation", storeAndUrl.apply("Livingroom.jpg"), "Interior",
+                List.of(
+                        new PortfolioComment("Anna S.", "sample-user-7", now.minusSeconds(10800), "Great use of space and natural lighting."),
+                        new PortfolioComment("Tom W.", "sample-user-8", now.minusSeconds(28800), "Very professional and modern design.")
+                ));
 
-            createPortfolioItem("Contemporary Living Space", storeAndUrl.apply("Livingroom2.jpg"), "Interior",
-                    List.of(
-                            new PortfolioComment("Mark H.", "sample-user-11", now.minusSeconds(172800), "Clean lines and beautiful finishes."),
-                            new PortfolioComment("Jennifer L.", "sample-user-12", now.minusSeconds(18000), "Love the open concept!")
-                    ));
+        createPortfolioItem("Contemporary Living Space", storeAndUrl.apply("Livingroom2.jpg"), "Interior",
+                List.of(
+                        new PortfolioComment("Mark H.", "sample-user-11", now.minusSeconds(172800), "Clean lines and beautiful finishes."),
+                        new PortfolioComment("Jennifer L.", "sample-user-12", now.minusSeconds(18000), "Love the open concept!")
+                ));
 
-            createPortfolioItem("Finished Basement", storeAndUrl.apply("Basement.jpg"), "Interior",
-                    List.of(
-                            new PortfolioComment("Steve R.", "sample-user-17", now.minusSeconds(50400), "Great use of basement space."),
-                            new PortfolioComment("Laura M.", "sample-user-18", now.minusSeconds(32400), "Perfect for entertaining!")
-                    ));
+        createPortfolioItem("Finished Basement", storeAndUrl.apply("Basement.jpg"), "Interior",
+                List.of(
+                        new PortfolioComment("Steve R.", "sample-user-17", now.minusSeconds(50400), "Great use of basement space."),
+                        new PortfolioComment("Laura M.", "sample-user-18", now.minusSeconds(32400), "Perfect for entertaining!")
+                ));
 
-            // Exterior/Yard projects
-            createPortfolioItem("Backyard Patio Installation", storeAndUrl.apply("Patio.jpg"), "Exterior/Yard",
-                    List.of(
-                            new PortfolioComment("Brian W.", "sample-user-19", now.minusSeconds(61200), "Beautiful patio, perfect for summer!"),
-                            new PortfolioComment("Susan H.", "sample-user-20", now.minusSeconds(43200), "Quality stonework and great design.")
-                    ));
+        // Exterior/Yard projects
+        createPortfolioItem("Backyard Patio Installation", storeAndUrl.apply("Patio.jpg"), "Exterior/Yard",
+                List.of(
+                        new PortfolioComment("Brian W.", "sample-user-19", now.minusSeconds(61200), "Beautiful patio, perfect for summer!"),
+                        new PortfolioComment("Susan H.", "sample-user-20", now.minusSeconds(43200), "Quality stonework and great design.")
+                ));
 
-            createPortfolioItem("Pool Installation & Landscaping", storeAndUrl.apply("Pool_Installation.jpg"), "Exterior/Yard",
-                    List.of(
-                            new PortfolioComment("Kevin D.", "sample-user-21", now.minusSeconds(72000), "Dream pool! The landscaping is stunning."),
-                            new PortfolioComment("Patricia L.", "sample-user-22", now.minusSeconds(54000), "Exceeded all expectations!")
-                    ));
+        createPortfolioItem("Pool Installation & Landscaping", storeAndUrl.apply("Pool_Installation.jpg"), "Exterior/Yard",
+                List.of(
+                        new PortfolioComment("Kevin D.", "sample-user-21", now.minusSeconds(72000), "Dream pool! The landscaping is stunning."),
+                        new PortfolioComment("Patricia L.", "sample-user-22", now.minusSeconds(54000), "Exceeded all expectations!")
+                ));
 
-            createPortfolioItem("Yard Renovation", storeAndUrl.apply("Yard_Work.jpg"), "Exterior/Yard",
-                    List.of(
-                            new PortfolioComment("Timothy G.", "sample-user-23", now.minusSeconds(82800), "Great landscaping work."),
-                            new PortfolioComment("Nancy B.", "sample-user-24", now.minusSeconds(64800), "Our yard looks amazing now!")
-                    ));
+        createPortfolioItem("Yard Renovation", storeAndUrl.apply("Yard_Work.jpg"), "Exterior/Yard",
+                List.of(
+                        new PortfolioComment("Timothy G.", "sample-user-23", now.minusSeconds(82800), "Great landscaping work."),
+                        new PortfolioComment("Nancy B.", "sample-user-24", now.minusSeconds(64800), "Our yard looks amazing now!")
+                ));
 
-            log.info("Sample portfolio data appended successfully. Total portfolio items: {}", portfolioRepository.count());
+        log.info("Sample portfolio data appended successfully. Total portfolio items: {}", portfolioRepository.count());
         }
     }
 
@@ -388,11 +388,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
                               String comment,
                               Boolean visible,
                               Rating rating,
-                              List<Photo> photos,
-                              boolean sentToPortfolio,
-                              String type) {
+                              List<Photo> photos) {
         try {
-            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos, sentToPortfolio, type);
+            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos, false, null);
             reviewRepository.save(review);
             log.debug("Created review for clientId: {} and appointmentId: {}", clientId, appointmentId);
         } catch (Exception e) {

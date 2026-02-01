@@ -117,43 +117,6 @@ class PortfolioMapperTest {
     }
 
     @Test
-    void entityToResponseDto_WithHighRating_ShouldMapCorrectly() {
-        // Arrange
-        PortfolioItem portfolioItem = new PortfolioItem(
-                "Perfect Kitchen",
-                "/uploads/portfolio/kitchenremodel.jpg",
-                null,
-                List.of()
-        );
-        portfolioItem.setPortfolioId("portfolio-perfect");
-
-        // Act
-        PortfolioResponseDto result = portfolioMapper.entityToResponseDto(portfolioItem);
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.getTitle()).isEqualTo("Perfect Kitchen");
-    }
-
-    @Test
-    void entityToResponseDto_WithLowRating_ShouldMapCorrectly() {
-        // Arrange
-        PortfolioItem portfolioItem = new PortfolioItem(
-                "Basic Renovation",
-                "/uploads/portfolio/basic.jpg",
-                null,
-                List.of()
-        );
-        portfolioItem.setPortfolioId("portfolio-basic");
-
-        // Act
-        PortfolioResponseDto result = portfolioMapper.entityToResponseDto(portfolioItem);
-
-        // Assert
-        assertThat(result).isNotNull();
-    }
-
-    @Test
     void entityToResponseDto_ShouldPreserveAllFields() {
         // Arrange
         Instant now = Instant.now();

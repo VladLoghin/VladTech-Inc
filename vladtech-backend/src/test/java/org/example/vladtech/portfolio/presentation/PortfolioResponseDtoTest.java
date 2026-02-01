@@ -30,12 +30,12 @@ class PortfolioResponseDtoTest {
 
         // Act
         PortfolioResponseDto dto = new PortfolioResponseDto(
-                "p123",               // portfolioId
-                null,                 // reviewId
-                "Project A",          // title
-                "/images/project-a.jpg", // imageUrl
-                null,                 // type
-                comments              // comments
+            "p123",
+            null,
+            "Project A",
+            "/images/project-a.jpg",
+            "Interior",
+            comments
         );
 
         // Assert
@@ -68,9 +68,9 @@ class PortfolioResponseDtoTest {
     @Test
     void testEqualsAndHashCode() {
         // Arrange
-        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", null, null);
-        PortfolioResponseDto dto2 = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", null, null);
-        PortfolioResponseDto dto3 = new PortfolioResponseDto("p2", null, "Project B", "/images/b.jpg", null, null);
+        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", null);
+        PortfolioResponseDto dto2 = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", null);
+        PortfolioResponseDto dto3 = new PortfolioResponseDto("p2", null, "Project B", "/images/b.jpg", "Kitchen", null);
 
         // Assert
         assertEquals(dto1, dto2);
@@ -81,7 +81,7 @@ class PortfolioResponseDtoTest {
     @Test
     void testToString() {
         // Arrange
-        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", null, null);
+        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", null);
 
         // Act
         String result = dto.toString();
@@ -95,7 +95,7 @@ class PortfolioResponseDtoTest {
     @Test
     void testWithNullComments() {
         // Act
-        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null,"Project A", "/images/a.jpg", null, null);
+        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", null);
 
         // Assert
         assertNull(dto.getComments());
@@ -107,7 +107,7 @@ class PortfolioResponseDtoTest {
         List<PortfolioCommentDto> comments = new ArrayList<>();
 
         // Act
-        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", null, comments);
+        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", comments);
 
         // Assert
         assertNotNull(dto.getComments());
@@ -123,42 +123,40 @@ class PortfolioResponseDtoTest {
         comments.add(new PortfolioCommentDto("User3", "auth0|3", java.time.Instant.now(), "Comment 3"));
 
         // Act
-        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", null, comments);
+        PortfolioResponseDto dto = new PortfolioResponseDto("p1", null, "Project A", "/images/a.jpg", "Interior", comments);
 
         // Assert
         assertEquals(3, dto.getComments().size());
     }
 
-
-
     @Test
     void testTitleVariations() {
         // Test short title
-        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", null,  "A", "/image.jpg", null, null);
+        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", null, "A", "/image.jpg", "Interior", null);
         assertEquals("A", dto1.getTitle());
 
         // Test long title
         String longTitle = "This is a very long project title that describes the project in detail";
-        PortfolioResponseDto dto2 = new PortfolioResponseDto("p2", null, longTitle, "/image.jpg", null, null);
+        PortfolioResponseDto dto2 = new PortfolioResponseDto("p2", null, longTitle, "/image.jpg", "Kitchen", null);
         assertEquals(longTitle, dto2.getTitle());
 
         // Test title with special characters
-        PortfolioResponseDto dto3 = new PortfolioResponseDto("p3", null, "Project #1 - Phase 2", "/image.jpg", null, null);
+        PortfolioResponseDto dto3 = new PortfolioResponseDto("p3", null, "Project #1 - Phase 2", "/image.jpg", "Bathroom", null);
         assertEquals("Project #1 - Phase 2", dto3.getTitle());
     }
 
     @Test
     void testImageUrlFormats() {
         // Test relative URL
-        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", "null" , "Project", "/images/project.jpg", null, null);
+        PortfolioResponseDto dto1 = new PortfolioResponseDto("p1", null, "Project", "/images/project.jpg", "Interior", null);
         assertEquals("/images/project.jpg", dto1.getImageUrl());
 
         // Test absolute URL
-        PortfolioResponseDto dto2 = new PortfolioResponseDto("p2", null, "Project", "https://example.com/images/project.jpg", null, null);
+        PortfolioResponseDto dto2 = new PortfolioResponseDto("p2", null, "Project", "https://example.com/images/project.jpg", "Kitchen", null);
         assertEquals("https://example.com/images/project.jpg", dto2.getImageUrl());
 
         // Test with different file extensions
-        PortfolioResponseDto dto3 = new PortfolioResponseDto("p3",null, "Project", "/images/project.png", null, null);
+        PortfolioResponseDto dto3 = new PortfolioResponseDto("p3", null, "Project", "/images/project.png", "Bathroom", null);
         assertTrue(dto3.getImageUrl().endsWith(".png"));
     }
 }

@@ -59,7 +59,7 @@ class PortfolioControllerIntegrationTest {
                 null,
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                null,
+                "Kitchen",
                 List.of(
                         new PortfolioCommentDto("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful countertop!"),
                         new PortfolioCommentDto("John D.", "auth0|user2", now.minusSeconds(3600), "Love the modern design.")
@@ -71,7 +71,7 @@ class PortfolioControllerIntegrationTest {
                 null,
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
-                null,
+                "Kitchen",
                 List.of(
                         new PortfolioCommentDto("Emma L.", "auth0|user3", now.minusSeconds(18000), "Amazing transformation!")
                 )
@@ -82,7 +82,7 @@ class PortfolioControllerIntegrationTest {
                 null,
                 "Luxury Bathroom Renovation",
                 "/uploads/portfolio/newbathroom.jpg",
-                null,
+                "Bathroom",
                 List.of(
                         new PortfolioCommentDto("Lisa K.", "auth0|user4", now.minusSeconds(14400), "Stunning bathroom design.")
                 )
@@ -151,7 +151,7 @@ class PortfolioControllerIntegrationTest {
                 null,
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
-                null,
+                "Interior",
                 List.of()
         );
 
