@@ -22,10 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,23 +56,23 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_returnsMappedList() {
-        Review r1 = new Review("client1", "abc234", "Jamie", "appt1", true, Rating.THREE, null, false);
+        Review r1 = new Review("client1", "abc234", "Jamie", "appt1", true, Rating.THREE, false, "Interior");
         r1.setReviewId("r1");
-        Review r2 = new Review("client2", "abc123", "Joel", "appt2", true, Rating.THREE, null, false);
+        Review r2 = new Review("client2", "abc123", "Joel", "appt2", true, Rating.THREE, false, "Interior");
         r2.setReviewId("r2");
 
         List<Review> repoResult = Arrays.asList(r1, r2);
 
         ReviewResponseModel m1 =
-                new ReviewResponseModel("r1", "client1", "abc456", "appt1", "ok", true, Rating.THREE, null);
+                new ReviewResponseModel("r1", "client1", "abc456", "appt1", "ok", true, Rating.THREE, null, "Interior");
         ReviewResponseModel m2 =
-                new ReviewResponseModel("r2", "client2", "abc455", "appt2", "ok", true, Rating.THREE, null);
+                new ReviewResponseModel("r2", "client2", "abc455", "appt2", "ok", true, Rating.THREE, null, "Interior");
 
         when(reviewRepository.findByVisibleTrue()).thenReturn(repoResult);
         when(responseMapper.entityListToResponseModelList(repoResult))
                 .thenReturn(Arrays.asList(m1, m2));
 
-        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null);
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null, null);
 
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -88,20 +85,20 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_returnsMappedList() {
-        Review r1 = new Review("client1", "abc324", "appt1", "good", true, null, false);
+        Review r1 = new Review("client1", "abc324", "appt1", "good", true, null, false, "Interior");
         r1.setReviewId("r1");
-        Review r2 = new Review("client2", "abc320", "appt2", "ok", true, null, false);
+        Review r2 = new Review("client2", "abc320", "appt2", "ok", true, null, false, "Interior");
         r2.setReviewId("r2");
 
         List<Review> repoResult = Arrays.asList(r1, r2);
 
-        ReviewResponseModel m1 = new ReviewResponseModel("r1", "abc345", "client1", "appt1", "good", true, null, null);
-        ReviewResponseModel m2 = new ReviewResponseModel("r2", "abc578", "client2", "appt2", "ok", true, null, null);
+        ReviewResponseModel m1 = new ReviewResponseModel("r1", "abc345", "client1", "appt1", "good", true, null, null, "Interior");
+        ReviewResponseModel m2 = new ReviewResponseModel("r2", "abc578", "client2", "appt2", "ok", true, null, null, "Interior");
 
         when(reviewRepository.findAll()).thenReturn(repoResult);
         when(responseMapper.entityListToResponseModelList(repoResult)).thenReturn(Arrays.asList(m1, m2));
 
-        List<ReviewResponseModel> result = reviewService.getAllReviews(null, null);
+        List<ReviewResponseModel> result = reviewService.getAllReviews(null, null, null);
 
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -117,13 +114,13 @@ class ReviewServiceImplTest {
         String reviewId = "r1";
         boolean visible = false;
 
-        Review existing = new Review("client1", "abc789", "appt1", "good", true, null, false);
+        Review existing = new Review("client1", "abc789", "appt1", "good", true, null, false, "Interior");
         existing.setReviewId(reviewId);
 
-        Review updated = new Review("client1", "abc009", "appt1", "good", visible, null, false);
+        Review updated = new Review("client1", "abc009", "appt1", "good", visible, null, false, "Interior");
         updated.setReviewId(reviewId);
 
-        ReviewResponseModel responseModel = new ReviewResponseModel(reviewId, "client1", "abc709", "appt1", "good", visible, null, null);
+        ReviewResponseModel responseModel = new ReviewResponseModel(reviewId, "client1", "abc709", "appt1", "good", visible, null, null, "Interior");
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(existing));
         when(reviewRepository.save(existing)).thenReturn(updated);
@@ -157,10 +154,10 @@ class ReviewServiceImplTest {
     void getReviewById_callsResponseMapperWithCorrectReview() {
         String reviewId = "r1";
 
-        Review review = new Review("client1", "abc587", "appt1", "Excellent service", true, Rating.FIVE, false);
+        Review review = new Review("client1", "abc587", "appt1", "Excellent service", true, Rating.FIVE, false, "Interior");
         review.setReviewId(reviewId);
 
-        ReviewResponseModel expectedResponse = new ReviewResponseModel(reviewId, "client1", "abc678", "appt1", "Excellent service", true, null, null);
+        ReviewResponseModel expectedResponse = new ReviewResponseModel(reviewId, "client1", "abc678", "appt1", "Excellent service", true, null, null, "Interior");
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(responseMapper.entityToResponseModel(review)).thenReturn(expectedResponse);
@@ -226,15 +223,15 @@ class ReviewServiceImplTest {
     @Test
     void getReviewsByOwnerAuth0Id_returnsMappedList() {
         String ownerAuth0Id = "owner123";
-        Review review1 = new Review("client1", "owner123", "appt1", "Great service", true, Rating.FIVE, false);
+        Review review1 = new Review("client1", "owner123", "appt1", "Great service", true, Rating.FIVE, false, "Interior");
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "owner123", "appt2", "Good service", true, Rating.FOUR, false);
+        Review review2 = new Review("client2", "owner123", "appt2", "Good service", true, Rating.FOUR, false, "Interior");
         review2.setReviewId("r2");
 
         List<Review> reviews = Arrays.asList(review1, review2);
 
-        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "owner123", "appt1", "Great service", true, Rating.FIVE, null);
-        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "owner123", "appt2", "Good service", true, Rating.FOUR, null);
+        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "owner123", "appt1", "Great service", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "owner123", "appt2", "Good service", true, Rating.FOUR, null, "Interior");
 
         when(reviewRepository.findByOwnerAuth0Id(ownerAuth0Id)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(Arrays.asList(response1, response2));
@@ -254,17 +251,17 @@ class ReviewServiceImplTest {
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null, "Interior");
 
         when(reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, ratingValue);
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, ratingValue, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -277,17 +274,17 @@ class ReviewServiceImplTest {
     void getAllVisibleReviews_withClientNameOnly_returnsFilteredReviews() {
         String clientName = "client1";
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, "Interior");
 
         when(reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCase(clientName)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, null);
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, null, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -300,17 +297,17 @@ class ReviewServiceImplTest {
     void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() {
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false);
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, ratingValue, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, ratingValue, null, "Interior");
 
         when(reviewRepository.findByVisibleTrueAndRating(ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, ratingValue);
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, ratingValue, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -321,20 +318,20 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllVisibleReviews_withoutFilters_returnsAllVisibleReviews() {
-        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
+        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, "Interior");
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false);
+        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false, "Interior");
         review2.setReviewId("r2");
 
         List<Review> reviews = List.of(review1, review2);
 
-        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
-        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, null);
+        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, null, "Interior");
 
         when(reviewRepository.findByVisibleTrue()).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response1, response2));
 
-        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null);
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null, null);
 
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -349,17 +346,17 @@ class ReviewServiceImplTest {
         String clientName = "client1";
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, ratingValue, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, ratingValue, null, "Interior");
 
         when(reviewRepository.findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, ratingValue);
+        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, ratingValue, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -372,17 +369,17 @@ class ReviewServiceImplTest {
     void getAllReviews_withClientNameOnly_returnsFilteredReviews() {
         String clientName = "client1";
 
-        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, "Interior");
 
         when(reviewRepository.findByClientNameContainingIgnoreCase(clientName)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, null);
+        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, null, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -395,17 +392,17 @@ class ReviewServiceImplTest {
     void getAllReviews_withRatingOnly_returnsFilteredReviews() {
         Rating ratingValue = Rating.FIVE;
 
-        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false);
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, ratingValue, false, "Interior");
         review.setReviewId("r1");
 
         List<Review> reviews = List.of(review);
 
-        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, ratingValue, null);
+        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, ratingValue, null, "Interior");
 
         when(reviewRepository.findByRating(ratingValue)).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
 
-        List<ReviewResponseModel> result = reviewService.getAllReviews(null, ratingValue);
+        List<ReviewResponseModel> result = reviewService.getAllReviews(null, ratingValue, null);
 
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -416,20 +413,20 @@ class ReviewServiceImplTest {
 
     @Test
     void getAllReviews_withoutFilters_returnsAllReviews() {
-        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false);
+        Review review1 = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, "Interior");
         review1.setReviewId("r1");
-        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false);
+        Review review2 = new Review("client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, false, "Interior");
         review2.setReviewId("r2");
 
         List<Review> reviews = List.of(review1, review2);
 
-        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, null);
-        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, null);
+        ReviewResponseModel response1 = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel response2 = new ReviewResponseModel("r2", "client2", "auth0Id", "appt2", "Good service", true, Rating.FOUR, null, "Interior");
 
         when(reviewRepository.findAll()).thenReturn(reviews);
         when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response1, response2));
 
-        List<ReviewResponseModel> result = reviewService.getAllReviews(null, null);
+        List<ReviewResponseModel> result = reviewService.getAllReviews(null, null, null);
 
         assertEquals(2, result.size());
         assertEquals("r1", result.get(0).getReviewId());
@@ -567,9 +564,9 @@ class ReviewServiceImplTest {
 
     @Test
     void computeSatisfactionPercentage_withMultipleReviews_calculatesCorrectPercentage() {
-        Review review1 = new Review("client1", "auth0Id1", "appt1", "Excellent", true, Rating.FIVE, false);
-        Review review2 = new Review("client2", "auth0Id2", "appt2", "Good", true, Rating.FOUR, false);
-        Review review3 = new Review("client3", "auth0Id3", "appt3", "Average", true, Rating.THREE, false);
+        Review review1 = new Review("client1", "auth0Id1", "appt1", "Excellent", true, Rating.FIVE, false, "Interior");
+        Review review2 = new Review("client2", "auth0Id2", "appt2", "Good", true, Rating.FOUR, false, "Interior");
+        Review review3 = new Review("client3", "auth0Id3", "appt3", "Average", true, Rating.THREE, false, "Interior");
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(3L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(List.of(review1, review2, review3));
@@ -606,41 +603,6 @@ class ReviewServiceImplTest {
         verifyNoMoreInteractions(reviewRepository);
     }
 
-    @Test
-    public PortfolioResponseDto sendToPortfolio(String reviewId) {
-        // 1) Load review
-        Review existing = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-
-        // 2) Guard against duplicates
-        if (existing.isSentToPortfolio()) {
-            throw new RuntimeException("Review has already been sent to portfolio");
-        }
-
-        // 3) Build portfolio fields from review
-        String title = "Review by " + existing.getClientName();
-        String imageUrl = existing.getPhotos().isEmpty()
-                ? ""
-                : existing.getPhotos().get(0).getUrl();
-
-        // 4) Create + save portfolio item (WITH reviewId)
-        PortfolioItem portfolioItem = new PortfolioItem();
-        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
-        portfolioItem.setReviewId(reviewId);
-        portfolioItem.setTitle(title);
-        portfolioItem.setImageUrl(imageUrl);
-        portfolioItem.setComments(new java.util.ArrayList<>());
-
-        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
-
-        // 5) Mark review as sent
-        existing.setSentToPortfolio(true);
-        reviewRepository.save(existing);
-
-        // 6) Return response DTO
-        return portfolioMapper.entityToResponseDto(savedItem);
-    }
-
 
     @Test
     public void resetPortfolioStatus() {
@@ -655,5 +617,256 @@ class ReviewServiceImplTest {
 
         verify(reviewRepository).save(existing);
         assertFalse(existing.isSentToPortfolio());
+    }
+
+    @Test
+    void getAllReviews_withTypeNameAndRating_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        String clientName = "John";
+        Rating rating = Rating.FIVE;
+        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, rating, null, type);
+        List<ReviewResponseModel> reviews = Collections.singletonList(review);
+
+        when(reviewRepository.findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(type, clientName, rating))
+                .thenReturn(Collections.singletonList(new Review()));
+        when(responseMapper.entityListToResponseModelList(anyList())).thenReturn(reviews);
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, rating, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(type, clientName, rating);
+    }
+
+    @Test
+    void getAllReviews_withTypeAndName_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        String clientName = "John";
+        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, Rating.FIVE, null, type);
+        List<ReviewResponseModel> reviews = Collections.singletonList(review);
+
+        when(reviewRepository.findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName))
+                .thenReturn(Collections.singletonList(new Review()));
+        when(responseMapper.entityListToResponseModelList(anyList())).thenReturn(reviews);
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllReviews(clientName, null, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName);
+    }
+
+    @Test
+    void getAllReviews_withTypeAndRating_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        Rating rating = Rating.FIVE;
+        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, rating, null, type);
+        List<ReviewResponseModel> reviews = Collections.singletonList(review);
+
+        when(reviewRepository.findByTypeContainingIgnoreCaseAndRating(type, rating))
+                .thenReturn(Collections.singletonList(new Review()));
+        when(responseMapper.entityListToResponseModelList(anyList())).thenReturn(reviews);
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllReviews(null, rating, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByTypeContainingIgnoreCaseAndRating(type, rating);
+    }
+
+    @Test
+    void getAllReviews_withTypeOnly_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, type);
+        List<ReviewResponseModel> reviews = Collections.singletonList(review);
+
+        when(reviewRepository.findByTypeContainingIgnoreCase(type))
+                .thenReturn(Collections.singletonList(new Review()));
+        when(responseMapper.entityListToResponseModelList(anyList())).thenReturn(reviews);
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllReviews(null, null, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByTypeContainingIgnoreCase(type);
+    }
+
+    @Test
+    void getAllVisibleReviews_withTypeNameAndRating_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        String clientName = "John";
+        Rating rating = Rating.FIVE;
+
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, rating, false, type);
+        review.setReviewId("r1");
+
+        List<Review> reviews = List.of(review);
+
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, rating, null, type);
+
+        when(reviewRepository.findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(type, clientName, rating))
+                .thenReturn(reviews);
+        when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, rating, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(type, clientName, rating);
+    }
+
+    @Test
+    void getAllVisibleReviews_withTypeAndName_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        String clientName = "John";
+
+        Review review = new Review(clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, type);
+        review.setReviewId("r1");
+
+        List<Review> reviews = List.of(review);
+
+        ReviewResponseModel response = new ReviewResponseModel("r1", clientName, "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, type);
+
+        when(reviewRepository.findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName))
+                .thenReturn(reviews);
+        when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(clientName, null, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName);
+    }
+
+    @Test
+    void getAllVisibleReviews_withTypeAndRating_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+        Rating rating = Rating.FIVE;
+
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, rating, false, type);
+        review.setReviewId("r1");
+
+        List<Review> reviews = List.of(review);
+
+        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, rating, null, type);
+
+        when(reviewRepository.findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(type, rating))
+                .thenReturn(reviews);
+        when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, rating, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(type, rating);
+    }
+
+    @Test
+    void getAllVisibleReviews_withTypeOnly_returnsFilteredReviews() {
+        // Arrange
+        String type = "Interior";
+
+        Review review = new Review("client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, false, type);
+        review.setReviewId("r1");
+
+        List<Review> reviews = List.of(review);
+
+        ReviewResponseModel response = new ReviewResponseModel("r1", "client1", "auth0Id", "appt1", "Great service", true, Rating.FIVE, null, type);
+
+        when(reviewRepository.findByVisibleTrueAndTypeContainingIgnoreCase(type))
+                .thenReturn(reviews);
+        when(responseMapper.entityListToResponseModelList(reviews)).thenReturn(List.of(response));
+
+        // Act
+        List<ReviewResponseModel> result = reviewService.getAllVisibleReviews(null, null, type);
+
+        // Assert
+        assertEquals(1, result.size());
+        verify(reviewRepository).findByVisibleTrueAndTypeContainingIgnoreCase(type);
+    }
+
+    @Test
+    void sendToPortfolio_createsPortfolioItemAndUpdatesReview() {
+        // Arrange
+        String reviewId = "review123";
+        Review review = new Review();
+        review.setReviewId(reviewId);
+        review.setClientName("John Doe");
+        review.setType("Interior");
+
+        Photo photo = new Photo();
+        photo.setUrl("photo1.jpg");
+        review.setPhotos(Collections.singletonList(photo));
+        review.setSentToPortfolio(false);
+
+        PortfolioItem portfolioItem = new PortfolioItem();
+        portfolioItem.setPortfolioId("portfolio123");
+        portfolioItem.setReviewId(reviewId);
+        portfolioItem.setTitle("Review by John Doe");
+        portfolioItem.setImageUrl("photo1.jpg");
+        portfolioItem.setType("Interior");
+
+        PortfolioResponseDto responseDto = new PortfolioResponseDto();
+        responseDto.setPortfolioId("portfolio123");
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(portfolioRepository.save(any(PortfolioItem.class))).thenReturn(portfolioItem);
+        when(portfolioMapper.entityToResponseDto(portfolioItem)).thenReturn(responseDto);
+
+        // Act
+        PortfolioResponseDto result = reviewService.sendToPortfolio(reviewId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("portfolio123", result.getPortfolioId());
+        verify(reviewRepository).findById(reviewId);
+        verify(portfolioRepository).save(any(PortfolioItem.class));
+        verify(reviewRepository).save(review);
+        verify(portfolioMapper).entityToResponseDto(portfolioItem);
+    }
+
+    @Test
+    void sendToPortfolio_reviewAlreadySent_throwsException() {
+        // Arrange
+        String reviewId = "review123";
+        Review review = new Review();
+        review.setReviewId(reviewId);
+        review.setSentToPortfolio(true);
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> reviewService.sendToPortfolio(reviewId));
+        assertEquals("Review has already been sent to portfolio", exception.getMessage());
+        verify(reviewRepository).findById(reviewId);
+        verifyNoInteractions(portfolioRepository, portfolioMapper);
+    }
+
+    @Test
+    void sendToPortfolio_reviewNotFound_throwsException() {
+        // Arrange
+        String reviewId = "review123";
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> reviewService.sendToPortfolio(reviewId));
+        assertEquals("Review not found", exception.getMessage());
+        verify(reviewRepository).findById(reviewId);
+        verifyNoInteractions(portfolioRepository, portfolioMapper);
     }
 }

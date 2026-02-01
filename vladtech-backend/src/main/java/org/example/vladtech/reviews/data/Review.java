@@ -27,8 +27,9 @@ public class Review {
     private List<Photo> photos = new ArrayList<>();
     private String ownerAuth0Id;
     private boolean sentToPortfolio = false;
+    private String type;
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, boolean sentToPortfolio) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, boolean sentToPortfolio, String type) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
@@ -36,9 +37,10 @@ public class Review {
         this.visible = visible;
         this.rating = rating;
         this.sentToPortfolio = sentToPortfolio;
+        this.type = type;
     }
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos, boolean sentToPortfolio) {
+    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos, boolean sentToPortfolio, String type) {
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
@@ -47,5 +49,6 @@ public class Review {
         this.rating = rating;
         this.photos = photos != null ? photos : new ArrayList<>();
         this.sentToPortfolio = sentToPortfolio;
+        this.type = type;
     }
 }

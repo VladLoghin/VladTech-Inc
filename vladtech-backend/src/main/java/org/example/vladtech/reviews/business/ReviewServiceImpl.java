@@ -39,22 +39,48 @@ public class ReviewServiceImpl implements ReviewService {
     private final PortfolioMapper portfolioMapper;
 
     @Override
-    public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue) {
-        if (clientName != null && ratingValue != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)
-            );
-        } else if (clientName != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByClientNameContainingIgnoreCase(clientName)
-            );
-        } else if (ratingValue != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByRating(ratingValue)
-            );
+    public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type) {
+
+        boolean hasName = clientName != null && !clientName.isBlank();
+        boolean hasType = type != null && !type.isBlank();
+        boolean hasRating = ratingValue != null;
+
+        List<Review> reviews;
+
+        if (hasType && hasName && hasRating) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(
+                            type, clientName, ratingValue
+                    );
+
+        } else if (hasType && hasName) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName);
+
+        } else if (hasType && hasRating) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndRating(type, ratingValue);
+
+        } else if (hasName && hasRating) {
+            reviews = reviewRepository
+                    .findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
+
+        } else if (hasType) {
+            reviews = reviewRepository.findByTypeContainingIgnoreCase(type);
+
+        } else if (hasName) {
+            reviews = reviewRepository.findByClientNameContainingIgnoreCase(clientName);
+
+        } else if (hasRating) {
+            reviews = reviewRepository.findByRating(ratingValue);
+
+        } else {
+            reviews = reviewRepository.findAll();
         }
-        return responseMapper.entityListToResponseModelList(reviewRepository.findAll());
+
+        return responseMapper.entityListToResponseModelList(reviews);
     }
+
 
 
 
@@ -69,6 +95,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setVisible(reviewRequest.getVisible());
         review.setRating(reviewRequest.getRating());
         review.setOwnerAuth0Id(OwnerAuth0Id);
+        review.setType(reviewRequest.getType());
 
         if (photos != null) {
             List<Photo> photoList = Arrays.stream(photos)
@@ -109,22 +136,51 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue) {
-        if (clientName != null && ratingValue != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue)
-            );
-        } else if (clientName != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByVisibleTrueAndClientNameContainingIgnoreCase(clientName)
-            );
-        } else if (ratingValue != null) {
-            return responseMapper.entityListToResponseModelList(
-                    reviewRepository.findByVisibleTrueAndRating(ratingValue)
-            );
+    public List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue, String type) {
+
+        boolean hasName = clientName != null && !clientName.isBlank();
+        boolean hasType = type != null && !type.isBlank();
+        boolean hasRating = ratingValue != null;
+
+        List<Review> reviews;
+
+        if (hasType && hasName && hasRating) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(
+                            type, clientName, ratingValue
+                    );
+
+        } else if (hasType && hasName) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName);
+
+        } else if (hasType && hasRating) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(type, ratingValue);
+
+        } else if (hasName && hasRating) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
+
+        } else if (hasType) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCase(type);
+
+        } else if (hasName) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndClientNameContainingIgnoreCase(clientName);
+
+        } else if (hasRating) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndRating(ratingValue);
+
+        } else {
+            reviews = reviewRepository.findByVisibleTrue();
         }
-        return responseMapper.entityListToResponseModelList(reviewRepository.findByVisibleTrue());
+
+        return responseMapper.entityListToResponseModelList(reviews);
     }
+
 
 
     //@PreAuthorize("hasAuthority('Client')")
@@ -173,36 +229,32 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public PortfolioResponseDto sendToPortfolio(String reviewId) {
-        // 1) Load review
         Review existing = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
-        // 2) Guard against duplicates
         if (existing.isSentToPortfolio()) {
             throw new RuntimeException("Review has already been sent to portfolio");
         }
 
-        // 3) Build portfolio fields from review
         String title = "Review by " + existing.getClientName();
         String imageUrl = existing.getPhotos().isEmpty()
                 ? ""
                 : existing.getPhotos().get(0).getUrl();
+        String type = existing.getType();
 
-        // 4) Create + save portfolio item (WITH reviewId)
         PortfolioItem portfolioItem = new PortfolioItem();
         portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
         portfolioItem.setReviewId(reviewId);
         portfolioItem.setTitle(title);
         portfolioItem.setImageUrl(imageUrl);
         portfolioItem.setComments(new java.util.ArrayList<>());
+        portfolioItem.setType(type);
 
         PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
 
-        // 5) Mark review as sent
         existing.setSentToPortfolio(true);
         reviewRepository.save(existing);
 
-        // 6) Return response DTO
         return portfolioMapper.entityToResponseDto(savedItem);
     }
 

@@ -34,7 +34,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 comments
         );
@@ -69,7 +68,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
-                4.5,
                 null,
                 new ArrayList<>()
         );
@@ -99,7 +97,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
-                4.8,
                 null,
                 comments
         );
@@ -125,7 +122,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Perfect Kitchen",
                 "/uploads/portfolio/kitchenremodel.jpg",
-                5.0,
                 null,
                 List.of()
         );
@@ -145,7 +141,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Basic Renovation",
                 "/uploads/portfolio/basic.jpg",
-                3.5,
                 null,
                 List.of()
         );
@@ -172,7 +167,6 @@ class PortfolioMapperTest {
         PortfolioItem portfolioItem = new PortfolioItem(
                 "Test Title",
                 "/test/url.jpg",
-                4.7,
                 null,
                 List.of(comment)
         );

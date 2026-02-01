@@ -22,7 +22,8 @@ class ReviewRequestMapperTest {
                 "nice job",
                 true,
                 Rating.FOUR,
-                false
+                false,
+                "Interior"
         );
 
         // Map to entity

@@ -26,7 +26,6 @@ public class PortfolioMapper {
                 portfolioItem.getReviewId(),
                 portfolioItem.getTitle(),
                 portfolioItem.getImageUrl(),
-                portfolioItem.getRating(),
                 portfolioItem.getType(),
                 commentDtos
         );

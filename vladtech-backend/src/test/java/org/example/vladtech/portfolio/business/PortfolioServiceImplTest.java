@@ -50,7 +50,6 @@ class PortfolioServiceImplTest {
         portfolioItem1 = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 List.of(
                         new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800),
@@ -60,7 +59,6 @@ class PortfolioServiceImplTest {
         portfolioItem2 = new PortfolioItem(
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
-                5.0,
                 null,
                 List.of(
                         new PortfolioComment("Emma L.", "auth0|user2", now.minusSeconds(18000),
@@ -193,7 +191,6 @@ class PortfolioServiceImplTest {
         PortfolioItem portfolioItemWithComments = new PortfolioItem(
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
-                4.9,
                 null,
                 new ArrayList<>());
         portfolioItemWithComments.setPortfolioId(portfolioId);
@@ -251,7 +248,7 @@ class PortfolioServiceImplTest {
         when(portfolioMapper.entityToResponseDto(savedItem)).thenReturn(expectedResponse);
 
         // Act
-        PortfolioResponseDto result = portfolioService.createPortfolioItem(title, imageUrl, rating, null);
+        PortfolioResponseDto result = portfolioService.createPortfolioItem(title, imageUrl, null);
 
         // Assert
         assertThat(result).isNotNull();
@@ -270,7 +267,6 @@ class PortfolioServiceImplTest {
         PortfolioItem itemToDelete = new PortfolioItem(
                 "Item to Delete",
                 "/uploads/portfolio/delete-me.jpg",
-                3.0,
                 null,
                 new ArrayList<>());
         itemToDelete.setPortfolioId(portfolioId);
@@ -342,7 +338,6 @@ class PortfolioServiceImplTest {
         PortfolioItem bathroomItem = new PortfolioItem(
                 "Luxury Bathroom",
                 "/bathroom.jpg",
-                4.8,
                 bathroomType,
                 List.of()
         );
@@ -370,9 +365,9 @@ class PortfolioServiceImplTest {
     void getPortfolioItemsByType_ShouldMapAllItemsCorrectly() {
         // Arrange
         String type = "Interior";
-        PortfolioItem item1 = new PortfolioItem("Living Room", "/living.jpg", 4.5, type, List.of());
-        PortfolioItem item2 = new PortfolioItem("Bedroom", "/bedroom.jpg", 4.7, type, List.of());
-        PortfolioItem item3 = new PortfolioItem("Office", "/office.jpg", 4.6, type, List.of());
+        PortfolioItem item1 = new PortfolioItem("Living Room", "/living.jpg", type, List.of());
+        PortfolioItem item2 = new PortfolioItem("Bedroom", "/bedroom.jpg", type, List.of());
+        PortfolioItem item3 = new PortfolioItem("Office", "/office.jpg", type, List.of());
 
         PortfolioResponseDto dto1 = new PortfolioResponseDto();
         dto1.setTitle("Living Room");

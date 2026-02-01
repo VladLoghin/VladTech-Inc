@@ -10,7 +10,7 @@ import { api } from "../../api/http";
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
-    const { clientName, comment, rating, photos } = review;
+    const { clientName, comment, rating, photos, type } = review;
     const reviewId = review.id ?? review.reviewId;
     const initialVisible = review.visible ?? false;
     const roles = user?.["https://vladtech.com/roles"] || [];
@@ -229,6 +229,22 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             <p className="client-name" data-testid="review-client">
                 {clientName}
             </p>
+
+            {type && (
+                <p style={{
+                    fontSize: "12px",
+                    color: "#666",
+                    fontWeight: 500,
+                    marginBottom: "8px",
+                    display: "inline-block",
+                    backgroundColor: "#f3f4f6",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    marginRight: "8px"
+                }}>
+                    {type}
+                </p>
+            )}
 
             <div className="stars" data-testid="review-stars">
                 {stars.map((star, index) =>

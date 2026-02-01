@@ -34,5 +34,8 @@ public class ReviewRequestModel {
 
     @NotNull
     private boolean sentToPortfolio;
+
+    @NotNull
+    private String type;
 }
 

@@ -28,4 +28,7 @@ public class ReviewResponseModel {
     @NotNull
     private Rating rating;
     private List<Photo> photos;
+
+    @NotNull
+    private String type;
 }
