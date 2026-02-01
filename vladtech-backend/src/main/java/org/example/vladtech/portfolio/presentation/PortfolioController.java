@@ -1,6 +1,5 @@
 package org.example.vladtech.portfolio.presentation;
 
-import com.mongodb.lang.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,14 +75,14 @@ public class PortfolioController {
     public ResponseEntity<List<PortfolioResponseDto>> getAllPortfolioItems(
             @RequestParam(required = false) String type) {
         log.info("GET request to /api/portfolio - Fetching portfolio items" + (type != null ? " with type: " + type : ""));
-
+        
         List<PortfolioResponseDto> portfolioItems;
         if (type != null && !type.trim().isEmpty()) {
             portfolioItems = portfolioService.getPortfolioItemsByType(type);
         } else {
             portfolioItems = portfolioService.getAllPortfolioItems();
         }
-
+        
         return ResponseEntity.ok(portfolioItems);
     }
 
