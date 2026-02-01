@@ -323,46 +323,6 @@ export default function PortfolioGallery() {
           </div>
         )}
       </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="py-8 flex items-center justify-center gap-4 border-t border-yellow-400/20">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-yellow-400" />
-          </button>
-
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => {
-                  setCurrentPage(page);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`w-10 h-10 rounded-lg transition-colors ${
-                  currentPage === page
-                    ? 'bg-yellow-400 text-black font-bold'
-                    : 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="h-6 w-6 text-yellow-400" />
-          </button>
-        </div>
-      )}
     </div>
 
       {/* Instagram-like Comment Modal */}
