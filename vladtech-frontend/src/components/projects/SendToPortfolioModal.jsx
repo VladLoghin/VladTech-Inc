@@ -72,22 +72,22 @@ const SendToPortfolioModal = ({ project, isOpen, onClose, onSuccess, getToken })
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-lg rounded-xl border-2 border-black shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b border-black/10">
+      <div className="bg-white w-full max-w-md rounded-xl border-2 border-black shadow-xl max-h-[70vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-black/10 flex-shrink-0">
           <h3 className="text-lg font-bold">
             {t("project.sendToPortfolio", { defaultValue: "Send to Portfolio" })}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-xl font-bold leading-none px-2 hover:text-black/70"
+            className="text-3xl font-bold leading-none px-2 hover:text-red-600 transition-colors"
             aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
           {/* Project Name */}
           <div>
             <p className="text-sm text-black/60 mb-1">
@@ -148,7 +148,7 @@ const SendToPortfolioModal = ({ project, isOpen, onClose, onSuccess, getToken })
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full max-h-64 object-cover rounded-lg border-2 border-black/10"
+                className="w-full max-h-48 object-contain rounded-lg border-2 border-black/10"
               />
             </div>
           )}

@@ -323,7 +323,6 @@ export default function PortfolioGallery() {
           </div>
         )}
       </div>
-    </div>
 
       {/* Instagram-like Comment Modal */}
       <AnimatePresence>
