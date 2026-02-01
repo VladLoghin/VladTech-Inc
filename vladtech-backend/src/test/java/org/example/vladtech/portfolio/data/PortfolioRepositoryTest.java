@@ -30,7 +30,7 @@ class PortfolioRepositoryTest {
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 4.9,
-                null,
+                "Kitchen",
                 List.of(new PortfolioComment("Sarah M.", "auth0|user1", now.minusSeconds(10800), "Beautiful!"))
         );
 
@@ -53,7 +53,7 @@ class PortfolioRepositoryTest {
                 "Luxury Bathroom",
                 "/uploads/portfolio/newbathroom.jpg",
                 4.8,
-                null,
+                "Bathroom",
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -84,14 +84,14 @@ class PortfolioRepositoryTest {
                 "Kitchen Remodel",
                 "/uploads/portfolio/kitchen.jpg",
                 5.0,
-                null,
+                "Kitchen",
                 List.of()
         );
         PortfolioItem item2 = new PortfolioItem(
                 "Bathroom Renovation",
                 "/uploads/portfolio/bathroom.jpg",
                 4.7,
-                null,
+                "Bathroom",
                 List.of()
         );
         portfolioRepository.saveAll(List.of(item1, item2));
@@ -121,7 +121,7 @@ class PortfolioRepositoryTest {
                 "Office Space",
                 "/uploads/portfolio/office.jpg",
                 4.5,
-                null,
+                "Interior",
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -137,8 +137,8 @@ class PortfolioRepositoryTest {
     @Test
     void deleteAll_ShouldRemoveAllItems() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, "Interior", List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, "Interior", List.of());
         portfolioRepository.saveAll(List.of(item1, item2));
 
         // Act
@@ -161,7 +161,7 @@ class PortfolioRepositoryTest {
                 "Premium Kitchen",
                 "/uploads/portfolio/premium.jpg",
                 5.0,
-                null,
+                "Kitchen",
                 comments
         );
 
@@ -183,7 +183,7 @@ class PortfolioRepositoryTest {
                 "Original Title",
                 "/original.jpg",
                 4.0,
-                null,
+                "Interior",
                 List.of()
         );
         PortfolioItem saved = portfolioRepository.save(portfolioItem);
@@ -203,9 +203,9 @@ class PortfolioRepositoryTest {
     @Test
     void count_ShouldReturnCorrectNumber() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, null, List.of());
-        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, null, List.of());
-        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", 4.6, null, List.of());
+        PortfolioItem item1 = new PortfolioItem("Item 1", "/url1.jpg", 4.5, "Interior", List.of());
+        PortfolioItem item2 = new PortfolioItem("Item 2", "/url2.jpg", 4.8, "Interior", List.of());
+        PortfolioItem item3 = new PortfolioItem("Item 3", "/url3.jpg", 4.6, "Interior", List.of());
         portfolioRepository.saveAll(List.of(item1, item2, item3));
 
         // Act

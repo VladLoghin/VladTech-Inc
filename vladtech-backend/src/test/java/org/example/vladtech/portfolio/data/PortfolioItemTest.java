@@ -31,7 +31,7 @@ class PortfolioItemTest {
         comments.add(new PortfolioComment("John", "auth0|123", java.time.Instant.now(), "Great!"));
 
         // Act
-        PortfolioItem item = new PortfolioItem("Project A", "/images/project-a.jpg", 4.5, null, comments);
+        PortfolioItem item = new PortfolioItem("Project A", "/images/project-a.jpg", 4.5, "Interior", comments);
 
         // Assert
         assertEquals("Project A", item.getTitle());
@@ -44,7 +44,7 @@ class PortfolioItemTest {
     @Test
     void testFourParameterConstructorWithNullComments() {
         // Act
-        PortfolioItem item = new PortfolioItem("Project A", "/images/project-a.jpg", 4.5, null, null);
+        PortfolioItem item = new PortfolioItem("Project A", "/images/project-a.jpg", 4.5, "Interior", null);
 
         // Assert
         assertNotNull(item.getComments());
@@ -58,7 +58,7 @@ class PortfolioItemTest {
         comments.add(new PortfolioComment("Jane", "auth0|456", java.time.Instant.now(), "Amazing!"));
 
         // Act
-        PortfolioItem item = new PortfolioItem("id123", "Project B", "/images/project-b.jpg", 4.8, "type", comments);
+        PortfolioItem item = new PortfolioItem("id123", "Project B", "/images/project-b.jpg", 4.8, "Interior", comments);
 
         // Assert
         assertEquals("id123", item.getPortfolioId());
@@ -94,13 +94,13 @@ class PortfolioItemTest {
     @Test
     void testEqualsAndHashCode() {
         // Arrange
-        PortfolioItem item1 = new PortfolioItem("Project A", "/images/a.jpg", 4.5, null, new ArrayList<>());
+        PortfolioItem item1 = new PortfolioItem("Project A", "/images/a.jpg", 4.5, "Interior", new ArrayList<>());
         item1.setPortfolioId("p1");
 
-        PortfolioItem item2 = new PortfolioItem("Project A", "/images/a.jpg", 4.5, null, new ArrayList<>());
+        PortfolioItem item2 = new PortfolioItem("Project A", "/images/a.jpg", 4.5, "Interior", new ArrayList<>());
         item2.setPortfolioId("p1");
 
-        PortfolioItem item3 = new PortfolioItem("Project B", "/images/b.jpg", 3.8, null, new ArrayList<>());
+        PortfolioItem item3 = new PortfolioItem("Project B", "/images/b.jpg", 3.8, "Interior", new ArrayList<>());
         item3.setPortfolioId("p2");
 
         // Assert
@@ -112,7 +112,7 @@ class PortfolioItemTest {
     @Test
     void testToString() {
         // Arrange
-        PortfolioItem item = new PortfolioItem("Project A", "/images/a.jpg", 4.5, null, new ArrayList<>());
+        PortfolioItem item = new PortfolioItem("Project A", "/images/a.jpg", 4.5, "Interior", new ArrayList<>());
         item.setPortfolioId("p1");
 
         // Act
@@ -143,15 +143,15 @@ class PortfolioItemTest {
     @Test
     void testRatingBoundaries() {
         // Test minimum rating
-        PortfolioItem item1 = new PortfolioItem("Project", "/image.jpg", 0.0, null, null);
+        PortfolioItem item1 = new PortfolioItem("Project", "/image.jpg", 0.0, "Interior", null);
         assertEquals(0.0, item1.getRating());
 
         // Test maximum rating
-        PortfolioItem item2 = new PortfolioItem("Project", "/image.jpg", 5.0, null, null);
+        PortfolioItem item2 = new PortfolioItem("Project", "/image.jpg", 5.0, "Interior", null);
         assertEquals(5.0, item2.getRating());
 
         // Test decimal rating
-        PortfolioItem item3 = new PortfolioItem("Project", "/image.jpg", 4.75, null, null);
+        PortfolioItem item3 = new PortfolioItem("Project", "/image.jpg", 4.75, "Interior", null);
         assertEquals(4.75, item3.getRating());
     }
 
@@ -161,7 +161,7 @@ class PortfolioItemTest {
         List<PortfolioComment> emptyComments = new ArrayList<>();
 
         // Act
-        PortfolioItem item = new PortfolioItem("Project", "/image.jpg", 4.0, null, emptyComments);
+        PortfolioItem item = new PortfolioItem("Project", "/image.jpg", 4.0, "Interior", emptyComments);
 
         // Assert
         assertNotNull(item.getComments());
