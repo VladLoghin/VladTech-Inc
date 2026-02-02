@@ -18,7 +18,6 @@ import org.example.vladtech.estimates.data.windowanddoor.DoorType;
 import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
 import org.example.vladtech.estimates.data.patio.DeckMaterial;
 import org.example.vladtech.estimates.data.floor.FloorReplace;
-import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.mapperlayer.RenovationEstimateResponseMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
