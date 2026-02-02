@@ -56,7 +56,7 @@ class EstimationServiceImplTest {
 
         // Door factors
         setField("woodDoorFactor", BigDecimal.ONE);
-        setField("fiberglasDoorFactor", new BigDecimal("1.15"));
+        setField("fiberglassDoorFactor", new BigDecimal("1.15"));
         setField("steelDoorFactor", new BigDecimal("1.05"));
         setField("glassPanelDoorFactor", new BigDecimal("1.30"));
 
