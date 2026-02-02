@@ -351,11 +351,30 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
 
     const [selectedPreset, setSelectedPreset] = useState(null);
     const [formData, setFormData] = useState({});
+    const [errors, setErrors] = useState({});
     const [result, setResult] = useState(null);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [toast, setToast] = useState(null);
 
     // Helper to auto-fill materialCostPerSqFt when missing based on preset type
+    const validateField = (field, value) => {
+        if (field.required) {
+            if (field.type === "checkbox") {
+                return "";
+            }
+            if (value === "" || value === null || value === undefined) {
+                return `${field.label} is required`;
+            }
+        }
+        if (field.type === "number" && field.min !== undefined) {
+            const numValue = Number(value);
+            if (!isNaN(numValue) && numValue < field.min) {
+                return `${field.label} must be at least ${field.min}`;
+            }
+        }
+        return "";
+    };
+
     const withAutoPrice = (preset, data) => {
         if (!preset) return data;
         const hasPrice = data.materialCostPerSqFt !== undefined && data.materialCostPerSqFt !== "";
@@ -415,6 +434,25 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     }, [toast]);
 
 
+    // Validate all fields on mount or when preset/formData changes
+    useEffect(() => {
+        if (!selectedPreset) return;
+
+        const nextErrors = {};
+        selectedPreset.fields.forEach((field) => {
+            if (field.name === "numSkylights" && !formData.hasSkylights) return;
+            if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return;
+
+            const error = validateField(field, formData[field.name]);
+            if (error) {
+                nextErrors[field.name] = error;
+            }
+        });
+
+        setErrors(nextErrors);
+    }, [selectedPreset]);
+
+    // Still update the price if user changes material
     useEffect(() => {
         if (!selectedPreset) return;
 
@@ -538,6 +576,23 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             }
             return updated;
         });
+
+        // Validate immediately on change
+        if (selectedPreset) {
+            const field = selectedPreset.fields.find((f) => f.name === name);
+            if (field) {
+                const error = validateField(field, nextValue);
+                setErrors((prev) => {
+                    const next = { ...prev };
+                    if (error) {
+                        next[name] = error;
+                    } else {
+                        delete next[name];
+                    }
+                    return next;
+                });
+            }
+        }
     };
 
     const handleSubmit = async (event) => {
@@ -633,56 +688,60 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                     <div key={field.name}>
                                         <label htmlFor={field.name}>{field.label}:</label>
 
-                                        {field.type === "select" ? (
-                                            <select
-                                                id={field.name}
-                                                name={field.name}
-                                                value={formData[field.name] ?? ""}
-                                                onChange={handleChange}
-                                                required={field.required}
-                                            >
-                                                <option value="" disabled>
-                                                    {t.selectPreset}
+                                    {field.type === "select" ? (
+                                        <select
+                                            id={field.name}
+                                            name={field.name}
+                                            value={formData[field.name] ?? ""}
+                                            onChange={handleChange}
+                                            required={field.required}
+                                        >
+                                            <option value="" disabled>
+                                                {t.selectPreset}
+                                            </option>
+                                            {field.options.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>
+                                                    {opt.label}
                                                 </option>
-                                                {field.options.map((opt) => (
-                                                    <option key={opt.value} value={opt.value}>
-                                                        {opt.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        ) : field.type === "checkbox" ? (
-                                            <input
-                                                id={field.name}
-                                                type="checkbox"
-                                                name={field.name}
-                                                checked={!!formData[field.name]}
-                                                onChange={handleChange}
-                                            />
-                                        ) : (
-                                            <input
-                                                id={field.name}
-                                                type={field.type}
-                                                name={field.name}
-                                                value={formData[field.name] ?? ""}
-                                                onChange={handleChange}
-                                                required={field.required}
-                                                min={field.min !== undefined ? String(field.min) : undefined}
-                                                step={field.step}
-                                                onInvalid={(e) => {
-                                                    if (e.target.validity.valueMissing) {
-                                                        e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
-                                                    } else if (e.target.validity.rangeUnderflow) {
-                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
-                                                    } else if (e.target.validity.typeMismatch) {
-                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
-                                                    }
-                                                }}
-                                                onInput={(e) => e.target.setCustomValidity("")}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })}
+                                            ))}
+                                        </select>
+                                    ) : field.type === "checkbox" ? (
+                                        <input
+                                            id={field.name}
+                                            type="checkbox"
+                                            name={field.name}
+                                            checked={!!formData[field.name]}
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <input
+                                            id={field.name}
+                                            type={field.type}
+                                            name={field.name}
+                                            value={formData[field.name] ?? ""}
+                                            onChange={handleChange}
+                                            required={field.required}
+                                            min={field.min !== undefined ? String(field.min) : undefined}
+                                            step={field.step}
+                                            onInvalid={(e) => {
+                                                if (e.target.validity.valueMissing) {
+                                                    e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                } else if (e.target.validity.rangeUnderflow) {
+                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                } else if (e.target.validity.typeMismatch) {
+                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                }
+                                            }}
+                                            onInput={(e) => e.target.setCustomValidity("")}
+                                        />
+                                    )}
+                                    {errors[field.name] && (
+                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                            {errors[field.name]}
+                                        </span>
+                                    )}
+                                </div>
+                            );})}
 
                             <div className="modal-actions">
                                 <button type="submit">{t.submit}</button>
