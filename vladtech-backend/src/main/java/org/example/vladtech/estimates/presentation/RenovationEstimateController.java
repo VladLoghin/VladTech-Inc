@@ -12,6 +12,12 @@ import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
 import org.example.vladtech.estimates.data.siding.SidingMaterial;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
+import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
+import org.example.vladtech.estimates.data.patio.DeckMaterial;
+import org.example.vladtech.estimates.data.floor.FloorReplace;
 import org.example.vladtech.estimates.mapperlayer.RenovationEstimateResponseMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +42,7 @@ public class RenovationEstimateController {
             @RequestParam String projectType,
             @RequestParam(required = false) BigDecimal squareFeet,
             @RequestParam(required = false) BigDecimal areaSqFt,
-            @RequestParam BigDecimal materialCostPerSqFt,
+            @RequestParam(required = false) BigDecimal materialCostPerSqFt,
             @RequestParam(required = false, defaultValue = "1.00") BigDecimal locationFactor,
             @RequestParam(required = false) BigDecimal taxRate,
             // Siding-specific
@@ -53,17 +59,37 @@ public class RenovationEstimateController {
             @RequestParam(required = false) String flooringMaterial,
             @RequestParam(required = false) String cabinetQuality,
             @RequestParam(required = false) String countertopMaterial,
+            // Window and Door-specific
+            @RequestParam(required = false) WindowType windowType,
+            @RequestParam(required = false) DoorType doorType,
+            @RequestParam(required = false) Integer windowCount,
+            @RequestParam(required = false) Integer doorCount,
+            // Deck/Patio-specific
+            @RequestParam(required = false) DeckMaterial deckMaterial,
+            @RequestParam(required = false) Boolean hasRailing,
+            @RequestParam(required = false) Integer stairsCount,
+            @RequestParam(required = false) Boolean isCovered,
+            @RequestParam(required = false) Double deckAreaSqFt,
+            // Floor-specific
+            @RequestParam(required = false) FlooringMaterial existingFloorMaterial,
+            @RequestParam(required = false) FlooringMaterial newFloorMaterial,
+            @RequestParam(required = false) Boolean subfloorRepairNeeded,
             @RequestParam(required = false) String lang
     ) {
+        boolean isWindowDoor = "WINDOW_DOOR_REPLACE".equalsIgnoreCase(projectType);
+        boolean isDeckPatio = "DECK_PATIO_ADDITION".equalsIgnoreCase(projectType);
+        boolean isFloorReplace = "FLOOR_REPLACE".equalsIgnoreCase(projectType);
         BigDecimal sqft = squareFeet != null ? squareFeet : areaSqFt;
-        if (sqft == null || sqft.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Square feet must be positive");
-        }
-        if (materialCostPerSqFt == null || materialCostPerSqFt.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Material cost per sq ft must be non-negative");
-        }
-        if (locationFactor != null && locationFactor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Location factor must be positive");
+        if (!isWindowDoor && !isDeckPatio) {
+            if (sqft == null || sqft.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Square feet must be positive");
+            }
+            if (materialCostPerSqFt == null || materialCostPerSqFt.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Material cost per sq ft must be non-negative");
+            }
+            if (locationFactor != null && locationFactor.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Location factor must be positive");
+            }
         }
 
         log.info("Received estimate calculation: type={}, sqFt={}, lang={}", projectType, sqft, lang);
@@ -102,6 +128,34 @@ public class RenovationEstimateController {
             kitchen.setCabinetQuality(cabinetQuality != null ? CabinetQuality.valueOf(cabinetQuality) : null);
             kitchen.setCountertopMaterial(countertopMaterial != null ? CountertopMaterial.valueOf(countertopMaterial) : null);
             project = kitchen;
+        } else if ("WINDOW_DOOR_REPLACE".equalsIgnoreCase(projectType)) {
+            WindowDoorReplace windowDoor = new WindowDoorReplace();
+            windowDoor.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            windowDoor.setWindowType(windowType);
+            windowDoor.setDoorType(doorType);
+            windowDoor.setWindowCount(windowCount != null ? windowCount : 0);
+            windowDoor.setDoorCount(doorCount != null ? doorCount : 0);
+            project = windowDoor;
+        } else if ("DECK_PATIO_ADDITION".equalsIgnoreCase(projectType)) {
+            DeckPatioAddition deckPatio = new DeckPatioAddition();
+            deckPatio.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            deckPatio.setLocationFactor(locationFactor != null ? locationFactor : BigDecimal.ONE);
+            deckPatio.setDeckMaterial(deckMaterial);
+            deckPatio.setHasRailing(hasRailing != null ? hasRailing : false);
+            deckPatio.setStairsCount(stairsCount != null ? stairsCount : 0);
+            deckPatio.setIsCovered(isCovered != null ? isCovered : false);
+            deckPatio.setAreaSqFt(deckAreaSqFt != null ? deckAreaSqFt : 0.0);
+            project = deckPatio;
+        } else if ("FLOOR_REPLACE".equalsIgnoreCase(projectType)) {
+            FloorReplace floorReplace = new FloorReplace();
+            floorReplace.setSquareFeet(sqft);
+            floorReplace.setMaterialCostPerSqFt(materialCostPerSqFt);
+            floorReplace.setLocationFactor(locationFactor);
+            floorReplace.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            floorReplace.setExistingFloorMaterial(existingFloorMaterial);
+            floorReplace.setNewFloorMaterial(newFloorMaterial);
+            floorReplace.setSubfloorRepairNeeded(subfloorRepairNeeded != null ? subfloorRepairNeeded : false);
+            project = floorReplace;
         } else {
             RenovationProject base = new RenovationProject();
             base.setSquareFeet(sqft);

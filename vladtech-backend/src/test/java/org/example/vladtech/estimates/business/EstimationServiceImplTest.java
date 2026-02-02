@@ -6,6 +6,13 @@ import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.roof.RoofingReplace;
 import org.example.vladtech.estimates.data.siding.SidingMaterial;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
+import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
+import org.example.vladtech.estimates.data.patio.DeckMaterial;
+import org.example.vladtech.estimates.data.floor.FloorReplace;
+import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.exceptions.EstimationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +46,34 @@ class EstimationServiceImplTest {
         setField("clayFactor", new BigDecimal("1.50"));
         setField("slateFactor", new BigDecimal("1.80"));
         setField("syntheticFactor", new BigDecimal("1.30"));
+
+        // Window factors
+        setField("casementFactor", BigDecimal.ONE);
+        setField("sliderFactor", new BigDecimal("0.95"));
+        setField("doubleHungFactor", new BigDecimal("1.05"));
+        setField("awningFactor", new BigDecimal("1.10"));
+        setField("fixedFactor", new BigDecimal("0.85"));
+
+        // Door factors
+        setField("woodDoorFactor", BigDecimal.ONE);
+        setField("fiberglassDoorFactor", new BigDecimal("1.15"));
+        setField("steelDoorFactor", new BigDecimal("1.05"));
+        setField("glassPanelDoorFactor", new BigDecimal("1.30"));
+
+        // Deck factors
+        setField("woodDeckFactor", BigDecimal.ONE);
+        setField("compositeDeckFactor", new BigDecimal("1.25"));
+        setField("pvcDeckFactor", new BigDecimal("1.40"));
+        setField("aluminumDeckFactor", new BigDecimal("1.50"));
+
+        // Flooring factors
+        setField("hardwoodFloorFactor", BigDecimal.ONE);
+        setField("engineeredHardwoodFloorFactor", new BigDecimal("0.85"));
+        setField("laminateFloorFactor", new BigDecimal("0.60"));
+        setField("vinylFloorFactor", new BigDecimal("0.50"));
+        setField("tileFloorFactor", new BigDecimal("0.90"));
+        setField("carpetFloorFactor", new BigDecimal("0.70"));
+        setField("polishedConcreteFloorFactor", new BigDecimal("0.95"));
     }
 
     @Test
@@ -361,6 +396,317 @@ class EstimationServiceImplTest {
         assertEquals(new BigDecimal("8662.50"), roof.getEstimatePrice());
         assertEquals(new BigDecimal("1299.38"), roof.getTaxAmount());
         assertEquals(new BigDecimal("9961.88"), roof.getTotalPrice());
+    }
+
+    // ==================== WindowDoorReplace Tests ====================
+
+    @Test
+    void windowDoorReplaceCalculatesWithBothWindowsAndDoors() {
+        WindowDoorReplace windowDoor = new WindowDoorReplace();
+        windowDoor.setWindowType(WindowType.CASEMENT); // factor 1.0, base $800
+        windowDoor.setDoorType(DoorType.WOOD); // factor 1.0, base $1200
+        windowDoor.setWindowCount(3);
+        windowDoor.setDoorCount(2);
+        windowDoor.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(windowDoor);
+
+        // Material: (3 * 800 * 1.0) + (2 * 1200 * 1.0) = 2400 + 2400 = 4800
+        // Labor: (3 * 50 * 3) + (2 * 50 * 3) = 450 + 300 = 750
+        // Base: 4800 + 750 = 5550
+        // Overhead: 5550 * 0.15 = 832.50
+        // Contingency: 5550 * 0.10 = 555
+        // Estimate: 5550 + 832.50 + 555 = 6937.50
+        // Tax: 6937.50 * 0.15 = 1040.63
+        // Total: 6937.50 + 1040.63 = 7978.13
+        assertEquals(new BigDecimal("6937.50"), windowDoor.getEstimatePrice());
+        assertEquals(new BigDecimal("1040.63"), windowDoor.getTaxAmount());
+        assertEquals(new BigDecimal("7978.13"), windowDoor.getTotalPrice());
+    }
+
+    @Test
+    void windowDoorReplaceWithOnlyWindows() {
+        WindowDoorReplace windowDoor = new WindowDoorReplace();
+        windowDoor.setWindowType(WindowType.DOUBLE_HUNG); // factor 1.05
+        windowDoor.setDoorType(null);
+        windowDoor.setWindowCount(5);
+        windowDoor.setDoorCount(0);
+        windowDoor.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(windowDoor);
+
+        // Material: 5 * 800 * 1.05 = 4200
+        // Labor: 5 * 50 * 3 = 750
+        // Base: 4950
+        // Overhead: 742.50, Contingency: 495
+        // Estimate: 6187.50
+        assertEquals(new BigDecimal("6187.50"), windowDoor.getEstimatePrice());
+        assertEquals(new BigDecimal("928.13"), windowDoor.getTaxAmount());
+        assertEquals(new BigDecimal("7115.63"), windowDoor.getTotalPrice());
+    }
+
+    @Test
+    void windowDoorReplaceWithOnlyDoors() {
+        WindowDoorReplace windowDoor = new WindowDoorReplace();
+        windowDoor.setWindowType(null);
+        windowDoor.setDoorType(DoorType.FIBERGLASS); // factor 1.15
+        windowDoor.setWindowCount(0);
+        windowDoor.setDoorCount(3);
+        windowDoor.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(windowDoor);
+
+        // Material: 3 * 1200 * 1.15 = 4140
+        // Labor: 3 * 50 * 3 = 450
+        // Base: 4590
+        // Overhead: 688.50, Contingency: 459
+        // Estimate: 5737.50
+        assertEquals(new BigDecimal("5737.50"), windowDoor.getEstimatePrice());
+        assertEquals(new BigDecimal("860.63"), windowDoor.getTaxAmount());
+        assertEquals(new BigDecimal("6598.13"), windowDoor.getTotalPrice());
+    }
+
+    @Test
+    void windowDoorReplaceAppliesSliderWindowFactor() {
+        WindowDoorReplace windowDoor = new WindowDoorReplace();
+        windowDoor.setWindowType(WindowType.SLIDER); // factor 0.95
+        windowDoor.setDoorType(null);
+        windowDoor.setWindowCount(4);
+        windowDoor.setDoorCount(0);
+        windowDoor.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(windowDoor);
+
+        // Material: 4 * 800 * 0.95 = 3040
+        // Labor: 4 * 50 * 3 = 600
+        // Base: 3640
+        assertEquals(new BigDecimal("4550.00"), windowDoor.getEstimatePrice());
+        assertEquals(new BigDecimal("682.50"), windowDoor.getTaxAmount());
+        assertEquals(new BigDecimal("5232.50"), windowDoor.getTotalPrice());
+    }
+
+    @Test
+    void windowDoorReplaceAppliesGlassPanelDoorFactor() {
+        WindowDoorReplace windowDoor = new WindowDoorReplace();
+        windowDoor.setWindowType(null);
+        windowDoor.setDoorType(DoorType.GLASS_PANEL); // factor 1.30
+        windowDoor.setWindowCount(0);
+        windowDoor.setDoorCount(2);
+        windowDoor.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(windowDoor);
+
+        // Material: 2 * 1200 * 1.30 = 3120
+        // Labor: 2 * 50 * 3 = 300
+        // Base: 3420
+        assertEquals(new BigDecimal("4275.00"), windowDoor.getEstimatePrice());
+        assertEquals(new BigDecimal("641.25"), windowDoor.getTaxAmount());
+        assertEquals(new BigDecimal("4916.25"), windowDoor.getTotalPrice());
+    }
+
+    // ==================== DeckPatioAddition Tests ====================
+
+    @Test
+    void deckPatioAdditionBasicCalculation() {
+        DeckPatioAddition deckPatio = new DeckPatioAddition();
+        deckPatio.setDeckMaterial(DeckMaterial.WOOD); // factor 1.0
+        deckPatio.setAreaSqFt(200.0);
+        deckPatio.setHasRailing(false);
+        deckPatio.setStairsCount(0);
+        deckPatio.setIsCovered(false);
+        deckPatio.setLocationFactor(BigDecimal.ONE);
+        deckPatio.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(deckPatio);
+
+        // Material: 200 * 25 * 1.0 = 5000
+        // Labor: 200 * 50 = 10000
+        // Base: 15000
+        // Overhead: 2250, Contingency: 1500
+        // Estimate: 18750
+        assertEquals(new BigDecimal("18750.00"), deckPatio.getEstimatePrice());
+        assertEquals(new BigDecimal("2812.50"), deckPatio.getTaxAmount());
+        assertEquals(new BigDecimal("21562.50"), deckPatio.getTotalPrice());
+    }
+
+    @Test
+    void deckPatioAdditionWithAllFeatures() {
+        DeckPatioAddition deckPatio = new DeckPatioAddition();
+        deckPatio.setDeckMaterial(DeckMaterial.COMPOSITE); // factor 1.25
+        deckPatio.setAreaSqFt(300.0);
+        deckPatio.setHasRailing(true);
+        deckPatio.setStairsCount(2); // 2 * $500 = $1000
+        deckPatio.setIsCovered(true); // 300 * $15 = $4500
+        deckPatio.setLocationFactor(new BigDecimal("1.10"));
+        deckPatio.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(deckPatio);
+
+        assertEquals(new BigDecimal("44888.53"), deckPatio.getEstimatePrice());
+        assertEquals(new BigDecimal("6733.28"), deckPatio.getTaxAmount());
+        assertEquals(new BigDecimal("51621.80"), deckPatio.getTotalPrice());
+    }
+
+    @Test
+    void deckPatioAdditionAppliesPvcFactor() {
+        DeckPatioAddition deckPatio = new DeckPatioAddition();
+        deckPatio.setDeckMaterial(DeckMaterial.PVC); // factor 1.40
+        deckPatio.setAreaSqFt(150.0);
+        deckPatio.setHasRailing(false);
+        deckPatio.setStairsCount(0);
+        deckPatio.setIsCovered(false);
+        deckPatio.setLocationFactor(BigDecimal.ONE);
+        deckPatio.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(deckPatio);
+
+        // Material: 150 * 25 * 1.40 = 5250
+        // Labor: 150 * 50 = 7500
+        // Base: 12750
+        assertEquals(new BigDecimal("15937.50"), deckPatio.getEstimatePrice());
+        assertEquals(new BigDecimal("2390.63"), deckPatio.getTaxAmount());
+        assertEquals(new BigDecimal("18328.13"), deckPatio.getTotalPrice());
+    }
+
+    @Test
+    void deckPatioAdditionAppliesAluminumFactor() {
+        DeckPatioAddition deckPatio = new DeckPatioAddition();
+        deckPatio.setDeckMaterial(DeckMaterial.ALUMINUM); // factor 1.50
+        deckPatio.setAreaSqFt(100.0);
+        deckPatio.setHasRailing(false);
+        deckPatio.setStairsCount(1); // $500
+        deckPatio.setIsCovered(false);
+        deckPatio.setLocationFactor(BigDecimal.ONE);
+        deckPatio.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(deckPatio);
+
+        // Material: 100 * 25 * 1.50 = 3750
+        // Labor: 100 * 50 = 5000
+        // Stairs: 500
+        // Base: 9250
+        assertEquals(new BigDecimal("11562.50"), deckPatio.getEstimatePrice());
+        assertEquals(new BigDecimal("1734.38"), deckPatio.getTaxAmount());
+        assertEquals(new BigDecimal("13296.88"), deckPatio.getTotalPrice());
+    }
+
+    // ==================== FloorReplace Tests ====================
+
+    @Test
+    void floorReplaceBasicCalculation() {
+        FloorReplace floorReplace = new FloorReplace();
+        floorReplace.setSquareFeet(new BigDecimal("500"));
+        floorReplace.setMaterialCostPerSqFt(new BigDecimal("8")); // HARDWOOD base price
+        floorReplace.setExistingFloorMaterial(FlooringMaterial.CARPET); // removal factor 0.60
+        floorReplace.setNewFloorMaterial(FlooringMaterial.HARDWOOD); // factor 1.0
+        floorReplace.setSubfloorRepairNeeded(false);
+        floorReplace.setLocationFactor(BigDecimal.ONE);
+        floorReplace.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(floorReplace);
+
+        // Material: 500 * 8 * 1.0 = 4000
+        // Labor: 500 * 50 = 25000
+        // Removal: 500 * 2 * 0.60 = 600
+        // Base: 29600
+        // Overhead: 4440, Contingency: 2960
+        // Estimate: 37000
+        assertEquals(new BigDecimal("37000.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("5550.00"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("42550.00"), floorReplace.getTotalPrice());
+    }
+
+    @Test
+    void floorReplaceWithSubfloorRepair() {
+        FloorReplace floorReplace = new FloorReplace();
+        floorReplace.setSquareFeet(new BigDecimal("200"));
+        floorReplace.setMaterialCostPerSqFt(new BigDecimal("6")); // ENGINEERED_HARDWOOD
+        floorReplace.setExistingFloorMaterial(FlooringMaterial.VINYL); // removal factor 0.70
+        floorReplace.setNewFloorMaterial(FlooringMaterial.ENGINEERED_HARDWOOD); // factor 0.85
+        floorReplace.setSubfloorRepairNeeded(true); // 200 * 3.50 = 700
+        floorReplace.setLocationFactor(BigDecimal.ONE);
+        floorReplace.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(floorReplace);
+
+        // Material: 200 * 6 * 0.85 = 1020
+        // Labor: 200 * 50 = 10000
+        // Subfloor: 200 * 3.50 = 700
+        // Removal: 200 * 2 * 0.70 = 280
+        // Base: 12000
+        assertEquals(new BigDecimal("15000.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("2250.00"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("17250.00"), floorReplace.getTotalPrice());
+    }
+
+    @Test
+    void floorReplaceAppliesLaminateFactor() {
+        FloorReplace floorReplace = new FloorReplace();
+        floorReplace.setSquareFeet(new BigDecimal("300"));
+        floorReplace.setMaterialCostPerSqFt(new BigDecimal("3")); // LAMINATE
+        floorReplace.setExistingFloorMaterial(FlooringMaterial.LAMINATE); // removal factor 0.80
+        floorReplace.setNewFloorMaterial(FlooringMaterial.LAMINATE); // factor 0.60
+        floorReplace.setSubfloorRepairNeeded(false);
+        floorReplace.setLocationFactor(BigDecimal.ONE);
+        floorReplace.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(floorReplace);
+
+        // Material: 300 * 3 * 0.60 = 540
+        // Labor: 300 * 50 = 15000
+        // Removal: 300 * 2 * 0.80 = 480
+        // Base: 16020
+        assertEquals(new BigDecimal("20025.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("3003.75"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("23028.75"), floorReplace.getTotalPrice());
+    }
+
+    @Test
+    void floorReplaceRemovingTile() {
+        FloorReplace floorReplace = new FloorReplace();
+        floorReplace.setSquareFeet(new BigDecimal("150"));
+        floorReplace.setMaterialCostPerSqFt(new BigDecimal("5")); // TILE
+        floorReplace.setExistingFloorMaterial(FlooringMaterial.TILE); // removal factor 1.50 (difficult)
+        floorReplace.setNewFloorMaterial(FlooringMaterial.TILE); // factor 0.90
+        floorReplace.setSubfloorRepairNeeded(true);
+        floorReplace.setLocationFactor(new BigDecimal("1.05"));
+        floorReplace.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(floorReplace);
+
+        // Material: 150 * 5 * 0.90 = 675
+        // Labor: 150 * 50 = 7500
+        // Subfloor: 150 * 3.50 = 525
+        // Removal: 150 * 2 * 1.50 = 450
+        // Base before location: 9150
+        // Location: 9150 * 1.05 = 9607.50
+        // Overhead: 1441.13, Contingency: 960.75
+        // Estimate: 12009.38
+        assertEquals(new BigDecimal("12009.38"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("1801.41"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("13810.78"), floorReplace.getTotalPrice());
+    }
+
+    @Test
+    void floorReplaceAppliesVinylFactor() {
+        FloorReplace floorReplace = new FloorReplace();
+        floorReplace.setSquareFeet(new BigDecimal("400"));
+        floorReplace.setMaterialCostPerSqFt(new BigDecimal("2.50")); // VINYL
+        floorReplace.setExistingFloorMaterial(FlooringMaterial.HARDWOOD); // removal factor 1.20
+        floorReplace.setNewFloorMaterial(FlooringMaterial.VINYL); // factor 0.50
+        floorReplace.setSubfloorRepairNeeded(false);
+        floorReplace.setLocationFactor(BigDecimal.ONE);
+        floorReplace.setTaxRate(new BigDecimal("0.15"));
+
+        service.calculateEstimate(floorReplace);
+
+        // Material: 400 * 2.50 * 0.50 = 500
+        // Labor: 400 * 50 = 20000
+        // Removal: 400 * 2 * 1.20 = 960
+        // Base: 21460
+        assertEquals(new BigDecimal("26825.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("4023.75"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("30848.75"), floorReplace.getTotalPrice());
     }
 
     private void setField(String name, BigDecimal value) {

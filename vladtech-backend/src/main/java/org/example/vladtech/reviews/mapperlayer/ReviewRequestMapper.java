@@ -12,5 +12,6 @@ public interface ReviewRequestMapper {
     @Mapping(target = "reviewId", ignore = true)
     @Mapping(target = "photos", ignore = true)
     @Mapping(target = "clientName", ignore = true)
+    @Mapping(target = "ownerAuth0Id", ignore = true)
     Review requestModelToEntity(ReviewRequestModel reviewRequestModel);
 }

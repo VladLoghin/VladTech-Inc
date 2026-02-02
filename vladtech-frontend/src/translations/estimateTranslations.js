@@ -74,6 +74,45 @@ export const estimateTranslations = {
     sidingReplacePreset: "Siding Replace",
     roofReplacePreset: "Roof Replace",
     kitchenRemodelPreset: "Kitchen Remodel",
+    windowDoorReplacePreset: "Window & Door Replace",
+    deckPatioAdditionPreset: "Deck/Patio Addition",
+    floorReplacePreset: "Floor Replace",
+    // Additional field labels
+    windowType: "Window Type",
+    doorType: "Door Type",
+    windowCount: "Number of Windows",
+    doorCount: "Number of Doors",
+    deckMaterial: "Deck Material",
+    hasRailing: "Include Railing",
+    stairsCount: "Number of Stair Sets",
+    isCovered: "Include Roof Cover",
+    deckAreaSqFt: "Deck Area (sq ft)",
+    existingFloorMaterial: "Existing Floor Material",
+    newFloorMaterial: "New Floor Material",
+    subfloorRepairNeeded: "Subfloor Repair Needed",
+    // Window type options
+    windowTypeOptions: {
+      SINGLE_HUNG: "Single Hung",
+      DOUBLE_HUNG: "Double Hung",
+      CASEMENT: "Casement",
+      SLIDER: "Slider",
+      BAY: "Bay",
+      BOW: "Bow",
+    },
+    // Door type options
+    doorTypeOptions: {
+      WOOD: "Wood",
+      FIBERGLASS: "Fiberglass",
+      STEEL: "Steel",
+      GLASS_PANEL: "Glass Panel",
+    },
+    // Deck material options
+    deckMaterialOptions: {
+      WOOD: "Wood",
+      COMPOSITE: "Composite",
+      PVC: "PVC",
+      ALUMINUM: "Aluminum",
+    },
     // Validation messages
     isRequired: "is required",
     mustBeGreaterThanZero: "must be greater than 0",
@@ -154,6 +193,45 @@ export const estimateTranslations = {
     sidingReplacePreset: "Remplacement du revêtement",
     roofReplacePreset: "Remplacement de toit",
     kitchenRemodelPreset: "Rénovation de cuisine",
+    windowDoorReplacePreset: "Remplacement de Fenêtres et Portes",
+    deckPatioAdditionPreset: "Ajout de Terrasse/Patio",
+    floorReplacePreset: "Remplacement de Plancher",
+    // Additional field labels
+    windowType: "Type de Fenêtre",
+    doorType: "Type de Porte",
+    windowCount: "Nombre de Fenêtres",
+    doorCount: "Nombre de Portes",
+    deckMaterial: "Matériau de Terrasse",
+    hasRailing: "Inclure Garde-corps",
+    stairsCount: "Nombre d'Escaliers",
+    isCovered: "Inclure Toit",
+    deckAreaSqFt: "Surface de Terrasse (pi²)",
+    existingFloorMaterial: "Matériau de Plancher Existant",
+    newFloorMaterial: "Nouveau Matériau de Plancher",
+    subfloorRepairNeeded: "Réparation de Sous-Plancher Nécessaire",
+    // Window type options
+    windowTypeOptions: {
+      SINGLE_HUNG: "À Guillotine Simple",
+      DOUBLE_HUNG: "À Guillotine Double",
+      CASEMENT: "À Battant",
+      SLIDER: "Coulissante",
+      BAY: "En Saillie",
+      BOW: "En Arc",
+    },
+    // Door type options
+    doorTypeOptions: {
+      WOOD: "Bois",
+      FIBERGLASS: "Fibre de Verre",
+      STEEL: "Acier",
+      GLASS_PANEL: "Panneau de Verre",
+    },
+    // Deck material options
+    deckMaterialOptions: {
+      WOOD: "Bois",
+      COMPOSITE: "Composite",
+      PVC: "PVC",
+      ALUMINUM: "Aluminium",
+    },
     // Validation messages
     isRequired: "est requis",
     mustBeGreaterThanZero: "doit être supérieur à 0",

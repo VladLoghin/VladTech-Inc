@@ -7,6 +7,13 @@ import org.example.vladtech.estimates.data.roof.RoofingReplace;
 import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.siding.SidingMaterial;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
+import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
+import org.example.vladtech.estimates.data.patio.DeckMaterial;
+import org.example.vladtech.estimates.data.floor.FloorReplace;
+import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.exceptions.EstimationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -65,6 +72,70 @@ public class EstimationServiceImpl implements EstimationService {
     @Value("${roof.material.factor.SYNTHETIC:1.30}")
     private BigDecimal syntheticFactor;
 
+    // Window material multipliers (defaults)
+    @Value("${window.material.factor.CASEMENT:1.00}")
+    private BigDecimal casementFactor;
+
+    @Value("${window.material.factor.SLIDER:0.95}")
+    private BigDecimal sliderFactor;
+
+    @Value("${window.material.factor.DOUBLE_HUNG:1.05}")
+    private BigDecimal doubleHungFactor;
+
+    @Value("${window.material.factor.AWNING:1.10}")
+    private BigDecimal awningFactor;
+
+    @Value("${window.material.factor.FIXED:0.85}")
+    private BigDecimal fixedFactor;
+
+    // Door material multipliers (defaults)
+    @Value("${door.material.factor.WOOD:1.00}")
+    private BigDecimal woodDoorFactor;
+
+    @Value("${door.material.factor.FIBERGLASS:1.15}")
+    private BigDecimal fiberglassDoorFactor;
+
+    @Value("${door.material.factor.STEEL:1.05}")
+    private BigDecimal steelDoorFactor;
+
+    @Value("${door.material.factor.GLASS_PANEL:1.30}")
+    private BigDecimal glassPanelDoorFactor;
+
+    // Deck material multipliers (defaults)
+    @Value("${deck.material.factor.WOOD:1.00}")
+    private BigDecimal woodDeckFactor;
+
+    @Value("${deck.material.factor.COMPOSITE:1.25}")
+    private BigDecimal compositeDeckFactor;
+
+    @Value("${deck.material.factor.PVC:1.40}")
+    private BigDecimal pvcDeckFactor;
+
+    @Value("${deck.material.factor.ALUMINUM:1.50}")
+    private BigDecimal aluminumDeckFactor;
+
+    // Flooring material multipliers (defaults)
+    @Value("${flooring.material.factor.HARDWOOD:1.00}")
+    private BigDecimal hardwoodFloorFactor;
+
+    @Value("${flooring.material.factor.ENGINEERED_HARDWOOD:0.85}")
+    private BigDecimal engineeredHardwoodFloorFactor;
+
+    @Value("${flooring.material.factor.LAMINATE:0.60}")
+    private BigDecimal laminateFloorFactor;
+
+    @Value("${flooring.material.factor.VINYL:0.50}")
+    private BigDecimal vinylFloorFactor;
+
+    @Value("${flooring.material.factor.TILE:0.90}")
+    private BigDecimal tileFloorFactor;
+
+    @Value("${flooring.material.factor.CARPET:0.70}")
+    private BigDecimal carpetFloorFactor;
+
+    @Value("${flooring.material.factor.POLISHED_CONCRETE:0.95}")
+    private BigDecimal polishedConcreteFloorFactor;
+
     @Override
     public RenovationProject calculateEstimate(RenovationProject project) {
         if (project == null) {
@@ -73,19 +144,27 @@ public class EstimationServiceImpl implements EstimationService {
 
         BigDecimal squareFeet = ns(project.getSquareFeet());
         BigDecimal materialPerSqFt = ns(project.getMaterialCostPerSqFt());
+
+        // Skip square feet validation for WindowDoorReplace and DeckPatioAddition
+        if (!(project instanceof WindowDoorReplace) && !(project instanceof DeckPatioAddition)) {
+            if (squareFeet.compareTo(ZERO) <= 0) {
+                throw new EstimationException("E101", "Square feet must be greater than zero");
+            }
+            if (materialPerSqFt.compareTo(ZERO) < 0) {
+                throw new EstimationException("E102", "Material cost per sq ft cannot be negative");
+            }
+        }
+
         BigDecimal locationFactor = ns(project.getLocationFactor(), ONE);
-
-        if (squareFeet.compareTo(ZERO) <= 0) {
-            throw new EstimationException("E101", "Square feet must be greater than zero");
-        }
-        if (materialPerSqFt.compareTo(ZERO) < 0) {
-            throw new EstimationException("E102", "Material cost per sq ft cannot be negative");
-        }
-
+        
         project.setLaborRate(laborRate);
         project.setOverheadRate(overheadRate);
         project.setContingencyRate(contingencyRate);
-        project.setTaxRate(taxRate);
+        
+        // Use provided taxRate or default
+        if (project.getTaxRate() == null) {
+            project.setTaxRate(taxRate);
+        }
 
         BigDecimal typeFactor = ONE;
         BigDecimal extraLaborPerStory = ZERO;
@@ -151,6 +230,134 @@ public class EstimationServiceImpl implements EstimationService {
                     project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
             
             return project;
+        } else if (project instanceof WindowDoorReplace windowDoor) {
+            BigDecimal windowCostPerUnit = BigDecimal.valueOf(800); // Base cost per window
+            BigDecimal doorCostPerUnit = BigDecimal.valueOf(1200); // Base cost per door
+            
+            BigDecimal windowMaterialFactor = resolveWindowMaterialFactor(windowDoor.getWindowType());
+            BigDecimal doorMaterialFactor = resolveDoorMaterialFactor(windowDoor.getDoorType());
+            
+            BigDecimal windowMaterialCost = BigDecimal.valueOf(windowDoor.getWindowCount()).multiply(windowCostPerUnit).multiply(windowMaterialFactor);
+            BigDecimal doorMaterialCost = BigDecimal.valueOf(windowDoor.getDoorCount()).multiply(doorCostPerUnit).multiply(doorMaterialFactor);
+            
+            // 3 labor rates per window and per door
+            BigDecimal windowLaborCost = BigDecimal.valueOf(windowDoor.getWindowCount()).multiply(laborRate.multiply(BigDecimal.valueOf(3)));
+            BigDecimal doorLaborCost = BigDecimal.valueOf(windowDoor.getDoorCount()).multiply(laborRate.multiply(BigDecimal.valueOf(3)));
+            
+            BigDecimal baseCost = windowMaterialCost.add(doorMaterialCost).add(windowLaborCost).add(doorLaborCost);
+            
+            BigDecimal overhead = baseCost.multiply(overheadRate);
+            BigDecimal contingency = baseCost.multiply(contingencyRate);
+            BigDecimal estimatePrice = baseCost.add(overhead).add(contingency);
+            BigDecimal taxAmount = estimatePrice.multiply(project.getTaxRate());
+            BigDecimal totalPrice = estimatePrice.add(taxAmount);
+            
+            project.setEstimatePrice(round2(estimatePrice));
+            project.setTaxAmount(round2(taxAmount));
+            project.setTotalPrice(round2(totalPrice));
+            
+            log.debug("Calculated window/door replacement estimate: estimatePrice={}, taxAmount={}, totalPrice={}",
+                    project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
+            
+            return project;
+        } else if (project instanceof DeckPatioAddition deckPatio) {
+            BigDecimal baseMaterialCostPerSqFt = BigDecimal.valueOf(25.00); // Base deck material cost per sq ft
+            BigDecimal deckMaterialFactor = resolveDeckMaterialFactor(deckPatio.getDeckMaterial());
+            
+            BigDecimal areaSqFt = BigDecimal.valueOf(deckPatio.getAreaSqFt() != null ? deckPatio.getAreaSqFt() : 0.0);
+            
+            // Material cost: areaSqFt × baseCost × materialFactor
+            BigDecimal materialCost = areaSqFt.multiply(baseMaterialCostPerSqFt).multiply(deckMaterialFactor);
+            
+            // Labor cost: areaSqFt × laborRate
+            BigDecimal laborCost = areaSqFt.multiply(laborRate);
+            
+            BigDecimal baseCost = materialCost.add(laborCost);
+            
+            // Add railing cost if applicable
+            if (Boolean.TRUE.equals(deckPatio.getHasRailing())) {
+                // Assume perimeter is approximately 4 × sqrt(area) for a squarish deck
+                // Cost of $40 per linear foot for railing
+                BigDecimal perimeter = BigDecimal.valueOf(Math.sqrt(areaSqFt.doubleValue()))
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(4));
+                BigDecimal railingCost = perimeter.multiply(BigDecimal.valueOf(40));
+                baseCost = baseCost.add(railingCost);
+            }
+            
+            // Add stairs cost
+            if (deckPatio.getStairsCount() != null && deckPatio.getStairsCount() > 0) {
+                BigDecimal stairsCost = BigDecimal.valueOf(deckPatio.getStairsCount()).multiply(BigDecimal.valueOf(500));
+                baseCost = baseCost.add(stairsCost);
+            }
+            
+            // Add covered cost if applicable
+            if (Boolean.TRUE.equals(deckPatio.getIsCovered())) {
+                BigDecimal coverCost = areaSqFt.multiply(BigDecimal.valueOf(15)); // $15 per sq ft for roof covering
+                baseCost = baseCost.add(coverCost);
+            }
+            
+            // Apply location factor
+            BigDecimal locationFactorValue = ns(deckPatio.getLocationFactor(), ONE);
+            baseCost = baseCost.multiply(locationFactorValue);
+            
+            BigDecimal overhead = baseCost.multiply(overheadRate);
+            BigDecimal contingency = baseCost.multiply(contingencyRate);
+            BigDecimal estimatePrice = baseCost.add(overhead).add(contingency);
+            BigDecimal taxAmount = estimatePrice.multiply(project.getTaxRate());
+            BigDecimal totalPrice = estimatePrice.add(taxAmount);
+            
+            project.setEstimatePrice(round2(estimatePrice));
+            project.setTaxAmount(round2(taxAmount));
+            project.setTotalPrice(round2(totalPrice));
+            
+            log.debug("Calculated deck/patio addition estimate: estimatePrice={}, taxAmount={}, totalPrice={}",
+                    project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
+            
+            return project;
+        } else if (project instanceof FloorReplace floorReplace) {
+            BigDecimal area = ns(floorReplace.getSquareFeet());
+            BigDecimal baseMaterialCostPerSqFt = ns(floorReplace.getMaterialCostPerSqFt());
+            
+            BigDecimal newFloorFactor = resolveFlooringMaterialFactor(floorReplace.getNewFloorMaterial());
+            
+            // Material cost: area × baseCost × materialFactor
+            BigDecimal materialCost = area.multiply(baseMaterialCostPerSqFt).multiply(newFloorFactor);
+            
+            // Labor cost: area × laborRate
+            BigDecimal laborCost = area.multiply(laborRate);
+            
+            BigDecimal baseCost = materialCost.add(laborCost);
+            
+            // Add subfloor repair cost if needed
+            if (Boolean.TRUE.equals(floorReplace.getSubfloorRepairNeeded())) {
+                BigDecimal subfloorRepairCost = area.multiply(BigDecimal.valueOf(3.50)); // $3.50 per sq ft for subfloor repair
+                baseCost = baseCost.add(subfloorRepairCost);
+            }
+            
+            // Add removal cost for existing floor (varies by material)
+            BigDecimal removalFactor = resolveFlooringRemovalFactor(floorReplace.getExistingFloorMaterial());
+            BigDecimal removalCost = area.multiply(BigDecimal.valueOf(2.00)).multiply(removalFactor); // Base $2/sqft × factor
+            baseCost = baseCost.add(removalCost);
+            
+            // Apply location factor
+            BigDecimal locationFactorValue = ns(floorReplace.getLocationFactor(), ONE);
+            baseCost = baseCost.multiply(locationFactorValue);
+            
+            BigDecimal overhead = baseCost.multiply(overheadRate);
+            BigDecimal contingency = baseCost.multiply(contingencyRate);
+            BigDecimal estimatePrice = baseCost.add(overhead).add(contingency);
+            BigDecimal taxAmount = estimatePrice.multiply(project.getTaxRate());
+            BigDecimal totalPrice = estimatePrice.add(taxAmount);
+            
+            project.setEstimatePrice(round2(estimatePrice));
+            project.setTaxAmount(round2(taxAmount));
+            project.setTotalPrice(round2(totalPrice));
+            
+            log.debug("Calculated floor replacement estimate: estimatePrice={}, taxAmount={}, totalPrice={}",
+                    project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
+            
+            return project;
         }
 
         BigDecimal effectiveLaborRate = laborRate.add(extraLaborPerStory);
@@ -194,6 +401,63 @@ public class EstimationServiceImpl implements EstimationService {
             case CLAY -> clayFactor;
             case SLATE -> slateFactor;
             case SYNTHETIC -> syntheticFactor;
+        };
+    }
+
+    private BigDecimal resolveWindowMaterialFactor(WindowType windowType) {
+        if (windowType == null) return ONE;
+        return switch (windowType) {
+            case CASEMENT -> casementFactor;
+            case SLIDER -> sliderFactor;
+            case DOUBLE_HUNG -> doubleHungFactor;
+            case AWNING -> awningFactor;
+            case FIXED -> fixedFactor;
+        };
+    }
+
+    private BigDecimal resolveDoorMaterialFactor(DoorType doorType) {
+        if (doorType == null) return ONE;
+        return switch (doorType) {
+            case WOOD -> woodDoorFactor;
+            case FIBERGLASS -> fiberglassDoorFactor;
+            case STEEL -> steelDoorFactor;
+            case GLASS_PANEL -> glassPanelDoorFactor;
+        };
+    }
+
+    private BigDecimal resolveDeckMaterialFactor(DeckMaterial deckMaterial) {
+        if (deckMaterial == null) return ONE;
+        return switch (deckMaterial) {
+            case WOOD -> woodDeckFactor;
+            case COMPOSITE -> compositeDeckFactor;
+            case PVC -> pvcDeckFactor;
+            case ALUMINUM -> aluminumDeckFactor;
+        };
+    }
+
+    private BigDecimal resolveFlooringMaterialFactor(FlooringMaterial flooringMaterial) {
+        if (flooringMaterial == null) return ONE;
+        return switch (flooringMaterial) {
+            case HARDWOOD -> hardwoodFloorFactor;
+            case ENGINEERED_HARDWOOD -> engineeredHardwoodFloorFactor;
+            case LAMINATE -> laminateFloorFactor;
+            case VINYL -> vinylFloorFactor;
+            case TILE -> tileFloorFactor;
+            case CARPET -> carpetFloorFactor;
+            case POLISHED_CONCRETE -> polishedConcreteFloorFactor;
+        };
+    }
+
+    private BigDecimal resolveFlooringRemovalFactor(FlooringMaterial flooringMaterial) {
+        if (flooringMaterial == null) return ONE;
+        return switch (flooringMaterial) {
+            case HARDWOOD -> BigDecimal.valueOf(1.20); // Harder to remove
+            case ENGINEERED_HARDWOOD -> BigDecimal.valueOf(1.10);
+            case LAMINATE -> BigDecimal.valueOf(0.80); // Easier to remove
+            case VINYL -> BigDecimal.valueOf(0.70); // Easiest
+            case TILE -> BigDecimal.valueOf(1.50); // Most difficult
+            case CARPET -> BigDecimal.valueOf(0.60); // Very easy
+            case POLISHED_CONCRETE -> BigDecimal.valueOf(0.50); // Minimal removal
         };
     }
 

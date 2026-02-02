@@ -59,4 +59,35 @@ public class RenovationEstimateRequestModel {
     private String cabinetQuality;
 
     private String countertopMaterial;
+
+    // Window and Door-specific properties
+    private String windowType;
+
+    private String doorType;
+
+    @PositiveOrZero(message = "Window count must be non-negative")
+    private Integer windowCount;
+
+    @PositiveOrZero(message = "Door count must be non-negative")
+    private Integer doorCount;
+
+    // Deck/Patio-specific properties
+    private String deckMaterial;
+
+    private Boolean hasRailing;
+
+    @PositiveOrZero(message = "Stairs count must be non-negative")
+    private Integer stairsCount;
+
+    private Boolean isCovered;
+
+    @PositiveOrZero(message = "Area square feet must be non-negative")
+    private Double areaSqFt;
+
+    // Floor-specific properties
+    private String existingFloorMaterial;
+
+    private String newFloorMaterial;
+
+    private Boolean subfloorRepairNeeded;
 }
