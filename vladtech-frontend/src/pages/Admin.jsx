@@ -18,7 +18,6 @@ const Admin = () => {
   const { t, i18n } = useTranslation();
 
   const [message, setMessage] = useState("");
-  const [isMessageVisible, setIsMessageVisible] = useState(false);
 
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
@@ -328,20 +327,14 @@ const Admin = () => {
         </div>
 
         {message && (
-          <div
-          >
-            <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
-              <span className="text-lg font-medium">{message}</span>
-              <button
-                onClick={() => {
-                  setIsMessageVisible(false);
-                  setTimeout(() => setMessage(""), 300);
-                }}
-                className="ml-4 text-yellow-600 hover:text-yellow-800 font-bold text-xl leading-none"
-              >
-                ×
-              </button>
-            </div>
+          <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
+            <span className="text-lg font-medium">{message}</span>
+            <button
+              onClick={() => setMessage("")}
+              className="ml-4 text-yellow-600 hover:text-yellow-800 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
           </div>
         )}
 
