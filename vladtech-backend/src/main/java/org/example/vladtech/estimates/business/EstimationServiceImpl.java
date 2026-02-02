@@ -249,7 +249,7 @@ public class EstimationServiceImpl implements EstimationService {
             BigDecimal overhead = baseCost.multiply(overheadRate);
             BigDecimal contingency = baseCost.multiply(contingencyRate);
             BigDecimal estimatePrice = baseCost.add(overhead).add(contingency);
-            BigDecimal taxAmount = estimatePrice.multiply(taxRate);
+            BigDecimal taxAmount = estimatePrice.multiply(project.getTaxRate());
             BigDecimal totalPrice = estimatePrice.add(taxAmount);
             
             project.setEstimatePrice(round2(estimatePrice));
