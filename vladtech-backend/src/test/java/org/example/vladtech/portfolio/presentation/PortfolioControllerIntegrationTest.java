@@ -57,6 +57,7 @@ class PortfolioControllerIntegrationTest {
         item1 = new PortfolioResponseDto(
                 "portfolio-1",
                 null,
+                null,
                 "Modern Kitchen Counter",
                 "/uploads/portfolio/kitchencounter.jpg",
                 "Kitchen",
@@ -69,6 +70,7 @@ class PortfolioControllerIntegrationTest {
         item2 = new PortfolioResponseDto(
                 "portfolio-2",
                 null,
+                null,
                 "Complete Kitchen Remodel",
                 "/uploads/portfolio/kitchenremodel.jpg",
                 "Kitchen",
@@ -79,6 +81,7 @@ class PortfolioControllerIntegrationTest {
 
         item3 = new PortfolioResponseDto(
                 "portfolio-3",
+                null,
                 null,
                 "Luxury Bathroom Renovation",
                 "/uploads/portfolio/newbathroom.jpg",
@@ -149,6 +152,7 @@ class PortfolioControllerIntegrationTest {
         PortfolioResponseDto noComments = new PortfolioResponseDto(
                 "portfolio-99",
                 null,
+                null,
                 "Simple Office",
                 "/uploads/portfolio/newoffice.jpg",
                 "Interior",
@@ -169,6 +173,7 @@ class PortfolioControllerIntegrationTest {
         PortfolioResponseDto kitchenItem = new PortfolioResponseDto(
                 "portfolio-k1", // portfolioId
                 null,           // reviewId (nullable)
+                null,           // reviewerName (nullable)
                 "Modern Kitchen", // title
                 "/uploads/portfolio/kitchen1.jpg", // imageUrl
                 "Kitchen",       // type
@@ -196,6 +201,7 @@ class PortfolioControllerIntegrationTest {
         PortfolioResponseDto bathroomItem1 = new PortfolioResponseDto(
                 "portfolio-b1",
                 null,
+                null,
                 "Luxury Bathroom",
                 "/uploads/portfolio/bathroom1.jpg",
                 "Bathroom",
@@ -203,6 +209,7 @@ class PortfolioControllerIntegrationTest {
         );
         PortfolioResponseDto bathroomItem2 = new PortfolioResponseDto(
                 "portfolio-b2",
+                null,
                 null,
                 "Modern Bathroom",
                 "/uploads/portfolio/bathroom2.jpg",
@@ -230,6 +237,7 @@ class PortfolioControllerIntegrationTest {
         PortfolioResponseDto interiorItem = new PortfolioResponseDto(
                 "portfolio-i1",
                 null,
+                null,
                 "Living Room Design",
                 "/uploads/portfolio/living.jpg",
                 "Interior",
@@ -254,6 +262,7 @@ class PortfolioControllerIntegrationTest {
         // Arrange
         PortfolioResponseDto exteriorItem = new PortfolioResponseDto(
                 "portfolio-e1",
+                null,
                 null,
                 "Garden Landscaping",
                 "/uploads/portfolio/garden.jpg",

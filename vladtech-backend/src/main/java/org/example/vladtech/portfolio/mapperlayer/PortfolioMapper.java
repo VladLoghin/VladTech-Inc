@@ -24,6 +24,7 @@ public class PortfolioMapper {
         return new PortfolioResponseDto(
                 portfolioItem.getPortfolioId(),
                 portfolioItem.getReviewId(),
+                portfolioItem.getReviewerName(),
                 portfolioItem.getTitle(),
                 portfolioItem.getImageUrl(),
                 portfolioItem.getType(),

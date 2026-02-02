@@ -56,7 +56,7 @@ class PortfolioItemTest {
         comments.add(new PortfolioComment("Jane", "auth0|456", java.time.Instant.now(), "Amazing!"));
 
         // Act
-        PortfolioItem item = new PortfolioItem("id123", "review-456", "Project B", "/images/project-b.jpg", "Interior", comments);
+        PortfolioItem item = new PortfolioItem("id123", "review-456", null, "Project B", "/images/project-b.jpg", "Interior", comments);
 
         // Assert
         assertEquals("id123", item.getPortfolioId());

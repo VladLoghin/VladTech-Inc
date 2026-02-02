@@ -151,4 +151,19 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getArchivedProjects());
     }
 
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @PostMapping("/{projectIdentifier}/send-to-portfolio")
+    public ResponseEntity<?> sendProjectToPortfolio(
+            @PathVariable String projectIdentifier,
+            @RequestParam String type,
+            @RequestParam(required = false) org.springframework.web.multipart.MultipartFile image) {
+        try {
+            org.example.vladtech.portfolio.presentation.PortfolioResponseDto portfolioItem = 
+                projectService.sendProjectToPortfolio(projectIdentifier, type, image);
+            return ResponseEntity.ok(portfolioItem);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 }

@@ -11,10 +11,11 @@ import {api} from "../api/http.js";
 
 interface PortfolioItem {
   portfolioId: string;
+  reviewId?: string;
   title: string;
   imageUrl: string;
-  rating: number;
   type: string;
+  reviewerName?: string; // Optional: name of reviewer if sent from review
   comments: PortfolioComment[];
 }
 
@@ -149,14 +150,6 @@ export default function PortfolioGallery() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-yellow-400 text-2xl tracking-wider">LOADING...</div>
-      </div>
-    );
-  }
-
   // Calculate pagination
   const totalPages = Math.ceil(portfolioItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -176,6 +169,14 @@ export default function PortfolioGallery() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-yellow-400 text-2xl tracking-wider">LOADING...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -266,6 +267,12 @@ export default function PortfolioGallery() {
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />
+                {/* Reviewer Name - Always visible in top-left corner */}
+                {item.reviewerName && (
+                  <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                    <p className="text-white text-sm font-medium tracking-wide">{item.reviewerName}</p>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>

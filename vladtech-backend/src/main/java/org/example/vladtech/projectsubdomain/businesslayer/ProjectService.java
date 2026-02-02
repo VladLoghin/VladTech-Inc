@@ -49,6 +49,12 @@ public interface ProjectService {
 
         List<ProjectResponseModel> getArchivedProjects();
 
+    org.example.vladtech.portfolio.presentation.PortfolioResponseDto sendProjectToPortfolio(
+            String projectIdentifier,
+            String type,
+            org.springframework.web.multipart.MultipartFile image
+    );
+
         void sendEmployeeAssignedEmailAsync(Project project, String employeeEmail);
 
         ProjectResponseModel updateProjectStatusForEmployee(String projectIdentifier, String employeeId,

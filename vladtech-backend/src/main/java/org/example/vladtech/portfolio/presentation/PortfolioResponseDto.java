@@ -1,5 +1,6 @@
 package org.example.vladtech.portfolio.presentation;
 
+import com.mongodb.lang.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,9 @@ public class PortfolioResponseDto {
     private String portfolioId;
 
     private String reviewId;
+
+    @Nullable
+    private String reviewerName; // Name of the reviewer if sent from a review
 
     @NotBlank(message = "Title cannot be empty")
     private String title;
