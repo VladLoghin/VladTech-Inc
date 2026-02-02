@@ -5,6 +5,8 @@ import org.example.vladtech.estimates.data.kitchen.KitchenRemodel;
 import org.example.vladtech.estimates.data.roof.RoofingReplace;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
 import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
+import org.example.vladtech.estimates.data.floor.FloorReplace;
 import org.example.vladtech.estimates.presentation.RenovationEstimateRequestModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -74,4 +76,30 @@ public interface RenovationEstimateRequestMapper {
     @Mapping(target = "taxAmount", ignore = true)
     @Mapping(target = "totalPrice", ignore = true)
     WindowDoorReplace toWindowDoorReplace(RenovationEstimateRequestModel request);
+
+    @Mapping(target = "deckMaterial", source = "deckMaterial")
+    @Mapping(target = "hasRailing", source = "hasRailing")
+    @Mapping(target = "stairsCount", source = "stairsCount")
+    @Mapping(target = "isCovered", source = "isCovered")
+    @Mapping(target = "areaSqFt", source = "areaSqFt")
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    DeckPatioAddition toDeckPatioAddition(RenovationEstimateRequestModel request);
+
+    @Mapping(target = "existingFloorMaterial", source = "existingFloorMaterial")
+    @Mapping(target = "newFloorMaterial", source = "newFloorMaterial")
+    @Mapping(target = "subfloorRepairNeeded", source = "subfloorRepairNeeded")
+    @Mapping(target = "laborRate", ignore = true)
+    @Mapping(target = "overheadRate", ignore = true)
+    @Mapping(target = "contingencyRate", ignore = true)
+    @Mapping(target = "taxRate", ignore = true)
+    @Mapping(target = "estimatePrice", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    FloorReplace toFloorReplace(RenovationEstimateRequestModel request);
 }

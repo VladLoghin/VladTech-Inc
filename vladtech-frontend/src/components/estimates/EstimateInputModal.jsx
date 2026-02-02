@@ -245,6 +245,85 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 { name: "doorCount", label: t.doorCount ?? "Number of Doors", type: "number", required: true, min: 0, step: "1" },
             ],
         },
+        {
+            name: t.deckPatioAdditionPreset ?? "Deck/Patio Addition",
+            key: "DECK_PATIO_ADDITION",
+            projectType: "DECK_PATIO_ADDITION",
+            defaultValues: {
+                deckMaterial: "WOOD",
+                hasRailing: false,
+                stairsCount: "0",
+                isCovered: false,
+                deckAreaSqFt: "",
+                locationFactor: "1.00",
+            },
+            fields: [
+                { name: "deckAreaSqFt", label: t.deckAreaSqFt ?? "Deck Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                {
+                    name: "deckMaterial",
+                    label: t.deckMaterial ?? "Deck Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "WOOD", label: t?.deckMaterialOptions?.WOOD ?? "Wood" },
+                        { value: "COMPOSITE", label: t?.deckMaterialOptions?.COMPOSITE ?? "Composite" },
+                        { value: "PVC", label: t?.deckMaterialOptions?.PVC ?? "PVC" },
+                        { value: "ALUMINUM", label: t?.deckMaterialOptions?.ALUMINUM ?? "Aluminum" },
+                    ],
+                },
+                { name: "hasRailing", label: t.hasRailing ?? "Include Railing", type: "checkbox", required: false },
+                { name: "stairsCount", label: t.stairsCount ?? "Number of Stair Sets", type: "number", required: false, min: 0, step: "1" },
+                { name: "isCovered", label: t.isCovered ?? "Include Roof Cover", type: "checkbox", required: false },
+            ],
+        },
+        {
+            name: t.floorReplacePreset ?? "Floor Replace",
+            key: "FLOOR_REPLACE",
+            projectType: "FLOOR_REPLACE",
+            defaultValues: {
+                squareFeet: "",
+                materialCostPerSqFt: "",
+                locationFactor: "1.00",
+                existingFloorMaterial: "CARPET",
+                newFloorMaterial: "HARDWOOD",
+                subfloorRepairNeeded: false,
+            },
+            fields: [
+                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                {
+                    name: "existingFloorMaterial",
+                    label: t.existingFloorMaterial ?? "Existing Floor Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
+                        { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
+                        { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
+                        { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
+                        { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
+                        { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
+                        { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
+                    ],
+                },
+                {
+                    name: "newFloorMaterial",
+                    label: t.newFloorMaterial ?? "New Floor Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
+                        { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
+                        { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
+                        { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
+                        { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
+                        { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
+                        { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
+                    ],
+                },
+                { name: "subfloorRepairNeeded", label: t.subfloorRepairNeeded ?? "Subfloor Repair Needed", type: "checkbox", required: false },
+            ],
+        },
     ],
     [t]
 );
@@ -305,6 +384,13 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                     const avg = (parts.reduce((a, b) => a + b, 0) / parts.length).toFixed(2);
                     return { ...data, materialCostPerSqFt: String(avg) };
                 }
+            }
+        }
+
+        if (preset.projectType === "FLOOR_REPLACE") {
+            const material = data.newFloorMaterial;
+            if (!hasPrice && material && flooringBasePrices[material] !== undefined) {
+                return { ...data, materialCostPerSqFt: String(flooringBasePrices[material]) };
             }
         }
 
@@ -369,7 +455,19 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 }));
             }
         }
-    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, selectedPreset, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+
+        if (selectedPreset.projectType === "FLOOR_REPLACE") {
+            const material = formData.newFloorMaterial;
+            if (!material) return;
+            const autoPrice = flooringBasePrices[material];
+            if (autoPrice !== undefined) {
+                setFormData((prev) => ({
+                    ...prev,
+                    materialCostPerSqFt: String(autoPrice),
+                }));
+            }
+        }
+    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
 
     const handlePresetSelect = (presetName) => {
         const preset = sortedPresets.find((p) => p.name === presetName);
@@ -426,6 +524,12 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                     updated.materialCostPerSqFt = String(avg);
                 }
             }
+            if (selectedPreset?.projectType === "FLOOR_REPLACE" && name === "newFloorMaterial") {
+                const autoPrice = flooringBasePrices[nextValue];
+                if (autoPrice !== undefined) {
+                    updated.materialCostPerSqFt = String(autoPrice);
+                }
+            }
             if (name === "hasSkylights" && !nextValue) {
                 updated.numSkylights = "0"; // reset count when skylights are toggled off
             }
@@ -462,6 +566,32 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         onClose();
     };
 
+    const handleBackdropPointerDown = (e) => {
+        if (e.target === e.currentTarget) {
+            e.currentTarget.dataset.pointerStartedOutside = 'true';
+        }
+    };
+
+    const handleBackdropPointerUp = (e) => {
+        if (e.target === e.currentTarget && e.currentTarget.dataset.pointerStartedOutside === 'true') {
+            onClose();
+        }
+        delete e.currentTarget.dataset.pointerStartedOutside;
+    };
+
+    const handleResultBackdropPointerDown = (e) => {
+        if (e.target === e.currentTarget) {
+            e.currentTarget.dataset.pointerStartedOutside = 'true';
+        }
+    };
+
+    const handleResultBackdropPointerUp = (e) => {
+        if (e.target === e.currentTarget && e.currentTarget.dataset.pointerStartedOutside === 'true') {
+            handleCloseResultModal();
+        }
+        delete e.currentTarget.dataset.pointerStartedOutside;
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -470,9 +600,8 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 className="modal"
                 role="dialog"
                 aria-modal="true"
-                onClick={(e) => {
-                    if (e.target === e.currentTarget) onClose();
-                }}
+                onPointerDown={handleBackdropPointerDown}
+                onPointerUp={handleBackdropPointerUp}
             >
                 <div className="modal-content">
                     <h2>{t.enterEstimateDetails}</h2>
@@ -572,11 +701,8 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                     role="dialog"
                     aria-modal="true"
                     data-testid="estimate-result-modal"
-                    onClick={(e) => {
-                        if (e.target === e.currentTarget) {
-                            handleCloseResultModal();
-                        }
-                    }}
+                    onPointerDown={handleResultBackdropPointerDown}
+                    onPointerUp={handleResultBackdropPointerUp}
                 >
                     <div className="modal-content">
                         <h2>{t.estimateResult}</h2>

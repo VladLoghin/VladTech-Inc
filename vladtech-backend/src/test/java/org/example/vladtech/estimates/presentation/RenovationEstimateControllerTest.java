@@ -3,6 +3,13 @@ package org.example.vladtech.estimates.presentation;
 import org.example.vladtech.estimates.business.EstimationService;
 import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.roof.RoofingReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
+import org.example.vladtech.estimates.data.patio.DeckPatioAddition;
+import org.example.vladtech.estimates.data.patio.DeckMaterial;
+import org.example.vladtech.estimates.data.floor.FloorReplace;
+import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.exceptions.EstimationException;
 import org.example.vladtech.estimates.exceptions.EstimatesExceptionHandler;
 import org.example.vladtech.estimates.mapperlayer.RenovationEstimateResponseMapper;
@@ -196,6 +203,142 @@ class RenovationEstimateControllerTest {
                         .param("projectType", "UNKNOWN_TYPE")
                         .param("squareFeet", "50")
                         .param("materialCostPerSqFt", "15"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void returnsEstimateForWindowDoorReplaceRequest() throws Exception {
+        WindowDoorReplace calculated = new WindowDoorReplace();
+        calculated.setEstimatePrice(new BigDecimal("7500"));
+        calculated.setTaxAmount(new BigDecimal("1125"));
+        calculated.setTotalPrice(new BigDecimal("8625"));
+
+        when(estimationService.calculateEstimate(any())).thenReturn(calculated);
+        when(responseMapper.toResponse(calculated)).thenReturn(
+                new RenovationEstimateResponseModel(
+                        null, null, null, null, null, null, null,
+                        calculated.getEstimatePrice(),
+                        calculated.getTaxAmount(),
+                        calculated.getTotalPrice())
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "WINDOW_DOOR_REPLACE")
+                        .param("windowType", WindowType.CASEMENT.name())
+                        .param("doorType", DoorType.FIBERGLASS.name())
+                        .param("windowCount", "3")
+                        .param("doorCount", "2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estimatePrice").value(7500))
+                .andExpect(jsonPath("$.taxAmount").value(1125))
+                .andExpect(jsonPath("$.totalPrice").value(8625));
+    }
+
+    @Test
+    void returnsEstimateForDeckPatioAdditionRequest() throws Exception {
+        DeckPatioAddition calculated = new DeckPatioAddition();
+        calculated.setEstimatePrice(new BigDecimal("15000"));
+        calculated.setTaxAmount(new BigDecimal("2250"));
+        calculated.setTotalPrice(new BigDecimal("17250"));
+
+        when(estimationService.calculateEstimate(any())).thenReturn(calculated);
+        when(responseMapper.toResponse(calculated)).thenReturn(
+                new RenovationEstimateResponseModel(
+                        null, null, null, null, null, null, null,
+                        calculated.getEstimatePrice(),
+                        calculated.getTaxAmount(),
+                        calculated.getTotalPrice())
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "DECK_PATIO_ADDITION")
+                        .param("deckMaterial", DeckMaterial.COMPOSITE.name())
+                        .param("hasRailing", "true")
+                        .param("stairsCount", "2")
+                        .param("isCovered", "true")
+                        .param("deckAreaSqFt", "250")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estimatePrice").value(15000))
+                .andExpect(jsonPath("$.taxAmount").value(2250))
+                .andExpect(jsonPath("$.totalPrice").value(17250));
+    }
+
+    @Test
+    void returnsEstimateForFloorReplaceRequest() throws Exception {
+        FloorReplace calculated = new FloorReplace();
+        calculated.setSquareFeet(new BigDecimal("300"));
+        calculated.setEstimatePrice(new BigDecimal("4500"));
+        calculated.setTaxAmount(new BigDecimal("675"));
+        calculated.setTotalPrice(new BigDecimal("5175"));
+
+        when(estimationService.calculateEstimate(any())).thenReturn(calculated);
+        when(responseMapper.toResponse(calculated)).thenReturn(
+                new RenovationEstimateResponseModel(
+                        calculated.getSquareFeet(), null, null, null, null, null, null,
+                        calculated.getEstimatePrice(),
+                        calculated.getTaxAmount(),
+                        calculated.getTotalPrice())
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "FLOOR_REPLACE")
+                        .param("squareFeet", "300")
+                        .param("materialCostPerSqFt", "8")
+                        .param("existingFloorMaterial", FlooringMaterial.CARPET.name())
+                        .param("newFloorMaterial", FlooringMaterial.HARDWOOD.name())
+                        .param("subfloorRepairNeeded", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estimatePrice").value(4500))
+                .andExpect(jsonPath("$.taxAmount").value(675))
+                .andExpect(jsonPath("$.totalPrice").value(5175));
+    }
+
+    @Test
+    void windowDoorReplaceSkipsSquareFeetValidation() throws Exception {
+        WindowDoorReplace calculated = new WindowDoorReplace();
+        calculated.setEstimatePrice(new BigDecimal("5000"));
+        calculated.setTaxAmount(new BigDecimal("750"));
+        calculated.setTotalPrice(new BigDecimal("5750"));
+
+        when(estimationService.calculateEstimate(any())).thenReturn(calculated);
+        when(responseMapper.toResponse(calculated)).thenReturn(
+                new RenovationEstimateResponseModel(
+                        null, null, null, null, null, null, null,
+                        calculated.getEstimatePrice(),
+                        calculated.getTaxAmount(),
+                        calculated.getTotalPrice())
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "WINDOW_DOOR_REPLACE")
+                        .param("windowCount", "4")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void deckPatioAdditionSkipsSquareFeetValidation() throws Exception {
+        DeckPatioAddition calculated = new DeckPatioAddition();
+        calculated.setEstimatePrice(new BigDecimal("10000"));
+        calculated.setTaxAmount(new BigDecimal("1500"));
+        calculated.setTotalPrice(new BigDecimal("11500"));
+
+        when(estimationService.calculateEstimate(any())).thenReturn(calculated);
+        when(responseMapper.toResponse(calculated)).thenReturn(
+                new RenovationEstimateResponseModel(
+                        null, null, null, null, null, null, null,
+                        calculated.getEstimatePrice(),
+                        calculated.getTaxAmount(),
+                        calculated.getTotalPrice())
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "DECK_PATIO_ADDITION")
+                        .param("deckAreaSqFt", "200")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 }

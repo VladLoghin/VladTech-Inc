@@ -170,6 +170,104 @@ test.describe('Estimate Modal E2E', () => {
     await expect(materialField).toBeVisible();
   });
 
+  test('applies window & door preset and shows fields', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+    const optionCount = await options.count();
+
+    let found = false;
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Window') || text?.includes('Door')) {
+        const optionValue = await options.nth(i).getAttribute('value');
+        if (optionValue) {
+          await presetSelect.selectOption(optionValue);
+          await page.waitForTimeout(500);
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found && optionCount > 1) {
+      const optionValue = await options.nth(1).getAttribute('value');
+      if (optionValue) await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+    }
+
+    await expect(page.locator('select[name="windowType"]')).toBeVisible();
+    await expect(page.locator('select[name="doorType"]')).toBeVisible();
+    await expect(page.locator('input[name="windowCount"]')).toBeVisible();
+    await expect(page.locator('input[name="doorCount"]')).toBeVisible();
+  });
+
+  test('applies deck/patio preset and shows fields', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+    const optionCount = await options.count();
+
+    let found = false;
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Deck') || text?.includes('Patio')) {
+        const optionValue = await options.nth(i).getAttribute('value');
+        if (optionValue) {
+          await presetSelect.selectOption(optionValue);
+          await page.waitForTimeout(500);
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found && optionCount > 1) {
+      const optionValue = await options.nth(1).getAttribute('value');
+      if (optionValue) await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+    }
+
+    await expect(page.locator('input[name="deckAreaSqFt"]')).toBeVisible();
+    await expect(page.locator('select[name="deckMaterial"]')).toBeVisible();
+    await expect(page.locator('input[name="hasRailing"]')).toBeVisible();
+    await expect(page.locator('input[name="stairsCount"]')).toBeVisible();
+    await expect(page.locator('input[name="isCovered"]')).toBeVisible();
+  });
+
+  test('applies floor replace preset and auto-prices material', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+    const optionCount = await options.count();
+
+    let found = false;
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Floor')) {
+        const optionValue = await options.nth(i).getAttribute('value');
+        if (optionValue) {
+          await presetSelect.selectOption(optionValue);
+          await page.waitForTimeout(500);
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found && optionCount > 1) {
+      const optionValue = await options.nth(1).getAttribute('value');
+      if (optionValue) await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+    }
+
+    const newFloorSelect = page.locator('select[name="newFloorMaterial"]');
+    const materialCost = page.locator('input[name="materialCostPerSqFt"]');
+
+    await expect(newFloorSelect).toBeVisible();
+    await expect(materialCost).toBeVisible();
+
+    await newFloorSelect.selectOption('VINYL');
+    await expect(materialCost).toHaveValue(/2\.5/);
+  });
+
   // ============ Conditional Field Tests ============
 
   test('displays skylight fields only for roof preset', async ({ page }) => {
@@ -318,6 +416,127 @@ test.describe('Estimate Modal E2E', () => {
       expect(response.status()).toBe(200);
       const data = await response.json();
       expect(data.estimatePrice).toBeGreaterThan(0);
+    }
+  });
+
+  test('calculates window & door estimate with counts', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+
+    let optionValue = '';
+    const optionCount = await options.count();
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Window') || text?.includes('Door')) {
+        optionValue = (await options.nth(i).getAttribute('value')) || '';
+        break;
+      }
+    }
+
+    if (optionValue) {
+      await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+
+      await page.locator('select[name="windowType"]').selectOption('SLIDER');
+      await page.locator('select[name="doorType"]').selectOption('FIBERGLASS');
+      await page.locator('input[name="windowCount"]').fill('4');
+      await page.locator('input[name="doorCount"]').fill('2');
+
+      const responsePromise = page.waitForResponse((resp) =>
+        resp.url().includes('/api/estimates/calculate') && resp.status() === 200
+      );
+
+      const submitBtn = page.getByRole('button', { name: /submit/i });
+      await submitBtn.scrollIntoViewIfNeeded();
+      await submitBtn.click();
+      const response = await responsePromise;
+
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      expect(data.estimatePrice).toBeGreaterThan(0);
+      expect(data.totalPrice).toBeGreaterThan(data.estimatePrice);
+    }
+  });
+
+  test('calculates deck/patio estimate with extras', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+
+    let optionValue = '';
+    const optionCount = await options.count();
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Deck') || text?.includes('Patio')) {
+        optionValue = (await options.nth(i).getAttribute('value')) || '';
+        break;
+      }
+    }
+
+    if (optionValue) {
+      await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+
+      await page.locator('input[name="deckAreaSqFt"]').fill('250');
+      await page.locator('select[name="deckMaterial"]').selectOption('COMPOSITE');
+      await page.locator('input[name="hasRailing"]').check();
+      await page.locator('input[name="stairsCount"]').fill('2');
+      await page.locator('input[name="isCovered"]').check();
+
+      const responsePromise = page.waitForResponse((resp) =>
+        resp.url().includes('/api/estimates/calculate') && resp.status() === 200
+      );
+
+      const submitBtn = page.getByRole('button', { name: /submit/i });
+      await submitBtn.scrollIntoViewIfNeeded();
+      await submitBtn.click();
+      const response = await responsePromise;
+
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      expect(data.estimatePrice).toBeGreaterThan(0);
+      expect(data.totalPrice).toBeGreaterThan(data.estimatePrice);
+    }
+  });
+
+  test('calculates floor replace estimate with auto-priced material', async ({ page }) => {
+    const presetSelect = page.locator('#preset-select');
+    const options = page.locator('#preset-select option');
+
+    let optionValue = '';
+    const optionCount = await options.count();
+    for (let i = 1; i < optionCount; i++) {
+      const text = await options.nth(i).textContent();
+      if (text?.includes('Floor')) {
+        optionValue = (await options.nth(i).getAttribute('value')) || '';
+        break;
+      }
+    }
+
+    if (optionValue) {
+      await presetSelect.selectOption(optionValue);
+      await page.waitForTimeout(500);
+
+      await page.locator('input[name="squareFeet"]').fill('400');
+      await page.locator('select[name="existingFloorMaterial"]').selectOption('CARPET');
+      await page.locator('select[name="newFloorMaterial"]').selectOption('VINYL');
+      await page.locator('input[name="subfloorRepairNeeded"]').check();
+
+      const materialCost = page.locator('input[name="materialCostPerSqFt"]');
+      await expect(materialCost).toHaveValue(/2\.5/);
+
+      const responsePromise = page.waitForResponse((resp) =>
+        resp.url().includes('/api/estimates/calculate') && resp.status() === 200
+      );
+
+      const submitBtn = page.getByRole('button', { name: /submit/i });
+      await submitBtn.scrollIntoViewIfNeeded();
+      await submitBtn.click();
+      const response = await responsePromise;
+
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      expect(data.estimatePrice).toBeGreaterThan(0);
+      expect(data.totalPrice).toBeGreaterThan(data.estimatePrice);
     }
   });
 

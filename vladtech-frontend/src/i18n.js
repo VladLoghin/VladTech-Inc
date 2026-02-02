@@ -225,6 +225,8 @@ const resources = {
       "estimate.roofReplacePreset": "Roof Replace",
       "estimate.kitchenRemodelPreset": "Kitchen Remodel",
       "estimate.windowDoorReplacePreset": "Window & Door Replace",
+      "estimate.deckPatioAdditionPreset": "Deck/Patio Addition",
+      "estimate.floorReplacePreset": "Floor Replace",
 
       // Estimate Field Labels
       "estimate.sidingMaterial": "Siding Material",
@@ -244,6 +246,14 @@ const resources = {
       "estimate.doorType": "Door Type",
       "estimate.windowCount": "Number of Windows",
       "estimate.doorCount": "Number of Doors",
+      "estimate.deckMaterial": "Deck Material",
+      "estimate.hasRailing": "Include Railing",
+      "estimate.stairsCount": "Number of Stair Sets",
+      "estimate.isCovered": "Include Roof Cover",
+      "estimate.deckAreaSqFt": "Deck Area (sq ft)",
+      "estimate.existingFloorMaterial": "Existing Floor Material",
+      "estimate.newFloorMaterial": "New Floor Material",
+      "estimate.subfloorRepairNeeded": "Subfloor Repair Needed",
 
       // Estimate Material Options
       "estimate.sidingMaterialOptions": {
@@ -298,6 +308,13 @@ const resources = {
         "STEEL": "Steel",
         "GLASS_PANEL": "Glass Panel",
       },
+      "estimate.deckMaterialOptions": {
+        "WOOD": "Wood",
+        "COMPOSITE": "Composite",
+        "PVC": "PVC",
+        "ALUMINUM": "Aluminum",
+      },
+
 
 
       // Project list / upload info (kept from your conflict)
@@ -618,6 +635,8 @@ const resources = {
       "estimate.roofReplacePreset": "Remplacement de Toit",
       "estimate.kitchenRemodelPreset": "Rénovation de Cuisine",
       "estimate.windowDoorReplacePreset": "Remplacement de Fenêtres et Portes",
+      "estimate.deckPatioAdditionPreset": "Ajout de Terrasse/Patio",
+      "estimate.floorReplacePreset": "Remplacement de Plancher",
 
       // Estimate Field Labels
       "estimate.sidingMaterial": "Matériau de Revêtement",
@@ -637,6 +656,14 @@ const resources = {
       "estimate.doorType": "Type de Porte",
       "estimate.windowCount": "Nombre de Fenêtres",
       "estimate.doorCount": "Nombre de Portes",
+      "estimate.deckMaterial": "Matériau de Terrasse",
+      "estimate.hasRailing": "Inclure Garde-corps",
+      "estimate.stairsCount": "Nombre d'Escaliers",
+      "estimate.isCovered": "Inclure Couverture de Toit",
+      "estimate.deckAreaSqFt": "Surface de Terrasse (pi²)",
+      "estimate.existingFloorMaterial": "Matériau de Plancher Existant",
+      "estimate.newFloorMaterial": "Nouveau Matériau de Plancher",
+      "estimate.subfloorRepairNeeded": "Réparation de Sous-Plancher Nécessaire",
 
       // Estimate Material Options
       "estimate.sidingMaterialOptions": {
@@ -691,6 +718,13 @@ const resources = {
         "STEEL": "Acier",
         "GLASS_PANEL": "Panneau de Verre",
       },
+      "estimate.deckMaterialOptions": {
+        "WOOD": "Bois",
+        "COMPOSITE": "Composite",
+        "PVC": "PVC",
+        "ALUMINUM": "Aluminium",
+      },
+
 
 
       // Project list / upload info (kept from your conflict)
