@@ -81,7 +81,7 @@ public class RenovationEstimateController {
         boolean isDeckPatio = "DECK_PATIO_ADDITION".equalsIgnoreCase(projectType);
         boolean isFloorReplace = "FLOOR_REPLACE".equalsIgnoreCase(projectType);
         BigDecimal sqft = squareFeet != null ? squareFeet : areaSqFt;
-        if (!isWindowDoor && !isDeckPatio && !isFloorReplace) {
+        if (!isWindowDoor && !isDeckPatio) {
             if (sqft == null || sqft.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Square feet must be positive");
             }

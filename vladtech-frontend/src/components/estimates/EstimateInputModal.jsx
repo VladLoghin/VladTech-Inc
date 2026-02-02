@@ -450,7 +450,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         });
 
         setErrors(nextErrors);
-    }, [selectedPreset]);
+    }, [selectedPreset, formData]);
 
     // Still update the price if user changes material
     useEffect(() => {

@@ -93,7 +93,7 @@ public class EstimationServiceImpl implements EstimationService {
     private BigDecimal woodDoorFactor;
 
     @Value("${door.material.factor.FIBERGLASS:1.15}")
-    private BigDecimal fiberglasDoorFactor;
+    private BigDecimal fiberglassDoorFactor;
 
     @Value("${door.material.factor.STEEL:1.05}")
     private BigDecimal steelDoorFactor;
@@ -419,7 +419,7 @@ public class EstimationServiceImpl implements EstimationService {
         if (doorType == null) return ONE;
         return switch (doorType) {
             case WOOD -> woodDoorFactor;
-            case FIBERGLASS -> fiberglasDoorFactor;
+            case FIBERGLASS -> fiberglassDoorFactor;
             case STEEL -> steelDoorFactor;
             case GLASS_PANEL -> glassPanelDoorFactor;
         };
