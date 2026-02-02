@@ -59,4 +59,15 @@ public class RenovationEstimateRequestModel {
     private String cabinetQuality;
 
     private String countertopMaterial;
+
+    // Window and Door-specific properties
+    private String windowType;
+
+    private String doorType;
+
+    @PositiveOrZero(message = "Window count must be non-negative")
+    private Integer windowCount;
+
+    @PositiveOrZero(message = "Door count must be non-negative")
+    private Integer doorCount;
 }

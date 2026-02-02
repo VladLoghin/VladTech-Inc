@@ -12,6 +12,9 @@ import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
 import org.example.vladtech.estimates.data.siding.SidingMaterial;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
 import org.example.vladtech.estimates.mapperlayer.RenovationEstimateResponseMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +39,7 @@ public class RenovationEstimateController {
             @RequestParam String projectType,
             @RequestParam(required = false) BigDecimal squareFeet,
             @RequestParam(required = false) BigDecimal areaSqFt,
-            @RequestParam BigDecimal materialCostPerSqFt,
+            @RequestParam(required = false) BigDecimal materialCostPerSqFt,
             @RequestParam(required = false, defaultValue = "1.00") BigDecimal locationFactor,
             @RequestParam(required = false) BigDecimal taxRate,
             // Siding-specific
@@ -53,17 +56,25 @@ public class RenovationEstimateController {
             @RequestParam(required = false) String flooringMaterial,
             @RequestParam(required = false) String cabinetQuality,
             @RequestParam(required = false) String countertopMaterial,
+            // Window and Door-specific
+            @RequestParam(required = false) WindowType windowType,
+            @RequestParam(required = false) DoorType doorType,
+            @RequestParam(required = false) Integer windowCount,
+            @RequestParam(required = false) Integer doorCount,
             @RequestParam(required = false) String lang
     ) {
+        boolean isWindowDoor = "WINDOW_DOOR_REPLACE".equalsIgnoreCase(projectType);
         BigDecimal sqft = squareFeet != null ? squareFeet : areaSqFt;
-        if (sqft == null || sqft.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Square feet must be positive");
-        }
-        if (materialCostPerSqFt == null || materialCostPerSqFt.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Material cost per sq ft must be non-negative");
-        }
-        if (locationFactor != null && locationFactor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Location factor must be positive");
+        if (!isWindowDoor) {
+            if (sqft == null || sqft.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Square feet must be positive");
+            }
+            if (materialCostPerSqFt == null || materialCostPerSqFt.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Material cost per sq ft must be non-negative");
+            }
+            if (locationFactor != null && locationFactor.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Location factor must be positive");
+            }
         }
 
         log.info("Received estimate calculation: type={}, sqFt={}, lang={}", projectType, sqft, lang);
@@ -102,6 +113,14 @@ public class RenovationEstimateController {
             kitchen.setCabinetQuality(cabinetQuality != null ? CabinetQuality.valueOf(cabinetQuality) : null);
             kitchen.setCountertopMaterial(countertopMaterial != null ? CountertopMaterial.valueOf(countertopMaterial) : null);
             project = kitchen;
+        } else if ("WINDOW_DOOR_REPLACE".equalsIgnoreCase(projectType)) {
+            WindowDoorReplace windowDoor = new WindowDoorReplace();
+            windowDoor.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            windowDoor.setWindowType(windowType);
+            windowDoor.setDoorType(doorType);
+            windowDoor.setWindowCount(windowCount != null ? windowCount : 0);
+            windowDoor.setDoorCount(doorCount != null ? doorCount : 0);
+            project = windowDoor;
         } else {
             RenovationProject base = new RenovationProject();
             base.setSquareFeet(sqft);

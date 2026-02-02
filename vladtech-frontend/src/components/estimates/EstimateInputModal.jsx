@@ -70,144 +70,184 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     );
 
     const builtInPresets = useMemo(
-        () => [
-            {
-                name: t.sidingReplacePreset ?? "Siding Replace",
-                key: "SIDING_REPLACE",
-                projectType: "SIDING_REPLACE",
-                defaultValues: {
-                    squareFeet: "",
-                    materialCostPerSqFt: "",
-                    locationFactor: "1.00",
-                    sidingMaterial: "VINYL",
-                    stories: "1",
-                    includeInsulation: false,
-                },
-                fields: [
-                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                    {
-                        name: "sidingMaterial",
-                        label: t.sidingMaterial ?? "Siding Material",
-                        type: "select",
-                        required: true,
-                        options: [
-                            { value: "VINYL", label: t?.sidingMaterialOptions?.VINYL ?? "Vinyl" },
-                            { value: "WOOD", label: t?.sidingMaterialOptions?.WOOD ?? "Wood" },
-                            { value: "FIBER_CEMENT", label: t?.sidingMaterialOptions?.FIBER_CEMENT ?? "Fiber Cement" },
-                            { value: "BRICK", label: t?.sidingMaterialOptions?.BRICK ?? "Brick" },
-                            { value: "STONE_VENEER", label: t?.sidingMaterialOptions?.STONE_VENEER ?? "Stone Veneer" },
-                        ],
-                    },
-                    { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
-                    { name: "includeInsulation", label: t.includeInsulation ?? "Include Insulation", type: "checkbox", required: false },
-                ],
+    () => [
+        {
+            name: t.sidingReplacePreset ?? "Siding Replace",
+            key: "SIDING_REPLACE",
+            projectType: "SIDING_REPLACE",
+            defaultValues: {
+                squareFeet: "",
+                materialCostPerSqFt: "",
+                locationFactor: "1.00",
+                sidingMaterial: "VINYL",
+                stories: "1",
+                includeInsulation: false,
             },
-            {
-                name: t.roofReplacePreset ?? "Roof Replace",
-                key: "ROOFING_REPLACE",
-                projectType: "ROOFING_REPLACE",
-                defaultValues: {
-                    squareFeet: "",
-                    materialCostPerSqFt: "",
-                    locationFactor: "1.00",
-                    roofMaterial: "ASPHALT",
-                    roofPitch: "1.0",
-                    stories: "1",
-                    tearOffRequired: false,
-                    hasSkylights: false,
-                    numSkylights: "0",
+            fields: [
+                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                {
+                    name: "sidingMaterial",
+                    label: t.sidingMaterial ?? "Siding Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "VINYL", label: t?.sidingMaterialOptions?.VINYL ?? "Vinyl" },
+                        { value: "WOOD", label: t?.sidingMaterialOptions?.WOOD ?? "Wood" },
+                        { value: "FIBER_CEMENT", label: t?.sidingMaterialOptions?.FIBER_CEMENT ?? "Fiber Cement" },
+                        { value: "BRICK", label: t?.sidingMaterialOptions?.BRICK ?? "Brick" },
+                        { value: "STONE_VENEER", label: t?.sidingMaterialOptions?.STONE_VENEER ?? "Stone Veneer" },
+                    ],
                 },
-                fields: [
-                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                    {
-                        name: "roofMaterial",
-                        label: t.roofMaterial ?? "Roof Material",
-                        type: "select",
-                        required: true,
-                        options: [
-                            { value: "ASPHALT", label: t?.roofMaterialOptions?.ASPHALT ?? "Asphalt" },
-                            { value: "METAL", label: t?.roofMaterialOptions?.METAL ?? "Metal" },
-                            { value: "CLAY", label: t?.roofMaterialOptions?.CLAY ?? "Clay" },
-                            { value: "SLATE", label: t?.roofMaterialOptions?.SLATE ?? "Slate" },
-                            { value: "SYNTHETIC", label: t?.roofMaterialOptions?.SYNTHETIC ?? "Synthetic" },
-                        ],
-                    },
-                    { name: "roofPitch", label: t.roofPitch ?? "Roof Pitch", type: "number", required: true, min: 0.1, step: "0.1" },
-                    { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
-                    { name: "tearOffRequired", label: t.tearOffRequired ?? "Tear Off Required", type: "checkbox", required: false },
-                    { name: "hasSkylights", label: t.hasSkylights ?? "Has Skylights", type: "checkbox", required: false },
-                    { name: "numSkylights", label: t.numSkylights ?? "Number of Skylights", type: "number", required: false, min: 0 },
-                ],
+                { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
+                { name: "includeInsulation", label: t.includeInsulation ?? "Include Insulation", type: "checkbox", required: false },
+            ],
+        },
+        {
+            name: t.roofReplacePreset ?? "Roof Replace",
+            key: "ROOFING_REPLACE",
+            projectType: "ROOFING_REPLACE",
+            defaultValues: {
+                squareFeet: "",
+                materialCostPerSqFt: "",
+                locationFactor: "1.00",
+                roofMaterial: "ASPHALT",
+                roofPitch: "1.0",
+                stories: "1",
+                tearOffRequired: false,
+                hasSkylights: false,
+                numSkylights: "0",
             },
-            {
-                name: t.kitchenRemodelPreset ?? "Kitchen Remodel",
-                key: "KITCHEN_REMODEL",
-                projectType: "KITCHEN_REMODEL",
-                defaultValues: {
-                    squareFeet: "",
-                    materialCostPerSqFt: "",
-                    locationFactor: "1.00",
-                    cabinetQuality: "STOCK",
-                    countertopMaterial: "LAMINATE",
-                    flooringMaterial: "VINYL",
-                    includeApplianceAllowance: false,
-                    applianceAllowance: "0",
+            fields: [
+                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                {
+                    name: "roofMaterial",
+                    label: t.roofMaterial ?? "Roof Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "ASPHALT", label: t?.roofMaterialOptions?.ASPHALT ?? "Asphalt" },
+                        { value: "METAL", label: t?.roofMaterialOptions?.METAL ?? "Metal" },
+                        { value: "CLAY", label: t?.roofMaterialOptions?.CLAY ?? "Clay" },
+                        { value: "SLATE", label: t?.roofMaterialOptions?.SLATE ?? "Slate" },
+                        { value: "SYNTHETIC", label: t?.roofMaterialOptions?.SYNTHETIC ?? "Synthetic" },
+                    ],
                 },
-                fields: [
-                    { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
-                    { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
-                    {
-                        name: "cabinetQuality",
-                        label: t.cabinetQuality ?? "Cabinet Quality",
-                        type: "select",
-                        required: true,
-                        options: [
-                            { value: "STOCK", label: t?.cabinetQualityOptions?.STOCK ?? "Stock" },
-                            { value: "SEMI_CUSTOM", label: t?.cabinetQualityOptions?.SEMI_CUSTOM ?? "Semi-Custom" },
-                            { value: "CUSTOM", label: t?.cabinetQualityOptions?.CUSTOM ?? "Custom" },
-                        ],
-                    },
-                    {
-                        name: "countertopMaterial",
-                        label: t.countertopMaterial ?? "Countertop Material",
-                        type: "select",
-                        required: true,
-                        options: [
-                            { value: "LAMINATE", label: t?.countertopMaterialOptions?.LAMINATE ?? "Laminate" },
-                            { value: "BUTCHERBLOCK", label: t?.countertopMaterialOptions?.BUTCHERBLOCK ?? "Butcherblock" },
-                            { value: "GRANITE", label: t?.countertopMaterialOptions?.GRANITE ?? "Granite" },
-                            { value: "QUARTZ", label: t?.countertopMaterialOptions?.QUARTZ ?? "Quartz" },
-                            { value: "MARBLE", label: t?.countertopMaterialOptions?.MARBLE ?? "Marble" },
-                            { value: "CONCRETE", label: t?.countertopMaterialOptions?.CONCRETE ?? "Concrete" },
-                            { value: "STAINLESS_STEEL", label: t?.countertopMaterialOptions?.STAINLESS_STEEL ?? "Stainless Steel" },
-                            { value: "SOLID_SURFACE", label: t?.countertopMaterialOptions?.SOLID_SURFACE ?? "Solid Surface" },
-                            { value: "TILE", label: t?.countertopMaterialOptions?.TILE ?? "Tile" },
-                        ],
-                    },
-                    {
-                        name: "flooringMaterial",
-                        label: t.flooringMaterial ?? "Flooring Material",
-                        type: "select",
-                        required: true,
-                        options: [
-                            { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
-                            { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
-                            { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
-                            { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
-                            { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
-                            { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
-                            { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
-                        ],
-                    },
-                    { name: "includeApplianceAllowance", label: t.includeApplianceAllowance ?? "Include Appliance Allowance", type: "checkbox", required: false },
-                    { name: "applianceAllowance", label: t.applianceAllowance ?? "Appliance Allowance", type: "number", required: false, min: 0, step: "0.01" },
-                ],
+                { name: "roofPitch", label: t.roofPitch ?? "Roof Pitch", type: "number", required: true, min: 0.1, step: "0.1" },
+                { name: "stories", label: t.stories ?? "Stories", type: "number", required: true, min: 1 },
+                { name: "tearOffRequired", label: t.tearOffRequired ?? "Tear Off Required", type: "checkbox", required: false },
+                { name: "hasSkylights", label: t.hasSkylights ?? "Has Skylights", type: "checkbox", required: false },
+                { name: "numSkylights", label: t.numSkylights ?? "Number of Skylights", type: "number", required: false, min: 0 },
+            ],
+        },
+        {
+            name: t.kitchenRemodelPreset ?? "Kitchen Remodel",
+            key: "KITCHEN_REMODEL",
+            projectType: "KITCHEN_REMODEL",
+            defaultValues: {
+                squareFeet: "",
+                materialCostPerSqFt: "",
+                locationFactor: "1.00",
+                cabinetQuality: "STOCK",
+                countertopMaterial: "LAMINATE",
+                flooringMaterial: "VINYL",
+                includeApplianceAllowance: false,
+                applianceAllowance: "0",
             },
-        ],
-        [t]
-    );
+            fields: [
+                { name: "squareFeet", label: t.squareFeet ?? "Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
+                {
+                    name: "cabinetQuality",
+                    label: t.cabinetQuality ?? "Cabinet Quality",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "STOCK", label: t?.cabinetQualityOptions?.STOCK ?? "Stock" },
+                        { value: "SEMI_CUSTOM", label: t?.cabinetQualityOptions?.SEMI_CUSTOM ?? "Semi-Custom" },
+                        { value: "CUSTOM", label: t?.cabinetQualityOptions?.CUSTOM ?? "Custom" },
+                    ],
+                },
+                {
+                    name: "countertopMaterial",
+                    label: t.countertopMaterial ?? "Countertop Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "LAMINATE", label: t?.countertopMaterialOptions?.LAMINATE ?? "Laminate" },
+                        { value: "BUTCHERBLOCK", label: t?.countertopMaterialOptions?.BUTCHERBLOCK ?? "Butcherblock" },
+                        { value: "GRANITE", label: t?.countertopMaterialOptions?.GRANITE ?? "Granite" },
+                        { value: "QUARTZ", label: t?.countertopMaterialOptions?.QUARTZ ?? "Quartz" },
+                        { value: "MARBLE", label: t?.countertopMaterialOptions?.MARBLE ?? "Marble" },
+                        { value: "CONCRETE", label: t?.countertopMaterialOptions?.CONCRETE ?? "Concrete" },
+                        { value: "STAINLESS_STEEL", label: t?.countertopMaterialOptions?.STAINLESS_STEEL ?? "Stainless Steel" },
+                        { value: "SOLID_SURFACE", label: t?.countertopMaterialOptions?.SOLID_SURFACE ?? "Solid Surface" },
+                        { value: "TILE", label: t?.countertopMaterialOptions?.TILE ?? "Tile" },
+                    ],
+                },
+                {
+                    name: "flooringMaterial",
+                    label: t.flooringMaterial ?? "Flooring Material",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "HARDWOOD", label: t?.flooringMaterialOptions?.HARDWOOD ?? "Hardwood" },
+                        { value: "ENGINEERED_HARDWOOD", label: t?.flooringMaterialOptions?.ENGINEERED_HARDWOOD ?? "Engineered Hardwood" },
+                        { value: "LAMINATE", label: t?.flooringMaterialOptions?.LAMINATE ?? "Laminate" },
+                        { value: "VINYL", label: t?.flooringMaterialOptions?.VINYL ?? "Vinyl" },
+                        { value: "TILE", label: t?.flooringMaterialOptions?.TILE ?? "Tile" },
+                        { value: "CARPET", label: t?.flooringMaterialOptions?.CARPET ?? "Carpet" },
+                        { value: "POLISHED_CONCRETE", label: t?.flooringMaterialOptions?.POLISHED_CONCRETE ?? "Polished Concrete" },
+                    ],
+                },
+                { name: "includeApplianceAllowance", label: t.includeApplianceAllowance ?? "Include Appliance Allowance", type: "checkbox", required: false },
+                { name: "applianceAllowance", label: t.applianceAllowance ?? "Appliance Allowance", type: "number", required: false, min: 0, step: "0.01" },
+            ],
+        },
+        {
+            name: t.windowDoorReplacePreset ?? "Window & Door Replace",
+            key: "WINDOW_DOOR_REPLACE",
+            projectType: "WINDOW_DOOR_REPLACE",
+            defaultValues: {
+                windowType: "CASEMENT",
+                doorType: "WOOD",
+                windowCount: "0",
+                doorCount: "0",
+            },
+            fields: [
+                {
+                    name: "windowType",
+                    label: t.windowType ?? "Window Type",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "CASEMENT", label: t?.windowTypeOptions?.CASEMENT ?? "Casement" },
+                        { value: "SLIDER", label: t?.windowTypeOptions?.SLIDER ?? "Slider" },
+                        { value: "DOUBLE_HUNG", label: t?.windowTypeOptions?.DOUBLE_HUNG ?? "Double Hung" },
+                        { value: "AWNING", label: t?.windowTypeOptions?.AWNING ?? "Awning" },
+                        { value: "FIXED", label: t?.windowTypeOptions?.FIXED ?? "Fixed" },
+                    ],
+                },
+                {
+                    name: "doorType",
+                    label: t.doorType ?? "Door Type",
+                    type: "select",
+                    required: true,
+                    options: [
+                        { value: "WOOD", label: t?.doorTypeOptions?.WOOD ?? "Wood" },
+                        { value: "FIBERGLASS", label: t?.doorTypeOptions?.FIBERGLASS ?? "Fiberglass" },
+                        { value: "STEEL", label: t?.doorTypeOptions?.STEEL ?? "Steel" },
+                        { value: "GLASS_PANEL", label: t?.doorTypeOptions?.GLASS_PANEL ?? "Glass Panel" },
+                    ],
+                },
+                { name: "windowCount", label: t.windowCount ?? "Number of Windows", type: "number", required: true, min: 0, step: "1" },
+                { name: "doorCount", label: t.doorCount ?? "Number of Doors", type: "number", required: true, min: 0, step: "1" },
+            ],
+        },
+    ],
+    [t]
+);
 
     const availablePresets = useMemo(
         () => [...builtInPresets, ...presets],
@@ -271,7 +311,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         return data;
     };
 
-     
+
     useEffect(() => {
         if (isOpen && sortedPresets.length > 0) {
             const defaultPreset = sortedPresets[0];
@@ -288,7 +328,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
     }, [toast]);
 
-     
+
     useEffect(() => {
         if (!selectedPreset) return;
 

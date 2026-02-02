@@ -220,6 +220,86 @@ const resources = {
       "estimate.greaterThanZero": "must be greater than 0",
       "estimate.validNumber": "must be a valid number",
 
+      // Estimate Presets
+      "estimate.sidingReplacePreset": "Siding Replace",
+      "estimate.roofReplacePreset": "Roof Replace",
+      "estimate.kitchenRemodelPreset": "Kitchen Remodel",
+      "estimate.windowDoorReplacePreset": "Window & Door Replace",
+
+      // Estimate Field Labels
+      "estimate.sidingMaterial": "Siding Material",
+      "estimate.stories": "Stories",
+      "estimate.includeInsulation": "Include Insulation",
+      "estimate.roofMaterial": "Roof Material",
+      "estimate.roofPitch": "Roof Pitch",
+      "estimate.tearOffRequired": "Tear Off Required",
+      "estimate.hasSkylights": "Has Skylights",
+      "estimate.numSkylights": "Number of Skylights",
+      "estimate.cabinetQuality": "Cabinet Quality",
+      "estimate.countertopMaterial": "Countertop Material",
+      "estimate.flooringMaterial": "Flooring Material",
+      "estimate.includeApplianceAllowance": "Include Appliance Allowance",
+      "estimate.applianceAllowance": "Appliance Allowance",
+      "estimate.windowType": "Window Type",
+      "estimate.doorType": "Door Type",
+      "estimate.windowCount": "Number of Windows",
+      "estimate.doorCount": "Number of Doors",
+
+      // Estimate Material Options
+      "estimate.sidingMaterialOptions": {
+        "VINYL": "Vinyl",
+        "WOOD": "Wood",
+        "FIBER_CEMENT": "Fiber Cement",
+        "BRICK": "Brick",
+        "STONE_VENEER": "Stone Veneer",
+      },
+      "estimate.roofMaterialOptions": {
+        "ASPHALT": "Asphalt",
+        "METAL": "Metal",
+        "CLAY": "Clay",
+        "SLATE": "Slate",
+        "SYNTHETIC": "Synthetic",
+      },
+      "estimate.cabinetQualityOptions": {
+        "STOCK": "Stock",
+        "SEMI_CUSTOM": "Semi-Custom",
+        "CUSTOM": "Custom",
+      },
+      "estimate.countertopMaterialOptions": {
+        "LAMINATE": "Laminate",
+        "BUTCHERBLOCK": "Butcherblock",
+        "GRANITE": "Granite",
+        "QUARTZ": "Quartz",
+        "MARBLE": "Marble",
+        "CONCRETE": "Concrete",
+        "STAINLESS_STEEL": "Stainless Steel",
+        "SOLID_SURFACE": "Solid Surface",
+        "TILE": "Tile",
+      },
+      "estimate.flooringMaterialOptions": {
+        "HARDWOOD": "Hardwood",
+        "ENGINEERED_HARDWOOD": "Engineered Hardwood",
+        "LAMINATE": "Laminate",
+        "VINYL": "Vinyl",
+        "TILE": "Tile",
+        "CARPET": "Carpet",
+        "POLISHED_CONCRETE": "Polished Concrete",
+      },
+      "estimate.windowTypeOptions": {
+        "CASEMENT": "Casement",
+        "SLIDER": "Slider",
+        "DOUBLE_HUNG": "Double Hung",
+        "AWNING": "Awning",
+        "FIXED": "Fixed",
+      },
+      "estimate.doorTypeOptions": {
+        "WOOD": "Wood",
+        "FIBERGLASS": "Fiberglass",
+        "STEEL": "Steel",
+        "GLASS_PANEL": "Glass Panel",
+      },
+
+
       // Project list / upload info (kept from your conflict)
       "project.uploadInformation": "Upload Information",
       "project.viewInformation": "View Information",
@@ -532,6 +612,86 @@ const resources = {
       "estimate.isRequired": "est requis",
       "estimate.greaterThanZero": "doit être supérieur à 0",
       "estimate.validNumber": "doit être un nombre valide",
+
+      // Estimate Presets
+      "estimate.sidingReplacePreset": "Remplacement de Revêtement",
+      "estimate.roofReplacePreset": "Remplacement de Toit",
+      "estimate.kitchenRemodelPreset": "Rénovation de Cuisine",
+      "estimate.windowDoorReplacePreset": "Remplacement de Fenêtres et Portes",
+
+      // Estimate Field Labels
+      "estimate.sidingMaterial": "Matériau de Revêtement",
+      "estimate.stories": "Étages",
+      "estimate.includeInsulation": "Inclure Isolation",
+      "estimate.roofMaterial": "Matériau de Toit",
+      "estimate.roofPitch": "Pente du Toit",
+      "estimate.tearOffRequired": "Enlèvement Requis",
+      "estimate.hasSkylights": "Dispose de Puits de Lumière",
+      "estimate.numSkylights": "Nombre de Puits de Lumière",
+      "estimate.cabinetQuality": "Qualité de l'Armoire",
+      "estimate.countertopMaterial": "Matériau du Plan de Travail",
+      "estimate.flooringMaterial": "Matériau de Revêtement de Sol",
+      "estimate.includeApplianceAllowance": "Inclure Allocation d'Électroménagers",
+      "estimate.applianceAllowance": "Allocation d'Électroménagers",
+      "estimate.windowType": "Type de Fenêtre",
+      "estimate.doorType": "Type de Porte",
+      "estimate.windowCount": "Nombre de Fenêtres",
+      "estimate.doorCount": "Nombre de Portes",
+
+      // Estimate Material Options
+      "estimate.sidingMaterialOptions": {
+        "VINYL": "Vinyle",
+        "WOOD": "Bois",
+        "FIBER_CEMENT": "Ciment Fibreux",
+        "BRICK": "Brique",
+        "STONE_VENEER": "Placage de Pierre",
+      },
+      "estimate.roofMaterialOptions": {
+        "ASPHALT": "Asphalte",
+        "METAL": "Métal",
+        "CLAY": "Argile",
+        "SLATE": "Ardoise",
+        "SYNTHETIC": "Synthétique",
+      },
+      "estimate.cabinetQualityOptions": {
+        "STOCK": "Stock",
+        "SEMI_CUSTOM": "Semi-Personnalisé",
+        "CUSTOM": "Personnalisé",
+      },
+      "estimate.countertopMaterialOptions": {
+        "LAMINATE": "Stratifié",
+        "BUTCHERBLOCK": "Butcherblock",
+        "GRANITE": "Granit",
+        "QUARTZ": "Quartz",
+        "MARBLE": "Marbre",
+        "CONCRETE": "Béton",
+        "STAINLESS_STEEL": "Acier Inoxydable",
+        "SOLID_SURFACE": "Surface Solide",
+        "TILE": "Carrelage",
+      },
+      "estimate.flooringMaterialOptions": {
+        "HARDWOOD": "Bois Dur",
+        "ENGINEERED_HARDWOOD": "Bois D'ingénierie",
+        "LAMINATE": "Stratifié",
+        "VINYL": "Vinyle",
+        "TILE": "Carrelage",
+        "CARPET": "Tapis",
+        "POLISHED_CONCRETE": "Béton Poli",
+      },
+      "estimate.windowTypeOptions": {
+        "CASEMENT": "Fenêtre à Battant",
+        "SLIDER": "Fenêtre Coulissante",
+        "DOUBLE_HUNG": "Fenêtre Double Battante",
+        "AWNING": "Fenêtre Auvent",
+        "FIXED": "Fenêtre Fixe",
+      },
+      "estimate.doorTypeOptions": {
+        "WOOD": "Bois",
+        "FIBERGLASS": "Fibre de Verre",
+        "STEEL": "Acier",
+        "GLASS_PANEL": "Panneau de Verre",
+      },
+
 
       // Project list / upload info (kept from your conflict)
       "project.uploadInformation": "Téléverser les informations",

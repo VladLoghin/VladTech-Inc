@@ -7,6 +7,9 @@ import org.example.vladtech.estimates.data.roof.RoofingReplace;
 import org.example.vladtech.estimates.data.roof.RoofMaterial;
 import org.example.vladtech.estimates.data.siding.SidingMaterial;
 import org.example.vladtech.estimates.data.siding.SidingReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace;
+import org.example.vladtech.estimates.data.windowanddoor.WindowType;
+import org.example.vladtech.estimates.data.windowanddoor.DoorType;
 import org.example.vladtech.estimates.exceptions.EstimationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -65,6 +68,35 @@ public class EstimationServiceImpl implements EstimationService {
     @Value("${roof.material.factor.SYNTHETIC:1.30}")
     private BigDecimal syntheticFactor;
 
+    // Window material multipliers (defaults)
+    @Value("${window.material.factor.CASEMENT:1.00}")
+    private BigDecimal casementFactor;
+
+    @Value("${window.material.factor.SLIDER:0.95}")
+    private BigDecimal sliderFactor;
+
+    @Value("${window.material.factor.DOUBLE_HUNG:1.05}")
+    private BigDecimal doubleHungFactor;
+
+    @Value("${window.material.factor.AWNING:1.10}")
+    private BigDecimal awningFactor;
+
+    @Value("${window.material.factor.FIXED:0.85}")
+    private BigDecimal fixedFactor;
+
+    // Door material multipliers (defaults)
+    @Value("${door.material.factor.WOOD:1.00}")
+    private BigDecimal woodDoorFactor;
+
+    @Value("${door.material.factor.FIBERGLASS:1.15}")
+    private BigDecimal fiberglasDoorFactor;
+
+    @Value("${door.material.factor.STEEL:1.05}")
+    private BigDecimal steelDoorFactor;
+
+    @Value("${door.material.factor.GLASS_PANEL:1.30}")
+    private BigDecimal glassPanelDoorFactor;
+
     @Override
     public RenovationProject calculateEstimate(RenovationProject project) {
         if (project == null) {
@@ -73,19 +105,27 @@ public class EstimationServiceImpl implements EstimationService {
 
         BigDecimal squareFeet = ns(project.getSquareFeet());
         BigDecimal materialPerSqFt = ns(project.getMaterialCostPerSqFt());
+
+        // Skip square feet validation for WindowDoorReplace
+        if (!(project instanceof WindowDoorReplace)) {
+            if (squareFeet.compareTo(ZERO) <= 0) {
+                throw new EstimationException("E101", "Square feet must be greater than zero");
+            }
+            if (materialPerSqFt.compareTo(ZERO) < 0) {
+                throw new EstimationException("E102", "Material cost per sq ft cannot be negative");
+            }
+        }
+
         BigDecimal locationFactor = ns(project.getLocationFactor(), ONE);
-
-        if (squareFeet.compareTo(ZERO) <= 0) {
-            throw new EstimationException("E101", "Square feet must be greater than zero");
-        }
-        if (materialPerSqFt.compareTo(ZERO) < 0) {
-            throw new EstimationException("E102", "Material cost per sq ft cannot be negative");
-        }
-
+        
         project.setLaborRate(laborRate);
         project.setOverheadRate(overheadRate);
         project.setContingencyRate(contingencyRate);
-        project.setTaxRate(taxRate);
+        
+        // Use provided taxRate or default
+        if (project.getTaxRate() == null) {
+            project.setTaxRate(taxRate);
+        }
 
         BigDecimal typeFactor = ONE;
         BigDecimal extraLaborPerStory = ZERO;
@@ -151,6 +191,36 @@ public class EstimationServiceImpl implements EstimationService {
                     project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
             
             return project;
+        } else if (project instanceof WindowDoorReplace windowDoor) {
+            BigDecimal windowCostPerUnit = BigDecimal.valueOf(800); // Base cost per window
+            BigDecimal doorCostPerUnit = BigDecimal.valueOf(1200); // Base cost per door
+            
+            BigDecimal windowMaterialFactor = resolveWindowMaterialFactor(windowDoor.getWindowType());
+            BigDecimal doorMaterialFactor = resolveDoorMaterialFactor(windowDoor.getDoorType());
+            
+            BigDecimal windowMaterialCost = BigDecimal.valueOf(windowDoor.getWindowCount()).multiply(windowCostPerUnit).multiply(windowMaterialFactor);
+            BigDecimal doorMaterialCost = BigDecimal.valueOf(windowDoor.getDoorCount()).multiply(doorCostPerUnit).multiply(doorMaterialFactor);
+            
+            // 3 labor rates per window and per door
+            BigDecimal windowLaborCost = BigDecimal.valueOf(windowDoor.getWindowCount()).multiply(laborRate.multiply(BigDecimal.valueOf(3)));
+            BigDecimal doorLaborCost = BigDecimal.valueOf(windowDoor.getDoorCount()).multiply(laborRate.multiply(BigDecimal.valueOf(3)));
+            
+            BigDecimal baseCost = windowMaterialCost.add(doorMaterialCost).add(windowLaborCost).add(doorLaborCost);
+            
+            BigDecimal overhead = baseCost.multiply(overheadRate);
+            BigDecimal contingency = baseCost.multiply(contingencyRate);
+            BigDecimal estimatePrice = baseCost.add(overhead).add(contingency);
+            BigDecimal taxAmount = estimatePrice.multiply(taxRate);
+            BigDecimal totalPrice = estimatePrice.add(taxAmount);
+            
+            project.setEstimatePrice(round2(estimatePrice));
+            project.setTaxAmount(round2(taxAmount));
+            project.setTotalPrice(round2(totalPrice));
+            
+            log.debug("Calculated window/door replacement estimate: estimatePrice={}, taxAmount={}, totalPrice={}",
+                    project.getEstimatePrice(), project.getTaxAmount(), project.getTotalPrice());
+            
+            return project;
         }
 
         BigDecimal effectiveLaborRate = laborRate.add(extraLaborPerStory);
@@ -194,6 +264,27 @@ public class EstimationServiceImpl implements EstimationService {
             case CLAY -> clayFactor;
             case SLATE -> slateFactor;
             case SYNTHETIC -> syntheticFactor;
+        };
+    }
+
+    private BigDecimal resolveWindowMaterialFactor(WindowType windowType) {
+        if (windowType == null) return ONE;
+        return switch (windowType) {
+            case CASEMENT -> casementFactor;
+            case SLIDER -> sliderFactor;
+            case DOUBLE_HUNG -> doubleHungFactor;
+            case AWNING -> awningFactor;
+            case FIXED -> fixedFactor;
+        };
+    }
+
+    private BigDecimal resolveDoorMaterialFactor(DoorType doorType) {
+        if (doorType == null) return ONE;
+        return switch (doorType) {
+            case WOOD -> woodDoorFactor;
+            case FIBERGLASS -> fiberglasDoorFactor;
+            case STEEL -> steelDoorFactor;
+            case GLASS_PANEL -> glassPanelDoorFactor;
         };
     }
 
