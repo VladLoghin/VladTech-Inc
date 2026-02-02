@@ -2,6 +2,7 @@ package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.business.ReviewServiceImpl;
 import org.example.vladtech.reviews.data.Rating;
@@ -28,13 +29,16 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    private final ContactServiceImpl contactService;
+
     @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
     @GetMapping()
     public ResponseEntity<List<ReviewResponseModel>> getAllReviews(@AuthenticationPrincipal Jwt jwt,
                                                                    @RequestParam(required = false) String clientName,
                                                                    @RequestParam(required = false) Rating rating,
-                                                                   @RequestParam(required = false) String type) {
-        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating, type));
+                                                                   @RequestParam(required = false) String type,
+                                                                   @RequestParam(required = false) String comment) {
+        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating, type, comment));
     }
 
 
@@ -59,8 +63,9 @@ public class ReviewController {
     @GetMapping("/visible")
     public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews(@RequestParam(required = false) String clientName,
                                                                            @RequestParam(required = false) Rating rating,
-                                                                          @RequestParam(required = false) String type) {
-        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating, type));
+                                                                          @RequestParam(required = false) String type,
+                                                                          @RequestParam(required = false) String comment) {
+        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating, type, comment));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -73,6 +78,8 @@ public class ReviewController {
         String userId = jwt.getClaim("sub");
         reviewRequest.setClientId(userId);
         reviewRequest.setVisible(false);
+
+        contactService.notifyAdminReviewSubmitted(reviewRequest);
         return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos, userId));
     }
 
@@ -102,7 +109,7 @@ public class ReviewController {
 
     @GetMapping("/satisfaction-percentage")
     public ResponseEntity<Double> getSatisfactionPercentage() {
-        if (reviewService.getAllVisibleReviews(null, null, null).isEmpty()) {
+        if (reviewService.getAllVisibleReviews(null, null, null, null).isEmpty()) {
             return ResponseEntity.ok(0.0);
         }
         return ResponseEntity.ok(reviewService.computeSatisfactionPercentage());

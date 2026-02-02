@@ -27,6 +27,7 @@ const ReviewsPage = () => {
     clientName: "",
     rating: "",
     type: "",
+    comment: "",
   });
 
   const rawRoles = user?.["https://vladtech.com/roles"];
@@ -79,6 +80,12 @@ const ReviewsPage = () => {
           filtered = filtered.filter(r => r.type === filters.type);
         }
         
+        if (filters.comment) {
+          filtered = filtered.filter(r => 
+            r.comment?.toLowerCase().includes(filters.comment.toLowerCase())
+          );
+        }
+        
         setReviews(filtered);
         return;
       }
@@ -95,37 +102,37 @@ const ReviewsPage = () => {
   }, [isLoading, isClient, isStaff, showMine, filters]);
 
   const handleReset = () => {
-    setFilters({ clientName: "", rating: "", type: "" });
+    setFilters({ clientName: "", rating: "", type: "", comment: "" });
   };
 
   return (
     <>
       <div className="reviews-page" data-testid="reviews-page">
         <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-yellow-400/20 backdrop-blur-xl">
-          <div className="container mx-auto px-8 py-6 flex items-center">
+          <div className="container mx-auto px-4 sm:px-8 py-4 sm:py-6 flex items-center justify-between gap-4 sm:gap-0">
             <button
               onClick={() => navigate("/")}
-              className="text-2xl text-white hover:text-yellow-400"
+              className="text-lg sm:text-2xl text-white hover:text-yellow-400 font-semibold whitespace-nowrap"
             >
               VLADTECH
             </button>
 
-            <div className="flex flex-1 justify-center gap-12">
+            <div className="flex flex-1 justify-center gap-4 sm:gap-12">
               <button
                 onClick={() => navigate("/portfolio")}
-                className="text-white/40 hover:text-yellow-400"
+                className="text-xs sm:text-base text-white/40 hover:text-yellow-400 whitespace-nowrap"
               >
                 PORTFOLIO
               </button>
               <button
                 onClick={() => navigate("/reviews")}
-                className="text-white border-b-2 border-yellow-400"
+                className="text-xs sm:text-base text-white border-b-2 border-yellow-400 whitespace-nowrap"
               >
                 REVIEWS
               </button>
             </div>
 
-            <div className="w-14" aria-hidden="true" />
+            <div className="w-12 sm:w-14" aria-hidden="true" />
           </div>
         </nav>
 
@@ -145,6 +152,16 @@ const ReviewsPage = () => {
                   value={filters.clientName}
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, clientName: e.target.value }))
+                  }
+                  className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Search by Comment"
+                  value={filters.comment}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, comment: e.target.value }))
                   }
                   className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
                 />
@@ -272,6 +289,9 @@ const ReviewsPage = () => {
           }}
         />
       </div>
+      <footer className="reviews-footer">
+        © 2026 VladTech. All rights reserved.
+      </footer>
     </>
   );
 };

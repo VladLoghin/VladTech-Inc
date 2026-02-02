@@ -1,5 +1,6 @@
 package org.example.vladtech.reviews.presentation;
 
+import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
 import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.data.Rating;
@@ -31,6 +32,9 @@ class ReviewControllerTest {
     private ReviewController reviewController;
 
     @Mock
+    private ContactServiceImpl contactService;
+
+    @Mock
     private Jwt jwt;
 
     @Test
@@ -40,15 +44,15 @@ class ReviewControllerTest {
         ReviewResponseModel review2 = new ReviewResponseModel("r2", "client2", "appt2", "Jane", "Good", true, Rating.FOUR, null, "Interior");
         List<ReviewResponseModel> reviews = Arrays.asList(review1, review2);
 
-        when(reviewService.getAllReviews(null, null, null)).thenReturn(reviews);
+        when(reviewService.getAllReviews(null, null, null, null)).thenReturn(reviews);
 
         // Act
-        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, null, null, null);
+        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, null, null, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
-        verify(reviewService).getAllReviews(null, null, null);
+        verify(reviewService).getAllReviews(null, null, null, null);
     }
 
     @Test
@@ -58,16 +62,16 @@ class ReviewControllerTest {
         ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, Rating.FIVE, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
-        when(reviewService.getAllReviews(clientName, null, null)).thenReturn(reviews);
+        when(reviewService.getAllReviews(clientName, null, null, null)).thenReturn(reviews);
 
         // Act
-        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, clientName, null, null);
+        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, clientName, null, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
         assertEquals(clientName, response.getBody().get(0).getClientName());
-        verify(reviewService).getAllReviews(clientName, null, null);
+        verify(reviewService).getAllReviews(clientName, null, null, null);
     }
 
     @Test
@@ -77,16 +81,16 @@ class ReviewControllerTest {
         ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, rating, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
-        when(reviewService.getAllReviews(null, rating, null)).thenReturn(reviews);
+        when(reviewService.getAllReviews(null, rating, null, null)).thenReturn(reviews);
 
         // Act
-        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, null, rating, null);
+        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllReviews(jwt, null, rating, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
         assertEquals(rating, response.getBody().get(0).getRating());
-        verify(reviewService).getAllReviews(null, rating, null);
+        verify(reviewService).getAllReviews(null, rating, null, null);
     }
 
     @Test
@@ -95,16 +99,16 @@ class ReviewControllerTest {
         ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(reviews);
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(reviews);
 
         // Act
-        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllVisibleReviews(null, null, null);
+        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllVisibleReviews(null, null, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
         assertTrue(response.getBody().get(0).getVisible());
-        verify(reviewService).getAllVisibleReviews(null, null, null);
+        verify(reviewService).getAllVisibleReviews(null, null, null, null);
     }
 
     @Test
@@ -115,15 +119,15 @@ class ReviewControllerTest {
         ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, rating, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
-        when(reviewService.getAllVisibleReviews(clientName, rating, null)).thenReturn(reviews);
+        when(reviewService.getAllVisibleReviews(clientName, rating, null, null)).thenReturn(reviews);
 
         // Act
-        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllVisibleReviews(clientName, rating, null);
+        ResponseEntity<List<ReviewResponseModel>> response = reviewController.getAllVisibleReviews(clientName, rating, null, null);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
-        verify(reviewService).getAllVisibleReviews(clientName, rating, null);
+        verify(reviewService).getAllVisibleReviews(clientName, rating, null, null);
     }
 
     @Test
@@ -343,7 +347,7 @@ class ReviewControllerTest {
     void getSatisfactionPercentage_withReviews_returnsPercentage() {
         // Arrange
         ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(Collections.singletonList(review));
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(Collections.singletonList(review));
         when(reviewService.computeSatisfactionPercentage()).thenReturn(92.5);
 
         // Act
@@ -352,14 +356,14 @@ class ReviewControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(92.5, response.getBody());
-        verify(reviewService).getAllVisibleReviews(null, null, null);
+        verify(reviewService).getAllVisibleReviews(null, null, null, null);
         verify(reviewService).computeSatisfactionPercentage();
     }
 
     @Test
     void getSatisfactionPercentage_withNoReviews_returnsZero() {
         // Arrange
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(Collections.emptyList());
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(Collections.emptyList());
 
         // Act
         ResponseEntity<Double> response = reviewController.getSatisfactionPercentage();
@@ -367,7 +371,7 @@ class ReviewControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(0.0, response.getBody());
-        verify(reviewService).getAllVisibleReviews(null, null, null);
+        verify(reviewService).getAllVisibleReviews(null, null, null, null);
         verify(reviewService, never()).computeSatisfactionPercentage();
     }
 

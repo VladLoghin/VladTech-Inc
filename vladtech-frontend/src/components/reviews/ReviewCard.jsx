@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar, FaRegStar, FaCheckCircle } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
 import { deleteReviewClient, deleteReviewAdmin } from "../../api/reviews/reviewsService.js";
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
 import { api } from "../../api/http";
-
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -24,6 +23,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     const canDelete = isAdmin || (isClient && isOwner);
 
     const [deleting, setDeleting] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const canToggleVisibility =
         isAuthenticated &&
@@ -72,7 +72,6 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     );
 
     console.log("ReviewCard rendered with review:", review);
-
 
     const handleVisibilityToggle = async () => {
         if (!reviewId) {
@@ -168,11 +167,11 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                 throw new Error(`Send failed with status ${res.status}`);
             }
 
-            setPortfolioError(""); // Clear any previous errors on success
+            setPortfolioError("");
+            setShowSuccessModal(true);
+            setTimeout(() => setShowSuccessModal(false), 3000);
         } catch (err) {
             console.error("Failed to send review to portfolio:", err);
-            
-            // Check if error response has message from backend
             const errorMessage = err.response?.data?.message || err.response?.data || "Failed to send review to portfolio. Please try again.";
             setPortfolioError(errorMessage);
         } finally {
@@ -181,152 +180,172 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     };
 
     return (
-        <div
-            className="review-card"
-            data-testid="review-card"
-            onClick={onClick}
-            style={{ cursor: onClick ? "pointer" : "default" }}
-        >
-            {canToggleVisibility && (
-                <label
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginTop: "12px",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <input
-                        type="checkbox"
-                        checked={isVisible}
-                        onChange={handleVisibilityToggle}
-                        disabled={saving}
-                        data-testid="review-visibility-toggle"
-                    />
-                    <span>{saving ? "Updating..." : "Visible"}</span>
-                </label>
-            )}
-            {canToggleVisibility && !isVisible && (
-                <div
-                    style={{
-                        marginBottom: "8px",
-                        fontSize: "12px",
-                        color: "#b45309",
-                        fontWeight: 600,
-                    }}
-                >
-                </div>
-            )}
-
-            <img
-                src={imgSrc}
-                alt={photo?.filename}
-                onError={handleError}
-                data-testid="review-image"
-            />
-
-            <p className="client-name" data-testid="review-client">
-                {clientName}
-            </p>
-
-            {type && (
-                <p style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    fontWeight: 500,
-                    marginBottom: "8px",
-                    display: "inline-block",
-                    backgroundColor: "#f3f4f6",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    marginRight: "8px"
-                }}>
-                    {type}
-                </p>
-            )}
-
-            <div className="stars" data-testid="review-stars">
-                {stars.map((star, index) =>
-                    star.type === FaStar ? (
-                        <span key={index} data-testid="review-star-filled">
-                            {star}
-                        </span>
-                    ) : (
-                        <span key={index} data-testid="review-star-empty">
-                            {star}
-                        </span>
-                    )
+        <>
+            <div
+                className="review-card"
+                data-testid="review-card"
+                onClick={onClick}
+                style={{ cursor: onClick ? "pointer" : "default" }}
+            >
+                {canToggleVisibility && (
+                    <label
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginTop: "12px",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={isVisible}
+                            onChange={handleVisibilityToggle}
+                            disabled={saving}
+                            data-testid="review-visibility-toggle"
+                        />
+                        <span>{saving ? "Updating..." : "Visible"}</span>
+                    </label>
                 )}
-            </div>
+                {canToggleVisibility && !isVisible && (
+                    <div
+                        style={{
+                            marginBottom: "8px",
+                            fontSize: "12px",
+                            color: "#b45309",
+                            fontWeight: 600,
+                        }}
+                    >
+                    </div>
+                )}
 
-            <p className="comment" data-testid="review-comment">
-                {comment}
-            </p>
+                <img
+                    src={imgSrc}
+                    alt={photo?.filename}
+                    onError={handleError}
+                    data-testid="review-image"
+                />
 
-            {canSendToPortfolio && (
-                <>
+                <p className="client-name" data-testid="review-client">
+                    {clientName}
+                </p>
+
+                {type && (
+                    <p style={{
+                        fontSize: "12px",
+                        color: "#666",
+                        fontWeight: 500,
+                        marginBottom: "8px",
+                        display: "inline-block",
+                        backgroundColor: "#f3f4f6",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        marginRight: "8px"
+                    }}>
+                        {type}
+                    </p>
+                )}
+
+                <div className="stars" data-testid="review-stars">
+                    {stars.map((star, index) =>
+                        star.type === FaStar ? (
+                            <span key={index} data-testid="review-star-filled">
+                                {star}
+                            </span>
+                        ) : (
+                            <span key={index} data-testid="review-star-empty">
+                                {star}
+                            </span>
+                        )
+                    )}
+                </div>
+
+                <p className="comment" data-testid="review-comment">
+                    {comment}
+                </p>
+
+                {canSendToPortfolio && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={handleSendToPortfolio}
+                            disabled={sending}
+                            style={{
+                                backgroundColor: "#2563eb",
+                                color: "white",
+                                padding: "8px 10px",
+                                borderRadius: "8px",
+                                marginTop: "10px",
+                                width: "100%",
+                                fontWeight: 700,
+                                cursor: sending ? "not-allowed" : "pointer",
+                                opacity: sending ? 0.7 : 1,
+                            }}
+                            data-testid="review-send-portfolio-button"
+                        >
+                            {sending ? "Sending..." : "Send to Portfolio"}
+                        </button>
+
+                        {portfolioError && (
+                            <div
+                                style={{
+                                    marginTop: "8px",
+                                    padding: "8px",
+                                    backgroundColor: "#fee2e2",
+                                    color: "#dc2626",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    fontWeight: 600,
+                                }}
+                                data-testid="review-portfolio-error"
+                            >
+                                {portfolioError}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {canDelete && (
                     <button
                         type="button"
-                        onClick={handleSendToPortfolio}
-                        disabled={sending}
+                        onClick={handleDelete}
+                        disabled={deleting}
                         style={{
-                            backgroundColor: "#2563eb",
+                            backgroundColor: "#dc2626",
                             color: "white",
                             padding: "8px 10px",
                             borderRadius: "8px",
                             marginTop: "10px",
                             width: "100%",
                             fontWeight: 700,
-                            cursor: sending ? "not-allowed" : "pointer",
-                            opacity: sending ? 0.7 : 1,
+                            cursor: deleting ? "not-allowed" : "pointer",
+                            opacity: deleting ? 0.7 : 1,
                         }}
-                        data-testid="review-send-portfolio-button"
+                        data-testid="review-delete-button"
                     >
-                        {sending ? "Sending..." : "Send to Portfolio"}
+                        {deleting ? "Deleting..." : "Delete"}
                     </button>
-                    
-                    {portfolioError && (
-                        <div
-                            style={{
-                                marginTop: "8px",
-                                padding: "8px",
-                                backgroundColor: "#fee2e2",
-                                color: "#dc2626",
-                                borderRadius: "4px",
-                                fontSize: "12px",
-                                fontWeight: 600,
-                            }}
-                            data-testid="review-portfolio-error"
-                        >
-                            {portfolioError}
-                        </div>
-                    )}
-                </>
-            )}
+                )}
+            </div>
 
-            {canDelete && (
-                <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    style={{
-                        backgroundColor: "#dc2626",
-                        color: "white",
-                        padding: "8px 10px",
-                        borderRadius: "8px",
-                        marginTop: "10px",
-                        width: "100%",
-                        fontWeight: 700,
-                        cursor: deleting ? "not-allowed" : "pointer",
-                        opacity: deleting ? 0.7 : 1,
-                    }}
-                    data-testid="review-delete-button"
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div
+                    className="success-modal-backdrop"
+                    onClick={() => setShowSuccessModal(false)}
                 >
-                    {deleting ? "Deleting..." : "Delete"}
-                </button>
+                    <div
+                        className="success-modal-box"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <FaCheckCircle className="success-modal-icon" />
+                        <h3 className="success-modal-title">Success!</h3>
+                        <p className="success-modal-text">Review added to portfolio</p>
+                    </div>
+                </div>
             )}
-        </div>
+        </>
     );
 };
+
 export default ReviewCard;

@@ -6,7 +6,6 @@ const API_BASE = "/reviews";
 export const getAllVisibleReviews = async (filters = {}) => {
     const params = {};
 
-    // Only add non-empty filters
     if (filters.clientName?.trim()) {
         params.clientName = filters.clientName.trim();
     }
@@ -15,17 +14,18 @@ export const getAllVisibleReviews = async (filters = {}) => {
     }
     if (filters.type) {
         params.type = filters.type;
+    }
+    if (filters.comment?.trim()) {
+        params.comment = filters.comment.trim();
     }
 
     const res = await api.get(`${API_BASE}/visible`, { params });
     return res.data;
 };
 
-
 export const getAllReviews = async (token, filters = {}) => {
     const params = {};
 
-    // Only add non-empty filters
     if (filters.clientName?.trim()) {
         params.clientName = filters.clientName.trim();
     }
@@ -34,6 +34,9 @@ export const getAllReviews = async (token, filters = {}) => {
     }
     if (filters.type) {
         params.type = filters.type;
+    }
+    if (filters.comment?.trim()) {
+        params.comment = filters.comment.trim();
     }
 
     const res = await api.get(`${API_BASE}`, {
@@ -45,8 +48,6 @@ export const getAllReviews = async (token, filters = {}) => {
 
     return res.data;
 };
-
-
 
 export const getMyReviews = async (token) => {
     const res = await api.get(`${API_BASE}/mine`, {
