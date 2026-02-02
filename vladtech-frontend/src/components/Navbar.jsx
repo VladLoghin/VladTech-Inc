@@ -46,7 +46,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[9999] backdrop-blur-sm border-b transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[50] backdrop-blur-sm border-b transition-all duration-300 ${
         isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
       }`}
     >

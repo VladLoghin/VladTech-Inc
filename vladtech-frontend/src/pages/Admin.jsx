@@ -329,8 +329,6 @@ const Admin = () => {
 
         {message && (
           <div
-            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-              }`}
           >
             <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
               <span className="text-lg font-medium">{message}</span>
