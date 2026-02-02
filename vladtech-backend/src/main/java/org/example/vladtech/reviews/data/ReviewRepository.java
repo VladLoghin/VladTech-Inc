@@ -44,7 +44,58 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(String type, String clientName, Rating rating);
 
 
+    // Single-filter
+    List<Review> findByCommentContainingIgnoreCase(String comment);
+
+    // Two-filters
+    List<Review> findByClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String clientName, String comment);
+    List<Review> findByTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String comment);
+    List<Review> findByRatingAndCommentContainingIgnoreCase(Rating rating, String comment);
+
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String clientName, String comment);
+
+    List<Review> findByTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String type, Rating rating, String comment);
+
+    List<Review> findByClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String clientName, Rating rating, String comment);
+
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String type, String clientName, Rating rating, String comment);
+
+    // Visible + comment only
+    List<Review> findByVisibleTrueAndCommentContainingIgnoreCase(String comment);
+
+    // Visible + (name/type/rating) + comment
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
+            String clientName, String comment
+    );
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(
+            String type, String comment
+    );
+
+    List<Review> findByVisibleTrueAndRatingAndCommentContainingIgnoreCase(
+            Rating rating, String comment
+    );
+
+    // Visible + 3 filters including comment
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
+            String type, String clientName, String comment
+    );
+
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+            String type, Rating rating, String comment
+    );
+
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+            String clientName, Rating rating, String comment
+    );
+
+    // Visible + all 4 filters
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+            String type, String clientName, Rating rating, String comment
+    );
+
     //
+
     List<Review> findByVisibleTrueAndRating(Rating rating);
 
     List<Review> findByRating(Rating rating);

@@ -39,18 +39,45 @@ public class ReviewServiceImpl implements ReviewService {
     private final PortfolioMapper portfolioMapper;
 
     @Override
-    public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type) {
+    public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type, String comment) {
 
         boolean hasName = clientName != null && !clientName.isBlank();
         boolean hasType = type != null && !type.isBlank();
         boolean hasRating = ratingValue != null;
+        boolean hasComment = comment != null && !comment.isBlank();
 
         List<Review> reviews;
 
-        if (hasType && hasName && hasRating) {
+        // 4 filters
+        if (hasType && hasName && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            type, clientName, ratingValue, comment
+                    );
+
+            // 3 filters
+        } else if (hasType && hasName && hasRating) {
             reviews = reviewRepository
                     .findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(
                             type, clientName, ratingValue
+                    );
+
+        } else if (hasType && hasName && hasComment) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
+                            type, clientName, comment
+                    );
+
+        } else if (hasType && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            type, ratingValue, comment
+                    );
+
+        } else if (hasName && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            clientName, ratingValue, comment
                     );
 
         } else if (hasType && hasName) {
@@ -65,6 +92,19 @@ public class ReviewServiceImpl implements ReviewService {
             reviews = reviewRepository
                     .findByClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
 
+        } else if (hasType && hasComment) {
+            reviews = reviewRepository
+                    .findByTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(type, comment);
+
+        } else if (hasName && hasComment) {
+            reviews = reviewRepository
+                    .findByClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(clientName, comment);
+
+        } else if (hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByRatingAndCommentContainingIgnoreCase(ratingValue, comment);
+
+            // 1 filter
         } else if (hasType) {
             reviews = reviewRepository.findByTypeContainingIgnoreCase(type);
 
@@ -74,12 +114,17 @@ public class ReviewServiceImpl implements ReviewService {
         } else if (hasRating) {
             reviews = reviewRepository.findByRating(ratingValue);
 
+        } else if (hasComment) {
+            reviews = reviewRepository.findByCommentContainingIgnoreCase(comment);
+
+            // no filters
         } else {
             reviews = reviewRepository.findAll();
         }
 
         return responseMapper.entityListToResponseModelList(reviews);
     }
+
 
 
 
@@ -136,32 +181,96 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue, String type) {
-
+    public List<ReviewResponseModel> getAllVisibleReviews(
+            String clientName,
+            Rating ratingValue,
+            String type,
+            String comment
+    ) {
         boolean hasName = clientName != null && !clientName.isBlank();
         boolean hasType = type != null && !type.isBlank();
         boolean hasRating = ratingValue != null;
+        boolean hasComment = comment != null && !comment.isBlank();
 
         List<Review> reviews;
 
-        if (hasType && hasName && hasRating) {
+        // 4 filters
+        if (hasType && hasName && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            type, clientName, ratingValue, comment
+                    );
+
+            // 3 filters (including comment)
+        } else if (hasType && hasName && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
+                            type, clientName, comment
+                    );
+
+        } else if (hasType && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            type, ratingValue, comment
+                    );
+
+        } else if (hasName && hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
+                            clientName, ratingValue, comment
+                    );
+
+            // 3 filters (without comment) - your existing cases
+        } else if (hasType && hasName && hasRating) {
             reviews = reviewRepository
                     .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(
                             type, clientName, ratingValue
                     );
 
+            // 2 filters (including comment)
+        } else if (hasType && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(
+                            type, comment
+                    );
+
+        } else if (hasName && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
+                            clientName, comment
+                    );
+
+        } else if (hasRating && hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndRatingAndCommentContainingIgnoreCase(
+                            ratingValue, comment
+                    );
+
+            // 2 filters (your existing cases)
         } else if (hasType && hasName) {
             reviews = reviewRepository
-                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(type, clientName);
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(
+                            type, clientName
+                    );
 
         } else if (hasType && hasRating) {
             reviews = reviewRepository
-                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(type, ratingValue);
+                    .findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(
+                            type, ratingValue
+                    );
 
         } else if (hasName && hasRating) {
             reviews = reviewRepository
-                    .findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(clientName, ratingValue);
+                    .findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(
+                            clientName, ratingValue
+                    );
 
+            // 1 filter (including comment)
+        } else if (hasComment) {
+            reviews = reviewRepository
+                    .findByVisibleTrueAndCommentContainingIgnoreCase(comment);
+
+            // 1 filter (your existing cases)
         } else if (hasType) {
             reviews = reviewRepository
                     .findByVisibleTrueAndTypeContainingIgnoreCase(type);
@@ -174,6 +283,7 @@ public class ReviewServiceImpl implements ReviewService {
             reviews = reviewRepository
                     .findByVisibleTrueAndRating(ratingValue);
 
+            // no filters
         } else {
             reviews = reviewRepository.findByVisibleTrue();
         }
@@ -183,7 +293,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 
-    //@PreAuthorize("hasAuthority('Client')")
+
     @Override
     public ReviewResponseModel deleteReviewAsClient(String reviewId, String clientId) {
         Review existing = reviewRepository.findById(reviewId)

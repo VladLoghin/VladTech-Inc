@@ -74,6 +74,7 @@
 .swiper-slide {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 /* Responsive grid for all reviews */
@@ -232,4 +233,172 @@
         font-size: 1.1rem;
         padding: 0 10px;
     }
+}
+
+/* Softer branded buttons */
+.review-btn {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    border: 1px solid #111;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease, opacity 0.12s ease;
+}
+
+.review-btn--primary {
+    background: #FFD84D; /* softer yellow */
+    color: #111;
+    box-shadow: 0 3px 8px rgba(17, 17, 17, 0.15);
+}
+
+.review-btn--primary:hover {
+    background: #F9CC3A;
+    transform: translateY(-1px);
+}
+
+.review-btn--danger {
+    background: #1f1f1f; /* softer black */
+    color: #FFD84D;
+    box-shadow: 0 3px 8px rgba(17, 17, 17, 0.15);
+    margin-top: 10px;
+}
+
+.review-btn--danger:hover {
+    background: #111;
+    transform: translateY(-1px);
+}
+
+.review-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Softer error */
+.review-error {
+    margin-top: 8px;
+    padding: 8px;
+    background: #fff5f5;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Softer footer */
+.reviews-footer {
+    background: #FFD84D;
+    color: #111;
+    text-align: center;
+    padding: 0.9rem 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-top: 2rem;
+}
+
+/* Mobile footer adjustments - remove fixed positioning */
+@media (max-width: 768px) {
+    .reviews-footer {
+        position: static;
+        padding: 0.5rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+}
+
+/* Desktop footer - keep fixed */
+@media (min-width: 769px) {
+    .reviews-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+    }
+}
+
+/* Mobile responsive centering */
+@media (max-width: 768px) {
+    .reviews-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .review-card {
+        max-width: 90vw;
+        width: 100%;
+        margin: 10px auto;
+    }
+
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .swiper {
+        width: 100%;
+        padding: 1rem 0;
+    }
+}
+
+/* Success Modal Backdrop */
+.success-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Success Modal Box */
+.success-modal-box {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-modal-icon {
+    font-size: 3.5rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+
+.success-modal-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 0.5rem;
+}
+
+.success-modal-text {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0;
 }

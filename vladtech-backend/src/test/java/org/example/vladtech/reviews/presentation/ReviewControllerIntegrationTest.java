@@ -1,5 +1,6 @@
 package org.example.vladtech.reviews.presentation;
 
+import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
@@ -44,6 +45,8 @@ class ReviewControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private ContactServiceImpl contactService;
+    @MockitoBean
     private ReviewService reviewService;
 
     private ReviewResponseModel r1;
@@ -75,7 +78,7 @@ class ReviewControllerIntegrationTest {
                 "Interior"
         );
 
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(List.of(r1, r2));
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(List.of(r1, r2));
     }
 
     @Test
@@ -117,7 +120,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews("client1", Rating.FIVE, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllReviews("client1", Rating.FIVE, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
@@ -134,7 +137,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllReviews_withClientNameOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews("client1", null, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllReviews("client1", null, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
@@ -150,7 +153,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews(null, Rating.FIVE, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllReviews(null, Rating.FIVE, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
@@ -166,7 +169,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllReviews_withoutParameters_returnsAllReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews(null, null, null)).thenReturn(List.of(r1, r2));
+        when(reviewService.getAllReviews(null, null, null, null)).thenReturn(List.of(r1, r2));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
@@ -182,7 +185,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllVisibleReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews("client1", Rating.FIVE, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllVisibleReviews("client1", Rating.FIVE, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
@@ -199,7 +202,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllVisibleReviews_withClientNameOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews("client1", null, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllVisibleReviews("client1", null, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
@@ -215,7 +218,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews(null, Rating.FIVE, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllVisibleReviews(null, Rating.FIVE, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
@@ -231,7 +234,7 @@ class ReviewControllerIntegrationTest {
     @Test
     void getAllVisibleReviews_withoutParameters_returnsAllVisibleReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(List.of(r1, r2));
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(List.of(r1, r2));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
@@ -377,7 +380,7 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void getSatisfactionPercentage_whenVisibleEmpty_returnsOkWithZero() throws Exception {
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(List.of());
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/reviews/satisfaction-percentage")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
@@ -389,7 +392,7 @@ class ReviewControllerIntegrationTest {
 
     @Test
     void getSatisfactionPercentage_whenVisibleNotEmpty_returnsOkWithValue() throws Exception {
-        when(reviewService.getAllVisibleReviews(null, null, null)).thenReturn(List.of(r1));
+        when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(List.of(r1));
         when(reviewService.computeSatisfactionPercentage()).thenReturn(75.0);
 
         mockMvc.perform(get("/api/reviews/satisfaction-percentage")
