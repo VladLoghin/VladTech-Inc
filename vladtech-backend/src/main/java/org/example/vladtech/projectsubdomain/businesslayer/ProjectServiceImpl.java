@@ -258,7 +258,35 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
         List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
+        
+        // Populate assignedEmployeeEmails for each project
+        projects.forEach(this::enrichProjectWithEmployeeEmails);
+        
         return projectResponseMapper.entityListToResponseModelList(projects);
+    }
+    
+    /**
+     * Enriches a project by populating assignedEmployeeEmails from assignedEmployeeIds
+     */
+    private void enrichProjectWithEmployeeEmails(Project project) {
+        if (project.getAssignedEmployeeIds() == null || project.getAssignedEmployeeIds().isEmpty()) {
+            project.setAssignedEmployeeEmails(new ArrayList<>());
+            return;
+        }
+        
+        List<String> emails = project.getAssignedEmployeeIds().stream()
+                .map(id -> {
+                    try {
+                        String email = userManagementService.getUserEmailById(id);
+                        return (email != null && !email.isBlank()) ? email : id;
+                    } catch (Exception e) {
+                        log.warn("Failed to get email for employee ID: {}", id, e);
+                        return id;
+                    }
+                })
+                .collect(Collectors.toList());
+        
+        project.setAssignedEmployeeEmails(emails);
     }
 
     @Override

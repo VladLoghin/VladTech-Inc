@@ -3,7 +3,12 @@ import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
 
-const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex, t) => {
+const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
+  // Prefer assignedEmployeeEmails if available
+  if (assignedEmployeeEmails && assignedEmployeeEmails.length > 0) {
+    return assignedEmployeeEmails.join(", ");
+  }
+  
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
   return assignedEmployeeIds
     .map((id) => {
@@ -380,7 +385,7 @@ const ProjectList = ({
                 {project.assignedEmployeeIds?.length > 0 && (
                   <p className="md:col-span-2">
                     <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
-                    {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex, t)}
+                    {formatAssignedEmployees(project.assignedEmployeeIds, project.assignedEmployeeEmails, employeeIndex, t)}
                   </p>
                 )}
 
