@@ -79,10 +79,10 @@ class DeletePortfolioControllerTest {
     }
 
     @Test
-    void deletePortfolio_WithoutAuthentication_ShouldBeUnauthorized() throws Exception {
+    void deletePortfolio_WithoutAuthentication_ShouldBeFound() throws Exception {
         mockMvc.perform(delete("/api/portfolio/{portfolioId}", "existing-id")
                         .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isFound());
 
         verifyNoInteractions(portfolioService);
     }

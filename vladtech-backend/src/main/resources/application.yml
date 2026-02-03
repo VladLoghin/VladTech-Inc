@@ -5,9 +5,18 @@ spring:
   security:
     oauth2:
       resourceserver:
-        jwt:
-          issuer-uri: ${AUTH0_ISSUER_URI}
-          audience: ${AUTH0_AUDIENCE}
+          jwt:
+            issuer-uri: ${AUTH0_ISSUER_URI}
+            audience: ${AUTH0_AUDIENCE}
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/vladtechdb}
