@@ -200,6 +200,16 @@ public class ProjectServiceImpl implements ProjectService {
             String employeeEmail = userManagementService.getUserEmailById(employeeId);
             log.info("[ASSIGN] resolved employeeEmail='{}'", employeeEmail);
 
+            if (employeeEmail != null && !employeeEmail.isBlank()) {
+                if (project.getAssignedEmployeeEmails() == null) {
+                    project.setAssignedEmployeeEmails(new ArrayList<>());
+                }
+                if (!project.getAssignedEmployeeEmails().contains(employeeEmail)) {
+                    project.getAssignedEmployeeEmails().add(employeeEmail);
+                    project = projectRepository.save(project);
+                }
+            }
+
             self.sendEmployeeAssignedEmailAsync(project, employeeEmail);
             log.info("[ASSIGN] triggered async send");
         } else {
@@ -259,10 +269,17 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectResponseModel> getProjectsForEmployee(String employeeId) {
         List<Project> projects = projectRepository.findByAssignedEmployeeIdsContains(employeeId);
         
-        // Populate assignedEmployeeEmails for each project
-        projects.forEach(this::enrichProjectWithEmployeeEmails);
+        // Defensive filter: only return ACTIVE projects where this employee is explicitly assigned
+        List<Project> filteredProjects = projects.stream()
+                .filter(p -> p.getState() == ProjectState.ACTIVE)
+                .filter(p -> p.getAssignedEmployeeIds() != null 
+                        && p.getAssignedEmployeeIds().contains(employeeId))
+                .toList();
         
-        return projectResponseMapper.entityListToResponseModelList(projects);
+        // Populate assignedEmployeeEmails for each project
+        filteredProjects.forEach(this::enrichProjectWithEmployeeEmails);
+        
+        return projectResponseMapper.entityListToResponseModelList(filteredProjects);
     }
     
     /**
@@ -274,19 +291,29 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         }
         
+        // If assignedEmployeeEmails already has values, use them
+        if (project.getAssignedEmployeeEmails() != null && !project.getAssignedEmployeeEmails().isEmpty()) {
+            return;
+        }
+        
         List<String> emails = project.getAssignedEmployeeIds().stream()
                 .map(id -> {
                     try {
                         String email = userManagementService.getUserEmailById(id);
-                        return (email != null && !email.isBlank()) ? email : id;
+                        return (email != null && !email.isBlank()) ? email : null;
                     } catch (Exception e) {
                         log.warn("Failed to get email for employee ID: {}", id, e);
-                        return id;
+                        return null;
                     }
                 })
+                .filter(email -> email != null && !email.isBlank())
                 .collect(Collectors.toList());
-        
+        if (emails.isEmpty()) {
+            return;
+        }
+
         project.setAssignedEmployeeEmails(emails);
+        projectRepository.save(project);
     }
 
     @Override

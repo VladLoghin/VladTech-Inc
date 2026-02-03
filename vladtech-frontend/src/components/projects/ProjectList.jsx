@@ -4,19 +4,21 @@ import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
 
 const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
-  // Prefer assignedEmployeeEmails if available
+  // Prefer assignedEmployeeEmails if available - filter out any Auth0 IDs
   if (assignedEmployeeEmails && assignedEmployeeEmails.length > 0) {
-    return assignedEmployeeEmails.join(", ");
+    const validEmails = assignedEmployeeEmails.filter(email => email && !/^auth0\|/.test(email));
+    if (validEmails.length > 0) return validEmails.join(", ");
   }
   
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
-  return assignedEmployeeIds
+  const validIds = assignedEmployeeIds
     .map((id) => {
       const resolved = employeeIndex?.[id]?.email || employeeIndex?.[id]?.name;
-      if (resolved) return resolved;
-      return id.replace(/^auth0\|/, "");
+      return resolved || null;
     })
-    .join(", ");
+    .filter(Boolean);
+  
+  return validIds.length > 0 ? validIds.join(", ") : t("project.none");
 };
 
 const formatArchivedAt = (archivedAt, locale) => {
