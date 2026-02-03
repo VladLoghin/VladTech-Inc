@@ -137,7 +137,7 @@ test('admin creates project, assigns employee, MailHog receives assignment email
   await page.locator('form input[name="address.streetAddress"]').fill('test');
   await page.locator('form input[name="address.city"]').fill('test');
 
-  await page.locator('form input[name="dueDate"]').fill('2026-01-31');
+  await page.locator('form input[name="dueDate"]').fill('2026-12-31');
   await page.getByRole('combobox').first().selectOption('SCHEDULED');
 
   await safeClick(page.getByRole('button', { name: 'Create', exact: true }));

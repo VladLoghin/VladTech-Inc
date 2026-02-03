@@ -12,7 +12,7 @@ test('employee clicks January 15 on calendar (employee dashboard)', async ({ pag
 
   // Calendar is FullCalendar in your app (fc-daygrid). Click the Jan 15 cell.
   // This targets the day cell by its data-date attribute.
-  const jan15Cell = page.locator('[data-date="2026-01-15"]');
+  const jan15Cell = page.locator('[data-date="2026-02-15"]');
 
   await expect(jan15Cell).toBeVisible({ timeout: 10000 });
 
@@ -22,5 +22,5 @@ test('employee clicks January 15 on calendar (employee dashboard)', async ({ pag
   // Optional: assert the right-side panel updates to show the selected date.
   // If your UI prints the formatted date somewhere (like "Thursday, January 15, 2026"),
   // this should pass. If not, delete this expectation.
-  await expect(page.getByText(/January\s+15,\s+2026/i)).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(/February\s+15,\s+2026/i)).toBeVisible({ timeout: 10000 });
 });

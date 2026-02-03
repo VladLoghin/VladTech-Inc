@@ -23,7 +23,12 @@ test('create project modal required fields validation', async ({ page, loginAs }
   await page.getByRole('button', { name: /^Create$/ }).click();
 
   await expect(page.getByText('Project name is required')).toBeVisible();
-  await expect(page.getByText('City is required')).toBeVisible();
+  await expect(page.getByText('City is required')).not.toBeVisible(); // City not required if address is empty
   await expect(page.getByText('Due date is required')).toBeVisible();
   await expect(page.getByText('Project type is required')).toBeVisible();
+
+  // Test conditional validation for City
+  await page.locator('form input[name="address.streetAddress"]').fill('123 Test St');
+  await page.getByRole('button', { name: /^Create$/ }).click();
+  await expect(page.getByText('City is required')).toBeVisible();
 });
