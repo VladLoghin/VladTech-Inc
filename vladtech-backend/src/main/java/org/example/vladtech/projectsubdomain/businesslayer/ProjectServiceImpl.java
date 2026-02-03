@@ -562,8 +562,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateProjectRequest(ProjectRequestModel model, boolean isCreate) {
-        // Validate name is not empty
-        if (model.getName() == null || model.getName().trim().isEmpty()) {
+        // Validate name is not empty (only if provided - allow null for partial updates)
+        if (model.getName() != null && model.getName().trim().isEmpty()) {
+            throw new InvalidProjectDataException("Project name cannot be empty");
+        }
+        
+        // For create operations, name is required
+        if (isCreate && model.getName() == null) {
             throw new InvalidProjectDataException("Project name cannot be empty");
         }
 
