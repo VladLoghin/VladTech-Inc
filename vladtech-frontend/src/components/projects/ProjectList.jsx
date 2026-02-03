@@ -102,6 +102,7 @@ const ProjectList = ({
   showUploadInformation = false,
   onUploadInformation,
   showViewInformation = false,
+  isAdmin = false,
 
   // ✅ REQUIRED so Admin can load protected image endpoints
   getToken, // async () => string
@@ -237,7 +238,7 @@ const ProjectList = ({
             >
               {/* Buttons - grid layout on desktop, at bottom on mobile */}
               <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">                {/* Send to Portfolio Button */}
-                {!isArchived && (
+                {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
@@ -427,7 +428,7 @@ const ProjectList = ({
 
               {/* Mobile buttons at bottom */}
               <div className="flex sm:hidden gap-2 flex-wrap mt-4 pt-4 border-t border-black/10">
-                {!isArchived && (
+                {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
