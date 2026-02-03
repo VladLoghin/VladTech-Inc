@@ -1769,4 +1769,352 @@ class ProjectServiceImplTest {
 
         verify(portfolioRepository, times(types.length)).save(any(org.example.vladtech.portfolio.data.PortfolioItem.class));
     }
+    
+    // ========== Validation Tests ==========
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenNameIsEmpty() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName(""); // Empty name
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Project name cannot be empty", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenNameIsNull() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName(null); // Null name
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Project name cannot be empty", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenNameIsWhitespace() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("   "); // Only whitespace
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Project name cannot be empty", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenCostIsNegative() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Project Name");
+        invalidRequest.setEstimatedCost(java.math.BigDecimal.valueOf(-100.50)); // Negative cost
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Estimated cost must be greater than or equal to 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldSucceed_WhenCostIsZero() {
+        // Arrange
+        ProjectRequestModel validRequest = new ProjectRequestModel();
+        validRequest.setName("Valid Project");
+        validRequest.setEstimatedCost(java.math.BigDecimal.ZERO); // Zero is valid
+        validRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(validRequest)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(validRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenStartDateAfterDueDate() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Project Name");
+        invalidRequest.setStartDate(LocalDate.now().plusDays(30)); // Start is after due
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Start date must be on or before due date", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldSucceed_WhenStartDateEqualsDueDate() {
+        // Arrange
+        LocalDate sameDate = LocalDate.now().plusDays(10);
+        ProjectRequestModel validRequest = new ProjectRequestModel();
+        validRequest.setName("Valid Project");
+        validRequest.setStartDate(sameDate);
+        validRequest.setDueDate(sameDate); // Start equals due is valid
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(validRequest)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(validRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenDueDateInPast() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Project Name");
+        invalidRequest.setDueDate(LocalDate.now().minusDays(1)); // Past date
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("Due date cannot be in the past", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldSucceed_WhenDueDateIsToday() {
+        // Arrange
+        ProjectRequestModel validRequest = new ProjectRequestModel();
+        validRequest.setName("Valid Project");
+        validRequest.setDueDate(LocalDate.now()); // Today is valid
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(validRequest)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(validRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void updateProject_ShouldNotValidatePastDueDate() {
+        // Arrange - This tests that past due dates are allowed for updates
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setName("Valid Project");
+        updateRequest.setDueDate(LocalDate.now().minusDays(5)); // Past date - should be OK for updates
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(any())).thenReturn(responseModel);
+        
+        // Act - Should not throw
+        ProjectResponseModel result = projectService.updateProject("PROJ-1", updateRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenAddressProvidedButCityMissing() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Project Name");
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        AddressRequestModel address = new AddressRequestModel(
+            "123 Main St",  // Street provided
+            "",             // City missing
+            "Quebec",       // Province provided
+            "Canada",
+            "H1A 1A1"
+        );
+        invalidRequest.setAddress(address);
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("City is required when address information is provided", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenOnlyStreetProvidedWithoutCity() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Project Name");
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        AddressRequestModel address = new AddressRequestModel(
+            "123 Main St",  // Only street provided
+            null,           // City missing
+            null,
+            null,
+            null
+        );
+        invalidRequest.setAddress(address);
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(invalidRequest));
+        
+        assertEquals("City is required when address information is provided", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldSucceed_WhenAddressIsEmptyAndCityIsEmpty() {
+        // Arrange - No address data means city is not required
+        ProjectRequestModel validRequest = new ProjectRequestModel();
+        validRequest.setName("Valid Project");
+        validRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        AddressRequestModel address = new AddressRequestModel(
+            "",    // Empty street
+            "",    // Empty city - this is OK when no other address data
+            "",
+            "",
+            ""
+        );
+        validRequest.setAddress(address);
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(validRequest)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(validRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void createProject_ShouldSucceed_WhenAddressHasCityWithOtherFields() {
+        // Arrange
+        ProjectRequestModel validRequest = new ProjectRequestModel();
+        validRequest.setName("Valid Project");
+        validRequest.setDueDate(LocalDate.now().plusDays(10));
+        
+        AddressRequestModel address = new AddressRequestModel(
+            "123 Main St",
+            "Montreal",  // City provided with other fields
+            "Quebec",
+            "Canada",
+            "H1A 1A1"
+        );
+        validRequest.setAddress(address);
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(validRequest)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(validRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void updateProject_ShouldThrowInvalidProjectDataException_WhenNameIsEmpty() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName(""); // Empty name
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.updateProject("PROJ-1", invalidRequest));
+        
+        assertEquals("Project name cannot be empty", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void updateProject_ShouldThrowInvalidProjectDataException_WhenCostIsNegative() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Name");
+        invalidRequest.setEstimatedCost(java.math.BigDecimal.valueOf(-50)); // Negative cost
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.updateProject("PROJ-1", invalidRequest));
+        
+        assertEquals("Estimated cost must be greater than or equal to 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void updateProject_ShouldThrowInvalidProjectDataException_WhenStartDateAfterDueDate() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Name");
+        invalidRequest.setStartDate(LocalDate.now().plusDays(20));
+        invalidRequest.setDueDate(LocalDate.now().plusDays(10)); // Due before start
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.updateProject("PROJ-1", invalidRequest));
+        
+        assertEquals("Start date must be on or before due date", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
 }

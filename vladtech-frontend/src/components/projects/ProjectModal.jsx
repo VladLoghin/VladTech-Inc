@@ -100,14 +100,28 @@ const ProjectModal = ({
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Project name is required";
-    if (!formData.dueDate) newErrors.dueDate = "Due date is required";
-    if (!formData.projectType) newErrors.projectType = "Project type is required";
-    if (!formData.address.city.trim()) newErrors.city = "City is required";
+    
+    // Validate name is not empty
+    if (!formData.name.trim()) {
+      newErrors.name = "Project name is required";
+    }
+    
+    // Validate due date is required
+    if (!formData.dueDate) {
+      newErrors.dueDate = "Due date is required";
+    }
+    
+    // Validate project type is required
+    if (!formData.projectType) {
+      newErrors.projectType = "Project type is required";
+    }
+    
+    // Validate estimated cost is non-negative
     if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
       newErrors.estimatedCost = t("project.costPositiveError");
     }
 
+    // Validate start date <= due date
     if (formData.startDate && formData.dueDate) {
       const start = new Date(formData.startDate);
       const due = new Date(formData.dueDate);
@@ -115,6 +129,29 @@ const ProjectModal = ({
         newErrors.startDate = "Start date cannot be after due date";
         newErrors.dueDate = "Due date cannot be before start date";
       }
+    }
+    
+    // Validate due date is not in the past (only for create mode)
+    if (!isEdit && formData.dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(formData.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      if (dueDate < today) {
+        newErrors.dueDate = "Due date cannot be in the past";
+      }
+    }
+
+    // Validate city if address is provided
+    const hasAddressData = 
+      (formData.address.streetAddress && formData.address.streetAddress.trim()) ||
+      (formData.address.province && formData.address.province.trim()) ||
+      (formData.address.country && formData.address.country.trim()) ||
+      (formData.address.postalCode && formData.address.postalCode.trim());
+    
+    if (hasAddressData && !formData.address.city.trim()) {
+      newErrors.city = "City is required when address information is provided";
     }
 
     setErrors(newErrors);
@@ -432,7 +469,7 @@ const ProjectModal = ({
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold mb-2">{t('project.city')} *</label>
+              <label className="block text-sm font-semibold mb-2">{t('project.city')}</label>
               <input
                 type="text"
                 name="address.city"

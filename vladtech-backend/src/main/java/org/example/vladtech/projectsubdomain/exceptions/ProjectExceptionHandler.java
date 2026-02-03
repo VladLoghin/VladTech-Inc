@@ -42,6 +42,16 @@ public class ProjectExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    @ExceptionHandler(InvalidProjectDataException.class)
+    public ResponseEntity<ProjectErrorResponse> handleInvalidProjectData(InvalidProjectDataException ex) {
+        log.error("Invalid project data: {}", ex.getMessage());
+        ProjectErrorResponse error = new ProjectErrorResponse(
+                "INVALID_PROJECT_DATA",
+                ex.getMessage(),
+                LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProjectErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error occurred in project subdomain", ex);
