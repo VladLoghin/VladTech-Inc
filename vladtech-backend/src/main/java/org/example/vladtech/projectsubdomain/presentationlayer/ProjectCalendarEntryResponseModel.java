@@ -17,5 +17,6 @@ public class ProjectCalendarEntryResponseModel {
     private LocalDate startDate;
     private LocalDate dueDate;
     private String status;
+    private String state;
     private String projectType;
 }
