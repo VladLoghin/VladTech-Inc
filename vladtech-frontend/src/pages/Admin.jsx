@@ -384,7 +384,7 @@ const Admin = () => {
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <AdminProjectCalendar projects={calendarProjects} onDateSelect={setSelectedDate} />
+          <AdminProjectCalendar projects={calendarProjects} onDateSelect={setSelectedDate} selectedDate={selectedDate} />
 
           <div className="border-2 border-black rounded-xl p-6 bg-white shadow-md">
             <h2 className="text-2xl font-bold mb-2">
@@ -401,8 +401,16 @@ const Admin = () => {
               {projectsForSelectedDate.map((project) => (
                 <div
                   key={project.projectIdentifier}
-                  className="border border-black/20 rounded-lg p-4 flex items-center justify-between bg-gray-50"
+                  className="border border-black/20 rounded-lg p-4 flex items-center justify-between bg-gray-50 relative"
                 >
+                  {/* Status Dot */}
+                  <div 
+                    className={`absolute top-2 right-2 w-3 h-3 rounded-full ${
+                      project.status === "COMPLETED" ? "bg-green-500" :
+                      project.status === "IN_PROGRESS" ? "bg-blue-500" : "bg-yellow-400"
+                    }`}
+                    title={project.status || "PENDING"}
+                  />
                   <div>
                     <p className="font-semibold">{project.name}</p>
                     <p className="text-xs text-black/60">ID: {project.projectIdentifier}</p>
