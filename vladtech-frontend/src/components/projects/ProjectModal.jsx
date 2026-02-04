@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 //import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +45,13 @@ const ProjectModal = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [_selectedEmployee, setSelectedEmployee] = useState([]);
+
+  // Refs for native browser validation
+  const nameRef = useRef(null);
+  const cityRef = useRef(null);
+  const dueDateRef = useRef(null);
+  const projectTypeRef = useRef(null);
+  const startDateRef = useRef(null);
 
   const isEdit = mode === "edit";
 
@@ -99,26 +106,90 @@ const ProjectModal = ({
   }, [isOpen, isEdit, initialData, employeeIndex]);
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Project name is required";
-    if (!formData.dueDate) newErrors.dueDate = "Due date is required";
-    if (!formData.projectType) newErrors.projectType = "Project type is required";
-    if (!formData.address.city.trim()) newErrors.city = "City is required";
+    // Clear all custom validity
+    nameRef.current?.setCustomValidity("");
+    dueDateRef.current?.setCustomValidity("");
+    projectTypeRef.current?.setCustomValidity("");
+    startDateRef.current?.setCustomValidity("");
+    cityRef.current?.setCustomValidity("");
+    
+    let isValid = true;
+    let firstInvalidRef = null;
+    
+    // Validate name is not empty
+    if (!formData.name.trim()) {
+      nameRef.current?.setCustomValidity("Project name is required");
+      if (!firstInvalidRef) firstInvalidRef = nameRef;
+      isValid = false;
+    }
+    
+    // Validate due date is required
+    if (!formData.dueDate) {
+      dueDateRef.current?.setCustomValidity("Due date is required");
+      if (!firstInvalidRef) firstInvalidRef = dueDateRef;
+      isValid = false;
+    }
+    
+    // Validate project type is required
+    if (!formData.projectType) {
+      projectTypeRef.current?.setCustomValidity("Project type is required");
+      if (!firstInvalidRef) firstInvalidRef = projectTypeRef;
+      isValid = false;
+    }
+    
+    // Validate estimated cost is non-negative (handled by min="0" on input)
     if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
-      newErrors.estimatedCost = t("project.costPositiveError");
+      // estimatedCost uses native min validation, but we can still set error state
+      setErrors({ estimatedCost: t("project.costPositiveError") });
+      isValid = false;
     }
 
+    // Validate start date <= due date
     if (formData.startDate && formData.dueDate) {
       const start = new Date(formData.startDate);
       const due = new Date(formData.dueDate);
       if (start > due) {
-        newErrors.startDate = "Start date cannot be after due date";
-        newErrors.dueDate = "Due date cannot be before start date";
+        startDateRef.current?.setCustomValidity("Start date cannot be after due date");
+        dueDateRef.current?.setCustomValidity("Due date cannot be before start date");
+        if (!firstInvalidRef) firstInvalidRef = startDateRef;
+        isValid = false;
+      }
+    }
+    
+    // Validate due date is not in the past (only for create mode)
+    if (!isEdit && formData.dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(formData.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      if (dueDate < today) {
+        dueDateRef.current?.setCustomValidity("Due date cannot be in the past");
+        if (!firstInvalidRef) firstInvalidRef = dueDateRef;
+        isValid = false;
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Validate city if address is provided
+    const hasAddressData = 
+      (formData.address.streetAddress && formData.address.streetAddress.trim()) ||
+      (formData.address.province && formData.address.province.trim()) ||
+      (formData.address.country && formData.address.country.trim()) ||
+      (formData.address.postalCode && formData.address.postalCode.trim());
+    
+    if (hasAddressData && !formData.address.city.trim()) {
+      cityRef.current?.setCustomValidity("City is required when address information is provided");
+      if (!firstInvalidRef) firstInvalidRef = cityRef;
+      isValid = false;
+    }
+
+    // Report validity on the first invalid field to show browser tooltip
+    if (firstInvalidRef?.current) {
+      firstInvalidRef.current.reportValidity();
+    }
+
+    setErrors({});
+    return isValid;
   };
 
   const assignEmployeesToProject = async (projectIdentifier, employeeIds, token) => {
@@ -221,6 +292,9 @@ const ProjectModal = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Clear native validation error on change
+    e.target.setCustomValidity?.("");
 
     if (name === "estimatedCostCurrency") {
       setFormData((prev) => {
@@ -334,15 +408,13 @@ const ProjectModal = ({
                 {t('project.projectName')} *
               </label>
               <input
+                ref={nameRef}
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               />
-              {errors.name && (
-                <span className="text-red-600 text-sm">{errors.name}</span>
-              )}
             </div>
 
             <div className="mb-5">
@@ -432,17 +504,15 @@ const ProjectModal = ({
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold mb-2">{t('project.city')} *</label>
+              <label className="block text-sm font-semibold mb-2">{t('project.city')}</label>
               <input
+                ref={cityRef}
                 type="text"
                 name="address.city"
                 value={formData.address.city}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               />
-              {errors.city && (
-                <span className="text-red-600 text-sm">{errors.city}</span>
-              )}
             </div>
 
             <div className="mb-5">
@@ -450,15 +520,13 @@ const ProjectModal = ({
                 {t('project.startDate')}
               </label>
               <input
+                ref={startDateRef}
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               />
-              {errors.startDate && (
-                <span className="text-red-600 text-sm">{errors.startDate}</span>
-              )}
             </div>
 
             <div className="mb-5">
@@ -466,15 +534,13 @@ const ProjectModal = ({
                 {t('project.dueDate')} *
               </label>
               <input
+                ref={dueDateRef}
                 type="date"
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               />
-              {errors.dueDate && (
-                <span className="text-red-600 text-sm">{errors.dueDate}</span>
-              )}
             </div>
 
             <div className="mb-5">
@@ -482,6 +548,7 @@ const ProjectModal = ({
                 {t('project.projectType')} *
               </label>
               <select
+                ref={projectTypeRef}
                 name="projectType"
                 value={formData.projectType}
                 onChange={handleChange}
@@ -491,9 +558,6 @@ const ProjectModal = ({
                 <option value="APPOINTMENT">Appointment</option>
                 <option value="SCHEDULED">Scheduled</option>
               </select>
-              {errors.projectType && (
-                <span className="text-red-600 text-sm">{errors.projectType}</span>
-              )}
             </div>
 
             <div className="mb-5">

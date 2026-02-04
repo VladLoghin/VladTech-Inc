@@ -138,7 +138,7 @@ test('admin creates project, assigns employee, employee updates status', async (
   await page.locator('form input[name="address.city"]').fill('test');
 
   // due date (your recording uses dueDate only)
-  await page.locator('form input[name="dueDate"]').fill('2026-01-31');
+  await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
   // project type dropdown (first combobox in modal)
   await page.getByRole('combobox').first().selectOption('SCHEDULED');

@@ -44,7 +44,7 @@ test('project priority dropdown and display', async ({ page, loginAs }) => {
 
     await page.locator('form input[name="name"]').fill(projectName);
     await page.locator('form input[name="address.city"]').fill('Montreal');
-    await page.locator('form input[name="dueDate"]').fill('2025-12-31');
+    await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
     // Scroll down in the modal
     await page.evaluate(() => {
@@ -55,7 +55,7 @@ test('project priority dropdown and display', async ({ page, loginAs }) => {
 
     await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
     await prioritySelect.selectOption('HIGH');
-    await page.locator('form input[name="startDate"]').fill('2025-01-15');
+    await page.locator('form input[name="startDate"]').fill('2026-10-15');
 
     // Click "Create" button
     await page.getByRole('button', { name: /^create$/i }).click();

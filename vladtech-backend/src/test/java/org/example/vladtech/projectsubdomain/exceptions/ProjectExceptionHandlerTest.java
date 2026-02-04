@@ -60,4 +60,16 @@ class ProjectExceptionHandlerTest {
         assertTrue(response.getBody().getMessage().contains("PROJ-123"));
         assertNotNull(response.getBody().getTimestamp());
     }
+    @Test
+    void handleInvalidProjectData_ShouldReturnUnprocessableEntityStatus() {
+        InvalidProjectDataException exception = new InvalidProjectDataException("Invalid data");
+
+        ResponseEntity<ProjectErrorResponse> response = handler.handleInvalidProjectData(exception);
+
+        assertNotNull(response);
+        assertEquals(422, response.getStatusCode().value());
+        assertEquals("INVALID_PROJECT_DATA", response.getBody().getErrorCode());
+        assertEquals("Invalid data", response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
+    }
 }

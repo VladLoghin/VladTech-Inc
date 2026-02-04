@@ -65,7 +65,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
 
   await page.locator('form input[name="name"]').fill(projectName);
   await page.locator('form input[name="address.city"]').fill('Montreal');
-  await page.locator('form input[name="dueDate"]').fill('2025-12-31');
+  await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
   await page.evaluate(() => {
     const modal = document.querySelector('.overflow-y-auto');
@@ -74,7 +74,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
   await page.waitForTimeout(300);
 
   await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
-  await page.locator('form input[name="startDate"]').fill('2025-01-15');
+  await page.locator('form input[name="startDate"]').fill('2026-10-15');
   await page.locator('form textarea[name="description"]').fill('Automated test project created by Playwright');
 
   // Step 6: Click create

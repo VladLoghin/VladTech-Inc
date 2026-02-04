@@ -9,6 +9,7 @@ import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectEmailSender;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
 import org.example.vladtech.projectsubdomain.exceptions.InvalidEmployeeIdException;
+import org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectNotFoundException;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectRequestMapper;
 import org.example.vladtech.projectsubdomain.mappinglayer.ProjectResponseMapper;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
@@ -86,6 +88,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponseModel createProject(ProjectRequestModel projectRequestModel) {
+        validateProjectRequest(projectRequestModel, true);
+        
         Project project = projectRequestMapper.requestModelToEntity(projectRequestModel);
 
         long count = projectRepository.count();
@@ -107,6 +111,8 @@ public class ProjectServiceImpl implements ProjectService {
         if (existingProject.getState() == ProjectState.COMPLETE) {
             throw new ProjectArchivedException(projectIdentifier);
         }
+        
+        validateProjectRequest(projectRequestModel, false);
 
         existingProject.setName(projectRequestModel.getName());
         existingProject.setClientId(projectRequestModel.getClientId());
@@ -608,5 +614,50 @@ public class ProjectServiceImpl implements ProjectService {
         log.info("Project {} sent to portfolio with type {}", projectIdentifier, type);
 
         return portfolioMapper.entityToResponseDto(savedItem);
+    }
+
+    private void validateProjectRequest(ProjectRequestModel model, boolean isCreate) {
+        // Validate name is not empty (only if provided - allow null for partial updates)
+        if (model.getName() != null && model.getName().trim().isEmpty()) {
+            throw new InvalidProjectDataException("Project name cannot be empty");
+        }
+        
+        // For create operations, name is required
+        if (isCreate && model.getName() == null) {
+            throw new InvalidProjectDataException("Project name cannot be empty");
+        }
+
+        // Validate estimated cost is non-negative
+        if (model.getEstimatedCost() != null && model.getEstimatedCost().compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidProjectDataException("Estimated cost must be greater than or equal to 0");
+        }
+
+        // Validate dates
+        if (model.getStartDate() != null && model.getDueDate() != null) {
+            if (model.getStartDate().isAfter(model.getDueDate())) {
+                throw new InvalidProjectDataException("Start date must be on or before due date");
+            }
+        }
+
+        // Validate due date is not in the past (only for creation)
+        if (isCreate && model.getDueDate() != null) {
+            if (model.getDueDate().isBefore(LocalDate.now())) {
+                throw new InvalidProjectDataException("Due date cannot be in the past");
+            }
+        }
+
+        // Validate city if address is provided
+        if (model.getAddress() != null) {
+            AddressRequestModel addr = model.getAddress();
+            boolean hasAddressData = 
+                (addr.getStreetAddress() != null && !addr.getStreetAddress().trim().isEmpty()) ||
+                (addr.getProvince() != null && !addr.getProvince().trim().isEmpty()) ||
+                (addr.getCountry() != null && !addr.getCountry().trim().isEmpty()) ||
+                (addr.getPostalCode() != null && !addr.getPostalCode().trim().isEmpty());
+            
+            if (hasAddressData && (addr.getCity() == null || addr.getCity().trim().isEmpty())) {
+                throw new InvalidProjectDataException("City is required when address information is provided");
+            }
+        }
     }
 }
