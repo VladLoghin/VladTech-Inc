@@ -131,7 +131,7 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
               onChange={(e) => setShowCounts(e.target.checked)}
               className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
             />
-            {t("admin.showCounts") || "Show Counts"}
+            {t("admin.showCounts") !== "admin.showCounts" ? t("admin.showCounts") : "Show Project Counts"}
           </label>
         </div>
       </div>
