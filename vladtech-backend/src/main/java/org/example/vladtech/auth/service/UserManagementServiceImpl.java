@@ -285,6 +285,14 @@ public class UserManagementServiceImpl implements UserManagementService {
     public String getUserEmailById(String userId) {
         if (userId == null || userId.isBlank()) return null;
 
+        // Prefer cached email from MongoDB
+        String cachedEmail = userProfileRepository.findById(userId)
+                .map(UserProfile::getEmail)
+                .orElse(null);
+        if (cachedEmail != null && !cachedEmail.isBlank()) {
+            return cachedEmail;
+        }
+
         String mgmtToken = managementTokenService.getManagementApiToken();
 
         // IMPORTANT: do NOT pre-encode userId. Let RestTemplate encode it once.
@@ -308,7 +316,24 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         Object email = response.getBody().get("email");
-        return email != null ? email.toString() : null;
+        String resolvedEmail = email != null ? email.toString() : null;
+
+        if (resolvedEmail != null && !resolvedEmail.isBlank()) {
+            userProfileRepository.findById(userId).ifPresentOrElse(
+                    profile -> {
+                        if (profile.getEmail() == null || profile.getEmail().isBlank()) {
+                            profile.setEmail(resolvedEmail);
+                            userProfileRepository.save(profile);
+                        }
+                    },
+                    () -> userProfileRepository.save(UserProfile.builder()
+                            .auth0Sub(userId)
+                            .email(resolvedEmail)
+                            .build())
+            );
+        }
+
+        return resolvedEmail;
     }
 
     @Transactional

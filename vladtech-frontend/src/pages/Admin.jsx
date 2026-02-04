@@ -655,6 +655,7 @@ const Admin = () => {
                 showEdit={true}
                 showComplete={true}
                 showViewInformation={true}
+                isAdmin={true}
                 getToken={getApiToken}
               />
             ) : (
@@ -666,6 +667,7 @@ const Admin = () => {
                 showComplete={false}
                 showReactivate={true}
                 showViewInformation={true}
+                isAdmin={true}
                 getToken={getApiToken}
               />
             )}

@@ -3,15 +3,22 @@ import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
 
-const formatAssignedEmployees = (assignedEmployeeIds, employeeIndex, t) => {
+const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
+  // Prefer assignedEmployeeEmails if available - filter out any Auth0 IDs
+  if (assignedEmployeeEmails && assignedEmployeeEmails.length > 0) {
+    const validEmails = assignedEmployeeEmails.filter(email => email && !/^auth0\|/.test(email));
+    if (validEmails.length > 0) return validEmails.join(", ");
+  }
+  
   if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
-  return assignedEmployeeIds
+  const validIds = assignedEmployeeIds
     .map((id) => {
       const resolved = employeeIndex?.[id]?.email || employeeIndex?.[id]?.name;
-      if (resolved) return resolved;
-      return id.replace(/^auth0\|/, "");
+      return resolved || null;
     })
-    .join(", ");
+    .filter(Boolean);
+  
+  return validIds.length > 0 ? validIds.join(", ") : t("project.none");
 };
 
 const formatArchivedAt = (archivedAt, locale) => {
@@ -95,6 +102,7 @@ const ProjectList = ({
   showUploadInformation = false,
   onUploadInformation,
   showViewInformation = false,
+  isAdmin = false,
 
   // ✅ REQUIRED so Admin can load protected image endpoints
   getToken, // async () => string
@@ -230,7 +238,7 @@ const ProjectList = ({
             >
               {/* Buttons - grid layout on desktop, at bottom on mobile */}
               <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">                {/* Send to Portfolio Button */}
-                {!isArchived && (
+                {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
@@ -380,7 +388,7 @@ const ProjectList = ({
                 {project.assignedEmployeeIds?.length > 0 && (
                   <p className="md:col-span-2">
                     <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
-                    {formatAssignedEmployees(project.assignedEmployeeIds, employeeIndex, t)}
+                    {formatAssignedEmployees(project.assignedEmployeeIds, project.assignedEmployeeEmails, employeeIndex, t)}
                   </p>
                 )}
 
@@ -420,7 +428,7 @@ const ProjectList = ({
 
               {/* Mobile buttons at bottom */}
               <div className="flex sm:hidden gap-2 flex-wrap mt-4 pt-4 border-t border-black/10">
-                {!isArchived && (
+                {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
