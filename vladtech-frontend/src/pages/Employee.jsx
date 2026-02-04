@@ -19,6 +19,24 @@ const Employee = () => {
   const [projectsError, setProjectsError] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // Search & Filter State (client-side for employee list)
+  const [filters, setFilters] = useState({
+    searchField: "name",
+    search: "",
+    status: "",
+    priority: "",
+    costStatus: "",
+    startDate: "",
+    dueDate: "",
+    projectType: "",
+  });
+
+  const [activeFilters, setActiveFilters] = useState({ ...filters });
+
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   const loadMyProjects = async () => {
     setProjectsLoading(true);
     setProjectsError("");
@@ -59,6 +77,93 @@ const Employee = () => {
       return p.startDate <= selectedDate && end >= selectedDate;
     });
   }, [projects, selectedDate]);
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const applyFilters = () => {
+    setActiveFilters({ ...filters });
+    setPage(0);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      applyFilters();
+    }
+  };
+
+  const clearFilters = () => {
+    const empty = {
+      searchField: "name",
+      search: "",
+      status: "",
+      priority: "",
+      costStatus: "",
+      startDate: "",
+      dueDate: "",
+      projectType: "",
+    };
+    setFilters(empty);
+    setActiveFilters(empty);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setPage(0);
+  };
+
+  const filteredProjects = useMemo(() => {
+    const searchValue = (activeFilters.search || "").toLowerCase().trim();
+
+    return projects.filter((project) => {
+      if (searchValue) {
+        let fieldValue = "";
+        if (activeFilters.searchField === "name") fieldValue = project.name || "";
+        else if (activeFilters.searchField === "clientName") fieldValue = project.clientName || "";
+        else if (activeFilters.searchField === "projectIdentifier") fieldValue = project.projectIdentifier || "";
+
+        if (!fieldValue.toLowerCase().includes(searchValue)) return false;
+      }
+
+      if (activeFilters.status && project.status !== activeFilters.status) return false;
+      if (activeFilters.priority && project.priority !== activeFilters.priority) return false;
+      if (activeFilters.projectType && project.projectType !== activeFilters.projectType) return false;
+
+      if (activeFilters.costStatus) {
+        const estimatedCost = Number(project.estimatedCost || 0);
+        const hasPrice = estimatedCost > 0;
+        if (activeFilters.costStatus === "HAS_PRICE" && !hasPrice) return false;
+        if (activeFilters.costStatus === "NO_PRICE" && hasPrice) return false;
+      }
+
+      if (activeFilters.startDate && project.startDate) {
+        if (project.startDate < activeFilters.startDate) return false;
+      }
+
+      if (activeFilters.dueDate && project.dueDate) {
+        if (project.dueDate > activeFilters.dueDate) return false;
+      }
+
+      return true;
+    });
+  }, [projects, activeFilters]);
+
+  const totalElements = filteredProjects.length;
+  const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
+
+  const paginatedProjects = useMemo(() => {
+    const start = page * pageSize;
+    return filteredProjects.slice(start, start + pageSize);
+  }, [filteredProjects, page, pageSize]);
+
+  useEffect(() => {
+    if (page > totalPages - 1) {
+      setPage(Math.max(0, totalPages - 1));
+    }
+  }, [page, totalPages]);
 
   const formatSelectedDate = (dateStr) => {
     if (!dateStr) return "";
@@ -200,9 +305,196 @@ const Employee = () => {
               <div className="mt-10">
                 <h3 className="text-2xl font-bold mb-4 tracking-tight">{t("employee.myProjects")}</h3>
 
+                {/* Search & Filter */}
+                <div className="bg-gray-50 rounded-xl border border-black/10 text-left overflow-hidden mb-6">
+                  <div
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className={`w-5 h-5 transition-transform duration-300 ${filtersOpen ? "rotate-90" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <h3 className="text-lg font-bold text-black/80">{t("admin.searchAndFilter")}</h3>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearFilters();
+                      }}
+                      className="text-sm font-semibold text-red-500 hover:underline"
+                    >
+                      {t("admin.clearFilters")}
+                    </button>
+                  </div>
+
+                  <div
+                    className={`transition-all duration-300 ease-in-out ${filtersOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+                  >
+                    <div className="p-6 pt-0">
+                      {/* Main Search Bar with Dropdown */}
+                      <div className="mb-6 flex flex-col sm:flex-row gap-2 sm:gap-0">
+                        <div className="relative w-full sm:w-auto">
+                          <select
+                            name="searchField"
+                            value={filters.searchField}
+                            onChange={handleFilterChange}
+                            className="w-full h-full px-4 py-3 bg-gray-100 border-2 sm:border-r-0 border-black/20 rounded-xl sm:rounded-l-xl sm:rounded-r-none focus:border-black outline-none font-bold text-sm uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
+                          >
+                            <option value="name">{t("admin.projectName")}</option>
+                            <option value="clientName">{t("admin.clientName")}</option>
+                            <option value="projectIdentifier">{t("admin.projectId")}</option>
+                          </select>
+                        </div>
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            name="search"
+                            value={filters.search}
+                            onChange={handleFilterChange}
+                            onKeyDown={handleKeyDown}
+                            placeholder={`${t("admin.searchBy")} ${
+                              filters.searchField === "name"
+                                ? t("admin.projectName").toLowerCase()
+                                : filters.searchField === "clientName"
+                                ? t("admin.clientName").toLowerCase()
+                                : t("admin.projectId").toLowerCase()
+                            }...`}
+                            className="w-full pl-4 pr-12 py-3 border-2 border-black/20 rounded-xl sm:rounded-r-xl sm:rounded-l-none focus:border-black outline-none bg-white font-medium text-lg"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-black/40">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.status")}</label>
+                          <select
+                            name="status"
+                            value={filters.status}
+                            onChange={handleFilterChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="">{t("admin.anyStatus")}</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="COMPLETED">Completed</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.priority")}</label>
+                          <select
+                            name="priority"
+                            value={filters.priority}
+                            onChange={handleFilterChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="">{t("admin.anyPriority")}</option>
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.projectType")}</label>
+                          <select
+                            name="projectType"
+                            value={filters.projectType}
+                            onChange={handleFilterChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="">{t("admin.anyType")}</option>
+                            <option value="APPOINTMENT">{t("admin.appointment")}</option>
+                            <option value="SCHEDULED">{t("admin.scheduled")}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Cost Status</label>
+                          <select
+                            name="costStatus"
+                            value={filters.costStatus}
+                            onChange={handleFilterChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="">Any</option>
+                            <option value="HAS_PRICE">Has Price</option>
+                            <option value="NO_PRICE">No Price</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.startDateFrom")}</label>
+                          <input
+                            type="date"
+                            name="startDate"
+                            value={filters.startDate}
+                            onChange={handleFilterChange}
+                            onKeyDown={handleKeyDown}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.dueDateTo")}</label>
+                          <input
+                            type="date"
+                            name="dueDate"
+                            value={filters.dueDate}
+                            onChange={handleFilterChange}
+                            onKeyDown={handleKeyDown}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                          <span className="font-medium text-black/70 text-sm">
+                            {totalElements > 0
+                              ? `${t("admin.showing")} ${page * pageSize + 1} - ${Math.min((page + 1) * pageSize, totalElements)} ${t("admin.of")} ${totalElements} ${t("admin.results")}`
+                              : `${t("admin.showing")} 0 ${t("admin.results")}`}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <label className="text-xs font-bold text-black/60 uppercase whitespace-nowrap">{t("admin.perPage")}</label>
+                            <select
+                              value={pageSize}
+                              onChange={handlePageSizeChange}
+                              className="px-3 py-1 border border-black/20 rounded-lg bg-white font-medium text-sm"
+                            >
+                              <option value="5">5</option>
+                              <option value="10">10</option>
+                              <option value="20">20</option>
+                              <option value="50">50</option>
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          onClick={applyFilters}
+                          className="w-full sm:w-auto bg-black text-white px-8 py-2 rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg"
+                        >
+                          {t("admin.searchProjects")}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
                   <ProjectList
-                    projects={projects}
+                    projects={paginatedProjects}
                     showEdit={false}
                     employeeIndex={{}}
                     showStatusControl={true}
@@ -217,6 +509,35 @@ const Employee = () => {
                     }
                   />
                 </div>
+
+                {/* Pagination Controls */}
+                {totalElements > 0 && (
+                  <div className="flex justify-center items-center p-4 border-t border-black/10 bg-gray-50 gap-4 mt-2 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage(Math.max(0, page - 1))}
+                        disabled={page === 0}
+                        className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${
+                          page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      <span className="font-medium text-black px-2">
+                        Page {page + 1} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                        disabled={page >= totalPages - 1}
+                        className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${
+                          page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
