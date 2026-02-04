@@ -177,6 +177,14 @@ const Admin = () => {
     }
   }, [getApiToken]);
 
+  // Refresh all project data (list, calendar, and stats)
+  const refreshAllProjectData = useCallback(async () => {
+    await Promise.all([
+      fetchProjects(),
+      fetchCalendarProjects(),
+      fetchProjectStats()
+    ]);
+  }, [fetchProjects, fetchCalendarProjects, fetchProjectStats]);
 
   // ... (handleCompleteProject, handleReactivateProject are unchanged)
   const handleCompleteProject = async (project) => {
@@ -189,8 +197,7 @@ const Admin = () => {
       );
 
       setMessage(`Project "${project.name}" has been marked as complete.`);
-      await fetchProjectStats(); // Explicitly update stats immediate
-      await fetchProjects();
+      await refreshAllProjectData();
     } catch (error) {
       console.error("Error completing project:", error);
       setMessage("Failed to complete project.");
@@ -207,7 +214,7 @@ const Admin = () => {
       );
 
       setMessage(`Project "${project.name}" has been reactivated.`);
-      await fetchProjects();
+      await refreshAllProjectData();
     } catch (error) {
       console.error("Error reactivating project:", error);
       setMessage("Failed to reactivate project.");
@@ -366,7 +373,7 @@ const Admin = () => {
           }}
           mode={editProject ? "edit" : "create"}
           initialData={editProject}
-          onSubmitSuccess={fetchProjects}
+          onSubmitSuccess={refreshAllProjectData}
           defaultDate={selectedDate}
           employeeIndex={employeeIndex}
         />
@@ -648,6 +655,7 @@ const Admin = () => {
                 showEdit={true}
                 showComplete={true}
                 showViewInformation={true}
+                isAdmin={true}
                 getToken={getApiToken}
               />
             ) : (
@@ -659,6 +667,7 @@ const Admin = () => {
                 showComplete={false}
                 showReactivate={true}
                 showViewInformation={true}
+                isAdmin={true}
                 getToken={getApiToken}
               />
             )}

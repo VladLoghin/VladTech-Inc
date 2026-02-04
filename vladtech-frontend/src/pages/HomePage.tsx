@@ -443,8 +443,12 @@ export default function HomePage({
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="relative"
               >
-                <div className="aspect-square bg-yellow-400 rounded-2xl shadow-2xl flex items-center justify-center">
-                  <div className="text-black text-8xl tracking-tighter opacity-20">W</div>
+                <div className="aspect-square rounded-2xl shadow-2xl overflow-hidden">
+                  <img 
+                    src="/vladtech-logo-512.png" 
+                    alt="VladTech Logo" 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               </motion.div>
             </div>
