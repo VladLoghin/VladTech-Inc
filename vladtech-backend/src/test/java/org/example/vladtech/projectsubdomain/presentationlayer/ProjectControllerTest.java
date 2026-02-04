@@ -330,6 +330,7 @@ class ProjectControllerTest {
                 calendarEntry.setLocationSummary("Montreal, Quebec");
                 calendarEntry.setStartDate(LocalDate.now());
                 calendarEntry.setDueDate(LocalDate.now().plusDays(30));
+                calendarEntry.setState("ACTIVE");
                 List<ProjectCalendarEntryResponseModel> calendarEntries = Arrays.asList(calendarEntry);
                 when(projectService.getProjectsForCalendar()).thenReturn(calendarEntries);
 
@@ -339,7 +340,8 @@ class ProjectControllerTest {
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"))
                                 .andExpect(jsonPath("$[0].name").value("Test Project"))
-                                .andExpect(jsonPath("$[0].locationSummary").value("Montreal, Quebec"));
+                                .andExpect(jsonPath("$[0].locationSummary").value("Montreal, Quebec"))
+                                .andExpect(jsonPath("$[0].state").value("ACTIVE"));
 
                 verify(projectService, times(1)).getProjectsForCalendar();
         }

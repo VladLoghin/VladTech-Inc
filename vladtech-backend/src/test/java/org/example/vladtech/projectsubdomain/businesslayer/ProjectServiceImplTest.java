@@ -561,6 +561,7 @@ class ProjectServiceImplTest {
         p1.setName("Kitchen Renovation");
         p1.setStartDate(LocalDate.of(2026, 1, 15));
         p1.setDueDate(LocalDate.of(2026, 3, 30));
+        p1.setState(ProjectState.ACTIVE);
         p1.setAddress(new Address(
                 "123 Main St",
                 "Montreal",
@@ -573,6 +574,7 @@ class ProjectServiceImplTest {
         p2.setName("Bathroom Remodel");
         p2.setStartDate(LocalDate.of(2026, 2, 1));
         p2.setDueDate(LocalDate.of(2026, 2, 28));
+        p2.setState(ProjectState.COMPLETE);
         // address left null on purpose
         p2.setAddress(null);
 
@@ -588,6 +590,7 @@ class ProjectServiceImplTest {
         assertEquals(LocalDate.of(2026, 1, 15), e1.getStartDate());
         assertEquals(LocalDate.of(2026, 3, 30), e1.getDueDate());
         assertEquals("Montreal, Quebec", e1.getLocationSummary());
+        assertEquals("ACTIVE", e1.getState());
 
         ProjectCalendarEntryResponseModel e2 = result.get(1);
         assertEquals("PROJ-2", e2.getProjectIdentifier());
@@ -595,6 +598,7 @@ class ProjectServiceImplTest {
         assertEquals(LocalDate.of(2026, 2, 1), e2.getStartDate());
         assertEquals(LocalDate.of(2026, 2, 28), e2.getDueDate());
         assertNull(e2.getLocationSummary());
+        assertEquals("COMPLETE", e2.getState());
     }
 
     @Test
