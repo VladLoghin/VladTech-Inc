@@ -2,7 +2,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import frLocale from "@fullcalendar/core/locales/fr";
 import enGbLocale from "@fullcalendar/core/locales/en-gb";
 
@@ -30,6 +30,15 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
   const calendarLocale = i18n.language === "fr" ? frLocale : enGbLocale;
 
   const [selectedDate, setSelectedDate] = useState(null);
+  const calendarRef = useRef();
+  // Helper: get today's date string in YYYY-MM-DD
+  const getTodayStr = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   const handleDateClick = (info) => {
     setSelectedDate(info.dateStr);
@@ -47,18 +56,31 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
       <h2 className="text-2xl font-bold mb-4">{t("employee.myCalendar")}</h2>
 
       <FullCalendar
-        key={`${i18n.language}-${selectedDate}`} // ADD: forces calendar to re-render on language switch OR selection
-        locale={calendarLocale}            // ADD: tells FullCalendar which locale to use
+        key={`${i18n.language}-${selectedDate}`}
+        ref={calendarRef}
+        locale={calendarLocale}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev,next todayCustom",
           center: "title",
           right: "",
         }}
+        customButtons={{
+          todayCustom: {
+            text: t("calendar.today") || "Today",
+            click: () => {
+              const todayStr = getTodayStr();
+              setSelectedDate(todayStr);
+              onDateSelect?.(todayStr);
+              // Also navigate to today
+              calendarRef.current?.getApi().today();
+            },
+          },
+        }}
         dateClick={handleDateClick}
         height="auto"
-        events={events} // Inject background event for selection
+        events={events}
         dayCellDidMount={(arg) => {
           const yyyy = arg.date.getFullYear();
           const mm = String(arg.date.getMonth() + 1).padStart(2, "0");

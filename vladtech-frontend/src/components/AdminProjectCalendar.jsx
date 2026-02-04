@@ -5,7 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import enLocale from "@fullcalendar/core/locales/en-gb";
 import frLocale from "@fullcalendar/core/locales/fr";
 import { Maximize2, Minimize2, X } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 
@@ -18,6 +18,15 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
   /* New State for Features */
   const [showCounts, setShowCounts] = useState(false);
   // Using persisted prop 'selectedDate' from parent
+  const calendarRef = useRef();
+  // Helper: get today's date string in YYYY-MM-DD
+  const getTodayStr = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   const handleDateClick = (info) => {
     onDateSelect(info.dateStr); // "YYYY-MM-DD"
@@ -137,8 +146,9 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
       </div>
 
       <FullCalendar
-        // Minimal KEY to prevents remounts on toggle
+        // Minimal KEY to prevent remounts except on language change
         key={isFr ? "fr" : "en"}
+        ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locales={[frLocale, enLocale]}
@@ -148,11 +158,21 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
         eventDisplay="block"
 
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev,next todayCustom",
           center: "title",
           right: "",
         }}
-
+        customButtons={{
+          todayCustom: {
+            text: t("calendar.today") || "Today",
+            click: () => {
+              const todayStr = getTodayStr();
+              onDateSelect(todayStr);
+              // Also navigate to today
+              calendarRef.current?.getApi().today();
+            },
+          },
+        }}
         buttonText={{
           today: t("calendar.today"),
         }}
