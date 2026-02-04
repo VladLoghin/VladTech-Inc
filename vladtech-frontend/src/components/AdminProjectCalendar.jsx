@@ -16,7 +16,6 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
   const isFr = lang.startsWith("fr");
 
   /* New State for Features */
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showCounts, setShowCounts] = useState(false);
   // Using persisted prop 'selectedDate' from parent
 
@@ -64,8 +63,7 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
     classNames: ["fc-selected-date-event"]
   }] : [], [selectedDate]);
 
-  // Toggle maximize
-  const toggleExpand = () => setIsExpanded(!isExpanded);
+  // ...existing code...
 
   // Custom Cell Content Renderer (Reactive)
   const renderDayCellContent = (arg) => {
@@ -73,91 +71,74 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
     const mm = String(arg.date.getMonth() + 1).padStart(2, "0");
     const dd = String(arg.date.getDate()).padStart(2, "0");
     const key = `${yyyy}-${mm}-${dd}`;
-    
+
     let dots = null;
 
     if (projectStatusMap.has(key)) {
-        const counts = projectStatusMap.get(key);
-        const statuses = ["COMPLETED", "IN_PROGRESS", "PENDING", "ACTIVE", "ARCHIVED", "APPOINTMENT", "SCHEDULED"]; 
-        const presentStatuses = statuses.filter(s => counts[s]);
-        // Catch-all for others
-        Object.keys(counts).forEach(s => {
-           if(!statuses.includes(s) && !presentStatuses.includes(s)) presentStatuses.push(s);
-        });
+      const counts = projectStatusMap.get(key);
+      const statuses = ["COMPLETED", "IN_PROGRESS", "PENDING", "ACTIVE", "ARCHIVED", "APPOINTMENT", "SCHEDULED"];
+      const presentStatuses = statuses.filter(s => counts[s]);
+      Object.keys(counts).forEach(s => {
+        if (!statuses.includes(s) && !presentStatuses.includes(s)) presentStatuses.push(s);
+      });
 
-        dots = (
-            <div className="flex justify-center flex-wrap gap-[2px] mt-1">
-                {presentStatuses.map(status => {
-                    const count = counts[status];
-                    const color = getEventStyle(status);
-                    
-                    if (showCounts) {
-                        return (
-                            <div key={status} className="flex items-center justify-center text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1" style={{ backgroundColor: color }}>
-                                {count}
-                            </div>
-                        );
-                    } else {
-                         return (
-                            <div key={status} className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                        );
-                    }
-                })}
-            </div>
-        );
+      dots = (
+        <div className="flex justify-center flex-wrap gap-[2px] mt-1">
+          {presentStatuses.map(status => {
+            const count = counts[status];
+            const color = getEventStyle(status);
+            if (showCounts) {
+              return (
+                <div key={status} className="flex items-center justify-center text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1" style={{ backgroundColor: color }}>
+                  {count}
+                </div>
+              );
+            } else {
+              return (
+                <div key={status} className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+              );
+            }
+          })}
+        </div>
+      );
     }
 
+    // Remove min-h-[50px] and min-h-[22px], use flex-grow for better sizing
     return (
-        <div className="flex flex-col items-center justify-start min-h-[50px] w-full h-full relative z-20">
-            {/* Day Number */}
-            <span className="text-sm font-medium">{arg.dayNumberText}</span>
-            {/* Interaction/Data Area - Fixed height to prevent jitter */}
-            <div className={`mt-1 flex items-start justify-center w-full min-h-[22px]`}>
-               {dots}
-            </div>
+      <div className="flex flex-col items-center justify-start w-full h-full relative z-20 flex-grow">
+        {/* Day Number */}
+        <span className="text-sm font-medium">{arg.dayNumberText}</span>
+        {/* Data Area - allow to grow/shrink */}
+        <div className="mt-1 flex items-start justify-center w-full flex-grow">
+          {dots}
         </div>
+      </div>
     );
   };
 
   return (
-    <div 
-      className={`transition-all duration-300 bg-white shadow-md ${
-        isExpanded 
-          ? "fixed inset-0 z-50 p-6 overflow-auto h-screen w-screen" 
-          : "border-2 border-black rounded-xl p-4 relative"
-      }`}
+    <div
+      className="transition-all duration-300 bg-white shadow-md border-2 border-black rounded-xl p-4 relative"
     >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">{t("admin.projectCalendar")}</h2>
         
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
-            <input 
-              type="checkbox" 
-              checked={showCounts} 
+            <input
+              type="checkbox"
+              checked={showCounts}
               onChange={(e) => setShowCounts(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black" 
+              className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
             />
             {t("admin.showCounts") || "Show Counts"}
           </label>
-
-          <button 
-            onClick={toggleExpand}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title={isExpanded ? "Collapse" : "Expand"}
-          >
-            {isExpanded ? (
-               <Minimize2 className="w-5 h-5" /> 
-            ) : (
-               <Maximize2 className="w-5 h-5" />
-            )}
-          </button>
         </div>
       </div>
 
       <FullCalendar
         // Minimal KEY to prevents remounts on toggle
-        key={isFr ? "fr" : "en"} 
+        key={isFr ? "fr" : "en"}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locales={[frLocale, enLocale]}
@@ -177,7 +158,7 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
         }}
 
         dateClick={handleDateClick}
-        height={isExpanded ? "100%" : "auto"} // Use full height in expand mode
+        height="auto"
         dayCellContent={renderDayCellContent}
       />
       
@@ -215,15 +196,6 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
           <span>{t("admin.stats.pending") || "Pending"}</span>
         </div>
       </div>
-
-      {isExpanded && (
-        <button 
-          onClick={toggleExpand}
-          className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full"
-        >
-          <X className="w-6 h-6" />
-        </button>
-      )}
     </div>
   );
 };
