@@ -268,7 +268,9 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getName(),
                 locationSummary,
                 project.getStartDate(),
-                project.getDueDate());
+                project.getDueDate(),
+                project.getStatus() != null ? project.getStatus().name() : "PENDING",
+                project.getProjectType() != null ? project.getProjectType().getType().name() : null);
     }
 
     @Override
