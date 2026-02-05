@@ -19,4 +19,5 @@ public class ProjectCalendarEntryResponseModel {
     private String status;
     private String state;
     private String projectType;
+    private String priority;
 }

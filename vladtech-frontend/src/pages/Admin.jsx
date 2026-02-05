@@ -1,6 +1,6 @@
 // Admin.jsx
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 import ProjectList from "../components/projects/ProjectList.jsx";
@@ -25,6 +25,12 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("active");
 
   const [selectedDate, setSelectedDate] = useState(null);
+
+  // Ref for scrolling to project list
+  const projectsListRef = useRef(null);
+
+  // Stats view mode: 'status', 'priority', 'projectType'
+  const [statsViewMode, setStatsViewMode] = useState('status');
 
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
   const [isRoleAssignmentModalOpen, setIsRoleAssignmentModalOpen] = useState(false);
@@ -274,6 +280,59 @@ const Admin = () => {
     fetchProjectStats();
   }, [fetchProjectStats]);
 
+  // Calculate priority and project type stats from calendarProjects
+  const computedStats = useMemo(() => {
+    if (!calendarProjects.length) return null;
+
+    // Priority stats - check both uppercase and proper case
+    const lowCount = calendarProjects.filter(p => 
+      p.priority && (p.priority === 'LOW' || p.priority.toUpperCase() === 'LOW')
+    ).length;
+    const mediumCount = calendarProjects.filter(p => 
+      p.priority && (p.priority === 'MEDIUM' || p.priority.toUpperCase() === 'MEDIUM')
+    ).length;
+    const highCount = calendarProjects.filter(p => 
+      p.priority && (p.priority === 'HIGH' || p.priority.toUpperCase() === 'HIGH')
+    ).length;
+    const urgentCount = calendarProjects.filter(p => 
+      p.priority && (p.priority === 'URGENT' || p.priority.toUpperCase() === 'URGENT')
+    ).length;
+
+    // Project type stats - check both uppercase and proper case
+    const appointmentCount = calendarProjects.filter(p => 
+      p.projectType && (p.projectType === 'APPOINTMENT' || p.projectType.toUpperCase() === 'APPOINTMENT')
+    ).length;
+    const scheduledCount = calendarProjects.filter(p => 
+      p.projectType && (p.projectType === 'SCHEDULED' || p.projectType.toUpperCase() === 'SCHEDULED')
+    ).length;
+
+    return {
+      priority: {
+        total: calendarProjects.length,
+        lowCount,
+        mediumCount,
+        highCount,
+        urgentCount
+      },
+      projectType: {
+        total: calendarProjects.length,
+        appointmentCount,
+        scheduledCount
+      }
+    };
+  }, [calendarProjects]);
+
+  // Get stats based on current view mode
+  const displayStats = useMemo(() => {
+    if (statsViewMode === 'priority') {
+      return computedStats?.priority;
+    } else if (statsViewMode === 'projectType') {
+      return computedStats?.projectType;
+    }
+    // Default to status stats
+    return projectStats;
+  }, [statsViewMode, computedStats, projectStats]);
+
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
     return calendarProjects.filter((p) => {
@@ -296,6 +355,54 @@ const Admin = () => {
       year: "numeric",
     });
   };
+
+  // Handle stat card clicks - scroll to projects and apply filter
+  const handleStatClick = useCallback((filterType, filterValue) => {
+    // Scroll to projects list
+    if (projectsListRef.current) {
+      projectsListRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+
+    // Ensure we're on active tab (stats are for active projects)
+    setActiveTab("active");
+    setPage(0);
+
+    // Open filters
+    setFiltersOpen(true);
+
+    // Apply the appropriate filter based on the stat clicked
+    let newFilters = {
+      searchField: "name",
+      search: "",
+      status: "",
+      priority: "",
+      costStatus: "",
+      startDate: "",
+      dueDate: "",
+      projectType: "",
+      estimatedCost: "",
+    };
+
+    if (filterType === "status") {
+      newFilters.status = filterValue;
+    } else if (filterType === "priority") {
+      newFilters.priority = filterValue;
+    } else if (filterType === "projectType") {
+      newFilters.projectType = filterValue;
+    } else if (filterType === "overdue") {
+      // For overdue, we filter by due date before today
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      newFilters.dueDate = todayStr;
+    }
+    // For "total", we don't apply any additional filter (show all active)
+
+    setFilters(newFilters);
+    setActiveFilters(newFilters);
+  }, []);
 
   return (
     <>
@@ -380,7 +487,48 @@ const Admin = () => {
 
         {/* Stats Section */}
         <section className="mb-8">
-          <ProjectStatsCards stats={projectStats} />
+          {/* Stats View Mode Tabs */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-semibold text-gray-600">View:</span>
+            <div className="flex border-2 border-black rounded-lg overflow-hidden">
+              <button
+                onClick={() => setStatsViewMode('status')}
+                className={`px-4 py-2 font-semibold transition-all ${
+                  statsViewMode === 'status' 
+                    ? 'bg-black text-white' 
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
+              >
+                Status
+              </button>
+              <button
+                onClick={() => setStatsViewMode('priority')}
+                className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
+                  statsViewMode === 'priority' 
+                    ? 'bg-black text-white' 
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
+              >
+                Priority
+              </button>
+              <button
+                onClick={() => setStatsViewMode('projectType')}
+                className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
+                  statsViewMode === 'projectType' 
+                    ? 'bg-black text-white' 
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
+              >
+                Project Type
+              </button>
+            </div>
+          </div>
+          
+          <ProjectStatsCards 
+            stats={displayStats} 
+            onStatClick={handleStatClick} 
+            viewMode={statsViewMode}
+          />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -436,7 +584,7 @@ const Admin = () => {
           </div>
         </div>
 
-        <section className="mt-10">
+        <section ref={projectsListRef} className="mt-10">
           <div className="flex flex-col gap-6 mb-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight">{t("admin.projects")}</h2>
