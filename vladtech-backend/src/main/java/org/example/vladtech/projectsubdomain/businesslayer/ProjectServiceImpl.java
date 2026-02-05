@@ -125,6 +125,7 @@ public class ProjectServiceImpl implements ProjectService {
         // keep cost fields (teammate work)
         existingProject.setEstimatedCost(projectRequestModel.getEstimatedCost());
         existingProject.setEstimatedCostCurrency(projectRequestModel.getEstimatedCostCurrency());
+        existingProject.setEstimatedTime(projectRequestModel.getEstimatedTime());
 
         if (projectRequestModel.getAddress() != null) {
             existingProject.setAddress(new Address(
@@ -632,6 +633,11 @@ public class ProjectServiceImpl implements ProjectService {
         // Validate estimated cost is non-negative
         if (model.getEstimatedCost() != null && model.getEstimatedCost().compareTo(BigDecimal.ZERO) < 0) {
             throw new InvalidProjectDataException("Estimated cost must be greater than or equal to 0");
+        }
+
+        // Validate estimated time is positive if provided
+        if (model.getEstimatedTime() != null && model.getEstimatedTime() <= 0) {
+            throw new InvalidProjectDataException("Estimated time must be greater than 0");
         }
 
         // Validate dates
