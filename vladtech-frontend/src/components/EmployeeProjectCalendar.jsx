@@ -13,8 +13,15 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
 
   projects.forEach((p) => {
     if (!p.startDate) return;
-    const start = new Date(p.startDate);
-    const end = new Date(p.dueDate || p.startDate);
+    // Skip archived projects (state === 'COMPLETE')
+    if (p.state && p.state.toUpperCase() === 'COMPLETE') return;
+    
+    // Parse dates in local timezone to avoid off-by-one errors
+    const [startY, startM, startD] = p.startDate.split('-').map(Number);
+    const start = new Date(startY, startM - 1, startD);
+    
+    const [endY, endM, endD] = (p.dueDate || p.startDate).split('-').map(Number);
+    const end = new Date(endY, endM - 1, endD);
 
     const d = new Date(start);
     while (d <= end) {

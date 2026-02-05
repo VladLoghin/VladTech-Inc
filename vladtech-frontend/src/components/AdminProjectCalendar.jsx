@@ -45,8 +45,16 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
 
     projects.forEach(p => {
         if (!p.startDate) return;
-        const start = new Date(p.startDate);
-        const end = new Date(p.dueDate || p.startDate);
+        // Skip archived projects (state === 'COMPLETE')
+        if (p.state && p.state.toUpperCase() === 'COMPLETE') return;
+        
+        // Parse dates in local timezone to avoid off-by-one errors
+        const [startY, startM, startD] = p.startDate.split('-').map(Number);
+        const start = new Date(startY, startM - 1, startD);
+        
+        const [endY, endM, endD] = (p.dueDate || p.startDate).split('-').map(Number);
+        const end = new Date(endY, endM - 1, endD);
+        
         const status = (p.status || "PENDING").toUpperCase();
 
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
@@ -134,13 +142,19 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
         
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={showCounts}
-              onChange={(e) => setShowCounts(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
-            />
-            {t("admin.showCounts") !== "admin.showCounts" ? t("admin.showCounts") : "Show Project Counts"}
+            <span>{t("admin.showCounts") !== "admin.showCounts" ? t("admin.showCounts") : "Show Project Counts"}</span>
+            <div
+              onClick={() => setShowCounts(!showCounts)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                showCounts ? "bg-black" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showCounts ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </div>
           </label>
         </div>
       </div>
