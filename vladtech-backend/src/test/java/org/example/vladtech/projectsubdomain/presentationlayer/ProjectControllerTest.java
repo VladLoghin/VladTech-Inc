@@ -2,6 +2,7 @@ package org.example.vladtech.projectsubdomain.presentationlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.vladtech.projectsubdomain.businesslayer.ProjectService;
+import org.example.vladtech.projectsubdomain.businesslayer.UserProjectPinService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(ProjectController.class)
-@AutoConfigureMockMvc(addFilters = false) // <-- This disables Spring Security for tests
+@AutoConfigureMockMvc(addFilters = false)
 class ProjectControllerTest {
 
         @Autowired
@@ -36,12 +36,16 @@ class ProjectControllerTest {
         @MockitoBean
         private ProjectService projectService;
 
+        @MockitoBean
+        private UserProjectPinService userProjectPinService;
+
         private ProjectResponseModel responseModel;
         private ProjectRequestModel requestModel;
 
         @BeforeEach
         void setUp() {
                 responseModel = new ProjectResponseModel();
+                responseModel.setId("mongo-id-123");
                 responseModel.setProjectIdentifier("PROJ-1");
                 responseModel.setName("Test Project");
                 responseModel.setClientId("CLIENT-123");
