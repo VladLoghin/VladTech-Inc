@@ -11,7 +11,7 @@ test('admin creates and edits project with estimated cost', async ({ page, login
     // 2. Go to Admin Panel
     // Logic similar to fixture or user example to navigate
     if (isMobile) {
-        const hamburgerButton = page.locator('button svg').first();
+        const hamburgerButton = page.locator('button[aria-expanded]');
         await hamburgerButton.click();
         await page.waitForTimeout(500);
         await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();

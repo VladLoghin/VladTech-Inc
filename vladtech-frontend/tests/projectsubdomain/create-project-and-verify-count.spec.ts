@@ -17,7 +17,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
 
     // Scroll to About section and wait
     if (isMobile) {
-      const hamburgerButton = page.locator('button svg').first();
+      const hamburgerButton = page.locator('button[aria-expanded]');
       if (await hamburgerButton.isVisible()) {
         await hamburgerButton.click();
         await page.waitForTimeout(500);
@@ -42,7 +42,7 @@ test('create project and verify count', async ({ page, loginAs }) => {
 
   // Step 3: Navigate to Admin Panel
   if (isMobile) {
-    const hamburgerButton = page.locator('button svg').first();
+    const hamburgerButton = page.locator('button[aria-expanded]');
     await hamburgerButton.click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();

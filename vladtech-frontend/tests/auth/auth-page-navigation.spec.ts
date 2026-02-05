@@ -8,7 +8,7 @@ test('test auth page navigation admin', async ({ page, loginAs }) => {
   const isMobile = viewport && viewport.width < 768;
 
   if (isMobile) {
-    const hamburger = page.locator('button svg').first();
+    const hamburger = page.locator('button[aria-expanded]');
     await hamburger.click();
     await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
   } else {

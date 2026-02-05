@@ -42,7 +42,8 @@ export const test = base.extend<{
 
       if (isMobile) {
         // Mobile view: Open hamburger menu first
-        const hamburgerButton = page.locator('button svg').first();
+        const hamburgerButton = page.locator('button[aria-expanded]');
+        await hamburgerButton.waitFor({ state: 'visible', timeout: 5000 });
         await hamburgerButton.click();
         await page.waitForTimeout(500); // Wait for menu animation to complete
 
@@ -78,7 +79,8 @@ export const test = base.extend<{
       const currentUrl = page.url();
       if (!currentUrl.includes('/admin')) {
         if (isMobile) {
-          const hamburgerButton = page.locator('button svg').first();
+          const hamburgerButton = page.locator('button[aria-expanded]');
+          await hamburgerButton.waitFor({ state: 'visible', timeout: 5000 });
           await hamburgerButton.click();
           await page.waitForTimeout(500);
           await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();
