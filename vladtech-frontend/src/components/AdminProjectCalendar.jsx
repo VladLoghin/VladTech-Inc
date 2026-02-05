@@ -82,56 +82,55 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
 
   // ...existing code...
 
-  // Custom Cell Content Renderer (Reactive)
-  const renderDayCellContent = (arg) => {
+  // Performance-optimized mount callback (runs once per cell)
+  const handleDayCellDidMount = (arg) => {
     const yyyy = arg.date.getFullYear();
     const mm = String(arg.date.getMonth() + 1).padStart(2, "0");
     const dd = String(arg.date.getDate()).padStart(2, "0");
     const key = `${yyyy}-${mm}-${dd}`;
 
-    let dots = null;
+    if (!projectStatusMap.has(key)) return;
 
-    if (projectStatusMap.has(key)) {
-      const counts = projectStatusMap.get(key);
-      const statuses = ["COMPLETED", "IN_PROGRESS", "PENDING", "ACTIVE", "ARCHIVED", "APPOINTMENT", "SCHEDULED"];
-      const presentStatuses = statuses.filter(s => counts[s]);
-      Object.keys(counts).forEach(s => {
-        if (!statuses.includes(s) && !presentStatuses.includes(s)) presentStatuses.push(s);
-      });
+    const counts = projectStatusMap.get(key);
+    const statuses = ["COMPLETED", "IN_PROGRESS", "PENDING", "ACTIVE", "ARCHIVED", "APPOINTMENT", "SCHEDULED"];
+    const presentStatuses = statuses.filter(s => counts[s]);
+    Object.keys(counts).forEach(s => {
+      if (!statuses.includes(s) && !presentStatuses.includes(s)) presentStatuses.push(s);
+    });
 
-      dots = (
-        <div className="flex justify-center flex-wrap gap-[2px] mt-1">
-          {presentStatuses.map(status => {
-            const count = counts[status];
-            const color = getEventStyle(status);
-            if (showCounts) {
-              return (
-                <div key={status} className="flex items-center justify-center text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1" style={{ backgroundColor: color }}>
-                  {count}
-                </div>
-              );
-            } else {
-              return (
-                <div key={status} className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-              );
-            }
-          })}
-        </div>
-      );
-    }
+    // Create container for status indicators
+    const container = document.createElement("div");
+    container.className = "flex justify-center flex-wrap gap-[2px] mt-1";
+    container.style.marginTop = "6px";
 
-    // Remove min-h-[50px] and min-h-[22px], use flex-grow for better sizing
-    return (
-      <div className="flex flex-col items-center justify-start w-full h-full relative z-20 flex-grow">
-        {/* Day Number */}
-        <span className="text-sm font-medium">{arg.dayNumberText}</span>
-        {/* Data Area - allow to grow/shrink */}
-        <div className="mt-1 flex items-start justify-center w-full flex-grow">
-          {dots}
-        </div>
-      </div>
-    );
+    presentStatuses.forEach(status => {
+      const count = counts[status];
+      const color = getEventStyle(status);
+      
+      const indicator = document.createElement("div");
+      
+      if (showCounts) {
+        indicator.className = "flex items-center justify-center text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1";
+        indicator.style.backgroundColor = color;
+        indicator.textContent = count;
+      } else {
+        indicator.className = "w-2 h-2 rounded-full";
+        indicator.style.backgroundColor = color;
+      }
+      
+      container.appendChild(indicator);
+    });
+
+    // Append after the day number
+    arg.el.querySelector(".fc-daygrid-day-number")?.after(container);
   };
+
+  // Calculate a data hash to force remount when deep data changes
+  const dataVersion = useMemo(() => {
+    return projects.map(p => 
+      `${p.projectIdentifier || p.id}:${p.status}:${p.startDate}:${p.dueDate}:${p.state}`
+    ).join("|");
+  }, [projects]);
 
   return (
     <div
@@ -160,8 +159,8 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
       </div>
 
       <FullCalendar
-        // Minimal KEY to prevent remounts except on language change
-        key={isFr ? "fr" : "en"}
+        // Key changes on lang, showCounts, or ANY data change (via dataVersion hash)
+        key={`${isFr ? "fr" : "en"}-${showCounts}-${dataVersion}`}
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -193,7 +192,7 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
 
         dateClick={handleDateClick}
         height="auto"
-        dayCellContent={renderDayCellContent}
+        dayCellDidMount={handleDayCellDidMount}
       />
       
       <style>{`

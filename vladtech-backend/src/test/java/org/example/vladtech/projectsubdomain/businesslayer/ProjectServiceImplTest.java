@@ -591,6 +591,7 @@ class ProjectServiceImplTest {
         assertEquals(LocalDate.of(2026, 3, 30), e1.getDueDate());
         assertEquals("Montreal, Quebec", e1.getLocationSummary());
         assertEquals("ACTIVE", e1.getState());
+        assertEquals("MEDIUM", e1.getPriority()); // default when priority is null
 
         ProjectCalendarEntryResponseModel e2 = result.get(1);
         assertEquals("PROJ-2", e2.getProjectIdentifier());
@@ -599,6 +600,7 @@ class ProjectServiceImplTest {
         assertEquals(LocalDate.of(2026, 2, 28), e2.getDueDate());
         assertNull(e2.getLocationSummary());
         assertEquals("COMPLETE", e2.getState());
+        assertEquals("MEDIUM", e2.getPriority()); // default when priority is null
     }
 
     @Test

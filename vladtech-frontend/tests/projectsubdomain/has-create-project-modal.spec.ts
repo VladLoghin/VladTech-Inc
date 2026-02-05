@@ -9,7 +9,7 @@ test('has create project modal', async ({ page, loginAs }) => {
 
   if (isMobile) {
     // Mobile: Open hamburger menu and click ADMIN PANEL
-    const hamburgerButton = page.locator('button svg').first();
+    const hamburgerButton = page.locator('button[aria-expanded]');
     await hamburgerButton.click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'ADMIN PANEL' }).first().click();

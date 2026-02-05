@@ -331,6 +331,7 @@ class ProjectControllerTest {
                 calendarEntry.setStartDate(LocalDate.now());
                 calendarEntry.setDueDate(LocalDate.now().plusDays(30));
                 calendarEntry.setState("ACTIVE");
+                calendarEntry.setPriority("MEDIUM");
                 List<ProjectCalendarEntryResponseModel> calendarEntries = Arrays.asList(calendarEntry);
                 when(projectService.getProjectsForCalendar()).thenReturn(calendarEntries);
 

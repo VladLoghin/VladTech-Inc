@@ -11,7 +11,7 @@ test('client can submit the Contact Us form and call backend', async ({ page, lo
   
   if (isMobile) {
     // Mobile: Open hamburger menu and click CONTACT
-    const hamburgerButton = page.locator('button svg').first();
+    const hamburgerButton = page.locator('button[aria-expanded]');
     await hamburgerButton.click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'CONTACT' }).first().click();

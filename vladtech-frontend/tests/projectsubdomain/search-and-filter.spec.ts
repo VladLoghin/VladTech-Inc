@@ -1,6 +1,9 @@
 import { test, expect } from '../fixtures/fixtures';
 
 test('search and filter projects by name and priority', async ({ page, loginAs, createProject }) => {
+    // Increase timeout for mobile testing
+    test.setTimeout(60000);
+    
     // Step 1: Login as admin
     await loginAs('admin');
 
