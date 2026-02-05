@@ -74,17 +74,17 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           ];
         } else if (viewMode === 'priority') {
           items = [
-            { label: "Total", value: stats.total, filterType: "total" },
-            { label: "Low", value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
-            { label: "Medium", value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
-            { label: "High", value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
-            { label: "Urgent", value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
+            { label: t("admin.stats.total"), value: stats.total, filterType: "total" },
+            { label: t("admin.stats.low"), value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
+            { label: t("admin.stats.medium"), value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
+            { label: t("admin.stats.high"), value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
+            { label: t("admin.stats.urgent"), value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
           ];
         } else if (viewMode === 'projectType') {
           items = [
-            { label: "Total", value: stats.total, filterType: "total" },
-            { label: "Appointment", value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
-            { label: "Scheduled", value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
+            { label: t("admin.stats.total"), value: stats.total, filterType: "total" },
+            { label: t("admin.stats.appointment"), value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
+            { label: t("admin.stats.scheduled"), value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
           ];
         }
 
@@ -118,25 +118,25 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           totalCount = stats.total || 0;
           activeData = [
             { 
-              name: "Low", 
+              name: t("admin.stats.low"), 
               value: stats.lowCount || 0, 
               color: "#10b981",
               percentage: totalCount > 0 ? Math.round(((stats.lowCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: "Medium", 
+              name: t("admin.stats.medium"), 
               value: stats.mediumCount || 0, 
               color: "#f59e0b",
               percentage: totalCount > 0 ? Math.round(((stats.mediumCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: "High", 
+              name: t("admin.stats.high"), 
               value: stats.highCount || 0, 
               color: "#ef4444",
               percentage: totalCount > 0 ? Math.round(((stats.highCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: "Urgent", 
+              name: t("admin.stats.urgent"), 
               value: stats.urgentCount || 0, 
               color: "#991b1b",
               percentage: totalCount > 0 ? Math.round(((stats.urgentCount || 0) / totalCount) * 100) : 0
@@ -146,13 +146,13 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           totalCount = stats.total || 0;
           activeData = [
             { 
-              name: "Appointment", 
+              name: t("admin.stats.appointment"), 
               value: stats.appointmentCount || 0, 
               color: "#8b5cf6",
               percentage: totalCount > 0 ? Math.round(((stats.appointmentCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: "Scheduled", 
+              name: t("admin.stats.scheduled"), 
               value: stats.scheduledCount || 0, 
               color: "#3b82f6",
               percentage: totalCount > 0 ? Math.round(((stats.scheduledCount || 0) / totalCount) * 100) : 0
@@ -164,20 +164,20 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
         const chartTitle = viewMode === 'status' 
           ? t("admin.stats.activeProjectsDistribution")
           : viewMode === 'priority'
-          ? "Priority Distribution"
-          : "Project Type Distribution";
+          ? t("admin.stats.priorityDistribution")
+          : t("admin.stats.projectTypeDistribution");
 
         const chartSubtitle = viewMode === 'status'
           ? t("admin.stats.statusBreakdown")
           : viewMode === 'priority'
-          ? "Priority Breakdown"
-          : "Type Breakdown";
+          ? t("admin.stats.priorityBreakdown")
+          : t("admin.stats.typeBreakdown");
 
         return (
           <div className="w-full bg-white border-2 border-black rounded-lg p-6">
             {/* View Mode Tabs */}
             <div className="flex items-center gap-2 mb-6">
-              <span className="text-sm font-semibold text-gray-600">View:</span>
+              <span className="text-sm font-semibold text-gray-600">{t("admin.stats.view")}:</span>
               <div className="flex border-2 border-black rounded-lg overflow-hidden">
                 <button
                   onClick={() => onViewModeChange('status')}
@@ -187,7 +187,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  Status
+                  {t("admin.status")}
                 </button>
                 <button
                   onClick={() => onViewModeChange('priority')}
@@ -197,7 +197,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  Priority
+                  {t("admin.priority")}
                 </button>
                 <button
                   onClick={() => onViewModeChange('projectType')}
@@ -207,7 +207,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  Project Type
+                  {t("admin.projectType")}
                 </button>
               </div>
             </div>
