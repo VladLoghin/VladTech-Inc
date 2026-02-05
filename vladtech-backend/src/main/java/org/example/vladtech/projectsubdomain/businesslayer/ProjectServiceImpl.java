@@ -270,6 +270,7 @@ public class ProjectServiceImpl implements ProjectService {
                 project.getStartDate(),
                 project.getDueDate(),
                 project.getStatus() != null ? project.getStatus().name() : "PENDING",
+                project.getState() != null ? project.getState().name() : "ACTIVE",
                 project.getProjectType() != null ? project.getProjectType().getType().name() : null);
     }
 
