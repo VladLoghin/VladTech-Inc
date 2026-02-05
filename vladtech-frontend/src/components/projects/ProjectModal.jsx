@@ -6,6 +6,53 @@ import ClientFinderModal from "./ClientFinderModal.jsx";
 import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
 import { api } from "../../api/http";
 
+// Time conversion constants
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 3600;
+const SECONDS_PER_DAY = 86400;
+const SECONDS_PER_WEEK = 604800;
+const SECONDS_PER_MONTH = 2592000; // 30 days
+const SECONDS_PER_YEAR = 31536000; // 365 days
+
+// Format seconds to Jira-like time format for display
+const formatSecondsToJiraTime = (seconds) => {
+  if (!seconds || seconds <= 0) return "";
+  
+  const parts = [];
+  let remaining = seconds;
+  
+  const years = Math.floor(remaining / SECONDS_PER_YEAR);
+  if (years > 0) {
+    parts.push(`${years}y`);
+    remaining -= years * SECONDS_PER_YEAR;
+  }
+  
+  const months = Math.floor(remaining / SECONDS_PER_MONTH);
+  if (months > 0) {
+    parts.push(`${months}mo`);
+    remaining -= months * SECONDS_PER_MONTH;
+  }
+  
+  const weeks = Math.floor(remaining / SECONDS_PER_WEEK);
+  if (weeks > 0) {
+    parts.push(`${weeks}w`);
+    remaining -= weeks * SECONDS_PER_WEEK;
+  }
+  
+  const days = Math.floor(remaining / SECONDS_PER_DAY);
+  if (days > 0) {
+    parts.push(`${days}d`);
+    remaining -= days * SECONDS_PER_DAY;
+  }
+  
+  const hours = Math.floor(remaining / SECONDS_PER_HOUR);
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  
+  return parts.join(" ");
+};
+
 const EMPTY_FORM = {
   name: "",
   description: "",
@@ -25,6 +72,7 @@ const EMPTY_FORM = {
   },
   estimatedCost: "",
   estimatedCostCurrency: "CAD",
+  estimatedTime: "",
   priority: "MEDIUM",
 };
 
@@ -45,6 +93,14 @@ const ProjectModal = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [_selectedEmployee, setSelectedEmployee] = useState([]);
+  
+  // Time estimate breakdown
+  const [timeEstimate, setTimeEstimate] = useState({
+    years: 0,
+    months: 0,
+    days: 0,
+    hours: 0
+  });
 
   // Refs for native browser validation
   const nameRef = useRef(null);
@@ -54,6 +110,25 @@ const ProjectModal = ({
   const startDateRef = useRef(null);
 
   const isEdit = mode === "edit";
+  
+  // Helper to break down seconds into time units
+  const breakdownSeconds = (seconds) => {
+    if (!seconds || seconds <= 0) return { years: 0, months: 0, days: 0, hours: 0 };
+    
+    let remaining = seconds;
+    const years = Math.floor(remaining / SECONDS_PER_YEAR);
+    remaining -= years * SECONDS_PER_YEAR;
+    
+    const months = Math.floor(remaining / SECONDS_PER_MONTH);
+    remaining -= months * SECONDS_PER_MONTH;
+    
+    const days = Math.floor(remaining / SECONDS_PER_DAY);
+    remaining -= days * SECONDS_PER_DAY;
+    
+    const hours = Math.floor(remaining / SECONDS_PER_HOUR);
+    
+    return { years, months, days, hours };
+  };
 
   useEffect(() => {
     if (isEdit && initialData) {
@@ -72,11 +147,18 @@ const ProjectModal = ({
         },
         estimatedCost: initialData.estimatedCost || "",
         estimatedCostCurrency: initialData.estimatedCostCurrency || "CAD",
+        estimatedTime: initialData.estimatedTime || "",
         priority: initialData.priority || "MEDIUM",
       });
+      // Break down estimatedTime for display
+      if (initialData.estimatedTime) {
+        const breakdown = breakdownSeconds(initialData.estimatedTime);
+        setTimeEstimate(breakdown);
+      }
     } else if (!isEdit) {
        
       setFormData(EMPTY_FORM);
+      setTimeEstimate({ years: 0, months: 0, days: 0, hours: 0 });
     }
   }, [isEdit, initialData]);
 
@@ -228,12 +310,21 @@ const ProjectModal = ({
         },
       });
 
+      // Calculate total seconds from time estimate breakdown
+      const estimatedTimeSeconds = 
+        (timeEstimate.years * SECONDS_PER_YEAR) +
+        (timeEstimate.months * SECONDS_PER_MONTH) +
+        (timeEstimate.days * SECONDS_PER_DAY) +
+        (timeEstimate.hours * SECONDS_PER_HOUR);
+      
+      const finalEstimatedTime = estimatedTimeSeconds > 0 ? estimatedTimeSeconds : null;
+
       if (isEdit) {
         const before = initialData?.assignedEmployeeIds || [];
         const after = formData.assignedEmployeeIds || [];
         const newlyAdded = after.filter((id) => !before.includes(id));
 
-        const payload = { ...formData };
+        const payload = { ...formData, estimatedTime: finalEstimatedTime };
         if (payload.estimatedCost === "") {
           payload.estimatedCost = null;
         }
@@ -253,7 +344,7 @@ const ProjectModal = ({
         const employeeIds = formData.assignedEmployeeIds || [];
 
         // 1) create project WITHOUT employees
-        const payload = { ...formData };
+        const payload = { ...formData, estimatedTime: finalEstimatedTime };
         if (payload.estimatedCost === "") {
           payload.estimatedCost = null;
         }
@@ -604,6 +695,64 @@ const ProjectModal = ({
               </div>
               {errors.estimatedCost && (
                 <span className="text-red-600 text-sm">{errors.estimatedCost}</span>
+              )}
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-semibold mb-2">
+                Estimated Time
+              </label>
+              <div className="grid grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs text-black/60 mb-1">Years</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={timeEstimate.years}
+                    onChange={(e) => setTimeEstimate(prev => ({ ...prev, years: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="w-full px-3 py-2 border-2 border-black/20 rounded-lg text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-black/60 mb-1">Months</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={timeEstimate.months}
+                    onChange={(e) => setTimeEstimate(prev => ({ ...prev, months: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="w-full px-3 py-2 border-2 border-black/20 rounded-lg text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-black/60 mb-1">Days</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={timeEstimate.days}
+                    onChange={(e) => setTimeEstimate(prev => ({ ...prev, days: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="w-full px-3 py-2 border-2 border-black/20 rounded-lg text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-black/60 mb-1">Hours</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={timeEstimate.hours}
+                    onChange={(e) => setTimeEstimate(prev => ({ ...prev, hours: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="w-full px-3 py-2 border-2 border-black/20 rounded-lg text-center"
+                  />
+                </div>
+              </div>
+              {(timeEstimate.years > 0 || timeEstimate.months > 0 || timeEstimate.days > 0 || timeEstimate.hours > 0) && (
+                <p className="text-xs text-black/60 mt-2">
+                  Total: {formatSecondsToJiraTime(
+                    (timeEstimate.years * SECONDS_PER_YEAR) +
+                    (timeEstimate.months * SECONDS_PER_MONTH) +
+                    (timeEstimate.days * SECONDS_PER_DAY) +
+                    (timeEstimate.hours * SECONDS_PER_HOUR)
+                  )}
+                </p>
               )}
             </div>
 

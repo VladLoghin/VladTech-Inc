@@ -59,6 +59,43 @@ const formatMoney = (amount, currency, locale) => {
   }).format(num);
 };
 
+const formatEstimatedTime = (seconds) => {
+  if (!seconds || seconds <= 0) return null;
+  
+  const SECONDS_IN_YEAR = 31536000;  // 365 days
+  const SECONDS_IN_MONTH = 2592000;  // 30 days
+  const SECONDS_IN_DAY = 86400;
+  const SECONDS_IN_HOUR = 3600;
+  
+  let remaining = seconds;
+  const parts = [];
+  
+  const years = Math.floor(remaining / SECONDS_IN_YEAR);
+  if (years > 0) {
+    parts.push(`${years}y`);
+    remaining -= years * SECONDS_IN_YEAR;
+  }
+  
+  const months = Math.floor(remaining / SECONDS_IN_MONTH);
+  if (months > 0) {
+    parts.push(`${months}mo`);
+    remaining -= months * SECONDS_IN_MONTH;
+  }
+  
+  const days = Math.floor(remaining / SECONDS_IN_DAY);
+  if (days > 0) {
+    parts.push(`${days}d`);
+    remaining -= days * SECONDS_IN_DAY;
+  }
+  
+  const hours = Math.floor(remaining / SECONDS_IN_HOUR);
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  
+  return parts.length > 0 ? parts.join(" ") : null;
+};
+
 const getStatusBadgeClasses = (status) => {
   const s = status || "PENDING";
   if (s === "COMPLETED") return "bg-green-100 text-green-800";
@@ -364,6 +401,15 @@ const ProjectList = ({
                     <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
                     {estimatedCostFormatted ? (
                     <span>{estimatedCostFormatted}</span>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
+                </p>
+
+                <p>
+                  <strong className="text-black/60">{t("project.estimatedTime", { defaultValue: "Estimated Time" })}:</strong>{" "}
+                  {formatEstimatedTime(project.estimatedTime) ? (
+                    <span>{formatEstimatedTime(project.estimatedTime)}</span>
                   ) : (
                     <span className="text-gray-400">N/A</span>
                   )}

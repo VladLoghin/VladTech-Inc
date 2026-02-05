@@ -41,6 +41,7 @@ public class ProjectResponseMapper {
         responseModel.setArchivedAt(project.getArchivedAt());
         responseModel.setEstimatedCost(project.getEstimatedCost());
         responseModel.setEstimatedCostCurrency(project.getEstimatedCostCurrency());
+        responseModel.setEstimatedTime(project.getEstimatedTime());
         responseModel.setPriority(project.getPriority() != null
                 ? project.getPriority().name()
                 : "MEDIUM");

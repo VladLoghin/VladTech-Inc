@@ -37,6 +37,7 @@ public class Project {
     private LocalDateTime archivedAt;
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
+    private Long estimatedTime; // Time estimate in seconds
     private ProjectPriority priority = ProjectPriority.MEDIUM;
     private boolean sentToPortfolio = false;
 }

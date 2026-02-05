@@ -99,12 +99,19 @@ const Admin = () => {
   // Track the *active* filters applied on search button click
   const [activeFilters, setActiveFilters] = useState({ ...filters });
 
+  // Sorting state
+  const [sortBy, setSortBy] = useState("projectIdentifier");
+  const [sortOrder, setSortOrder] = useState("ASC");
+  const [activeSortBy, setActiveSortBy] = useState("projectIdentifier");
+  const [activeSortOrder, setActiveSortOrder] = useState("ASC");
+
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [animatedFilter, setAnimatedFilter] = useState(null);
+  const [sortOpen, setSortOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // Fetch Projects with Search & Filters
@@ -119,6 +126,8 @@ const Admin = () => {
         state: stateFilter,
         page: page,
         size: pageSize,
+        sortBy: activeSortBy,
+        sortOrder: activeSortOrder,
       };
 
       // Map the generic 'search' input to the specific field selected
@@ -144,9 +153,9 @@ const Admin = () => {
       });
 
       if (activeTab === "active") {
-        setProjects(response.data.content || []);
+        setProjects(applySortingToArray(response.data.content || []));
       } else {
-        setArchivedProjects(response.data.content || []);
+        setArchivedProjects(applySortingToArray(response.data.content || []));
       }
       setTotalPages(response.data.totalPages);
       setTotalElements(response.data.totalElements);
@@ -156,7 +165,7 @@ const Admin = () => {
     } finally {
       setSearchLoading(false);
     }
-  }, [getApiToken, activeTab, activeFilters, page]);
+  }, [getApiToken, activeTab, activeFilters, page, activeSortBy, activeSortOrder]);
 
   // Calendar still needs all active projects...
   const [calendarProjects, setCalendarProjects] = useState([]);
@@ -275,6 +284,62 @@ const Admin = () => {
     setFilters(empty);
     setActiveFilters(empty);
     setPage(0);
+  };
+
+  const handleSortChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "sortBy") {
+      setSortBy(value);
+    } else if (name === "sortOrder") {
+      setSortOrder(value);
+    }
+  };
+
+  const applySorting = () => {
+    setActiveSortBy(sortBy);
+    setActiveSortOrder(sortOrder);
+    setPage(0);
+  };
+
+  // Helper function to get sort priority for enums
+  const getPrioritySortValue = (priority) => {
+    const priorityOrder = { "URGENT": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1 };
+    return priorityOrder[priority] || 0;
+  };
+
+  const getStatusSortValue = (status) => {
+    const statusOrder = { "COMPLETED": 3, "IN_PROGRESS": 2, "PENDING": 1 };
+    return statusOrder[status] || 0;
+  };
+
+  // Apply client-side sorting to projects (fallback if backend doesn't support it)
+  const applySortingToArray = (projectsArray) => {
+    return [...projectsArray].sort((a, b) => {
+      let aVal, bVal, comparison = 0;
+
+      if (activeSortBy === "priority") {
+        aVal = getPrioritySortValue(a.priority);
+        bVal = getPrioritySortValue(b.priority);
+        comparison = aVal - bVal;
+      } else if (activeSortBy === "status") {
+        aVal = getStatusSortValue(a.status);
+        bVal = getStatusSortValue(b.status);
+        comparison = aVal - bVal;
+      } else if (activeSortBy === "startDate" || activeSortBy === "dueDate") {
+        aVal = new Date(a[activeSortBy]).getTime();
+        bVal = new Date(b[activeSortBy]).getTime();
+        comparison = aVal - bVal;
+      } else {
+        aVal = a[activeSortBy] || "";
+        bVal = b[activeSortBy] || "";
+        aVal = String(aVal).toLowerCase();
+        bVal = String(bVal).toLowerCase();
+        if (aVal < bVal) comparison = -1;
+        else if (aVal > bVal) comparison = 1;
+      }
+
+      return activeSortOrder === "ASC" ? comparison : -comparison;
+    });
   };
 
   useEffect(() => {
@@ -786,6 +851,69 @@ const Admin = () => {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sorting Section */}
+          <div className="bg-gray-50 rounded-xl border border-black/10 text-left overflow-hidden mt-4">
+            <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setSortOpen(!sortOpen)}>
+              <div className="flex items-center gap-3">
+                <svg
+                  className={`w-5 h-5 transition-transform duration-300 ${sortOpen ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <h3 className="text-lg font-bold text-black/80">Sort By</h3>
+              </div>
+            </div>
+
+            <div
+              className={`transition-all duration-300 ease-in-out ${sortOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+            >
+              <div className="p-6 pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Field</label>
+                    <select
+                      name="sortBy"
+                      value={sortBy}
+                      onChange={handleSortChange}
+                      className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                    >
+                      <option value="projectIdentifier">Project ID</option>
+                      <option value="name">Project Name</option>
+                      <option value="clientName">Client Name</option>
+                      <option value="dueDate">Due Date</option>
+                      <option value="startDate">Start Date</option>
+                      <option value="priority">Priority</option>
+                      <option value="status">Status</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Order</label>
+                    <select
+                      name="sortOrder"
+                      value={sortOrder}
+                      onChange={handleSortChange}
+                      className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                    >
+                      <option value="ASC">Ascending</option>
+                      <option value="DESC">Descending</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  onClick={applySorting}
+                  className="w-full mt-4 bg-black text-white px-8 py-2 rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg"
+                >
+                  Sort
+                </button>
               </div>
             </div>
           </div>

@@ -2123,4 +2123,162 @@ class ProjectServiceImplTest {
         assertEquals("Start date must be on or before due date", exception.getMessage());
         verify(projectRepository, never()).save(any());
     }
+    
+    // ---------- Time Estimate Tests ----------
+    @Test
+    void createProject_ShouldSaveEstimatedTime_WhenProvided() {
+        // Arrange
+        Long estimatedTimeInSeconds = 7776000L; // 90 days
+        requestModel.setEstimatedTime(estimatedTimeInSeconds);
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenAnswer(invocation -> {
+            Project savedProject = invocation.getArgument(0);
+            savedProject.setEstimatedTime(estimatedTimeInSeconds);
+            assertEquals(estimatedTimeInSeconds, savedProject.getEstimatedTime());
+            return savedProject;
+        });
+        when(projectResponseMapper.entityToResponseModel(any())).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(requestModel);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void createProject_ShouldAllowNullEstimatedTime() {
+        // Arrange
+        requestModel.setEstimatedTime(null);
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(requestModel);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void updateProject_ShouldUpdateEstimatedTime() {
+        // Arrange
+        Long newEstimatedTime = 31536000L; // 1 year
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setName("Updated Project");
+        updateRequest.setEstimatedTime(newEstimatedTime);
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+            .thenAnswer(invocation -> {
+                Project p = invocation.getArgument(0);
+                assertEquals(newEstimatedTime, p.getEstimatedTime());
+                return p;
+            });
+        when(projectResponseMapper.entityToResponseModel(any(Project.class)))
+            .thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.updateProject("PROJ-1", updateRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void updateProject_ShouldAllowNullEstimatedTime() {
+        // Arrange
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setName("Updated Project");
+        updateRequest.setEstimatedTime(null);
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class)))
+            .thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project))
+            .thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.updateProject("PROJ-1", updateRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+    
+    @Test
+    void updateProject_ShouldThrowInvalidProjectDataException_WhenEstimatedTimeIsZero() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Name");
+        invalidRequest.setEstimatedTime(0L); // Zero time
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.updateProject("PROJ-1", invalidRequest));
+        
+        assertEquals("Estimated time must be greater than 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void updateProject_ShouldThrowInvalidProjectDataException_WhenEstimatedTimeIsNegative() {
+        // Arrange
+        ProjectRequestModel invalidRequest = new ProjectRequestModel();
+        invalidRequest.setName("Valid Name");
+        invalidRequest.setEstimatedTime(-3600L); // Negative time
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1"))
+            .thenReturn(Optional.of(project));
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.updateProject("PROJ-1", invalidRequest));
+        
+        assertEquals("Estimated time must be greater than 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenEstimatedTimeIsZero() {
+        // Arrange
+        requestModel.setEstimatedTime(0L);
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(requestModel));
+        
+        assertEquals("Estimated time must be greater than 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
+    
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenEstimatedTimeIsNegative() {
+        // Arrange
+        requestModel.setEstimatedTime(-86400L); // Negative 1 day
+        
+        // Act & Assert
+        org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException exception = 
+            assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(requestModel));
+        
+        assertEquals("Estimated time must be greater than 0", exception.getMessage());
+        verify(projectRepository, never()).save(any());
+    }
 }

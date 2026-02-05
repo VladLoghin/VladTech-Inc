@@ -33,9 +33,16 @@ const Employee = () => {
 
   const [activeFilters, setActiveFilters] = useState({ ...filters });
 
+  // Sorting state
+  const [sortBy, setSortBy] = useState("projectIdentifier");
+  const [sortOrder, setSortOrder] = useState("ASC");
+  const [activeSortBy, setActiveSortBy] = useState("projectIdentifier");
+  const [activeSortOrder, setActiveSortOrder] = useState("ASC");
+
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
 
   const loadMyProjects = async () => {
     setProjectsLoading(true);
@@ -110,6 +117,32 @@ const Employee = () => {
     setPage(0);
   };
 
+  const handleSortChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "sortBy") {
+      setSortBy(value);
+    } else if (name === "sortOrder") {
+      setSortOrder(value);
+    }
+  };
+
+  const applySorting = () => {
+    setActiveSortBy(sortBy);
+    setActiveSortOrder(sortOrder);
+    setPage(0);
+  };
+
+  // Helper function to get sort priority for enums
+  const getPrioritySortValue = (priority) => {
+    const priorityOrder = { "URGENT": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1 };
+    return priorityOrder[priority] || 0;
+  };
+
+  const getStatusSortValue = (status) => {
+    const statusOrder = { "COMPLETED": 3, "IN_PROGRESS": 2, "PENDING": 1 };
+    return statusOrder[status] || 0;
+  };
+
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setPage(0);
@@ -118,7 +151,7 @@ const Employee = () => {
   const filteredProjects = useMemo(() => {
     const searchValue = (activeFilters.search || "").toLowerCase().trim();
 
-    return projects.filter((project) => {
+    let results = projects.filter((project) => {
       if (searchValue) {
         let fieldValue = "";
         if (activeFilters.searchField === "name") fieldValue = project.name || "";
@@ -149,7 +182,41 @@ const Employee = () => {
 
       return true;
     });
-  }, [projects, activeFilters]);
+
+    // Apply sorting
+    results.sort((a, b) => {
+      let aVal, bVal, comparison = 0;
+
+      if (activeSortBy === "priority") {
+        // Priority: URGENT > HIGH > MEDIUM > LOW
+        aVal = getPrioritySortValue(a.priority);
+        bVal = getPrioritySortValue(b.priority);
+        comparison = aVal - bVal;
+      } else if (activeSortBy === "status") {
+        // Status: COMPLETED > IN_PROGRESS > PENDING
+        aVal = getStatusSortValue(a.status);
+        bVal = getStatusSortValue(b.status);
+        comparison = aVal - bVal;
+      } else if (activeSortBy === "startDate" || activeSortBy === "dueDate") {
+        // Date fields: later dates have higher values
+        aVal = new Date(a[activeSortBy]).getTime();
+        bVal = new Date(b[activeSortBy]).getTime();
+        comparison = aVal - bVal;
+      } else {
+        // String fields: alphabetical
+        aVal = a[activeSortBy] || "";
+        bVal = b[activeSortBy] || "";
+        aVal = String(aVal).toLowerCase();
+        bVal = String(bVal).toLowerCase();
+        if (aVal < bVal) comparison = -1;
+        else if (aVal > bVal) comparison = 1;
+      }
+
+      return activeSortOrder === "ASC" ? comparison : -comparison;
+    });
+
+    return results;
+  }, [projects, activeFilters, activeSortBy, activeSortOrder]);
 
   const totalElements = filteredProjects.length;
   const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
@@ -492,7 +559,70 @@ const Employee = () => {
                   </div>
                 </div>
 
-                <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto">
+                {/* Sorting Section */}
+                <div className="bg-gray-50 rounded-xl border border-black/10 text-left overflow-hidden mt-4">
+                  <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setSortOpen(!sortOpen)}>
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className={`w-5 h-5 transition-transform duration-300 ${sortOpen ? "rotate-90" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <h3 className="text-lg font-bold text-black/80">Sort By</h3>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`transition-all duration-300 ease-in-out ${sortOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}
+                  >
+                    <div className="p-6 pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Field</label>
+                          <select
+                            name="sortBy"
+                            value={sortBy}
+                            onChange={handleSortChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="projectIdentifier">Project ID</option>
+                            <option value="name">Project Name</option>
+                            <option value="clientName">Client Name</option>
+                            <option value="dueDate">Due Date</option>
+                            <option value="startDate">Start Date</option>
+                            <option value="priority">Priority</option>
+                            <option value="status">Status</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Order</label>
+                          <select
+                            name="sortOrder"
+                            value={sortOrder}
+                            onChange={handleSortChange}
+                            className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                          >
+                            <option value="ASC">Ascending</option>
+                            <option value="DESC">Descending</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={applySorting}
+                        className="w-full mt-4 bg-black text-white px-8 py-2 rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg"
+                      >
+                        Sort
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-2 border-black rounded-xl bg-white p-4 max-h-[400px] overflow-y-auto mt-4">
                   <ProjectList
                     projects={paginatedProjects}
                     showEdit={false}
