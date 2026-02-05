@@ -27,5 +27,6 @@ public class ProjectRequestModel {
     private List<String> assignedEmployeeEmails = new ArrayList<>();
     private BigDecimal estimatedCost;
     private String estimatedCostCurrency;
+    private Long estimatedTime; // Time estimate in seconds
     private String priority;
 }

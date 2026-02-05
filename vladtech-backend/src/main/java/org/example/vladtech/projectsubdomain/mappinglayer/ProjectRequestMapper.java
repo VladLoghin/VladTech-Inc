@@ -30,6 +30,7 @@ public class ProjectRequestMapper {
         project.setAssignedEmployeeEmails(requestModel.getAssignedEmployeeEmails());
         project.setEstimatedCost(requestModel.getEstimatedCost());
         project.setEstimatedCostCurrency(requestModel.getEstimatedCostCurrency());
+        project.setEstimatedTime(requestModel.getEstimatedTime());
         project.setPriority(mapPriority(requestModel.getPriority()));
         return project;
     }
