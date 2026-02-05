@@ -125,6 +125,13 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
     arg.el.querySelector(".fc-daygrid-day-number")?.after(container);
   };
 
+  // Calculate a data hash to force remount when deep data changes
+  const dataVersion = useMemo(() => {
+    return projects.map(p => 
+      `${p.projectIdentifier || p.id}:${p.status}:${p.startDate}:${p.dueDate}:${p.state}`
+    ).join("|");
+  }, [projects]);
+
   return (
     <div
       className="transition-all duration-300 bg-white shadow-md border-2 border-black rounded-xl p-4 relative"
@@ -152,8 +159,8 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
       </div>
 
       <FullCalendar
-        // Minimal KEY to prevent remounts except on language change, showCounts toggle, or data load
-        key={`${isFr ? "fr" : "en"}-${showCounts}-${projectStatusMap.size}`}
+        // Key changes on lang, showCounts, or ANY data change (via dataVersion hash)
+        key={`${isFr ? "fr" : "en"}-${showCounts}-${dataVersion}`}
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

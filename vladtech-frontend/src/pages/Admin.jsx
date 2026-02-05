@@ -337,6 +337,9 @@ const Admin = () => {
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
     return calendarProjects.filter((p) => {
+      // Exclude archived projects, matching AdminProjectCalendar logic
+      if (p.state && p.state.toUpperCase() === 'COMPLETE') return false;
+
       if (!p.startDate || !p.dueDate) return false;
       return p.startDate <= selectedDate && p.dueDate >= selectedDate;
     });
