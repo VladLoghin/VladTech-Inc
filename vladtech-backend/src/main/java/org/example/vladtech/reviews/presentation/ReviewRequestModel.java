@@ -15,6 +15,9 @@ import java.util.List;
 public class ReviewRequestModel {
 
     @NotNull
+    private String projectId;
+
+    @NotNull
     private String clientId;
 
     @NotNull

@@ -94,7 +94,11 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
             String type, String clientName, Rating rating, String comment
     );
 
-    //
+    boolean existsByProjectIdAndClientId(String projectId, String clientId);
+
+    List<Review> findByProjectIdAndClientId(String projectId, String clientId);
+
+    List<Review> findByProjectIdAndClientIdAndAppointmentId(String projectId, String clientId, String appointmentId);
 
     List<Review> findByVisibleTrueAndRating(Rating rating);
 

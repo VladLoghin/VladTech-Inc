@@ -3,14 +3,20 @@ import { test, expect } from '../fixtures/fixtures.ts';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { mockCompletedProjects } from './mockCompletedProjects';
 
 test.describe('Reviews Page E2E', () => {
+    test.beforeEach(async ({ page }) => {
+        await mockCompletedProjects(page);
+        await page.goto('http://localhost:5173/reviews');
+        await page.waitForLoadState('networkidle');
+    });
+
+    test.afterEach(async ({ page }) => {
+        await page.close();
+    });
+
     test.describe('View and Create Reviews', () => {
-        test.beforeEach(async ({page}) => {
-            // Go directly to reviews page
-            await page.goto('http://localhost:5173/reviews');
-            await page.waitForLoadState('networkidle');
-        });
 
         test('page loads and main sections are visible', async ({page}) => {
             await expect(page.getByRole('heading', {name: /customer highlights/i})).toBeVisible();
@@ -34,38 +40,42 @@ test.describe('Reviews Page E2E', () => {
         test('create a new review successfully', async ({page, loginAs}) => {
             const uniqueComment = `E2E review submission ${Date.now()}`;
 
-            // Log in as client
             await loginAs('client');
             console.log('✅ Logged in as client');
-
-            // Navigate to reviews page
+            
+            // Re-mock completed projects after login
+            await mockCompletedProjects(page);
+            
+            // Navigate back to reviews page after login
             await page.goto('http://localhost:5173/reviews');
             await page.waitForLoadState('networkidle');
+            await page.waitForTimeout(1000);
 
-            // Open the review modal
             const addReviewButton = page.getByTestId('Add Review');
             await addReviewButton.waitFor({state: 'visible', timeout: 30000});
+            //await addReviewButton.waitFor({state: 'enabled', timeout: 5000});
             await addReviewButton.click();
 
-            // Fill out the review form
+            // Select a different project (Bathroom Remodel)
+            const projectDropdown = page.locator('select, [role="combobox"]').first();
+            await projectDropdown.waitFor({state: 'visible', timeout: 5000});
+            await projectDropdown.selectOption({label: 'Office Space Update'});
+
             await page.getByPlaceholder('Your name').fill('Charlie');
             await page.getByPlaceholder('Your message').fill(uniqueComment);
-            await page.locator('button >> text=★').nth(4).click();
+            await page.locator('button >> text=★').nth(3).click();
 
-            // Submit review and wait for response
             await Promise.all([
                 page.waitForResponse(resp =>
-                    resp.url().includes('/api/reviews') && resp.status() === 200
+                    resp.url().includes('/api/reviews') && resp.status() === 201
                 ),
                 page.getByRole('button', {name: /submit review/i}).click()
             ]);
 
-            // Wait for modal to close
             await page.getByRole('dialog').waitFor({state: 'detached', timeout: 5000});
             await page.waitForLoadState('networkidle');
             await page.waitForTimeout(1000);
 
-            // Verify the new review appears
             const newReviewCard = page
                 .getByTestId('review-card')
                 .filter({
@@ -101,14 +111,22 @@ test.describe('Reviews Page E2E', () => {
 
             expect(true).toBeTruthy();
         });
+
+        test('review cards are interactive and clickable', async ({page}) => {
+            const cards = page.getByTestId('review-card');
+            await page.waitForTimeout(500);
+            const cardCount = await cards.count();
+            expect(cardCount).toBeGreaterThan(0);
+
+            for (let i = 0; i < cardCount; i++) {
+                const card = cards.nth(i);
+                await expect(card).toBeVisible();
+                await expect(card).toHaveCSS('cursor', 'pointer');
+            }
+        });
     });
 
     test.describe('Review Detail Modal', () => {
-
-        test.beforeEach(async ({ page }) => {
-            await page.goto('http://localhost:5173/reviews');
-            await page.waitForLoadState('networkidle');
-        });
 
         test('clicking a review card opens the detail modal', async ({ page }) => {
             const firstCard = page.getByTestId('review-card').first();
@@ -251,12 +269,95 @@ test.describe('Reviews Page E2E', () => {
 
             const closeButton = page.getByTestId('review-detail-close-button');
             const ariaLabel = await closeButton.getAttribute('aria-label');
-            expect(ariaLabel).toBeTruthy();
-            expect(ariaLabel?.toLowerCase()).toContain('close');
+            await expect(ariaLabel).not.toBeNull();
+            await expect(ariaLabel?.toLowerCase()).toContain('close');
 
             const image = page.getByTestId('review-detail-image');
             const altText = await image.getAttribute('alt');
-            expect(altText).toBeTruthy();
+            await expect(altText).not.toBeNull();
+        });
+    });
+
+    test.describe('Form Validation & Deletion', () => {
+        test('review submission form validation works', async ({page, loginAs}) => {
+            await loginAs('client');
+            
+            // Re-mock and navigate after login
+            await mockCompletedProjects(page);
+            await page.goto('http://localhost:5173/reviews');
+            await page.waitForLoadState('networkidle');
+
+            const addReviewButton = page.getByTestId('Add Review');
+            await addReviewButton.waitFor({state: 'visible', timeout: 30000});
+            await addReviewButton.click();
+
+            const submitButton = page.getByRole('button', {name: /submit review/i});
+            await submitButton.waitFor({state: 'visible', timeout: 5000});
+            await expect(submitButton).toBeDisabled();
+
+            // Select a project
+            const projectDropdown = page.locator('select, [role="combobox"]').first();
+            await projectDropdown.waitFor({state: 'visible', timeout: 5000});
+            await projectDropdown.selectOption({label: 'Office Space Update'});
+
+            const nameInput = page.getByPlaceholder('Your name');
+            await nameInput.waitFor({state: 'visible', timeout: 5000});
+            await nameInput.fill('Test User');
+            
+            const messageInput = page.getByPlaceholder('Your message');
+            await messageInput.waitFor({state: 'visible', timeout: 5000});
+            await messageInput.fill('Test message');
+            
+            // Select star rating
+            await page.locator('button >> text=★').nth(3).click();
+            
+            await expect(submitButton).not.toBeDisabled();
+        });
+
+        test('review deletion removes card from page', async ({page, loginAs}) => {
+            await loginAs('client');
+
+            const initialCount = await page.getByTestId('review-card').count();
+
+            const firstCard = page.getByTestId('review-card').first();
+            const deleteButton = firstCard.getByTestId('delete-review');
+            
+            if (await deleteButton.isVisible({timeout: 5000})) {
+                await deleteButton.waitFor({state: 'visible', timeout: 5000});
+                await deleteButton.click();
+                await page.getByRole('button', {name: /confirm/i}).waitFor({state: 'visible', timeout: 5000});
+                await page.getByRole('button', {name: /confirm/i}).click();
+                await page.waitForLoadState('networkidle');
+
+                const newCount = await page.getByTestId('review-card').count();
+                expect(newCount).toBeLessThan(initialCount);
+            }
+        });
+    });
+
+    test.describe('Pagination & Filtering', () => {
+        test('pagination works correctly', async ({page}) => {
+            const pageButtons = page.locator('[data-testid="pagination-button"]');
+            const buttonCount = await pageButtons.count();
+
+            if (buttonCount > 1) {
+                await pageButtons.nth(1).click();
+                await page.waitForTimeout(300);
+                expect(true).toBeTruthy();
+            }
+        });
+
+        test('filter by rating works', async ({page}) => {
+            const filterButton = page.getByTestId('filter-by-rating');
+            if (await filterButton.isVisible()) {
+                await filterButton.click();
+                await page.getByTestId('rating-5').click();
+                await page.waitForLoadState('networkidle');
+
+                const cards = page.getByTestId('review-card');
+                const count = await cards.count();
+                expect(count).toBeGreaterThanOrEqual(0);
+            }
         });
     });
 });

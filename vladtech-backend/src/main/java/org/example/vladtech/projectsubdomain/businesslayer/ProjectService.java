@@ -25,6 +25,8 @@ public interface ProjectService {
 
         ProjectResponseModel assignEmployee(String projectIdentifier, String employeeId);
 
+        ProjectResponseModel assignClient(String projectIdentifier, String clientId);
+
         List<PhotoResponseModel> getProjectPhotos(String projectIdentifier);
 
         ProjectResponseModel addProjectPhoto(String projectIdentifier, PhotoResponseModel photoResponseModel);
@@ -48,6 +50,8 @@ public interface ProjectService {
     List<ProjectResponseModel> getActiveProjects();
 
         List<ProjectResponseModel> getArchivedProjects();
+
+    List<ProjectResponseModel> getCompletedProjectsByClientId(String clientId);
 
     org.example.vladtech.portfolio.presentation.PortfolioResponseDto sendProjectToPortfolio(
             String projectIdentifier,

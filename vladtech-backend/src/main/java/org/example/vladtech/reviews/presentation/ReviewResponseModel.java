@@ -16,6 +16,8 @@ public class ReviewResponseModel {
     @NotNull
     private String reviewId;
     @NotNull
+    private String projectId;
+    @NotNull
     private String clientId;
     @NotNull
     private String appointmentId;

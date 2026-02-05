@@ -10,6 +10,7 @@ import {
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import "../components/reviews/Review.css";
+import { api } from "../api/http"; // ✅ ADD
 
 const ReviewsPage = () => {
   const navigate = useNavigate();
@@ -104,6 +105,35 @@ const ReviewsPage = () => {
   const handleReset = () => {
     setFilters({ clientName: "", rating: "", type: "", comment: "" });
   };
+
+  const [hasCompletedProjects, setHasCompletedProjects] = useState(false); // ✅ ADD
+  const [loadingProjects, setLoadingProjects] = useState(false); // ✅ ADD
+
+  useEffect(() => {
+    if (!isClient || isLoading) return;
+
+    const fetchCompletedProjects = async () => {
+      setLoadingProjects(true);
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: "https://vladtech/api" },
+        });
+
+        const res = await api.get("/projects/client/completed", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setHasCompletedProjects(Array.isArray(res.data) && res.data.length > 0);
+      } catch (err) {
+        console.error("Failed to fetch completed projects:", err);
+        setHasCompletedProjects(false);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchCompletedProjects();
+  }, [isClient, isLoading, getAccessTokenSilently]);
 
   return (
     <>
@@ -215,7 +245,6 @@ const ReviewsPage = () => {
                       onChange={(e) => setShowMine(e.target.checked)}
                       aria-label="Show only my reviews"
                     />
-
                     <div
                       className="
                         relative h-7 w-14 rounded-full
@@ -236,20 +265,21 @@ const ReviewsPage = () => {
                         }}
                       />
                     </div>
-
                     <span className="text-sm font-semibold text-white whitespace-nowrap">
                       Show only my reviews
                     </span>
                   </label>
 
                   {/* Add Review Button */}
-                  <button
-                    onClick={() => setShowModal(true)}
-                    data-testid="Add Review"
-                    className="px-5 py-3 rounded-full bg-yellow-400 text-black font-semibold hover:bg-yellow-500 shadow-sm transition-colors duration-300"
-                  >
-                    Add Review
-                  </button>
+                  {hasCompletedProjects && !loadingProjects && (
+                    <button
+                      onClick={() => setShowModal(true)}
+                      data-testid="Add Review"
+                      className="px-5 py-3 rounded-full bg-yellow-400 text-black font-semibold hover:bg-yellow-500 shadow-sm transition-colors duration-300"
+                    >
+                      Add Review
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -226,6 +226,33 @@ public class ProjectServiceImpl implements ProjectService {
         return projectResponseMapper.entityToResponseModel(project);
     }
 
+
+    @Override
+    public ProjectResponseModel assignClient(String projectIdentifier, String clientId) {
+        /*
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier)
+                .orElseThrow(() -> new ProjectNotFoundException(projectIdentifier));
+
+        log.info("[ASSIGN CLIENT] called projectIdentifier={} clientId={}", projectIdentifier, clientId);
+        log.info("[ASSIGN Client called before] clientId={}", project.getClientId());
+
+        if (clientId == null || clientId.isBlank()) {
+            throw new RuntimeException("clientId cannot be null or blank");
+        }
+
+        if (Project.assignClientToProject(project, clientId)) {
+            project = projectRepository.save(project);
+            log.info("[ASSIGN CLIENT] saved project. now clientId={}", project.getClientId());
+        } else {
+            log.info("[ASSIGN CLIENT] client already assigned, skipping");
+        }
+
+         */
+             return null;
+    }
+
+
+
     @Override
     public List<PhotoResponseModel> getProjectPhotos(String projectIdentifier) {
         return null;
@@ -669,5 +696,15 @@ public class ProjectServiceImpl implements ProjectService {
                 throw new InvalidProjectDataException("City is required when address information is provided");
             }
         }
+    }
+
+    @Override
+    public List<ProjectResponseModel> getCompletedProjectsByClientId(String clientId) {
+        List<Project> allProjects = projectRepository.findAll();
+        List<Project> completedProjects = allProjects.stream()
+                .filter(p -> p.getClientId() != null && p.getClientId().equals(clientId))
+                .filter(p -> p.getState() == ProjectState.COMPLETE)
+                .collect(Collectors.toList());
+        return projectResponseMapper.entityListToResponseModelList(completedProjects);
     }
 }

@@ -8,6 +8,7 @@ test('admin toggles review visibility, client views reviews', async ({ page, log
 
   await page.getByRole('button', { name: 'VIEW ALL →' }).click();
   await page.getByRole('button', { name: 'REVIEWS' }).click();
+  await page.waitForSelector('[data-testid="review-visibility-toggle"]');
 
   // Toggle visibility on a review
   await page.getByTestId('review-visibility-toggle').nth(2).check();
@@ -28,6 +29,7 @@ test('admin toggles review visibility, client views reviews', async ({ page, log
   await page.getByRole('button', { name: 'REVIEWS' }).click();
 
   // Navigate through carousel
+  await page.waitForSelector('.swiper-button-next');
   await page.locator('.swiper-button-next').click();
   await page.locator('.swiper-button-next').click();
   await page.locator('.swiper-button-next').click();
