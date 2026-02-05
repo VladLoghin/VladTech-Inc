@@ -2,6 +2,7 @@ package org.example.vladtech.projectsubdomain.presentationlayer;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vladtech.projectsubdomain.businesslayer.ProjectService;
+import org.example.vladtech.projectsubdomain.businesslayer.UserProjectPinService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final UserProjectPinService userProjectPinService;
 
     @PreAuthorize("hasAuthority('Admin')")
     @GetMapping("/search")
@@ -175,6 +177,39 @@ public class ProjectController {
             @AuthenticationPrincipal Jwt jwt) {
         String clientId = jwt.getClaim("sub");
         return ResponseEntity.ok(projectService.getCompletedProjectsByClientId(clientId));
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @PostMapping("/{projectIdentifier}/pin")
+    public ResponseEntity<Void> pinProject(
+            @PathVariable String projectIdentifier,
+            @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getClaim("sub");
+        ProjectResponseModel project = projectService.getProjectByIdentifier(projectIdentifier);
+        userProjectPinService.pinProject(userId, project.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @DeleteMapping("/{projectIdentifier}/pin")
+    public ResponseEntity<Void> unpinProject(
+            @PathVariable String projectIdentifier,
+            @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getClaim("sub");
+        ProjectResponseModel project = projectService.getProjectByIdentifier(projectIdentifier);
+        userProjectPinService.unpinProject(userId, project.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @GetMapping("/{projectIdentifier}/is-pinned")
+    public ResponseEntity<Boolean> isProjectPinned(
+            @PathVariable String projectIdentifier,
+            @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getClaim("sub");
+        ProjectResponseModel project = projectService.getProjectByIdentifier(projectIdentifier);
+        boolean isPinned = userProjectPinService.isProjectPinned(userId, project.getId());
+        return ResponseEntity.ok(isPinned);
     }
 
 }
