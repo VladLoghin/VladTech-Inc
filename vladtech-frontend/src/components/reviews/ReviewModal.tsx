@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../api/http";
+
+interface ProjectOption {
+    projectIdentifier: string;
+    name: string;
+}
 
 interface ReviewModalProps {
     open: boolean;
@@ -16,33 +21,62 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     
     const clientId = user?.sub;
 
-    const portfolioTypes = [
-        "Interior",
-        "Kitchen",
-        "Bathroom",
-        "Exterior/Yard"
-    ];
-
     const [clientName, setClientName] = useState("");
     const [comment, setComment] = useState("");
     const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
-    const [type, setType] = useState("Interior");
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [errors, setErrors] = useState<{ name?: string; comment?: string }>({});
+    const [projectId, setProjectId] = useState("");
+    const [projects, setProjects] = useState<ProjectOption[]>([]);
+    const [loadingProjects, setLoadingProjects] = useState(false);
+    const [errors, setErrors] = useState<{ name?: string; comment?: string; projectId?: string; submit?: string }>({});
+
+    const reviewTypes = ["Interior", "Kitchen", "Bathroom", "Exterior/Yard"];
+
+    const [type, setType] = useState("Interior");
+
+    useEffect(() => {
+        if (!open) return;
+
+        const fetchProjects = async () => {
+            setLoadingProjects(true);
+            try {
+                const token = await getAccessTokenSilently({
+                    authorizationParams: { audience: "https://vladtech/api" },
+                });
+
+                const res = await api.get("/projects/client/completed", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const projectOptions: ProjectOption[] = res.data.map((p: any) => ({
+                    projectIdentifier: p.projectIdentifier,
+                    name: p.name,
+                }));
+
+                setProjects(projectOptions);
+
+                if (projectOptions.length > 0) {
+                    setProjectId(projectOptions[0].projectIdentifier); // auto‑select first
+                }
+            } catch {
+                setErrors({ submit: "Failed to load projects." });
+            } finally {
+                setLoadingProjects(false);
+            }
+        };
+
+        fetchProjects();
+    }, [open, getAccessTokenSilently]);
 
     if (!open) return null;
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        // Validate fields
-        const newErrors: { name?: string; comment?: string } = {};
-        if (!clientName.trim()) {
-            newErrors.name = "Name is required";
-        }
-        if (!comment.trim()) {
-            newErrors.comment = "Description is required";
-        }
+        const newErrors: { name?: string; comment?: string; projectId?: string } = {};
+        if (!clientName.trim()) newErrors.name = "Name is required";
+        if (!comment.trim()) newErrors.comment = "Description is required";
+        if (!projectId) newErrors.projectId = "Please select a project";
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -54,6 +88,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         const ratingEnum = ["ONE", "TWO", "THREE", "FOUR", "FIVE"][stars - 1];
 
         const reviewPayload = {
+            projectId,
             clientId,
             clientName,
             appointmentId: appointmentId || "temp-appointment",
@@ -61,7 +96,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             visible: false,
             rating: ratingEnum,
             sentToPortfolio: false,
-            type,
+            type
         };
 
         const formData = new FormData();
@@ -82,24 +117,25 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             });
 
             const res = await api.post("/reviews", formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             const createdReview = res.data;
-            console.log("Review submitted successfully:", createdReview);
             onSubmitSuccess?.(createdReview);
             onClose();
 
-            // Reset form
             setClientName("");
             setComment("");
             setStars(5);
-            setType("Interior");
             setImageFile(null);
-        } catch (err) {
-            console.error("Error submitting review:", err);
+            setProjectId("");
+        } catch (err: any) {
+            const status = err?.response?.status;
+            if (status === 409) {
+                setErrors({ submit: "You already reviewed this project." });
+            } else {
+                setErrors({ submit: "Error submitting review." });
+            }
         }
     }
 
@@ -112,6 +148,26 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">
+                            Project <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={projectId}
+                            onChange={(e) => setProjectId(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            required
+                            disabled={loadingProjects || projects.length === 0}
+                        >
+                            {projects.map((p) => (
+                                <option key={p.projectIdentifier} value={p.projectIdentifier}>
+                                    {p.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.projectId && <p className="text-red-600 text-sm font-semibold mt-1">{errors.projectId}</p>}
+                    </div>
+
                     <div>
                         <input
                             type="text"
@@ -135,24 +191,6 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         {errors.comment && <p className="text-red-600 text-sm font-semibold mt-1">{errors.comment}</p>}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">
-                            Type <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                            required
-                        >
-                            {portfolioTypes.map((portfolioType) => (
-                                <option key={portfolioType} value={portfolioType}>
-                                    {portfolioType}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((s) => (
                             <button
@@ -167,6 +205,22 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         ))}
                     </div>
 
+                         <div>
+                        <label className="block text-sm font-semibold mb-2">
+                            Project Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            required
+                        >
+                            {reviewTypes.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div>
                         <label className="block mb-1 font-medium">Upload Photo</label>
                         <input
@@ -176,6 +230,12 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             className="w-full border border-gray-300 rounded-xl p-2"
                         />
                     </div>
+
+                   
+
+                    {errors.submit && (
+                        <p className="text-red-600 text-sm font-semibold">{errors.submit}</p>
+                    )}
 
                     <button
                         type="submit"

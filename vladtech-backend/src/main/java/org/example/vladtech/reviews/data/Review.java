@@ -17,7 +17,7 @@ import java.util.List;
 public class Review {
     @Id
     private String reviewId;
-
+    private String projectId;
     private String clientId;
     private String appointmentId;
     private String clientName;
@@ -29,7 +29,8 @@ public class Review {
     private boolean sentToPortfolio = false;
     private String type;
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, boolean sentToPortfolio, String type) {
+    public Review(String projectId, String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, boolean sentToPortfolio, String type) {
+        this.projectId = projectId;
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
@@ -40,7 +41,8 @@ public class Review {
         this.type = type;
     }
 
-    public Review(String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos, boolean sentToPortfolio, String type) {
+    public Review(String projectId, String clientId, String appointmentId, String clientName, String comment, Boolean visible, Rating rating, List<Photo> photos, boolean sentToPortfolio, String type) {
+        this.projectId = projectId;
         this.clientId = clientId;
         this.appointmentId = appointmentId;
         this.clientName = clientName;
@@ -50,5 +52,13 @@ public class Review {
         this.photos = photos != null ? photos : new ArrayList<>();
         this.sentToPortfolio = sentToPortfolio;
         this.type = type;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 }

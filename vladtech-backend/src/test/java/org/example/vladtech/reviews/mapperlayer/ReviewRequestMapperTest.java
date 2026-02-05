@@ -16,6 +16,7 @@ class ReviewRequestMapperTest {
     void requestModelToEntity_mapsFields_and_ignoresId() {
         // Create a ReviewRequestModel with all fields
         ReviewRequestModel request = new ReviewRequestModel(
+                "RID",
                 "clientA",
                 "appointmentA",
                 "Alissa",

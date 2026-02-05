@@ -56,6 +56,8 @@ class ReviewControllerIntegrationTest {
     void setup() {
         r1 = new ReviewResponseModel(
                 "review-1",
+                "PID",
+
                 "client1",
                 "appt1",
                 "Roger",
@@ -68,6 +70,7 @@ class ReviewControllerIntegrationTest {
 
         r2 = new ReviewResponseModel(
                 "review-2",
+                "PID",
                 "client2",
                 "appt2",
                 "John",
@@ -252,6 +255,8 @@ class ReviewControllerIntegrationTest {
         // Arrange
         ReviewResponseModel updated = new ReviewResponseModel(
                 "review-1",
+                "PID",
+
                 "client1",
                 "appt1",
                 "Roger",

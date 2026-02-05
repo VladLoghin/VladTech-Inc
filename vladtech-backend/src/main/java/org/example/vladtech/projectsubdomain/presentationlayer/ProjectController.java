@@ -14,6 +14,9 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
@@ -164,6 +167,14 @@ public class ProjectController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @PreAuthorize("hasAuthority('Client')")
+    @GetMapping("/client/completed")
+    public ResponseEntity<List<ProjectResponseModel>> getCompletedProjectsByClient(
+            @AuthenticationPrincipal Jwt jwt) {
+        String clientId = jwt.getClaim("sub");
+        return ResponseEntity.ok(projectService.getCompletedProjectsByClientId(clientId));
     }
 
 }

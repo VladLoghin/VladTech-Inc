@@ -163,35 +163,35 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         if (!projectsExist) {
             log.info("Seeding review data...");
-            
-            createReview("client-001", "appointment-001", "Roger", "Amazing kitchen service! Highly recommend.", true, Rating.FIVE,
+
+            createReview("PROJ-1", "client-001", "appointment-001", "Roger", "Amazing kitchen service! Highly recommend.", true, Rating.FIVE,
                     List.of(new Photo("client-001", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), "Kitchen");
 
-            createReview("client-002", "appointment-002", "Karen", "Good bathroom work, but could be faster.", true, Rating.FOUR,
+            createReview("PROJ-2", "client-002", "appointment-002", "Karen", "Good bathroom work, but could be faster.", true, Rating.FOUR,
                     List.of(new Photo("client-002", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), "Bathroom");
 
-            createReview("client-003", "appointment-003", "Josh", "Not satisfied with the interior quality.", false, Rating.TWO,
+            createReview("PROJ-3", "client-003", "appointment-003", "Josh", "Not satisfied with the interior quality.", false, Rating.TWO,
                     List.of(new Photo("client-003", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), "Interior");
 
-            createReview("client-004", "appointment-004", "Reed Richards", "Fantastic kitchen experience, will definitely come back!", true, Rating.FIVE,
+            createReview("PROJ-1", "client-004", "appointment-004", "Reed Richards", "Fantastic kitchen experience, will definitely come back!", true, Rating.FIVE,
                     List.of(new Photo("client-004", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), "Kitchen");
 
-            createReview("client-005", "appointment-005", "Raymond", "Pretty good yard work, but room for improvement.", true, Rating.FOUR,
+            createReview("PROJ-3", "client-005", "appointment-005", "Raymond", "Pretty good yard work, but room for improvement.", true, Rating.FOUR,
                     List.of(new Photo("client-005", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), "Exterior/Yard");
 
-            createReview("client-006", "appointment-006", "John", "Average bathroom service, nothing special.", false, Rating.THREE,
+            createReview("PROJ-2", "client-006", "appointment-006", "John", "Average bathroom service, nothing special.", false, Rating.THREE,
                     List.of(new Photo("client-006", "Reno1.jpg", "image/jpeg", storeAndUrl.apply("Reno1.jpg"))), "Bathroom");
 
-            createReview("client-007", "appointment-007", "Isabelle", "Excellent interior staff and quick service!", true, Rating.FIVE,
+            createReview("PROJ-3", "client-007", "appointment-007", "Isabelle", "Excellent interior staff and quick service!", true, Rating.FIVE,
                     List.of(new Photo("client-007", "Reno2.jpg", "image/jpeg", storeAndUrl.apply("Reno2.jpg"))), "Interior");
 
-            createReview("client-008", "appointment-008", "Joshua", "Decent kitchen service, but a bit slow.", true, Rating.FOUR,
+            createReview("PROJ-1", "client-008", "appointment-008", "Joshua", "Decent kitchen service, but a bit slow.", true, Rating.FOUR,
                     List.of(new Photo("client-008", "Reno3.jpg", "image/jpeg", storeAndUrl.apply("Reno3.jpg"))), "Kitchen");
 
-            createReview("client-009", "appointment-009", "Peter", "Very disappointed with outdoor work, would not recommend.", false, Rating.ONE,
+            createReview("PROJ-3", "client-009", "appointment-009", "Peter", "Very disappointed with outdoor work, would not recommend.", false, Rating.ONE,
                     List.of(new Photo("client-009", "Reno4.jpg", "image/jpeg", storeAndUrl.apply("Reno4.jpg"))), "Exterior/Yard");
 
-            createReview("client-010", "appointment-010", "Simon", "Loved the bathroom experience! Highly professional.", true, Rating.FIVE,
+            createReview("PROJ-2", "client-010", "appointment-010", "Simon", "Loved the bathroom experience! Highly professional.", true, Rating.FIVE,
                     List.of(new Photo("client-010", "Reno5.jpg", "image/jpeg", storeAndUrl.apply("Reno5.jpg"))), "Bathroom");
 
             log.info("Sample review data appended successfully. Total reviews: {}", reviewRepository.count());
@@ -382,23 +382,34 @@ public class DatabaseLoaderService implements CommandLineRunner {
     // -------------------------------------------------
     // CREATE REVIEW
     // -------------------------------------------------
-    private void createReview(String clientId,
-                              String appointmentId,
-                              String clientName,
-                              String comment,
-                              Boolean visible,
-                              Rating rating,
-                              List<Photo> photos,
-                              String type) {
-        try {
-            Review review = new Review(clientId, appointmentId, clientName, comment, visible, rating, photos, false, type);
-            reviewRepository.save(review);
-            log.debug("Created review for clientId: {} and appointmentId: {} with type: {}", clientId, appointmentId, type);
-        } catch (Exception e) {
-            log.error("Error creating review record: {}", e.getMessage(), e);
-        }
+    private void createReview(String projectId,
+                          String clientId,
+                          String appointmentId,
+                          String clientName,
+                          String comment,
+                          Boolean visible,
+                          Rating rating,
+                          List<Photo> photos,
+                          String type) {
+    try {
+        Review review = new Review(
+                projectId,
+                clientId,
+                appointmentId,
+                clientName,
+                comment,
+                visible,
+                rating,
+                photos,
+                false,
+                type
+        );
+        reviewRepository.save(review);
+        log.debug("Created review for clientId: {} and appointmentId: {} with type: {}", clientId, appointmentId, type);
+    } catch (Exception e) {
+        log.error("Error creating review record: {}", e.getMessage(), e);
     }
-
+}
     // -------------------------------------------------
     // CREATE PORTFOLIO ITEM
     // -------------------------------------------------

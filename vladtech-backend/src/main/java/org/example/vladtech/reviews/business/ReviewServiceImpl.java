@@ -131,10 +131,25 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewResponseModel createReview(ReviewRequestModel reviewRequest, MultipartFile[] photos, String OwnerAuth0Id) {
+        // Validate project ID is provided
+        if (reviewRequest.getProjectId() == null || reviewRequest.getProjectId().isBlank()) {
+            throw new RuntimeException("Project ID is required");
+        }
+
+        // Check if review already exists for this project and client
+        boolean reviewExists = reviewRepository.existsByProjectIdAndClientId(
+                reviewRequest.getProjectId(), 
+                reviewRequest.getClientId()
+        );
+        
+        if (reviewExists) {
+            throw new RuntimeException("A review for this project already exists. You cannot create another review for the same project.");
+        }
+
         Review review = requestMapper.requestModelToEntity(reviewRequest);
 
         review.setOwnerAuth0Id(OwnerAuth0Id);
-
+        review.setProjectId(reviewRequest.getProjectId());  // SET PROJECT ID
         review.setClientId(reviewRequest.getClientId());
         review.setClientName(reviewRequest.getClientName());
         review.setVisible(reviewRequest.getVisible());

@@ -79,8 +79,15 @@ public class ReviewController {
         reviewRequest.setClientId(userId);
         reviewRequest.setVisible(false);
 
-        contactService.notifyAdminReviewSubmitted(reviewRequest);
-        return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos, userId));
+        try {
+            contactService.notifyAdminReviewSubmitted(reviewRequest);
+            return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos, userId));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("already exists")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);  // 409 Conflict
+            }
+            throw e;
+        }
     }
 
     @PreAuthorize("hasAuthority('Client')")

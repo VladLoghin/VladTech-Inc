@@ -40,8 +40,8 @@ class ReviewControllerTest {
     @Test
     void getAllReviews_returnsListOfReviews() {
         // Arrange
-        ReviewResponseModel review1 = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
-        ReviewResponseModel review2 = new ReviewResponseModel("r2", "client2", "appt2", "Jane", "Good", true, Rating.FOUR, null, "Interior");
+        ReviewResponseModel review1 = new ReviewResponseModel("r1","PID", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel review2 = new ReviewResponseModel("r2","PID", "client2", "appt2", "Jane", "Good", true, Rating.FOUR, null, "Interior");
         List<ReviewResponseModel> reviews = Arrays.asList(review1, review2);
 
         when(reviewService.getAllReviews(null, null, null, null)).thenReturn(reviews);
@@ -59,7 +59,7 @@ class ReviewControllerTest {
     void getAllReviews_withClientNameFilter_returnsFilteredReviews() {
         // Arrange
         String clientName = "John";
-        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel review = new ReviewResponseModel("r1","PID", "client1", "appt1", clientName, "Great", true, Rating.FIVE, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
         when(reviewService.getAllReviews(clientName, null, null, null)).thenReturn(reviews);
@@ -78,7 +78,7 @@ class ReviewControllerTest {
     void getAllReviews_withRatingFilter_returnsFilteredReviews() {
         // Arrange
         Rating rating = Rating.FIVE;
-        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, rating, null, "Interior");
+        ReviewResponseModel review = new ReviewResponseModel("r1","PID", "client1", "appt1", "John", "Great", true, rating, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
         when(reviewService.getAllReviews(null, rating, null, null)).thenReturn(reviews);
@@ -96,7 +96,7 @@ class ReviewControllerTest {
     @Test
     void getAllVisibleReviews_returnsOnlyVisibleReviews() {
         // Arrange
-        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel review = new ReviewResponseModel("r1","PID", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
         when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(reviews);
@@ -116,7 +116,7 @@ class ReviewControllerTest {
         // Arrange
         String clientName = "John";
         Rating rating = Rating.FIVE;
-        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", clientName, "Great", true, rating, null, "Interior");
+        ReviewResponseModel review = new ReviewResponseModel("r1","PID", "client1", "appt1", clientName, "Great", true, rating, null, "Interior");
         List<ReviewResponseModel> reviews = Collections.singletonList(review);
 
         when(reviewService.getAllVisibleReviews(clientName, rating, null, null)).thenReturn(reviews);
@@ -327,8 +327,8 @@ class ReviewControllerTest {
     void getMyReviews_returnsUserReviews() {
         // Arrange
         String userId = "auth0|user123";
-        ReviewResponseModel review1 = new ReviewResponseModel("r1", userId, "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
-        ReviewResponseModel review2 = new ReviewResponseModel("r2", userId, "appt2", "John", "Good", false, Rating.FOUR, null, "Interior");
+        ReviewResponseModel review1 = new ReviewResponseModel("r1","PID", userId, "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel review2 = new ReviewResponseModel("r2","PID", userId, "appt2", "John", "Good", false, Rating.FOUR, null, "Interior");
         List<ReviewResponseModel> reviews = Arrays.asList(review1, review2);
 
         when(jwt.getClaim("sub")).thenReturn(userId);
@@ -346,7 +346,7 @@ class ReviewControllerTest {
     @Test
     void getSatisfactionPercentage_withReviews_returnsPercentage() {
         // Arrange
-        ReviewResponseModel review = new ReviewResponseModel("r1", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
+        ReviewResponseModel review = new ReviewResponseModel("r1","PID", "client1", "appt1", "John", "Great", true, Rating.FIVE, null, "Interior");
         when(reviewService.getAllVisibleReviews(null, null, null, null)).thenReturn(Collections.singletonList(review));
         when(reviewService.computeSatisfactionPercentage()).thenReturn(92.5);
 

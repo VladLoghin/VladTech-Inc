@@ -55,9 +55,9 @@ class SatisfactionPercentageTest {
     @Test
     void testComputeSatisfactionPercentage_AllFiveStars() {
         // Given
-        Review review1 = new Review("client1", "apt1", "John", "Great!", true, Rating.FIVE, false, "Interior");
-        Review review2 = new Review("client2", "apt2", "Jane", "Excellent!", true, Rating.FIVE, false, "Interior");
-        Review review3 = new Review("client3", "apt3", "Bob", "Perfect!", true, Rating.FIVE, false, "Interior");
+        Review review1 = new Review("PID","client1", "apt1", "John", "Great!", true, Rating.FIVE, false, "Interior");
+        Review review2 = new Review("PID","client2", "apt2", "Jane", "Excellent!", true, Rating.FIVE, false, "Interior");
+        Review review3 = new Review("PID","client3", "apt3", "Bob", "Perfect!", true, Rating.FIVE, false, "Interior");
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(3L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2, review3));
@@ -74,8 +74,8 @@ class SatisfactionPercentageTest {
     @Test
     void testComputeSatisfactionPercentage_AllOneStars() {
         // Given
-        Review review1 = new Review("client1", "apt1", "John", "Bad", true, Rating.ONE, false, "Interior");
-        Review review2 = new Review("client2", "apt2", "Jane", "Terrible", true, Rating.ONE, false, "Interior");
+        Review review1 = new Review("PID","client1", "apt1", "John", "Bad", true, Rating.ONE, false, "Interior");
+        Review review2 = new Review("PID","client2", "apt2", "Jane", "Terrible", true, Rating.ONE, false, "Interior");
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(2L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2));
@@ -92,11 +92,11 @@ class SatisfactionPercentageTest {
     @Test
     void testComputeSatisfactionPercentage_MixedRatings() {
         // Given: ratings are 5, 4, 3, 2, 1 -> average = 3.0 -> 60%
-        Review review1 = new Review("client1", "apt1", "John", "Excellent", true, Rating.FIVE, false, "Interior");
-        Review review2 = new Review("client2", "apt2", "Jane", "Good", true, Rating.FOUR, false, "Interior");
-        Review review3 = new Review("client3", "apt3", "Bob", "Average", true, Rating.THREE, false, "Interior");
-        Review review4 = new Review("client4", "apt4", "Alice", "Below", true, Rating.TWO, false, "Interior");
-        Review review5 = new Review("client5", "apt5", "Tom", "Poor", true, Rating.ONE, false, "interior");
+        Review review1 = new Review("PID","client1", "apt1", "John", "Excellent", true, Rating.FIVE, false, "Interior");
+        Review review2 = new Review("PID","client2", "apt2", "Jane", "Good", true, Rating.FOUR, false, "Interior");
+        Review review3 = new Review("PID","client3", "apt3", "Bob", "Average", true, Rating.THREE, false, "Interior");
+        Review review4 = new Review("PID","client4", "apt4", "Alice", "Below", true, Rating.TWO, false, "Interior");
+        Review review5 = new Review("PID","client5", "apt5", "Tom", "Poor", true, Rating.ONE, false, "interior");
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(5L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2, review3, review4, review5));
@@ -115,11 +115,11 @@ class SatisfactionPercentageTest {
     @Test
     void testComputeSatisfactionPercentage_FourPointFiveAverage() {
         // Given: ratings are 5, 5, 4, 4, 5 -> average = 4.6 -> 92%
-        Review review1 = new Review("client1", "apt1", "John", "Excellent", true, Rating.FIVE, false, "Interior");
-        Review review2 = new Review("client2", "apt2", "Jane", "Excellent", true, Rating.FIVE, false, "Interior");
-        Review review3 = new Review("client3", "apt3", "Bob", "Good", true, Rating.FOUR, false, "Interior");
-        Review review4 = new Review("client4", "apt4", "Alice", "Good", true, Rating.FOUR, false, "Interior");
-        Review review5 = new Review("client5", "apt5", "Tom", "Excellent", true, Rating.FIVE, false, "Interior");
+        Review review1 = new Review("PID","client1", "apt1", "John", "Excellent", true, Rating.FIVE, false, "Interior");
+        Review review2 = new Review("PID","client2", "apt2", "Jane", "Excellent", true, Rating.FIVE, false, "Interior");
+        Review review3 = new Review("PID","client3", "apt3", "Bob", "Good", true, Rating.FOUR, false, "Interior");
+        Review review4 = new Review("PID","client4", "apt4", "Alice", "Good", true, Rating.FOUR, false, "Interior");
+        Review review5 = new Review("PID","client5", "apt5", "Tom", "Excellent", true, Rating.FIVE, false, "Interior");
 
         when(reviewRepository.countByVisibleTrue()).thenReturn(5L);
         when(reviewRepository.findByVisibleTrue()).thenReturn(Arrays.asList(review1, review2, review3, review4, review5));
