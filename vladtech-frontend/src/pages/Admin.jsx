@@ -487,47 +487,11 @@ const Admin = () => {
 
         {/* Stats Section */}
         <section className="mb-8">
-          {/* Stats View Mode Tabs */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-semibold text-gray-600">View:</span>
-            <div className="flex border-2 border-black rounded-lg overflow-hidden">
-              <button
-                onClick={() => setStatsViewMode('status')}
-                className={`px-4 py-2 font-semibold transition-all ${
-                  statsViewMode === 'status' 
-                    ? 'bg-black text-white' 
-                    : 'bg-white text-black hover:bg-gray-100'
-                }`}
-              >
-                Status
-              </button>
-              <button
-                onClick={() => setStatsViewMode('priority')}
-                className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
-                  statsViewMode === 'priority' 
-                    ? 'bg-black text-white' 
-                    : 'bg-white text-black hover:bg-gray-100'
-                }`}
-              >
-                Priority
-              </button>
-              <button
-                onClick={() => setStatsViewMode('projectType')}
-                className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
-                  statsViewMode === 'projectType' 
-                    ? 'bg-black text-white' 
-                    : 'bg-white text-black hover:bg-gray-100'
-                }`}
-              >
-                Project Type
-              </button>
-            </div>
-          </div>
-          
           <ProjectStatsCards 
             stats={displayStats} 
             onStatClick={handleStatClick} 
             viewMode={statsViewMode}
+            onViewModeChange={setStatsViewMode}
           />
         </section>
 

@@ -51,128 +51,168 @@ const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, payload }) =>
   );
 };
 
-const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status' }) => {
+const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewModeChange }) => {
   const { t } = useTranslation();
 
   if (!stats) {
     return null;
   }
 
-  // Define items based on view mode
-  let items = [];
-  
-  if (viewMode === 'status') {
-    items = [
-      { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
-      { label: t("admin.stats.pending"), value: stats.pendingCount, filterType: "status", filterValue: "PENDING" },
-      { label: t("admin.stats.inProgress"), value: stats.inProgressCount, filterType: "status", filterValue: "IN_PROGRESS" },
-      { label: t("admin.stats.completed"), value: stats.completedCount, filterType: "status", filterValue: "COMPLETED" },
-      { label: t("admin.stats.overdue"), value: stats.overdueCount, isError: true, filterType: "overdue" },
-    ];
-  } else if (viewMode === 'priority') {
-    items = [
-      { label: "Total", value: stats.total, filterType: "total" },
-      { label: "Low", value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
-      { label: "Medium", value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
-      { label: "High", value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
-      { label: "Urgent", value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
-    ];
-  } else if (viewMode === 'projectType') {
-    items = [
-      { label: "Total", value: stats.total, filterType: "total" },
-      { label: "Appointment", value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
-      { label: "Scheduled", value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
-    ];
-  }
-
-  // Data for charts - changes based on view mode
-  let activeData = [];
-  let totalCount = 0;
-  
-  if (viewMode === 'status') {
-    totalCount = stats.activeCount || stats.total || 0;
-    activeData = [
-      { 
-        name: t("admin.stats.pending"), 
-        value: stats.pendingCount || 0, 
-        color: "#f59e0b",
-        percentage: totalCount > 0 ? Math.round(((stats.pendingCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: t("admin.stats.inProgress"), 
-        value: stats.inProgressCount || 0, 
-        color: "#3b82f6",
-        percentage: totalCount > 0 ? Math.round(((stats.inProgressCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: t("admin.stats.completed"), 
-        value: stats.completedCount || 0, 
-        color: "#10b981",
-        percentage: totalCount > 0 ? Math.round(((stats.completedCount || 0) / totalCount) * 100) : 0
-      },
-    ];
-  } else if (viewMode === 'priority') {
-    totalCount = stats.total || 0;
-    activeData = [
-      { 
-        name: "Low", 
-        value: stats.lowCount || 0, 
-        color: "#10b981",
-        percentage: totalCount > 0 ? Math.round(((stats.lowCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: "Medium", 
-        value: stats.mediumCount || 0, 
-        color: "#f59e0b",
-        percentage: totalCount > 0 ? Math.round(((stats.mediumCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: "High", 
-        value: stats.highCount || 0, 
-        color: "#ef4444",
-        percentage: totalCount > 0 ? Math.round(((stats.highCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: "Urgent", 
-        value: stats.urgentCount || 0, 
-        color: "#991b1b",
-        percentage: totalCount > 0 ? Math.round(((stats.urgentCount || 0) / totalCount) * 100) : 0
-      },
-    ];
-  } else if (viewMode === 'projectType') {
-    totalCount = stats.total || 0;
-    activeData = [
-      { 
-        name: "Appointment", 
-        value: stats.appointmentCount || 0, 
-        color: "#8b5cf6",
-        percentage: totalCount > 0 ? Math.round(((stats.appointmentCount || 0) / totalCount) * 100) : 0
-      },
-      { 
-        name: "Scheduled", 
-        value: stats.scheduledCount || 0, 
-        color: "#3b82f6",
-        percentage: totalCount > 0 ? Math.round(((stats.scheduledCount || 0) / totalCount) * 100) : 0
-      },
-    ];
-  }
-
-  // Chart titles based on view mode
-  const chartTitle = viewMode === 'status' 
-    ? t("admin.stats.activeProjectsDistribution")
-    : viewMode === 'priority'
-    ? "Priority Distribution"
-    : "Project Type Distribution";
-
-  const chartSubtitle = viewMode === 'status'
-    ? t("admin.stats.statusBreakdown")
-    : viewMode === 'priority'
-    ? "Priority Breakdown"
-    : "Type Breakdown";
-
   return (
-    <div className="w-full bg-white border-2 border-black rounded-lg p-6">
-      {/* Stats Row */}
+    <div>
+      {/* Define items based on view mode */}
+      {(() => {
+        let items = [];
+        
+        if (viewMode === 'status') {
+          items = [
+            { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
+            { label: t("admin.stats.pending"), value: stats.pendingCount, filterType: "status", filterValue: "PENDING" },
+            { label: t("admin.stats.inProgress"), value: stats.inProgressCount, filterType: "status", filterValue: "IN_PROGRESS" },
+            { label: t("admin.stats.completed"), value: stats.completedCount, filterType: "status", filterValue: "COMPLETED" },
+            { label: t("admin.stats.overdue"), value: stats.overdueCount, isError: true, filterType: "overdue" },
+          ];
+        } else if (viewMode === 'priority') {
+          items = [
+            { label: "Total", value: stats.total, filterType: "total" },
+            { label: "Low", value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
+            { label: "Medium", value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
+            { label: "High", value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
+            { label: "Urgent", value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
+          ];
+        } else if (viewMode === 'projectType') {
+          items = [
+            { label: "Total", value: stats.total, filterType: "total" },
+            { label: "Appointment", value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
+            { label: "Scheduled", value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
+          ];
+        }
+
+        // Data for charts - changes based on view mode
+        let activeData = [];
+        let totalCount = 0;
+        
+        if (viewMode === 'status') {
+          totalCount = stats.activeCount || stats.total || 0;
+          activeData = [
+            { 
+              name: t("admin.stats.pending"), 
+              value: stats.pendingCount || 0, 
+              color: "#f59e0b",
+              percentage: totalCount > 0 ? Math.round(((stats.pendingCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: t("admin.stats.inProgress"), 
+              value: stats.inProgressCount || 0, 
+              color: "#3b82f6",
+              percentage: totalCount > 0 ? Math.round(((stats.inProgressCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: t("admin.stats.completed"), 
+              value: stats.completedCount || 0, 
+              color: "#10b981",
+              percentage: totalCount > 0 ? Math.round(((stats.completedCount || 0) / totalCount) * 100) : 0
+            },
+          ];
+        } else if (viewMode === 'priority') {
+          totalCount = stats.total || 0;
+          activeData = [
+            { 
+              name: "Low", 
+              value: stats.lowCount || 0, 
+              color: "#10b981",
+              percentage: totalCount > 0 ? Math.round(((stats.lowCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: "Medium", 
+              value: stats.mediumCount || 0, 
+              color: "#f59e0b",
+              percentage: totalCount > 0 ? Math.round(((stats.mediumCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: "High", 
+              value: stats.highCount || 0, 
+              color: "#ef4444",
+              percentage: totalCount > 0 ? Math.round(((stats.highCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: "Urgent", 
+              value: stats.urgentCount || 0, 
+              color: "#991b1b",
+              percentage: totalCount > 0 ? Math.round(((stats.urgentCount || 0) / totalCount) * 100) : 0
+            },
+          ];
+        } else if (viewMode === 'projectType') {
+          totalCount = stats.total || 0;
+          activeData = [
+            { 
+              name: "Appointment", 
+              value: stats.appointmentCount || 0, 
+              color: "#8b5cf6",
+              percentage: totalCount > 0 ? Math.round(((stats.appointmentCount || 0) / totalCount) * 100) : 0
+            },
+            { 
+              name: "Scheduled", 
+              value: stats.scheduledCount || 0, 
+              color: "#3b82f6",
+              percentage: totalCount > 0 ? Math.round(((stats.scheduledCount || 0) / totalCount) * 100) : 0
+            },
+          ];
+        }
+
+        // Chart titles based on view mode
+        const chartTitle = viewMode === 'status' 
+          ? t("admin.stats.activeProjectsDistribution")
+          : viewMode === 'priority'
+          ? "Priority Distribution"
+          : "Project Type Distribution";
+
+        const chartSubtitle = viewMode === 'status'
+          ? t("admin.stats.statusBreakdown")
+          : viewMode === 'priority'
+          ? "Priority Breakdown"
+          : "Type Breakdown";
+
+        return (
+          <div className="w-full bg-white border-2 border-black rounded-lg p-6">
+            {/* View Mode Tabs */}
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-sm font-semibold text-gray-600">View:</span>
+              <div className="flex border-2 border-black rounded-lg overflow-hidden">
+                <button
+                  onClick={() => onViewModeChange('status')}
+                  className={`px-4 py-2 font-semibold transition-all ${
+                    viewMode === 'status' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  Status
+                </button>
+                <button
+                  onClick={() => onViewModeChange('priority')}
+                  className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
+                    viewMode === 'priority' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  Priority
+                </button>
+                <button
+                  onClick={() => onViewModeChange('projectType')}
+                  className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
+                    viewMode === 'projectType' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  Project Type
+                </button>
+              </div>
+            </div>
+
+            {/* Stats Row */}
       <div className="grid grid-cols-2 gap-y-6 md:flex md:flex-row md:items-center md:justify-start md:gap-0 mb-8">
         {items.map((item, index) => (
           <button
@@ -244,6 +284,9 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status' }) => {
           </ResponsiveContainer>
         </div>
       </div>
+    </div>
+        );
+      })()}
     </div>
   );
 };
