@@ -213,7 +213,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
             </div>
 
             {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-y-6 md:flex md:flex-row md:items-center md:justify-start md:gap-0 mb-8">
+            <div className="grid grid-cols-2 gap-y-6 md:flex md:flex-row md:items-center md:justify-start md:gap-0 mb-8">
         {items.map((item, index) => (
           <button
             key={index}

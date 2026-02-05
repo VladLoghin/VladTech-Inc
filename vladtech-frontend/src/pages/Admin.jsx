@@ -104,6 +104,7 @@ const Admin = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [animatedFilter, setAnimatedFilter] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // Fetch Projects with Search & Filters
@@ -373,35 +374,48 @@ const Admin = () => {
     // Open filters
     setFiltersOpen(true);
 
-    // Apply the appropriate filter based on the stat clicked
-    let newFilters = {
-      searchField: "name",
+    const newFilters = {
       search: "",
+      searchField: "name",
       status: "",
       priority: "",
+      projectType: "",
       costStatus: "",
       startDate: "",
       dueDate: "",
-      projectType: "",
       estimatedCost: "",
+      assignedEmployeeId: "",
+      state: "ACTIVE", // Assuming stats are for active projects
     };
+
+    let animatedField = null;
 
     if (filterType === "status") {
       newFilters.status = filterValue;
+      animatedField = "status";
     } else if (filterType === "priority") {
       newFilters.priority = filterValue;
+      animatedField = "priority";
     } else if (filterType === "projectType") {
       newFilters.projectType = filterValue;
+      animatedField = "projectType";
     } else if (filterType === "overdue") {
       // For overdue, we filter by due date before today
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
       newFilters.dueDate = todayStr;
+      animatedField = "dueDate";
     }
     // For "total", we don't apply any additional filter (show all active)
 
     setFilters(newFilters);
     setActiveFilters(newFilters);
+
+    // Trigger animation
+    if (animatedField) {
+      setAnimatedFilter(animatedField);
+      setTimeout(() => setAnimatedFilter(null), 800);
+    }
   }, []);
 
   return (
@@ -640,7 +654,9 @@ const Admin = () => {
                         name="status"
                         value={filters.status}
                         onChange={handleFilterChange}
-                        className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                        className={`w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium transition-all ${
+                          animatedFilter === 'status' ? 'animate-pulse ring-4 ring-blue-400 bg-blue-50' : ''
+                        }`}
                       >
                         <option value="">{t('admin.anyStatus')}</option>
                         <option value="PENDING">Pending</option>
@@ -656,7 +672,9 @@ const Admin = () => {
                         name="priority"
                         value={filters.priority}
                         onChange={handleFilterChange}
-                        className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                        className={`w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium transition-all ${
+                          animatedFilter === 'priority' ? 'animate-pulse ring-4 ring-blue-400 bg-blue-50' : ''
+                        }`}
                       >
                         <option value="">{t('admin.anyPriority')}</option>
                         <option value="LOW">Low</option>
@@ -673,7 +691,9 @@ const Admin = () => {
                         name="projectType"
                         value={filters.projectType}
                         onChange={handleFilterChange}
-                        className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                        className={`w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium transition-all ${
+                          animatedFilter === 'projectType' ? 'animate-pulse ring-4 ring-blue-400 bg-blue-50' : ''
+                        }`}
                       >
                         <option value="">{t('admin.anyType')}</option>
                         <option value="APPOINTMENT">{t('admin.appointment')}</option>
@@ -720,7 +740,9 @@ const Admin = () => {
                         value={filters.dueDate}
                         onChange={handleFilterChange}
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
+                        className={`w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium transition-all ${
+                          animatedFilter === 'dueDate' ? 'animate-pulse ring-4 ring-blue-400 bg-blue-50' : ''
+                        }`}
                       />
                     </div>
                   </div>
