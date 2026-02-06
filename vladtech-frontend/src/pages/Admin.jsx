@@ -1047,7 +1047,10 @@ const Admin = () => {
               <div className="flex justify-center items-center p-4 border-t border-black/10 bg-gray-50 gap-4">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setPage(Math.max(0, page - 1))}
+                    onClick={() => {
+                      setPage(Math.max(0, page - 1));
+                      setTimeout(() => window.scrollTo(0, 100000), 200);
+                    }}
                     disabled={page === 0}
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
@@ -1058,7 +1061,10 @@ const Admin = () => {
                     Page {page + 1} / {totalPages}
                   </span>
                   <button
-                    onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                    onClick={() => {
+                      setPage(Math.min(totalPages - 1, page + 1));
+                      setTimeout(() => window.scrollTo(0, 100000), 200);
+                    }}
                     disabled={page >= totalPages - 1}
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
