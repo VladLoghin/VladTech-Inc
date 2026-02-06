@@ -78,4 +78,56 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
             String costStatus,
             String assignedEmployeeId,
             Pageable pageable);
+
+    @Query("{ " +
+            "'$and': [ " +
+            " { $expr: { $cond: { if: { $eq: [ ?0, '' ] }, then: true, else: { $regexMatch: { input: '$name', regex: ?0, options: 'i' } } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?1, '' ] }, then: true, else: { $regexMatch: { input: '$projectIdentifier', regex: ?1, options: 'i' } } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?2, '' ] }, then: true, else: { $regexMatch: { input: '$clientName', regex: ?2, options: 'i' } } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?3, null ] }, then: true, else: { $eq: [ '$status', ?3 ] } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?4, null ] }, then: true, else: { $eq: [ '$state', ?4 ] } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?5, null ] }, then: true, else: { $eq: [ '$priority', ?5 ] } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?6, null ] }, then: true, else: { $gte: [ '$startDate', ?6 ] } } } }, "
+            +
+            " { $expr: { $cond: { if: { $eq: [ ?7, null ] }, then: true, else: { $lte: [ '$dueDate', ?7 ] } } } }, "
+            +
+            " { $or: [ { $expr: { $eq: [ ?8, null ] } }, { 'projectType.type': ?8 } ] }, "
+            +
+            " { $or: [ " +
+            "   { $expr: { $eq: [ ?9, '' ] } }, " +
+            "   { $and: [ " +
+            "       { $expr: { $eq: [ ?9, 'HAS_PRICE' ] } }, " +
+            "       { $expr: { $ne: [ '$estimatedCost', null ] } }, " +
+            "       { $expr: { $gt: [ '$estimatedCost', 0 ] } } " +
+            "   ] }, " +
+            "   { $and: [ " +
+            "       { $expr: { $eq: [ ?9, 'NO_PRICE' ] } }, " +
+            "       { $expr: { $or: [ " +
+            "           { $eq: [ '$estimatedCost', null ] }, " +
+            "           { $lte: [ '$estimatedCost', 0 ] } " +
+            "       ] } } " +
+            "   ] } " +
+            " ] }, " +
+            " { $expr: { $cond: { if: { $eq: [ ?10, '' ] }, then: true, else: { $gt: [ { $size: { $filter: { input: { $ifNull: ['$assignedEmployeeIds', []] }, as: 'id', cond: { $regexMatch: { input: '$$id', regex: ?10, options: 'i' } } } } }, 0 ] } } } } "
+            +
+            "] " +
+            "}")
+    List<Project> searchProjectsList(
+            String name,
+            String projectIdentifier,
+            String clientName,
+            ProjectStatus status,
+            ProjectState state,
+            ProjectPriority priority,
+            java.time.LocalDate startDate,
+            java.time.LocalDate dueDate,
+            ProjectType.ProjectTypeEnum projectType,
+            String costStatus,
+            String assignedEmployeeId);
 }

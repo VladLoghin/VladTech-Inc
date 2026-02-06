@@ -12,9 +12,10 @@ import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
 import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
 import { api } from "../api/http";
+import { generateCsv, generatePdf } from "../utils/exportUtils";
 
 const Admin = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, user } = useAuth0();
   const { t, i18n } = useTranslation();
 
   const [message, setMessage] = useState("");
@@ -486,39 +487,121 @@ const Admin = () => {
     }
   }, []);
 
+  const handleExport = async (type) => {
+    try {
+      setMessage(`Exporting ${type.toUpperCase()}...`);
+      const token = await getApiToken();
+      
+      const stateFilter = activeTab === "active" ? "ACTIVE" : "COMPLETE";
+      const params = { 
+        state: stateFilter,
+        sortBy: activeSortBy,
+        sortOrder: activeSortOrder
+      };
+
+      // Apply all active filters
+      if (activeFilters.search) {
+        if (activeFilters.searchField === "name") params.name = activeFilters.search;
+        else if (activeFilters.searchField === "clientName") params.clientName = activeFilters.search;
+        else if (activeFilters.searchField === "projectIdentifier") params.projectIdentifier = activeFilters.search;
+        else if (activeFilters.searchField === "assignedEmployeeId") params.assignedEmployeeId = activeFilters.search;
+      }
+      const otherFields = ["status", "priority", "startDate", "dueDate", "projectType", "costStatus"];
+      otherFields.forEach((key) => {
+        if (activeFilters[key]) params[key] = activeFilters[key];
+      });
+
+      // Fetch ALL matching projects from the list endpoint
+      const response = await api.get("/projects/list", {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      });
+
+      const projectsToExport = response.data;
+      const langSuffix = i18n.language === "fr" ? "-fr" : "-en";
+
+      if (type === "csv") {
+        generateCsv(projectsToExport, `projects_export_${new Date().toISOString().split('T')[0]}${langSuffix}.csv`, {
+          locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
+        });
+      } else {
+        const reportTitle = activeTab === "active" 
+          ? t("project.fullActiveReport") 
+          : t("project.fullArchivedReport");
+
+        generatePdf(projectsToExport, `projects_export_${new Date().toISOString().split('T')[0]}${langSuffix}.pdf`, {
+          exporterName: user?.name || user?.email || "Admin",
+          title: reportTitle,
+          locale: i18n.language === "fr" ? "fr-CA" : "en-CA",
+          sortBy: activeSortBy,
+          sortOrder: activeSortOrder
+        });
+      }
+
+      setMessage(`${type.toUpperCase()} Export complete!`);
+    } catch (e) {
+      console.error("Export failed", e);
+      setMessage(`Failed to export ${type.toUpperCase()}`);
+    }
+  };
+
   return (
     <>
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">{t("admin.title")}</h1>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-3 w-full lg:w-auto">
-            <button
-              onClick={() => setIsPortfolioModalOpen(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-            >
-              {t("admin.createPortfolio")}
-            </button>
-            <button
-              onClick={() => setIsDeletePortfolioModalOpen(true)}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-            >
-              {t("admin.deletePortfolio")}
-            </button>
-            <button
-              onClick={() => setIsRoleFinderModalOpen(true)}
-              className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-            >
-              {t("admin.roleFinder")}
-            </button>
-            <button
-              onClick={() => setIsRoleAssignmentModalOpen(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg"
-            >
-              {t("admin.roleManager")}
-            </button>
+        <div className="mb-8 border-b-2 border-black/5 pb-6">
+          <h1 className="text-6xl font-light tracking-tight mb-8">{t("admin.title")}</h1>
+          
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+            {/* Left Side: Export */}
+            <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-xl border border-black/10 w-full lg:w-auto">
+              <span className="text-xs font-bold text-black/40 px-2 uppercase tracking-wider whitespace-nowrap">{t("project.allProjects")}</span>
+              <button
+                onClick={() => handleExport("csv")}
+                className="flex-1 bg-white border-2 border-green-600 text-green-700 hover:bg-green-50 px-4 py-2 rounded-lg transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2"
+                title="Export to CSV"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                CSV
+              </button>
+              <button
+                onClick={() => handleExport("pdf")}
+                className="flex-1 bg-white border-2 border-red-600 text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2"
+                title="Export to PDF"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                PDF
+              </button>
+            </div>
+ 
+            {/* Right Side: Action Buttons */}
+            <div className="flex flex-col lg:flex-row gap-3 items-center w-full lg:w-auto">
+              <button
+                onClick={() => setIsPortfolioModalOpen(true)}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.createPortfolio")}
+              </button>
+              <button
+                onClick={() => setIsDeletePortfolioModalOpen(true)}
+                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.deletePortfolio")}
+              </button>
+              <button
+                onClick={() => setIsRoleFinderModalOpen(true)}
+                className="bg-black hover:bg-black/80 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.roleFinder")}
+              </button>
+              <button
+                onClick={() => setIsRoleAssignmentModalOpen(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.roleManager")}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -630,12 +713,14 @@ const Admin = () => {
           </div>
         </div>
 
-        <section ref={projectsListRef} className="mt-10">
-          <div className="flex flex-col gap-6 mb-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold tracking-tight">{t("admin.projects")}</h2>
+        <div className="border-b-2 border-black/5 mt-16 mb-12" />
 
-              <div className="flex border-2 border-black rounded-lg overflow-hidden">
+        <section ref={projectsListRef}>
+          <div className="flex flex-col gap-6 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-baseline justify-between gap-4 mb-2">
+              <h2 className="text-5xl font-light tracking-tight">{t("admin.projects")}</h2>
+
+              <div className="flex border-2 border-black rounded-lg overflow-hidden shrink-0">
                 <button
                   onClick={() => { setActiveTab("active"); setPage(0); }}
                   className={`px-6 py-2 font-semibold transition-all ${activeTab === "active" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"
@@ -918,7 +1003,7 @@ const Admin = () => {
             </div>
           </div>
 
-          <div className="bg-white border-2 border-black rounded-xl overflow-hidden p-1">
+          <div className="bg-white border-2 border-black rounded-xl overflow-hidden p-1 mt-6">
             {activeTab === "active" ? (
               <ProjectList
                 projects={projects}

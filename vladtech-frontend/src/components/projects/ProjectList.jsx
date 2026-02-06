@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
+import { generateCsv, generatePdf } from "../../utils/exportUtils";
 
 const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
   // Prefer assignedEmployeeEmails if available - filter out any Auth0 IDs
@@ -145,12 +147,14 @@ const ProjectList = ({
   getToken, // async () => string
 }) => {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth0();
   const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [activeProject, setActiveProject] = useState(null);
   const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const [comments, setComments] = useState("");
   const [file, setFile] = useState(null);
@@ -191,6 +195,11 @@ const ProjectList = ({
   const handlePortfolioSuccess = () => {
     setPortfolioModalOpen(false);
     setActiveProject(null);
+  };
+ 
+  const openExport = (project) => {
+    setActiveProject(project);
+    setExportOpen(true);
   };
 
   const submitUpload = async () => {
@@ -303,7 +312,10 @@ const ProjectList = ({
                   >
                     {t("project.viewInformation", { defaultValue: "View Information" })}
                   </button>
+
                 )}
+
+                
 
                 {/* Complete / Reactivate / Edit */}
                 {showReactivate && isArchived && (
@@ -335,6 +347,17 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
+ 
+                {/* Single Export Button */}
+                <button
+                  type="button"
+                  onClick={() => openExport(project)}
+                  className="px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm flex items-center justify-center gap-2"
+                  title={t("project.export")}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  {t("project.export")}
+                </button>
               </div>
 
               {/* Content area with margin to avoid button overlap on desktop */}
@@ -533,6 +556,16 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
+ 
+                {/* Single Export Button (Mobile) */}
+                <button
+                  type="button"
+                  onClick={() => openExport(project)}
+                  className="flex-1 min-w-[140px] px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  {t("project.export")}
+                </button>
               </div>
             </div>
           );
@@ -651,6 +684,66 @@ const ProjectList = ({
         </ModalShell>
       )}
 
+      {exportOpen && activeProject && (
+        <ModalShell
+          title={t("project.export")}
+          onClose={() => setExportOpen(false)}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="text-center mb-2">
+              <p className="text-black/60 text-sm uppercase tracking-widest font-bold opacity-70">
+                {t("project.exportFormatDescFull", { defaultValue: "Select Format For" })}
+              </p>
+              <h4 className="text-xl font-light text-black mt-1">
+                {activeProject.name}
+              </h4>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  generateCsv([activeProject], `project_${activeProject.projectIdentifier}.csv`, {
+                    locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
+                  });
+                }}
+                className="flex flex-col items-center justify-center p-6 border-2 border-green-600 text-green-700 rounded-xl hover:bg-green-50 transition-all group shadow-sm hover:shadow-md"
+              >
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </div>
+                <span className="font-bold">CSV</span>
+                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">Spreadsheet</span>
+              </button>
+ 
+              <button
+                type="button"
+                onClick={() => {
+                  const langSuffix = i18n.language === "fr" ? "-fr" : "-en";
+                  generatePdf([activeProject], `project_${activeProject.projectIdentifier}${langSuffix}.pdf`, {
+                    exporterName: user?.name || user?.email || "Staff",
+                    title: t("project.singleReport", { name: activeProject.name }),
+                    locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
+                  });
+                }}
+                className="flex flex-col items-center justify-center p-6 border-2 border-red-600 text-red-700 rounded-xl hover:bg-red-50 transition-all group shadow-sm hover:shadow-md"
+              >
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="font-bold">PDF</span>
+                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">Document</span>
+              </button>
+            </div>
+            
+
+          </div>
+        </ModalShell>
+      )}
+ 
       {/* Send to Portfolio Modal */}
       <SendToPortfolioModal
         project={activeProject}
