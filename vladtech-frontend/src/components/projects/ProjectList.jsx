@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
+import { pinProject, unpinProject, isProjectPinned } from "../../api/projects/projectPinApi";
 
 const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
   // Prefer assignedEmployeeEmails if available - filter out any Auth0 IDs
@@ -152,6 +153,10 @@ const ProjectList = ({
   const [activeProject, setActiveProject] = useState(null);
   const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
 
+  // Pin-related state
+  const [pinnedProjects, setPinnedProjects] = useState(new Set());
+  const [pinLoading, setPinLoading] = useState(false);
+
   const [comments, setComments] = useState("");
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -250,14 +255,83 @@ const ProjectList = ({
     };
   }, [viewOpen, latestInfo?.photoUrl, getToken, t]);
 
+  // Load pinned projects for current user
+  useEffect(() => {
+    const loadPinnedProjects = async () => {
+      if (!getToken) return;
+      
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const pinStates = new Set();
+        
+        // Check pin status for each project
+        for (const project of projects) {
+          try {
+            const isPinned = await isProjectPinned(project.projectIdentifier, token);
+            if (isPinned) {
+              pinStates.add(project.projectIdentifier);
+            }
+          } catch (error) {
+            console.error(`Error checking pin status for ${project.projectIdentifier}:`, error);
+          }
+        }
+        
+        setPinnedProjects(pinStates);
+      } catch (error) {
+        console.error("Failed to load pinned projects:", error);
+      }
+    };
+
+    loadPinnedProjects();
+  }, [projects, getToken]);
+
+  const handleTogglePin = async (project) => {
+    if (!getToken) return;
+
+    try {
+      setPinLoading(true);
+      const token = await getToken();
+      if (!token) return;
+
+      if (pinnedProjects.has(project.projectIdentifier)) {
+        // Unpin
+        await unpinProject(project.projectIdentifier, token);
+        setPinnedProjects(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(project.projectIdentifier);
+          return newSet;
+        });
+      } else {
+        // Pin
+        await pinProject(project.projectIdentifier, token);
+        setPinnedProjects(prev => new Set([...prev, project.projectIdentifier]));
+      }
+    } catch (error) {
+      console.error("Error toggling project pin:", error);
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
+  // Sort projects with pinned ones first
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => {
+      const aPinned = pinnedProjects.has(a.projectIdentifier) ? 1 : 0;
+      const bPinned = pinnedProjects.has(b.projectIdentifier) ? 1 : 0;
+      return bPinned - aPinned;
+    });
+  }, [projects, pinnedProjects]);
+
   return (
     <>
       <div className="border-2 border-black rounded-xl bg-white p-4 space-y-4">
-        {projects.length === 0 && (
+        {sortedProjects.length === 0 && (
           <p className="text-black/60 text-center py-8">{t("project.noProjectsFound")}</p>
         )}
 
-        {projects.map((project) => {
+        {sortedProjects.map((project) => {
           const isArchived = project.state === "COMPLETE";
           const hasInfo = (project.photos || []).length > 0;
 
@@ -335,6 +409,23 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
+
+                {/* Pin / Unpin Button */}
+                <button
+                  type="button"
+                  onClick={() => handleTogglePin(project)}
+                  disabled={pinLoading}
+                  className={`px-3 py-2 rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-1 ${
+                    pinnedProjects.has(project.projectIdentifier)
+                      ? "bg-orange-400 text-black hover:bg-orange-500"
+                      : "bg-gray-300 text-black hover:bg-gray-400"
+                  } disabled:opacity-50`}
+                >
+                  <span>{pinnedProjects.has(project.projectIdentifier) ? "📌" : "📍"}</span>
+                  {pinnedProjects.has(project.projectIdentifier)
+                    ? t("project.unpin", { defaultValue: "Unpin" })
+                    : t("project.pin", { defaultValue: "Pin" })}
+                </button>
               </div>
 
               {/* Content area with margin to avoid button overlap on desktop */}

@@ -21,6 +21,7 @@ public class ProjectResponseMapper {
         }
 
         ProjectResponseModel responseModel = new ProjectResponseModel();
+        responseModel.setId(project.getId());
         responseModel.setProjectIdentifier(project.getProjectIdentifier());
         responseModel.setName(project.getName());
         responseModel.setClientId(project.getClientId());

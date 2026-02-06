@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectResponseModel {
 
+    private String id;
     private String projectIdentifier;
     private String name;
     private String clientId;
