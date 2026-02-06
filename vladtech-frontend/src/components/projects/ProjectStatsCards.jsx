@@ -177,7 +177,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           <div className="w-full bg-white border-2 border-black rounded-lg p-6">
             {/* View Mode Tabs */}
             <div className="flex items-center gap-2 mb-6">
-              <span className="text-sm font-semibold text-gray-600">{t("admin.stats.view")}:</span>
+              <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">{t("admin.stats.view")}:</span>
               <div className="flex border-2 border-black rounded-lg overflow-hidden">
                 <button
                   onClick={() => onViewModeChange('status')}
@@ -218,7 +218,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           <button
             key={index}
             onClick={() => onStatClick?.(item.filterType, item.filterValue)}
-            className="flex flex-col md:px-8 md:first:pl-0 md:border-r-2 md:last:border-r-0 border-gray-100 min-w-0 md:min-w-[120px] first:col-span-2 md:first:col-span-1 text-left cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg p-2 -m-2"
+            className="flex flex-col md:px-8 md:first:pl-2 md:border-r-2 md:last:border-r-0 border-gray-100 min-w-0 md:min-w-[120px] first:col-span-2 md:first:col-span-1 text-left cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg p-2 -m-2"
             aria-label={`Filter by ${item.label}`}
           >
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">

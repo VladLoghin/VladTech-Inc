@@ -454,16 +454,23 @@ const ProjectList = ({
                   type="button"
                   onClick={() => handleTogglePin(project)}
                   disabled={pinLoading}
-                  className={`px-3 py-2 rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-1 ${pinnedProjects.has(project.projectIdentifier)
-                    ? "bg-orange-400 text-black hover:bg-orange-500"
-                    : "bg-gray-300 text-black hover:bg-gray-400"
+                  className={`px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
+                    ? "bg-black text-white hover:bg-black/80"
+                    : "bg-white text-black hover:bg-black hover:text-white"
                     } disabled:opacity-50`}
                 >
-                  <span>
-                    {pinnedProjects.has(project.projectIdentifier)
-                      ? "📌"
-                      : "📍"}
-                  </span>
+                  <svg
+                    className="w-4 h-4"
+                    fill={pinnedProjects.has(project.projectIdentifier) ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="12" y1="17" x2="12" y2="22"></line>
+                    <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.79-.9A.5.5 0 0 1 16 12.1V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v7.1a.5.5 0 0 1-.1.3l-1.79.9A2 2 0 0 0 5 15.24Z"></path>
+                  </svg>
                   {pinnedProjects.has(project.projectIdentifier)
                     ? t("project.unpin", { defaultValue: "Unpin" })
                     : t("project.pin", { defaultValue: "Pin" })}
@@ -742,6 +749,33 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
+
+                {/* Pin Button (Mobile) */}
+                <button
+                  type="button"
+                  onClick={() => handleTogglePin(project)}
+                  disabled={pinLoading}
+                  className={`flex-1 min-w-[140px] px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
+                    ? "bg-black text-white hover:bg-black/80"
+                    : "bg-white text-black hover:bg-black hover:text-white"
+                    } disabled:opacity-50`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill={pinnedProjects.has(project.projectIdentifier) ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="12" y1="17" x2="12" y2="22"></line>
+                    <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.79-.9A.5.5 0 0 1 16 12.1V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v7.1a.5.5 0 0 1-.1.3l-1.79.9A2 2 0 0 0 5 15.24Z"></path>
+                  </svg>
+                  {pinnedProjects.has(project.projectIdentifier)
+                    ? t("project.unpin", { defaultValue: "Unpin" })
+                    : t("project.pin", { defaultValue: "Pin" })}
+                </button>
 
                 {/* Single Export Button (Mobile) */}
                 <button

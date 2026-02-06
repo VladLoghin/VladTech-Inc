@@ -109,6 +109,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
   const t = (key, opts) => i18n.t(key, { ...opts, lng: locale.split('-')[0] });
   
   const doc = new jsPDF('p', 'mm', 'a4');
+  doc.setCharSpace(0);
   const isSingle = projects.length === 1;
   const p = projects[0];
 
@@ -142,7 +143,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     doc.setFont("helvetica", "bold");
     doc.text(p.name, 14, 45);
     
-    doc.setFontSize(10);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(`${t('project.id')}: ${p.projectIdentifier}`, 14, 51);
@@ -179,10 +180,39 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 35, textColor: [100, 100, 100] } },
     });
 
+    let currentY = doc.lastAutoTable.finalY + 10;
+
+    // Section 1.5: Description
+    if (p.description) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(20, 20, 20);
+      doc.text(t('pdf.projectDescription'), 14, currentY);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(50, 50, 50); // Slightly lighter to distinguish from older versions
+      doc.setCharSpace(0);
+      
+      const maxWidth = 180; // Slightly narrower to be safe
+      const cleanDesc = p.description.replace(/\s+/g, ' ').trim();
+      const lines = doc.splitTextToSize(cleanDesc, maxWidth);
+      
+      let cursorY = currentY + 6;
+      lines.forEach((line) => {
+        // Explicitly set align 'left' for every line to override any justification
+        doc.text(line, 14, cursorY, { align: 'left' });
+        cursorY += 5; // Fixed 5mm line spacing
+      });
+      
+      currentY = cursorY + 5;
+    }
+
     // Section 2: Timeline & Financials
-    const nextY = doc.lastAutoTable.finalY + 10;
     doc.setFont("helvetica", "bold");
-    doc.text(t('pdf.timeline'), 14, nextY);
+    doc.setFontSize(10);
+    doc.setTextColor(20, 20, 20);
+    doc.text(t('pdf.timeline'), 14, currentY);
 
     const timelineData = [
       [t('project.startDate'), p.startDate || '-'],
@@ -193,7 +223,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
 
     autoTable(doc, {
       body: timelineData,
-      startY: nextY + 4,
+      startY: currentY + 4,
       margin: { left: 14 },
       theme: 'plain',
       styles: { fontSize: 9, cellPadding: 1 },
@@ -207,6 +237,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
+    doc.setCharSpace(0);
     doc.text(formatEmployees(p.assignedEmployeeEmails, '-'), 14, personnelY + 6, { maxWidth: 182 });
 
     startTableY = personnelY + 20;
@@ -262,15 +293,15 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     },
     styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' },
     columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 12 },
-      1: { cellWidth: 35 },
-      2: { cellWidth: 24 },
-      3: { cellWidth: 30 },
-      4: { halign: 'center', cellWidth: 16 },
-      5: { halign: 'center', cellWidth: 16 },
-      6: { halign: 'center', cellWidth: 15 },
-      7: { halign: 'right', cellWidth: 18 },
-      8: { cellWidth: 23 },
+      0: { cellWidth: 16 },                   // ID: Normal weight
+      1: { cellWidth: 35 },                   // Project Name
+      2: { cellWidth: 24 },                   // Client
+      3: { cellWidth: 24 },                   // Employee
+      4: { halign: 'center', cellWidth: 16 }, // Status
+      5: { halign: 'center', cellWidth: 16 }, // Priority
+      6: { halign: 'center', cellWidth: 17 }, // Type
+      7: { halign: 'right', cellWidth: 17 },  // Cost
+      8: { cellWidth: 20 },                   // Location
     },
     didParseCell: function(data) {
       if (data.section === 'body') {

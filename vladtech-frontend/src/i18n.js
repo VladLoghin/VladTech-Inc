@@ -347,6 +347,7 @@ const resources = {
       "pdf.overview": "Project Overview",
       "pdf.timeline": "Timeline & Financials",
       "pdf.personnel": "Assigned Personnel",
+      "pdf.projectDescription": "Project Description",
     },
   },
   fr: {
@@ -695,6 +696,7 @@ const resources = {
       "pdf.overview": "Aperçu du projet",
       "pdf.timeline": "Calendrier et finances",
       "pdf.personnel": "Personnel assigné",
+      "pdf.projectDescription": "Description du projet",
     },
   },
 };

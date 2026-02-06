@@ -30,7 +30,7 @@ const ProjectStatsCharts = ({ stats }) => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Circle Chart */}
       <div className="bg-white border-2 border-black rounded-lg p-6">
-        <h3 className="text-lg font-bold mb-4">Active Projects Distribution</h3>
+        <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">Active Projects Distribution</h3>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -61,7 +61,7 @@ const ProjectStatsCharts = ({ stats }) => {
 
       {/* Bar Chart */}
       <div className="bg-white border-2 border-black rounded-lg p-6">
-        <h3 className="text-lg font-bold mb-4">Project Status Breakdown</h3>
+        <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4">Project Status Breakdown</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={activeData}>
             <CartesianGrid strokeDasharray="3 3" />
