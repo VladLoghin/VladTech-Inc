@@ -16,6 +16,9 @@ const resources = {
       add: "ADD",
       yes: "Yes",
       no: "No",
+      previous: "Previous",
+      next: "Next",
+      pageOf: "Page {{current}} / {{total}}",
 
       // Navigation
       "nav.portfolio": "PORTFOLIO",
@@ -375,6 +378,9 @@ const resources = {
       add: "AJOUTER",
       yes: "Oui",
       no: "Non",
+      previous: "Précédent",
+      next: "Suivant",
+      pageOf: "Page {{current}} / {{total}}",
 
       // Navigation
       "nav.portfolio": "PORTFOLIO",

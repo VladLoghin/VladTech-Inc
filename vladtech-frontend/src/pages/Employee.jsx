@@ -710,10 +710,10 @@ const Employee = () => {
                           page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                         }`}
                       >
-                        Previous
+                        {t('previous')}
                       </button>
                       <span className="font-medium text-black px-2">
-                        Page {page + 1} / {totalPages}
+                        {t('pageOf', { current: page + 1, total: totalPages })}
                       </span>
                       <button
                         onClick={() => {
@@ -725,7 +725,7 @@ const Employee = () => {
                           page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                         }`}
                       >
-                        Next
+                        {t('next')}
                       </button>
                     </div>
                   </div>

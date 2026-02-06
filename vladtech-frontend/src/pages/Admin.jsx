@@ -1055,10 +1055,10 @@ const Admin = () => {
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
                   >
-                    Previous
+                    {t('previous')}
                   </button>
                   <span className="font-medium text-black px-2">
-                    Page {page + 1} / {totalPages}
+                    {t('pageOf', { current: page + 1, total: totalPages })}
                   </span>
                   <button
                     onClick={() => {
@@ -1069,7 +1069,7 @@ const Admin = () => {
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
                   >
-                    Next
+                    {t('next')}
                   </button>
                 </div>
               </div>
