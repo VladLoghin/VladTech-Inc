@@ -162,7 +162,7 @@ const Admin = () => {
       setTotalElements(response.data.totalElements);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setMessage("Failed to fetch projects.");
+      setMessage(t("admin.failedFetchProjects"));
     } finally {
       setSearchLoading(false);
     }
@@ -213,11 +213,11 @@ const Admin = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(`Project "${project.name}" has been marked as complete.`);
+      setMessage(t("admin.projectCompleted", { name: project.name }));
       await refreshAllProjectData();
     } catch (error) {
       console.error("Error completing project:", error);
-      setMessage("Failed to complete project.");
+      setMessage(t("admin.failedComplete"));
     }
   };
 
@@ -230,11 +230,11 @@ const Admin = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(`Project "${project.name}" has been reactivated.`);
+      setMessage(t("admin.projectReactivated", { name: project.name }));
       await refreshAllProjectData();
     } catch (error) {
       console.error("Error reactivating project:", error);
-      setMessage("Failed to reactivate project.");
+      setMessage(t("admin.failedReactivate"));
     }
   };
 
@@ -349,40 +349,47 @@ const Admin = () => {
 
   // Calculate priority and project type stats from calendarProjects
   const computedStats = useMemo(() => {
-    if (!calendarProjects.length) return null;
+    // Only count active projects in stats
+    const activeProjects = calendarProjects.filter(p => 
+      !(p.state && p.state.toUpperCase() === 'COMPLETE')
+    );
+
+    if (!activeProjects.length) return null;
 
     // Priority stats - check both uppercase and proper case
-    const lowCount = calendarProjects.filter(p => 
+    const lowCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'LOW' || p.priority.toUpperCase() === 'LOW')
     ).length;
-    const mediumCount = calendarProjects.filter(p => 
+    const mediumCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'MEDIUM' || p.priority.toUpperCase() === 'MEDIUM')
     ).length;
-    const highCount = calendarProjects.filter(p => 
+    const highCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'HIGH' || p.priority.toUpperCase() === 'HIGH')
     ).length;
-    const urgentCount = calendarProjects.filter(p => 
+    const urgentCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'URGENT' || p.priority.toUpperCase() === 'URGENT')
     ).length;
 
     // Project type stats - check both uppercase and proper case
-    const appointmentCount = calendarProjects.filter(p => 
+    const appointmentCount = activeProjects.filter(p => 
       p.projectType && (p.projectType === 'APPOINTMENT' || p.projectType.toUpperCase() === 'APPOINTMENT')
     ).length;
-    const scheduledCount = calendarProjects.filter(p => 
+    const scheduledCount = activeProjects.filter(p => 
       p.projectType && (p.projectType === 'SCHEDULED' || p.projectType.toUpperCase() === 'SCHEDULED')
     ).length;
 
     return {
       priority: {
-        total: calendarProjects.length,
+        total: activeProjects.length,
+        activeCount: activeProjects.length,
         lowCount,
         mediumCount,
         highCount,
         urgentCount
       },
       projectType: {
-        total: calendarProjects.length,
+        total: activeProjects.length,
+        activeCount: activeProjects.length,
         appointmentCount,
         scheduledCount
       }
@@ -489,7 +496,7 @@ const Admin = () => {
 
   const handleExport = async (type) => {
     try {
-      setMessage(`Exporting ${type.toUpperCase()}...`);
+      setMessage(t("admin.exporting", { type: type.toUpperCase() }));
       const token = await getApiToken();
       
       const stateFilter = activeTab === "active" ? "ACTIVE" : "COMPLETE";
@@ -538,10 +545,10 @@ const Admin = () => {
         });
       }
 
-      setMessage(`${type.toUpperCase()} Export complete!`);
+      setMessage(t("admin.exportComplete", { type: type.toUpperCase() }));
     } catch (e) {
       console.error("Export failed", e);
-      setMessage(`Failed to export ${type.toUpperCase()}`);
+      setMessage(t("admin.exportFailed", { type: type.toUpperCase() }));
     }
   };
 
@@ -622,19 +629,19 @@ const Admin = () => {
         <RoleAssignmentModal
           isOpen={isRoleAssignmentModalOpen}
           onClose={() => setIsRoleAssignmentModalOpen(false)}
-          onSuccess={() => setMessage("Role assigned successfully!")}
+          onSuccess={() => setMessage(t("admin.roleAssigned"))}
         />
 
         <CreatePortfolioModal
           isOpen={isPortfolioModalOpen}
           onClose={() => setIsPortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item created successfully!")}
+          onSuccess={() => setMessage(t("admin.portfolioCreated"))}
         />
 
         <DeletePortfolioModal
           isOpen={isDeletePortfolioModalOpen}
           onClose={() => setIsDeletePortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item deleted successfully!")}
+          onSuccess={() => setMessage(t("admin.portfolioDeleted"))}
         />
 
         <ProjectModal
@@ -696,7 +703,12 @@ const Admin = () => {
                     </p>
                     {project.address && (
                       <p className="text-xs text-black/60 mt-1">
-                        {project.address.city}, {project.address.province}
+                        {[
+                          project.address.city,
+                          project.address.province,
+                          project.address.country,
+                          project.address.postalCode
+                        ].filter(Boolean).join(", ")}
                       </p>
                     )}
                   </div>
@@ -775,7 +787,7 @@ const Admin = () => {
                         onChange={handleFilterChange}
                         className="w-full h-full px-4 py-3 bg-gray-100 border-2 sm:border-r-0 border-black/20 rounded-xl sm:rounded-l-xl sm:rounded-r-none focus:border-black outline-none font-bold text-sm uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                       >
-                        <option value="name">{t('admin.projectName')}</option>
+                        <option value="name">{t('project.projectName')}</option>
                         <option value="clientName">{t('admin.clientName')}</option>
                         <option value="projectIdentifier">{t('admin.projectId')}</option>
                         <option value="assignedEmployeeId">{t('admin.employeeId')}</option>
@@ -788,7 +800,7 @@ const Admin = () => {
                         value={filters.search}
                         onChange={handleFilterChange}
                         onKeyDown={handleKeyDown}
-                        placeholder={`${t('admin.searchBy')} ${filters.searchField === 'name' ? t('admin.projectName').toLowerCase() : filters.searchField === 'clientName' ? t('admin.clientName').toLowerCase() : filters.searchField === 'projectIdentifier' ? t('admin.projectId').toLowerCase() : t('admin.employeeId').toLowerCase()}...`}
+                        placeholder={`${t('admin.searchBy')} ${filters.searchField === 'name' ? t('project.projectName').toLowerCase() : filters.searchField === 'clientName' ? t('admin.clientName').toLowerCase() : filters.searchField === 'projectIdentifier' ? t('admin.projectId').toLowerCase() : t('admin.employeeId').toLowerCase()}...`}
                         className="w-full pl-4 pr-12 py-3 border-2 border-black/20 rounded-xl sm:rounded-r-xl sm:rounded-l-none focus:border-black outline-none bg-white font-medium text-lg"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-black/40">
@@ -802,7 +814,7 @@ const Admin = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* 1. Status */}
                     <div>
-                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.status')}</label>
+                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('project.status')}</label>
                       <select
                         name="status"
                         value={filters.status}
@@ -812,15 +824,15 @@ const Admin = () => {
                         }`}
                       >
                         <option value="">{t('admin.anyStatus')}</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="COMPLETED">Completed</option>
+                        <option value="PENDING">{t('project.pending')}</option>
+                        <option value="IN_PROGRESS">{t('project.inProgress')}</option>
+                        <option value="COMPLETED">{t('project.completed')}</option>
                       </select>
                     </div>
 
                     {/* 2. Priority */}
                     <div>
-                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.priority')}</label>
+                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('project.priority')}</label>
                       <select
                         name="priority"
                         value={filters.priority}
@@ -830,16 +842,16 @@ const Admin = () => {
                         }`}
                       >
                         <option value="">{t('admin.anyPriority')}</option>
-                        <option value="LOW">Low</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="HIGH">High</option>
-                        <option value="URGENT">Urgent</option>
+                        <option value="LOW">{t('project.priorityLow')}</option>
+                        <option value="MEDIUM">{t('project.priorityMedium')}</option>
+                        <option value="HIGH">{t('project.priorityHigh')}</option>
+                        <option value="URGENT">{t('project.priorityUrgent')}</option>
                       </select>
                     </div>
 
                     {/* 3. Type */}
                     <div>
-                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.projectType')}</label>
+                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('project.projectType')}</label>
                       <select
                         name="projectType"
                         value={filters.projectType}
@@ -856,16 +868,16 @@ const Admin = () => {
 
                     {/* 4. Cost Status */}
                     <div>
-                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Cost Status</label>
+                      <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.costStatus')}</label>
                       <select
                         name="costStatus"
                         value={filters.costStatus}
                         onChange={handleFilterChange}
                         className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                       >
-                        <option value="">Any</option>
-                        <option value="HAS_PRICE">Has Price</option>
-                        <option value="NO_PRICE">No Price</option>
+                        <option value="">{t('admin.any')}</option>
+                        <option value="HAS_PRICE">{t('admin.hasPrice')}</option>
+                        <option value="NO_PRICE">{t('admin.noPrice')}</option>
                       </select>
                     </div>
 
@@ -952,7 +964,7 @@ const Admin = () => {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-                <h3 className="text-lg font-bold text-black/80">Sort By</h3>
+                <h3 className="text-lg font-bold text-black/80">{t('admin.sortBy')}</h3>
               </div>
             </div>
 
@@ -962,33 +974,33 @@ const Admin = () => {
               <div className="p-6 pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Field</label>
+                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.sortField')}</label>
                     <select
                       name="sortBy"
                       value={sortBy}
                       onChange={handleSortChange}
                       className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                     >
-                      <option value="projectIdentifier">Project ID</option>
-                      <option value="name">Project Name</option>
-                      <option value="clientName">Client Name</option>
-                      <option value="dueDate">Due Date</option>
-                      <option value="startDate">Start Date</option>
-                      <option value="priority">Priority</option>
-                      <option value="status">Status</option>
+                      <option value="projectIdentifier">{t('admin.projectId')}</option>
+                      <option value="name">{t('project.projectName')}</option>
+                      <option value="clientName">{t('admin.clientName')}</option>
+                      <option value="dueDate">{t('project.dueDate')}</option>
+                      <option value="startDate">{t('project.startDate')}</option>
+                      <option value="priority">{t('project.priority')}</option>
+                      <option value="status">{t('project.status')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Order</label>
+                    <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.sortOrder')}</label>
                     <select
                       name="sortOrder"
                       value={sortOrder}
                       onChange={handleSortChange}
                       className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                     >
-                      <option value="ASC">Ascending</option>
-                      <option value="DESC">Descending</option>
+                      <option value="ASC">{t('admin.sortAsc')}</option>
+                      <option value="DESC">{t('admin.sortDesc')}</option>
                     </select>
                   </div>
                 </div>
@@ -997,7 +1009,7 @@ const Admin = () => {
                   onClick={applySorting}
                   className="w-full mt-4 bg-black text-white px-8 py-2 rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg"
                 >
-                  Sort
+                  {t('admin.sortApply')}
                 </button>
               </div>
             </div>
@@ -1035,23 +1047,29 @@ const Admin = () => {
               <div className="flex justify-center items-center p-4 border-t border-black/10 bg-gray-50 gap-4">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setPage(Math.max(0, page - 1))}
+                    onClick={() => {
+                      setPage(Math.max(0, page - 1));
+                      setTimeout(() => window.scrollTo(0, 100000), 200);
+                    }}
                     disabled={page === 0}
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
                   >
-                    Previous
+                    {t('previous')}
                   </button>
                   <span className="font-medium text-black px-2">
-                    Page {page + 1} / {totalPages}
+                    {t('pageOf', { current: page + 1, total: totalPages })}
                   </span>
                   <button
-                    onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                    onClick={() => {
+                      setPage(Math.min(totalPages - 1, page + 1));
+                      setTimeout(() => window.scrollTo(0, 100000), 200);
+                    }}
                     disabled={page >= totalPages - 1}
                     className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                       }`}
                   >
-                    Next
+                    {t('next')}
                   </button>
                 </div>
               </div>

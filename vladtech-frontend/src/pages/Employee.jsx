@@ -408,7 +408,12 @@ const Employee = () => {
                         </p>
                         {project.address && (
                           <p className="text-xs text-black/60 mt-1">
-                            {project.address.city}, {project.address.province}
+                            {[
+                              project.address.city,
+                              project.address.province,
+                              project.address.country,
+                              project.address.postalCode
+                            ].filter(Boolean).join(", ")}
                           </p>
                         )}
                       </div>
@@ -463,7 +468,7 @@ const Employee = () => {
                             onChange={handleFilterChange}
                             className="w-full h-full px-4 py-3 bg-gray-100 border-2 sm:border-r-0 border-black/20 rounded-xl sm:rounded-l-xl sm:rounded-r-none focus:border-black outline-none font-bold text-sm uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                           >
-                            <option value="name">{t("admin.projectName")}</option>
+                            <option value="name">{t("project.projectName")}</option>
                             <option value="clientName">{t("admin.clientName")}</option>
                             <option value="projectIdentifier">{t("admin.projectId")}</option>
                           </select>
@@ -477,7 +482,7 @@ const Employee = () => {
                             onKeyDown={handleKeyDown}
                             placeholder={`${t("admin.searchBy")} ${
                               filters.searchField === "name"
-                                ? t("admin.projectName").toLowerCase()
+                                ? t("project.projectName").toLowerCase()
                                 : filters.searchField === "clientName"
                                 ? t("admin.clientName").toLowerCase()
                                 : t("admin.projectId").toLowerCase()
@@ -494,7 +499,7 @@ const Employee = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.status")}</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("project.status")}</label>
                           <select
                             name="status"
                             value={filters.status}
@@ -502,14 +507,14 @@ const Employee = () => {
                             className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                           >
                             <option value="">{t("admin.anyStatus")}</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="COMPLETED">Completed</option>
+                            <option value="PENDING">{t('project.pending')}</option>
+                            <option value="IN_PROGRESS">{t('project.inProgress')}</option>
+                            <option value="COMPLETED">{t('project.completed')}</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.priority")}</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("project.priority")}</label>
                           <select
                             name="priority"
                             value={filters.priority}
@@ -517,15 +522,15 @@ const Employee = () => {
                             className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                           >
                             <option value="">{t("admin.anyPriority")}</option>
-                            <option value="LOW">Low</option>
-                            <option value="MEDIUM">Medium</option>
-                            <option value="HIGH">High</option>
-                            <option value="URGENT">Urgent</option>
+                            <option value="LOW">{t('project.priorityLow')}</option>
+                            <option value="MEDIUM">{t('project.priorityMedium')}</option>
+                            <option value="HIGH">{t('project.priorityHigh')}</option>
+                            <option value="URGENT">{t('project.priorityUrgent')}</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.projectType")}</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("project.projectType")}</label>
                           <select
                             name="projectType"
                             value={filters.projectType}
@@ -539,16 +544,16 @@ const Employee = () => {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Cost Status</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t("admin.costStatus")}</label>
                           <select
                             name="costStatus"
                             value={filters.costStatus}
                             onChange={handleFilterChange}
                             className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                           >
-                            <option value="">Any</option>
-                            <option value="HAS_PRICE">Has Price</option>
-                            <option value="NO_PRICE">No Price</option>
+                            <option value="">{t("admin.any")}</option>
+                            <option value="HAS_PRICE">{t("admin.hasPrice")}</option>
+                            <option value="NO_PRICE">{t("admin.noPrice")}</option>
                           </select>
                         </div>
 
@@ -622,7 +627,7 @@ const Employee = () => {
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                      <h3 className="text-lg font-bold text-black/80">Sort By</h3>
+                      <h3 className="text-lg font-bold text-black/80">{t('admin.sortBy')}</h3>
                     </div>
                   </div>
 
@@ -632,33 +637,33 @@ const Employee = () => {
                     <div className="p-6 pt-0">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Field</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.sortField')}</label>
                           <select
                             name="sortBy"
                             value={sortBy}
                             onChange={handleSortChange}
                             className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                           >
-                            <option value="projectIdentifier">Project ID</option>
-                            <option value="name">Project Name</option>
-                            <option value="clientName">Client Name</option>
-                            <option value="dueDate">Due Date</option>
-                            <option value="startDate">Start Date</option>
-                            <option value="priority">Priority</option>
-                            <option value="status">Status</option>
+                            <option value="projectIdentifier">{t('admin.projectId')}</option>
+                            <option value="name">{t('project.projectName')}</option>
+                            <option value="clientName">{t('admin.clientName')}</option>
+                            <option value="dueDate">{t('project.dueDate')}</option>
+                            <option value="startDate">{t('project.startDate')}</option>
+                            <option value="priority">{t('project.priority')}</option>
+                            <option value="status">{t('project.status')}</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">Order</label>
+                          <label className="block text-xs font-bold text-black/60 mb-1 uppercase">{t('admin.sortOrder')}</label>
                           <select
                             name="sortOrder"
                             value={sortOrder}
                             onChange={handleSortChange}
                             className="w-full px-3 py-2 border border-black/20 rounded-lg bg-white font-medium"
                           >
-                            <option value="ASC">Ascending</option>
-                            <option value="DESC">Descending</option>
+                            <option value="ASC">{t('admin.sortAsc')}</option>
+                            <option value="DESC">{t('admin.sortDesc')}</option>
                           </select>
                         </div>
                       </div>
@@ -667,7 +672,7 @@ const Employee = () => {
                         onClick={applySorting}
                         className="w-full mt-4 bg-black text-white px-8 py-2 rounded-lg font-bold hover:bg-black/80 transition-all shadow-lg"
                       >
-                        Sort
+                        {t('admin.sortApply')}
                       </button>
                     </div>
                   </div>
@@ -696,25 +701,31 @@ const Employee = () => {
                   <div className="flex justify-center items-center p-4 border-t border-black/10 bg-gray-50 gap-4 mt-2 rounded-xl">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setPage(Math.max(0, page - 1))}
+                        onClick={() => {
+                          setPage(Math.max(0, page - 1));
+                          setTimeout(() => window.scrollTo(0, 100000), 200);
+                        }}
                         disabled={page === 0}
                         className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${
                           page === 0 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                         }`}
                       >
-                        Previous
+                        {t('previous')}
                       </button>
                       <span className="font-medium text-black px-2">
-                        Page {page + 1} / {totalPages}
+                        {t('pageOf', { current: page + 1, total: totalPages })}
                       </span>
                       <button
-                        onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                        onClick={() => {
+                          setPage(Math.min(totalPages - 1, page + 1));
+                          setTimeout(() => window.scrollTo(0, 100000), 200);
+                        }}
                         disabled={page >= totalPages - 1}
                         className={`px-4 py-2 rounded-lg font-semibold border-2 border-black/10 transition-all ${
                           page >= totalPages - 1 ? "text-gray-300 cursor-not-allowed" : "hover:bg-black hover:text-white text-black bg-white"
                         }`}
                       >
-                        Next
+                        {t('next')}
                       </button>
                     </div>
                   </div>

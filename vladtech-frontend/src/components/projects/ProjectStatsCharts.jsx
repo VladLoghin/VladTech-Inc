@@ -21,9 +21,9 @@ const ProjectStatsCharts = ({ stats }) => {
 
   // Data for active projects (excluding completed)
   const activeData = [
-    { name: t("admin.stats.pending"), value: stats.pendingCount, color: "#f59e0b" },
-    { name: t("admin.stats.inProgress"), value: stats.inProgressCount, color: "#3b82f6" },
-    { name: t("admin.stats.overdue"), value: stats.overdueCount, color: "#ef4444" },
+    { name: t("project.pending"), value: stats.pendingCount, color: "#f59e0b" },
+    { name: t("project.inProgress"), value: stats.inProgressCount, color: "#3b82f6" },
+    { name: t("project.overdue"), value: stats.overdueCount, color: "#ef4444" },
   ];
 
   return (

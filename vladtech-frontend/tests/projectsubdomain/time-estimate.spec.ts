@@ -32,7 +32,9 @@ test('create project with time estimate', async ({ page, loginAs }) => {
     const projectName = `Time Estimate Test ${timestamp}`;
 
     await page.locator('form input[name="name"]').fill(projectName);
-    await page.locator('form input[name="address.city"]').fill('Toronto');
+    await page.locator('form select[name="address.country"]').selectOption('Canada');
+    await page.locator('form select[name="address.province"]').selectOption('Quebec');
+    await page.locator('form input[name="address.city"]').fill('Montreal');
     await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
     // Scroll down in the modal to reach the time estimate fields
@@ -43,6 +45,7 @@ test('create project with time estimate', async ({ page, loginAs }) => {
     await page.waitForTimeout(300);
 
     await page.locator('form select[name="projectType"]').selectOption('SCHEDULED');
+    await page.locator('form input[name="startDate"]').fill('2026-01-15');
     
     // Fill in time estimate: 2 years, 3 months, 15 days, 8 hours
     // Use label-based selection for better reliability

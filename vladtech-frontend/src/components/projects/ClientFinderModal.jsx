@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 //import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 
 const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }) => {
   const { getAccessTokenSilently } = useAuth0();
+  const { t } = useTranslation();
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -17,7 +19,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
 
   const perPage = 25;
 
-  const fetchClients = async (page, query = "") => {
+  const fetchClients = useCallback(async (page, query = "") => {
     setLoading(true);
     setError("");
 
@@ -49,9 +51,9 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAccessTokenSilently, perPage]);
 
-  const fetchSelectedClient = async () => {
+  const fetchSelectedClient = useCallback(async () => {
     if (!selectedClientId) return;
 
     try {
@@ -67,7 +69,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
     } catch (err) {
       console.error("Error fetching selected client:", err);
     }
-  };
+  }, [getAccessTokenSilently, selectedClientId]);
 
    
   useEffect(() => {
@@ -78,14 +80,14 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
       fetchClients(0);
       fetchSelectedClient();
     }
-  }, [isOpen, selectedClientId]);
+  }, [isOpen, fetchClients, fetchSelectedClient]);
 
    
   useEffect(() => {
     if (isOpen && currentPage > 0) {
       fetchClients(currentPage, activeQuery);
     }
-  }, [currentPage]);
+  }, [currentPage, isOpen, activeQuery, fetchClients]);
 
   const totalPages = Math.ceil(totalClients / perPage);
 
@@ -128,9 +130,9 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Select Client</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t('clientFinder.title')}</h2>
             <p className="text-sm text-black/60 mt-1">
-              {totalClients} clients found
+              {t('clientFinder.clientsFound', { count: totalClients })}
             </p>
           </div>
           <button
@@ -149,7 +151,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by email, name, or user ID..."
+                placeholder={t('clientFinder.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-black/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               />
             </div>
@@ -157,7 +159,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
               type="submit"
               className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors font-semibold"
             >
-              Search
+              {t('clientFinder.search')}
             </button>
             {activeQuery && (
               <button
@@ -165,7 +167,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                 onClick={handleClearSearch}
                 className="px-4 py-2 border border-black/20 hover:bg-black/5 rounded-lg transition-colors"
               >
-                Clear
+                {t('clientFinder.clear')}
               </button>
             )}
           </form>
@@ -178,17 +180,17 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-600">{error}</p>
+              <p className="text-red-600">{t('clientFinder.error')}</p>
               <button
                 onClick={() => fetchClients(currentPage, activeQuery)}
                 className="mt-4 text-sm text-yellow-600 hover:text-yellow-700"
               >
-                Try again
+                {t('clientFinder.tryAgain')}
               </button>
             </div>
           ) : displayClients.length === 0 ? (
             <div className="text-center py-12 text-black/60">
-              No clients found
+              {t('clientFinder.noClients')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -207,17 +209,17 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-lg">
-                            {client.name || "No name"}
+                            {client.name || t('clientFinder.noName')}
                           </p>
                           {isSelected && (
                             <span className="text-xs bg-yellow-400 px-2 py-1 rounded font-semibold">
-                              Currently Selected
+                              {t('clientFinder.currentlySelected')}
                             </span>
                           )}
                         </div>
                         <p className="text-sm text-black/60">{client.email}</p>
                         <p className="text-xs text-black/40 mt-1">
-                          ID: {encodeURIComponent(client.user_id)}
+                          {t('project.id')}: {encodeURIComponent(client.user_id)}
                         </p>
                       </div>
                       {client.picture && (
@@ -242,11 +244,11 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            {t('previous')}
           </button>
 
           <div className="text-sm text-black/60">
-            Page {currentPage + 1} of {totalPages || 1}
+            {t('pageOf', { current: currentPage + 1, total: totalPages || 1 })}
           </div>
 
           <button
@@ -254,7 +256,7 @@ const ClientFinderModal = ({ isOpen, onClose, onSelectClient, selectedClientId }
             disabled={currentPage >= totalPages - 1 || loading}
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Next
+            {t('next')}
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
