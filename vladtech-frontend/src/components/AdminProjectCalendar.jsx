@@ -218,15 +218,15 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
       <div className="mt-4 flex flex-wrap gap-4 text-sm px-2 border-t pt-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-          <span>{t("admin.stats.completed") || "Completed"}</span>
+          <span>{t("project.completed") || "Completed"}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span>{t("admin.stats.inProgress") || "In Progress"}</span>
+          <span>{t("project.inProgress") || "In Progress"}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-          <span>{t("admin.stats.pending") || "Pending"}</span>
+          <span>{t("project.pending") || "Pending"}</span>
         </div>
       </div>
     </div>

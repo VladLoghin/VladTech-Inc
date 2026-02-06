@@ -600,7 +600,7 @@ const ProjectModal = ({
                     onClick={handleClearClient}
                     className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
                   >
-                    Clear
+                    {t('project.clear')}
                   </button>
                 )}
               </div>
@@ -640,7 +640,7 @@ const ProjectModal = ({
                     onClick={handleClearEmployee}
                     className="px-4 py-3 border-2 border-black/20 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors"
                   >
-                    Clear
+                    {t('project.clear')}
                   </button>
                 )}
               </div>
@@ -762,8 +762,8 @@ const ProjectModal = ({
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               >
                 <option value="">{t('project.select')}</option>
-                <option value="APPOINTMENT">Appointment</option>
-                <option value="SCHEDULED">Scheduled</option>
+                <option value="APPOINTMENT">{t('admin.appointment')}</option>
+                <option value="SCHEDULED">{t('admin.scheduled')}</option>
               </select>
             </div>
 

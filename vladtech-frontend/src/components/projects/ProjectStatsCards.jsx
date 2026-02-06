@@ -67,24 +67,24 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
         if (viewMode === 'status') {
           items = [
             { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
-            { label: t("admin.stats.pending"), value: stats.pendingCount, filterType: "status", filterValue: "PENDING" },
-            { label: t("admin.stats.inProgress"), value: stats.inProgressCount, filterType: "status", filterValue: "IN_PROGRESS" },
-            { label: t("admin.stats.completed"), value: stats.completedCount, filterType: "status", filterValue: "COMPLETED" },
-            { label: t("admin.stats.overdue"), value: stats.overdueCount, isError: true, filterType: "overdue" },
+            { label: t("project.pending"), value: stats.pendingCount, filterType: "status", filterValue: "PENDING" },
+            { label: t("project.inProgress"), value: stats.inProgressCount, filterType: "status", filterValue: "IN_PROGRESS" },
+            { label: t("project.completed"), value: stats.completedCount, filterType: "status", filterValue: "COMPLETED" },
+            { label: t("project.overdue"), value: stats.overdueCount, isError: true, filterType: "overdue" },
           ];
         } else if (viewMode === 'priority') {
           items = [
             { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
-            { label: t("admin.stats.low"), value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
-            { label: t("admin.stats.medium"), value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
-            { label: t("admin.stats.high"), value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
-            { label: t("admin.stats.urgent"), value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
+            { label: t("project.priorityLow"), value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
+            { label: t("project.priorityMedium"), value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
+            { label: t("project.priorityHigh"), value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
+            { label: t("project.priorityUrgent"), value: stats.urgentCount, filterType: "priority", filterValue: "URGENT", isError: true },
           ];
         } else if (viewMode === 'projectType') {
           items = [
             { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
-            { label: t("admin.stats.appointment"), value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
-            { label: t("admin.stats.scheduled"), value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
+            { label: t("project.appointment"), value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
+            { label: t("project.scheduled"), value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
           ];
         }
 
@@ -96,19 +96,19 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           totalCount = stats.activeCount || stats.total || 0;
           activeData = [
             { 
-              name: t("admin.stats.pending"), 
+              name: t("project.pending"), 
               value: stats.pendingCount || 0, 
               color: "#f59e0b",
               percentage: totalCount > 0 ? Math.round(((stats.pendingCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.inProgress"), 
+              name: t("project.inProgress"), 
               value: stats.inProgressCount || 0, 
               color: "#3b82f6",
               percentage: totalCount > 0 ? Math.round(((stats.inProgressCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.completed"), 
+              name: t("project.completed"), 
               value: stats.completedCount || 0, 
               color: "#10b981",
               percentage: totalCount > 0 ? Math.round(((stats.completedCount || 0) / totalCount) * 100) : 0
@@ -118,25 +118,25 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           totalCount = stats.activeCount || stats.total || 0;
           activeData = [
             { 
-              name: t("admin.stats.low"), 
+              name: t("project.priorityLow"), 
               value: stats.lowCount || 0, 
               color: "#10b981",
               percentage: totalCount > 0 ? Math.round(((stats.lowCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.medium"), 
+              name: t("project.priorityMedium"), 
               value: stats.mediumCount || 0, 
               color: "#f59e0b",
               percentage: totalCount > 0 ? Math.round(((stats.mediumCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.high"), 
+              name: t("project.priorityHigh"), 
               value: stats.highCount || 0, 
               color: "#ef4444",
               percentage: totalCount > 0 ? Math.round(((stats.highCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.urgent"), 
+              name: t("project.priorityUrgent"), 
               value: stats.urgentCount || 0, 
               color: "#991b1b",
               percentage: totalCount > 0 ? Math.round(((stats.urgentCount || 0) / totalCount) * 100) : 0
@@ -146,13 +146,13 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           totalCount = stats.activeCount || stats.total || 0;
           activeData = [
             { 
-              name: t("admin.stats.appointment"), 
+              name: t("project.appointment"), 
               value: stats.appointmentCount || 0, 
               color: "#8b5cf6",
               percentage: totalCount > 0 ? Math.round(((stats.appointmentCount || 0) / totalCount) * 100) : 0
             },
             { 
-              name: t("admin.stats.scheduled"), 
+              name: t("project.scheduled"), 
               value: stats.scheduledCount || 0, 
               color: "#3b82f6",
               percentage: totalCount > 0 ? Math.round(((stats.scheduledCount || 0) / totalCount) * 100) : 0
@@ -187,7 +187,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  {t("admin.status")}
+                  {t("project.status")}
                 </button>
                 <button
                   onClick={() => onViewModeChange('priority')}
@@ -197,7 +197,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  {t("admin.priority")}
+                  {t("project.priority")}
                 </button>
                 <button
                   onClick={() => onViewModeChange('projectType')}
@@ -207,7 +207,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  {t("admin.projectType")}
+                  {t("project.projectType")}
                 </button>
               </div>
             </div>

@@ -102,7 +102,7 @@ export const generateCsv = (projects, filename = 'projects.csv', options = {}) =
     const statusKey = `project.${mappedStatus}`;
     
     const priorityKey = `project.priority${p.priority?.charAt(0).toUpperCase() + p.priority?.slice(1).toLowerCase() || 'none'}`;
-    const typeKey = `admin.stats.${p.projectType?.toLowerCase() || 'none'}`;
+    const typeKey = `project.${p.projectType?.toLowerCase() || 'none'}`;
 
     const address = formatAddress(p.address);
     
@@ -213,7 +213,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
       [t('project.client'), p.clientName ? `${p.clientName} (${p.clientEmail || '-'})` : '-'],
       [t('project.status'), t(`project.${mappedStatus}`)],
       [t('project.priority'), t(`project.priority${p.priority?.charAt(0).toUpperCase() + p.priority?.slice(1).toLowerCase() || 'none'}`)],
-      [t('project.projectType'), t(`admin.stats.${p.projectType?.toLowerCase() || 'none'}`)]
+      [t('project.projectType'), t(`project.${p.projectType?.toLowerCase() || 'none'}`)]
     ];
 
     autoTable(doc, {
@@ -317,7 +317,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
       formatEmployees(proj.assignedEmployeeEmails, '-'),
       t(`project.${mappedStatus}`),
       t(`project.priority${proj.priority?.charAt(0).toUpperCase() + proj.priority?.slice(1).toLowerCase() || 'none'}`),
-      t(`admin.stats.${proj.projectType?.toLowerCase() || 'none'}`),
+      t(`project.${proj.projectType?.toLowerCase() || 'none'}`),
       formatMoney(proj.estimatedCost, proj.estimatedCostCurrency, locale),
       location,
     ];
