@@ -1,16 +1,17 @@
 // Employee.jsx
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar.jsx";
 import { api } from "../api/http";
+import { generateCsv, generatePdf } from "../utils/exportUtils";
 import ProjectList from "../components/projects/ProjectList.jsx";
 import EmployeeProjectCalendar from "../components/EmployeeProjectCalendar";
 import i18n from "../i18n";
 import EmployeeProjectStatsCards from "../components/projects/EmployeeProjectStatsCards.jsx";
 
 const Employee = () => {
-  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
   const { t } = useTranslation();
 
   const [message] = useState("");
@@ -44,7 +45,7 @@ const Employee = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
-  const loadMyProjects = async () => {
+  const loadMyProjects = useCallback(async () => {
     setProjectsLoading(true);
     setProjectsError("");
 
@@ -68,13 +69,13 @@ const Employee = () => {
     } finally {
       setProjectsLoading(false);
     }
-  };
+  }, [getAccessTokenSilently]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       loadMyProjects();
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, loadMyProjects]);
 
   const projectsForSelectedDate = useMemo(() => {
     if (!selectedDate) return [];
@@ -309,13 +310,60 @@ const Employee = () => {
     }
   };
 
+  const handleExport = (type) => {
+    try {
+      const exportOptions = {
+        exporterName: user?.name || user?.email || "Employee",
+        title: t("project.personalReport"),
+        locale: i18n.language === "fr" ? "fr-CA" : "en-CA",
+        sortBy: activeSortBy,
+        sortOrder: activeSortOrder
+      };
+
+      const langSuffix = i18n.language === "fr" ? "-fr" : "-en";
+
+      // Use filteredProjects directly as it reflects current client-side view
+      if (type === "csv") {
+        generateCsv(filteredProjects, `my_projects_${new Date().toISOString().split('T')[0]}${langSuffix}.csv`, {
+          locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
+        });
+      } else {
+        generatePdf(filteredProjects, `my_projects_${new Date().toISOString().split('T')[0]}${langSuffix}.pdf`, exportOptions);
+      }
+    } catch (e) {
+      console.error("Export failed", e);
+    }
+  };
+
   return (
     <>
       <Navbar />
 
       <div className="p-8 bg-white min-h-screen pt-32">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">{t("employee.title")}</h1>
+        <div className="mb-8 border-b-2 border-black/5 pb-6">
+            <h1 className="text-6xl font-light tracking-tight mb-8">{t("employee.title")}</h1>
+            
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+            <div className="flex items-baseline gap-2 bg-gray-100 p-1.5 rounded-xl border border-black/10 w-full lg:w-auto">
+               <span className="text-xs font-bold text-black/40 px-2 uppercase tracking-wider whitespace-nowrap">{t("project.allProjects")}</span>
+               <button
+                  onClick={() => handleExport("csv")}
+                  className="bg-white border-2 border-green-600 text-green-700 hover:bg-green-50 px-4 py-2 rounded-lg transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2 flex-1"
+                  title="Export to CSV"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  CSV
+                </button>
+                <button
+                  onClick={() => handleExport("pdf")}
+                  className="bg-white border-2 border-red-600 text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2 flex-1"
+                  title="Export to PDF"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                  PDF
+                </button>
+            </div>
+          </div>
         </div>
 
         {message && (
@@ -369,13 +417,15 @@ const Employee = () => {
                 </div>
               </div>
 
-              <div className="mt-10">
-                <h3 className="text-2xl font-bold mb-4 tracking-tight">{t("employee.myProjects")}</h3>
+              <div className="border-b-2 border-black/5 mt-16 mb-12" />
+
+              <div className="mt-12 text-left">
+                <h3 className="text-5xl font-light tracking-tight mb-8">{t("employee.myProjects")}</h3>
 
                 {/* Search & Filter */}
                 <div className="bg-gray-50 rounded-xl border border-black/10 text-left overflow-hidden mb-6">
                   <div
-                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="flex items-baseline justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => setFiltersOpen(!filtersOpen)}
                   >
                     <div className="flex items-center gap-3">
@@ -527,7 +577,7 @@ const Employee = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mt-4 gap-4">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                           <span className="font-medium text-black/70 text-sm">
                             {totalElements > 0
@@ -554,6 +604,7 @@ const Employee = () => {
                         >
                           {t("admin.searchProjects")}
                         </button>
+
                       </div>
                     </div>
                   </div>
@@ -561,7 +612,7 @@ const Employee = () => {
 
                 {/* Sorting Section */}
                 <div className="bg-gray-50 rounded-xl border border-black/10 text-left overflow-hidden mt-4">
-                  <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setSortOpen(!sortOpen)}>
+                  <div className="flex items-baseline justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setSortOpen(!sortOpen)}>
                     <div className="flex items-center gap-3">
                       <svg
                         className={`w-5 h-5 transition-transform duration-300 ${sortOpen ? "rotate-90" : ""}`}

@@ -2281,4 +2281,127 @@ class ProjectServiceImplTest {
         assertEquals("Estimated time must be greater than 0", exception.getMessage());
         verify(projectRepository, never()).save(any());
     }
+
+    // ========== Export & List Tests ==========
+
+    @Test
+    void getCompletedProjectsByClientId_ShouldReturnCompletedProjectsForClient() {
+        // Arrange
+        String clientId = "CLIENT-123";
+        
+        Project p1 = new Project();
+        p1.setClientId(clientId);
+        p1.setState(ProjectState.COMPLETE);
+        p1.setName("P1");
+        
+        Project p2 = new Project(); // Different client
+        p2.setClientId("OTHER");
+        p2.setState(ProjectState.COMPLETE);
+        p2.setName("P2");
+        
+        Project p3 = new Project(); // Same client, but ACTIVE
+        p3.setClientId(clientId);
+        p3.setState(ProjectState.ACTIVE);
+        p3.setName("P3");
+        
+        when(projectRepository.findAll()).thenReturn(List.of(p1, p2, p3));
+        
+        ProjectResponseModel m1 = new ProjectResponseModel();
+        m1.setName("P1");
+        
+        when(projectResponseMapper.entityListToResponseModelList(any()))
+            .thenAnswer(inv -> {
+                List<Project> list = inv.getArgument(0);
+                if (list.size() == 1 && list.get(0) == p1) {
+                    return List.of(m1);
+                }
+                return Collections.emptyList();
+            });
+
+        // Act
+        List<ProjectResponseModel> result = projectService.getCompletedProjectsByClientId(clientId);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("P1", result.get(0).getName());
+        verify(projectRepository).findAll();
+    }
+
+    @Test
+    void getProjectsList_ShouldReturnFilteredProjects_WhenParametersProvided() {
+        // Arrange
+        String name = "Test Project";
+        List<Project> projects = Collections.singletonList(project);
+        
+        when(projectRepository.searchProjectsList(
+                eq(name), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any()))
+                .thenReturn(projects);
+
+        when(projectResponseMapper.entityListToResponseModelList(projects)).thenReturn(Collections.singletonList(responseModel));
+
+        // Act
+        List<ProjectResponseModel> result = projectService.getProjectsList(
+                name, null, null, null, null, null,
+                null, null, null, null, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("PROJ-1", result.get(0).getProjectIdentifier());
+
+        verify(projectRepository, times(1)).searchProjectsList(
+                eq(name), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void getProjectsList_ShouldTrimAndProcessParameters() {
+        // Arrange
+        String name = "  Test Name  ";
+        String projectIdentifier = "  PROJ-1  ";
+        String clientName = "  Client  ";
+        String costStatus = "  Status  ";
+        String assignedEmployeeId = "  auth0|emp-1  ";
+        String projectType = "  scheduled  ";
+
+        when(projectRepository.searchProjectsList(
+                eq("Test Name"), // Expect trimmed
+                eq("PROJ-1"),    // Expect trimmed
+                eq("Client"),    // Expect trimmed
+                any(), any(), any(), any(), any(),
+                eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED), // Expect uppercased & trimmed
+                eq("Status"),    // Expect trimmed
+                eq("auth0|emp-1"))) // Expect trimmed
+                .thenReturn(Collections.emptyList());
+
+        when(projectResponseMapper.entityListToResponseModelList(any())).thenReturn(Collections.emptyList());
+
+        // Act
+        projectService.getProjectsList(
+                name, projectIdentifier, clientName,
+                null, null, null, null, null,
+                projectType, costStatus, assignedEmployeeId);
+
+        // Assert
+        verify(projectRepository, times(1)).searchProjectsList(
+                eq("Test Name"),
+                eq("PROJ-1"),
+                eq("Client"),
+                any(), any(), any(), any(), any(),
+                eq(org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum.SCHEDULED),
+                eq("Status"),
+                eq("auth0|emp-1"));
+    
+    }
+    
+    @Test
+    void assignClient_ShouldReturnNull() {
+        // Act
+        ProjectResponseModel result = projectService.assignClient("PROJ-1", "CLIENT-1");
+
+        // Assert
+        assertNull(result);
+    }
 }
+

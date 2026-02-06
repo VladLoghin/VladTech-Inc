@@ -678,4 +678,45 @@ class ProjectControllerTest {
                 verify(projectService, times(2)).getProjectByIdentifier(projectIdentifier);
                 verify(userProjectPinService, times(2)).pinProject(anyString(), eq("mongo-id-123"));
         }
+
+    @Test
+    void getCompletedProjectsByClient_ShouldReturnOkWithProjectList() throws Exception {
+        // Arrange
+        String clientId = "auth0|client-123";
+        List<ProjectResponseModel> projects = Collections.singletonList(responseModel);
+        when(projectService.getCompletedProjectsByClientId(clientId)).thenReturn(projects);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/projects/client/completed")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Client"))
+                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", clientId))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"));
+
+        verify(projectService, times(1)).getCompletedProjectsByClientId(clientId);
+    }
+
+    @Test
+    void getProjectsList_ShouldReturnOkWithProjectList() throws Exception {
+        // Arrange
+        List<ProjectResponseModel> projects = Collections.singletonList(responseModel);
+
+        when(projectService.getProjectsList(
+                any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any()))
+                .thenReturn(projects);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/projects/list")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))) // Test with Admin authority
+                        .param("name", "Test"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].projectIdentifier").value("PROJ-1"));
+
+        verify(projectService, times(1)).getProjectsList(
+                eq("Test"), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any());
+    }
 }

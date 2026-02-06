@@ -707,4 +707,65 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
         return projectResponseMapper.entityListToResponseModelList(completedProjects);
     }
+
+    @Override
+    public List<ProjectResponseModel> getProjectsList(
+            String name,
+            String projectIdentifier,
+            String clientName,
+            ProjectStatus status,
+            ProjectState state,
+            org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+            java.time.LocalDate startDate,
+            java.time.LocalDate dueDate,
+            String projectType,
+            String costStatus,
+            String assignedEmployeeId) {
+
+        List<Project> projects = fetchProjectsForExport(name, projectIdentifier, clientName, status, state, priority, startDate, dueDate, projectType, costStatus, assignedEmployeeId);
+        return projectResponseMapper.entityListToResponseModelList(projects);
+    }
+
+    private List<Project> fetchProjectsForExport(
+            String name,
+            String projectIdentifier,
+            String clientName,
+            ProjectStatus status,
+            ProjectState state,
+            org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPriority priority,
+            java.time.LocalDate startDate,
+            java.time.LocalDate dueDate,
+            String projectType,
+            String costStatus,
+            String assignedEmployeeId) {
+        
+        String safeName = (name == null) ? "" : name.trim();
+        String safeId = (projectIdentifier == null) ? "" : projectIdentifier.trim();
+        String safeClient = (clientName == null) ? "" : clientName.trim();
+        String safeCostStatus = (costStatus == null) ? "" : costStatus.trim();
+        String safeEmployeeId = (assignedEmployeeId == null) ? "" : assignedEmployeeId.trim();
+
+        org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum safeType = null;
+        if (projectType != null && !projectType.trim().isEmpty()) {
+            try {
+                safeType = org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectType.ProjectTypeEnum
+                        .valueOf(projectType.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                safeType = null;
+            }
+        }
+        
+        return projectRepository.searchProjectsList(
+                safeName,
+                safeId,
+                safeClient,
+                status,
+                state,
+                priority,
+                startDate,
+                dueDate,
+                safeType,
+                safeCostStatus,
+                safeEmployeeId);
+    }
 }

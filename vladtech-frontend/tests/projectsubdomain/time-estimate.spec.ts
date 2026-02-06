@@ -101,5 +101,5 @@ test('create project with time estimate', async ({ page, loginAs }) => {
 
     // Verify the total is still displayed
     await expect(page.getByText(/Total:/)).toBeVisible();
-    await expect(page.getByText(/2y 3mo/)).toBeVisible();
+    await expect(page.getByText(/2y 3mo 2w 1d 8h/)).toBeVisible();
 });

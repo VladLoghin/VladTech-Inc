@@ -180,6 +180,29 @@ public class ProjectController {
     }
 
     @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
+    @GetMapping("/list")
+    public ResponseEntity<List<ProjectResponseModel>> getProjectsList(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String projectIdentifier,
+            @RequestParam(required = false) String clientName,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) ProjectState state,
+            @RequestParam(required = false) ProjectPriority priority,
+            @RequestParam(required = false) java.time.LocalDate startDate,
+            @RequestParam(required = false) java.time.LocalDate dueDate,
+            @RequestParam(required = false) String projectType,
+            @RequestParam(required = false) String costStatus,
+            @RequestParam(required = false) String assignedEmployeeId) {
+
+        List<ProjectResponseModel> projects = projectService.getProjectsList(
+                name, projectIdentifier, clientName,
+                status, state, priority,
+                startDate, dueDate,
+                projectType, costStatus, assignedEmployeeId);
+
+        return ResponseEntity.ok(projects);
+    }
+    @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
     @PostMapping("/{projectIdentifier}/pin")
     public ResponseEntity<Void> pinProject(
             @PathVariable String projectIdentifier,
