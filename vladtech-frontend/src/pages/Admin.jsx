@@ -162,7 +162,7 @@ const Admin = () => {
       setTotalElements(response.data.totalElements);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setMessage("Failed to fetch projects.");
+      setMessage(t("admin.failedFetchProjects"));
     } finally {
       setSearchLoading(false);
     }
@@ -213,11 +213,11 @@ const Admin = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(`Project "${project.name}" has been marked as complete.`);
+      setMessage(t("admin.projectCompleted", { name: project.name }));
       await refreshAllProjectData();
     } catch (error) {
       console.error("Error completing project:", error);
-      setMessage("Failed to complete project.");
+      setMessage(t("admin.failedComplete"));
     }
   };
 
@@ -230,11 +230,11 @@ const Admin = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(`Project "${project.name}" has been reactivated.`);
+      setMessage(t("admin.projectReactivated", { name: project.name }));
       await refreshAllProjectData();
     } catch (error) {
       console.error("Error reactivating project:", error);
-      setMessage("Failed to reactivate project.");
+      setMessage(t("admin.failedReactivate"));
     }
   };
 
@@ -349,40 +349,47 @@ const Admin = () => {
 
   // Calculate priority and project type stats from calendarProjects
   const computedStats = useMemo(() => {
-    if (!calendarProjects.length) return null;
+    // Only count active projects in stats
+    const activeProjects = calendarProjects.filter(p => 
+      !(p.state && p.state.toUpperCase() === 'COMPLETE')
+    );
+
+    if (!activeProjects.length) return null;
 
     // Priority stats - check both uppercase and proper case
-    const lowCount = calendarProjects.filter(p => 
+    const lowCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'LOW' || p.priority.toUpperCase() === 'LOW')
     ).length;
-    const mediumCount = calendarProjects.filter(p => 
+    const mediumCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'MEDIUM' || p.priority.toUpperCase() === 'MEDIUM')
     ).length;
-    const highCount = calendarProjects.filter(p => 
+    const highCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'HIGH' || p.priority.toUpperCase() === 'HIGH')
     ).length;
-    const urgentCount = calendarProjects.filter(p => 
+    const urgentCount = activeProjects.filter(p => 
       p.priority && (p.priority === 'URGENT' || p.priority.toUpperCase() === 'URGENT')
     ).length;
 
     // Project type stats - check both uppercase and proper case
-    const appointmentCount = calendarProjects.filter(p => 
+    const appointmentCount = activeProjects.filter(p => 
       p.projectType && (p.projectType === 'APPOINTMENT' || p.projectType.toUpperCase() === 'APPOINTMENT')
     ).length;
-    const scheduledCount = calendarProjects.filter(p => 
+    const scheduledCount = activeProjects.filter(p => 
       p.projectType && (p.projectType === 'SCHEDULED' || p.projectType.toUpperCase() === 'SCHEDULED')
     ).length;
 
     return {
       priority: {
-        total: calendarProjects.length,
+        total: activeProjects.length,
+        activeCount: activeProjects.length,
         lowCount,
         mediumCount,
         highCount,
         urgentCount
       },
       projectType: {
-        total: calendarProjects.length,
+        total: activeProjects.length,
+        activeCount: activeProjects.length,
         appointmentCount,
         scheduledCount
       }
@@ -489,7 +496,7 @@ const Admin = () => {
 
   const handleExport = async (type) => {
     try {
-      setMessage(`Exporting ${type.toUpperCase()}...`);
+      setMessage(t("admin.exporting", { type: type.toUpperCase() }));
       const token = await getApiToken();
       
       const stateFilter = activeTab === "active" ? "ACTIVE" : "COMPLETE";
@@ -538,10 +545,10 @@ const Admin = () => {
         });
       }
 
-      setMessage(`${type.toUpperCase()} Export complete!`);
+      setMessage(t("admin.exportComplete", { type: type.toUpperCase() }));
     } catch (e) {
       console.error("Export failed", e);
-      setMessage(`Failed to export ${type.toUpperCase()}`);
+      setMessage(t("admin.exportFailed", { type: type.toUpperCase() }));
     }
   };
 
@@ -622,19 +629,19 @@ const Admin = () => {
         <RoleAssignmentModal
           isOpen={isRoleAssignmentModalOpen}
           onClose={() => setIsRoleAssignmentModalOpen(false)}
-          onSuccess={() => setMessage("Role assigned successfully!")}
+          onSuccess={() => setMessage(t("admin.roleAssigned"))}
         />
 
         <CreatePortfolioModal
           isOpen={isPortfolioModalOpen}
           onClose={() => setIsPortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item created successfully!")}
+          onSuccess={() => setMessage(t("admin.portfolioCreated"))}
         />
 
         <DeletePortfolioModal
           isOpen={isDeletePortfolioModalOpen}
           onClose={() => setIsDeletePortfolioModalOpen(false)}
-          onSuccess={() => setMessage("Portfolio item deleted successfully!")}
+          onSuccess={() => setMessage(t("admin.portfolioDeleted"))}
         />
 
         <ProjectModal

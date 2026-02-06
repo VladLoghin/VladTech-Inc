@@ -74,7 +74,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           ];
         } else if (viewMode === 'priority') {
           items = [
-            { label: t("admin.stats.total"), value: stats.total, filterType: "total" },
+            { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
             { label: t("admin.stats.low"), value: stats.lowCount, filterType: "priority", filterValue: "LOW" },
             { label: t("admin.stats.medium"), value: stats.mediumCount, filterType: "priority", filterValue: "MEDIUM" },
             { label: t("admin.stats.high"), value: stats.highCount, filterType: "priority", filterValue: "HIGH" },
@@ -82,7 +82,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           ];
         } else if (viewMode === 'projectType') {
           items = [
-            { label: t("admin.stats.total"), value: stats.total, filterType: "total" },
+            { label: t("admin.stats.total"), value: stats.activeCount || stats.total, filterType: "total" },
             { label: t("admin.stats.appointment"), value: stats.appointmentCount, filterType: "projectType", filterValue: "APPOINTMENT" },
             { label: t("admin.stats.scheduled"), value: stats.scheduledCount, filterType: "projectType", filterValue: "SCHEDULED" },
           ];
@@ -115,7 +115,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
             },
           ];
         } else if (viewMode === 'priority') {
-          totalCount = stats.total || 0;
+          totalCount = stats.activeCount || stats.total || 0;
           activeData = [
             { 
               name: t("admin.stats.low"), 
@@ -143,7 +143,7 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
             },
           ];
         } else if (viewMode === 'projectType') {
-          totalCount = stats.total || 0;
+          totalCount = stats.activeCount || stats.total || 0;
           activeData = [
             { 
               name: t("admin.stats.appointment"), 
