@@ -22,8 +22,12 @@ const formatAddress = (addr) => {
   if (!addr) return '-';
   const parts = [];
   if (addr.streetAddress) parts.push(addr.streetAddress);
-  const cityProv = [addr.city, addr.province].filter(Boolean).join(' ');
-  if (cityProv) parts.push(cityProv);
+  
+  const cityProv = [addr.city, addr.province].filter(Boolean).join(', ');
+  const cityProvPost = [cityProv, addr.postalCode].filter(Boolean).join(' ');
+  
+  if (cityProvPost) parts.push(cityProvPost);
+  if (addr.country) parts.push(addr.country);
   return parts.length > 0 ? parts.join(', ') : '-';
 };
 
@@ -78,11 +82,13 @@ export const generateCsv = (projects, filename = 'projects.csv', options = {}) =
     t('project.id'), 
     t('project.projectName'), 
     t('project.client'), 
+    'Client Email',
     t('project.employee'), 
     t('project.status'), 
     t('project.priority'), 
     t('project.projectType'), 
     t('project.estimatedCost'),
+    'Estimated Time',
     t('project.startDate'),
     t('project.dueDate'),
     t('project.addressLabel')
@@ -104,11 +110,13 @@ export const generateCsv = (projects, filename = 'projects.csv', options = {}) =
       p.projectIdentifier || '',
       p.name || '',
       p.clientName || '-',
+      p.clientEmail || '-',
       formatEmployees(p.assignedEmployeeEmails, '-'),
       t(statusKey).toUpperCase(),
       t(priorityKey).toUpperCase(),
       t(typeKey),
       p.estimatedCost ? `${p.estimatedCost} ${p.estimatedCostCurrency || 'CAD'}` : '-',
+      formatEstimatedTime(p.estimatedTime),
       p.startDate || '-',
       p.dueDate || '-',
       address
@@ -202,7 +210,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     const mappedStatus = p.status === 'IN_PROGRESS' ? 'inProgress' : (p.status?.toLowerCase() || 'none');
     
     const overviewData = [
-      [t('project.client'), p.clientName || '-'],
+      [t('project.client'), p.clientName ? `${p.clientName} (${p.clientEmail || '-'})` : '-'],
       [t('project.status'), t(`project.${mappedStatus}`)],
       [t('project.priority'), t(`project.priority${p.priority?.charAt(0).toUpperCase() + p.priority?.slice(1).toLowerCase() || 'none'}`)],
       [t('project.projectType'), t(`admin.stats.${p.projectType?.toLowerCase() || 'none'}`)]
@@ -331,15 +339,15 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     },
     styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' },
     columnStyles: {
-      0: { cellWidth: 16 },                   // ID: Normal weight
-      1: { cellWidth: 35 },                   // Project Name
-      2: { cellWidth: 24 },                   // Client
+      0: { cellWidth: 15 },                   // ID: Normal weight
+      1: { cellWidth: 33 },                   // Project Name
+      2: { cellWidth: 23 },                   // Client
       3: { cellWidth: 24 },                   // Employee
       4: { halign: 'center', cellWidth: 16 }, // Status
       5: { halign: 'center', cellWidth: 16 }, // Priority
       6: { halign: 'center', cellWidth: 17 }, // Type
-      7: { halign: 'right', cellWidth: 17 },  // Cost
-      8: { cellWidth: 20 },                   // Location
+      7: { halign: 'right', cellWidth: 12 },  // Cost
+      8: { cellWidth: 28 },                   // Location
     },
     didParseCell: function(data) {
       if (data.section === 'body') {

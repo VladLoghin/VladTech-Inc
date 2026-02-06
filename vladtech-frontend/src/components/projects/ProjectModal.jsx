@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import ClientFinderModal from "./ClientFinderModal.jsx";
 import EmployeeFinderModal from "./EmployeeFinderModal.jsx";
 import { api } from "../../api/http";
+import { countries, provinces } from "../../utils/locationData";
 
 // Time conversion constants
 const SECONDS_PER_MINUTE = 60;
@@ -104,7 +105,11 @@ const ProjectModal = ({
 
   // Refs for native browser validation
   const nameRef = useRef(null);
+  const streetAddressRef = useRef(null);
   const cityRef = useRef(null);
+  const countryRef = useRef(null);
+  const provinceRef = useRef(null);
+  const postalCodeRef = useRef(null);
   const dueDateRef = useRef(null);
   const projectTypeRef = useRef(null);
   const startDateRef = useRef(null);
@@ -143,6 +148,7 @@ const ProjectModal = ({
           streetAddress: initialData.address?.streetAddress || "",
           city: initialData.address?.city || "",
           province: initialData.address?.province || "",
+          country: initialData.address?.country || "",
           postalCode: initialData.address?.postalCode || "",
         },
         estimatedCost: initialData.estimatedCost || "",
@@ -190,16 +196,20 @@ const ProjectModal = ({
   const validateForm = () => {
     // Clear all custom validity
     nameRef.current?.setCustomValidity("");
+    streetAddressRef.current?.setCustomValidity("");
+    cityRef.current?.setCustomValidity("");
+    countryRef.current?.setCustomValidity("");
+    provinceRef.current?.setCustomValidity("");
+    postalCodeRef.current?.setCustomValidity("");
     dueDateRef.current?.setCustomValidity("");
     projectTypeRef.current?.setCustomValidity("");
     startDateRef.current?.setCustomValidity("");
-    cityRef.current?.setCustomValidity("");
     
     let isValid = true;
     let firstInvalidRef = null;
     
     // Validate name is not empty
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       nameRef.current?.setCustomValidity("Project name is required");
       if (!firstInvalidRef) firstInvalidRef = nameRef;
       isValid = false;
@@ -218,12 +228,73 @@ const ProjectModal = ({
       if (!firstInvalidRef) firstInvalidRef = projectTypeRef;
       isValid = false;
     }
-    
-    // Validate estimated cost is non-negative (handled by min="0" on input)
-    if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
-      // estimatedCost uses native min validation, but we can still set error state
-      setErrors({ estimatedCost: t("project.costPositiveError") });
-      isValid = false;
+
+    // Address validation hierarchy:
+    // Country -> Province -> City -> Street Address
+    const { streetAddress, city, country, province } = formData.address;
+
+    const hasStreet = (streetAddress || "").length > 0;
+    const hasCity = (city || "").length > 0;
+    const hasProvince = (province || "").length > 0;
+    const hasCountry = (country || "").length > 0;
+
+    // Street Address requires City, Province, Country
+    if (hasStreet) {
+      if (!hasCity) {
+        cityRef.current?.setCustomValidity(`${t('project.city')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = cityRef;
+        isValid = false;
+      }
+      if (!hasProvince) {
+        provinceRef.current?.setCustomValidity(`${t('project.province')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = provinceRef;
+        isValid = false;
+      }
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t('project.country')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // City requires Province, Country
+    if (hasCity && !hasStreet) { // only trigger if street didn't already
+      if (!hasProvince) {
+        provinceRef.current?.setCustomValidity(`${t('project.province')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = provinceRef;
+        isValid = false;
+      }
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t('project.country')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // Province requires Country
+    if (hasProvince && !hasCity && !hasStreet) { // only trigger if city/street didn't already
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t('project.country')} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // Postal code length verification
+    if (formData.address.postalCode?.trim() && !postalCodeRef.current?.validationMessage) {
+      const pc = formData.address.postalCode.replace(/[\s-]/g, "");
+      const isCanada = formData.address.country === "Canada";
+      const isUS = formData.address.country === "United States";
+      
+      let pcValid = true;
+      if (isCanada && pc.length !== 6) pcValid = false;
+      if (isUS && pc.length !== 5 && pc.length !== 9) pcValid = false;
+      
+      if (!pcValid) {
+        postalCodeRef.current?.setCustomValidity(t("project.invalidPostalCode"));
+        if (!firstInvalidRef) firstInvalidRef = postalCodeRef;
+        isValid = false;
+      }
     }
 
     // Validate start date <= due date
@@ -250,19 +321,6 @@ const ProjectModal = ({
         if (!firstInvalidRef) firstInvalidRef = dueDateRef;
         isValid = false;
       }
-    }
-
-    // Validate city if address is provided
-    const hasAddressData = 
-      (formData.address.streetAddress && formData.address.streetAddress.trim()) ||
-      (formData.address.province && formData.address.province.trim()) ||
-      (formData.address.country && formData.address.country.trim()) ||
-      (formData.address.postalCode && formData.address.postalCode.trim());
-    
-    if (hasAddressData && !formData.address.city.trim()) {
-      cityRef.current?.setCustomValidity("City is required when address information is provided");
-      if (!firstInvalidRef) firstInvalidRef = cityRef;
-      isValid = false;
     }
 
     // Report validity on the first invalid field to show browser tooltip
@@ -409,10 +467,19 @@ const ProjectModal = ({
       });
     } else if (name.includes(".")) {
       const [parent, child] = name.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: { ...prev[parent], [child]: value },
-      }));
+      setFormData((prev) => {
+        const updatedParent = { ...prev[parent], [child]: value };
+        
+        // Reset province if country changes
+        if (parent === "address" && child === "country") {
+          updatedParent.province = "";
+        }
+        
+        return {
+          ...prev,
+          [parent]: updatedParent,
+        };
+      });
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -586,6 +653,7 @@ const ProjectModal = ({
                 {t('project.streetAddress')}
               </label>
               <input
+                ref={streetAddressRef}
                 type="text"
                 name="address.streetAddress"
                 value={formData.address.streetAddress}
@@ -604,6 +672,54 @@ const ProjectModal = ({
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+              <div>
+                <label className="block text-sm font-semibold mb-2">{t('project.country')}</label>
+                <select
+                  ref={countryRef}
+                  name="address.country"
+                  value={formData.address.country}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg bg-white"
+                >
+                  <option value="">{t('project.select')}</option>
+                  {countries.map(c => (
+                    <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">{t('project.province')}</label>
+                <select
+                  ref={provinceRef}
+                  name="address.province"
+                  value={formData.address.province}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg bg-white"
+                  disabled={!formData.address.country}
+                >
+                  <option value="">{t('project.select')}</option>
+                {formData.address.country && (provinces[countries.find(c => c.name === formData.address.country)?.code] || []).map(p => (
+                  <option key={p.code} value={p.name}>{p.name}</option>
+                ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">{t('project.postalCode')}</label>
+                <input
+                  ref={postalCodeRef}
+                  type="text"
+                  name="address.postalCode"
+                  value={formData.address.postalCode}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg"
+                  placeholder={formData.address.country === "Canada" ? "A1A1A1" : formData.address.country === "United States" ? "10001" : ""}
+                />
+              </div>
             </div>
 
             <div className="mb-5">
@@ -700,11 +816,11 @@ const ProjectModal = ({
 
             <div className="mb-5">
               <label className="block text-sm font-semibold mb-2">
-                Estimated Time
+                {t('project.estimatedTime')}
               </label>
               <div className="grid grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-xs text-black/60 mb-1">Years</label>
+                  <label className="block text-xs text-black/60 mb-1">{t('project.years')}</label>
                   <input
                     type="number"
                     min="0"
@@ -714,7 +830,7 @@ const ProjectModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-black/60 mb-1">Months</label>
+                  <label className="block text-xs text-black/60 mb-1">{t('project.months')}</label>
                   <input
                     type="number"
                     min="0"
@@ -724,7 +840,7 @@ const ProjectModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-black/60 mb-1">Days</label>
+                  <label className="block text-xs text-black/60 mb-1">{t('project.days')}</label>
                   <input
                     type="number"
                     min="0"
@@ -734,7 +850,7 @@ const ProjectModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-black/60 mb-1">Hours</label>
+                  <label className="block text-xs text-black/60 mb-1">{t('project.hours')}</label>
                   <input
                     type="number"
                     min="0"

@@ -408,7 +408,12 @@ const Employee = () => {
                         </p>
                         {project.address && (
                           <p className="text-xs text-black/60 mt-1">
-                            {project.address.city}, {project.address.province}
+                            {[
+                              project.address.city,
+                              project.address.province,
+                              project.address.country,
+                              project.address.postalCode
+                            ].filter(Boolean).join(", ")}
                           </p>
                         )}
                       </div>

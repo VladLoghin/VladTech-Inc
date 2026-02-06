@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { api } from "../../api/http";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import EmployeeFinderModal from "../projects/EmployeeFinderModal.jsx";
+import { countries, provinces } from "../../utils/locationData";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => {
+  const { t } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
     name: "",
@@ -26,6 +29,17 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
   const [submitError, setSubmitError] = useState("");
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]); // [{id,email,name}]
+  
+  // Refs for native browser validation
+  const nameRef = useRef(null);
+  const streetAddressRef = useRef(null);
+  const cityRef = useRef(null);
+  const countryRef = useRef(null);
+  const provinceRef = useRef(null);
+  const postalCodeRef = useRef(null);
+  const dueDateRef = useRef(null);
+  const projectTypeRef = useRef(null);
+  const startDateRef = useRef(null);
 
 
   useEffect(() => {
@@ -36,27 +50,134 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
   }, [defaultDate]);
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Project name is required";
-    if (!formData.dueDate) newErrors.dueDate = "Due date is required";
-    if (!formData.projectType) newErrors.projectType = "Project type is required";
-    if (!formData.address.city.trim()) newErrors.city = "City is required";
+    // Clear all custom validity
+    nameRef.current?.setCustomValidity("");
+    streetAddressRef.current?.setCustomValidity("");
+    cityRef.current?.setCustomValidity("");
+    countryRef.current?.setCustomValidity("");
+    provinceRef.current?.setCustomValidity("");
+    postalCodeRef.current?.setCustomValidity("");
+    dueDateRef.current?.setCustomValidity("");
+    projectTypeRef.current?.setCustomValidity("");
+    startDateRef.current?.setCustomValidity("");
 
-    if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
-      newErrors.estimatedCost = "Cost must be a positive number";
+    let isValid = true;
+    let firstInvalidRef = null;
+    
+    // Validate name is not empty
+    if (!formData.name?.trim()) {
+      nameRef.current?.setCustomValidity("Project name is required");
+      if (!firstInvalidRef) firstInvalidRef = nameRef;
+      isValid = false;
+    }
+    
+    // Validate due date is required
+    if (!formData.dueDate) {
+      dueDateRef.current?.setCustomValidity("Due date is required");
+      if (!firstInvalidRef) firstInvalidRef = dueDateRef;
+      isValid = false;
+    }
+    
+    // Validate project type is required
+    if (!formData.projectType) {
+      projectTypeRef.current?.setCustomValidity("Project type is required");
+      if (!firstInvalidRef) firstInvalidRef = projectTypeRef;
+      isValid = false;
     }
 
+    // Address validation hierarchy:
+    // Country -> Province -> City -> Street Address
+    const { streetAddress, city, country, province } = formData.address;
+
+    const hasStreet = (streetAddress || "").length > 0;
+    const hasCity = (city || "").length > 0;
+    const hasProvince = (province || "").length > 0;
+    const hasCountry = (country || "").length > 0;
+
+    // Street Address requires City, Province, Country
+    if (hasStreet) {
+      if (!hasCity) {
+        cityRef.current?.setCustomValidity(`${t("project.city")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = cityRef;
+        isValid = false;
+      }
+      if (!hasProvince) {
+        provinceRef.current?.setCustomValidity(`${t("project.province")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = provinceRef;
+        isValid = false;
+      }
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t("project.country")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // City requires Province, Country
+    if (hasCity && !hasStreet) {
+      if (!hasProvince) {
+        provinceRef.current?.setCustomValidity(`${t("project.province")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = provinceRef;
+        isValid = false;
+      }
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t("project.country")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // Province requires Country
+    if (hasProvince && !hasCity && !hasStreet) {
+      if (!hasCountry) {
+        countryRef.current?.setCustomValidity(`${t("project.country")} is required`);
+        if (!firstInvalidRef) firstInvalidRef = countryRef;
+        isValid = false;
+      }
+    }
+
+    // Postal code length verification
+    if (formData.address.postalCode?.trim() && !postalCodeRef.current?.validationMessage) {
+      const pc = formData.address.postalCode.replace(/[\s-]/g, "");
+      const isCanada = formData.address.country === "Canada";
+      const isUS = formData.address.country === "United States";
+      
+      let pcValid = true;
+      if (isCanada && pc.length !== 6) pcValid = false;
+      if (isUS && pc.length !== 5 && pc.length !== 9) pcValid = false;
+      
+      if (!pcValid) {
+        postalCodeRef.current?.setCustomValidity(t("project.invalidPostalCode"));
+        if (!firstInvalidRef) firstInvalidRef = postalCodeRef;
+        isValid = false;
+      }
+    }
+
+    // Validate estimated cost is non-negative
+    if (formData.estimatedCost && Number(formData.estimatedCost) < 0) {
+      setErrors({ estimatedCost: t("project.costPositiveError") });
+      isValid = false;
+    }
+
+    // Validate start date <= due date
     if (formData.startDate && formData.dueDate) {
       const start = new Date(formData.startDate);
       const due = new Date(formData.dueDate);
       if (start > due) {
-        newErrors.startDate = "Start date cannot be after due date";
-        newErrors.dueDate = "Due date cannot be before start date";
+        startDateRef.current?.setCustomValidity("Start date cannot be after due date");
+        dueDateRef.current?.setCustomValidity("Due date cannot be before start date");
+        if (!firstInvalidRef) firstInvalidRef = startDateRef;
+        isValid = false;
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Report validity on the first invalid field to show browser tooltip
+    if (firstInvalidRef?.current) {
+      firstInvalidRef.current.reportValidity();
+    }
+
+    setErrors({});
+    return isValid;
   };
 
   const handleToggleEmployee = (employee) => {
@@ -146,10 +267,16 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     const { name, value } = e.target;
     if (name.includes(".")) {
       const [parent, child] = name.split(".");
-      setFormData(prev => ({
-        ...prev,
-        [parent]: { ...prev[parent], [child]: value }
-      }));
+      setFormData(prev => {
+        const updatedParent = { ...prev[parent], [child]: value };
+        if (parent === "address" && child === "country") {
+          updatedParent.province = "";
+        }
+        return {
+          ...prev,
+          [parent]: updatedParent
+        };
+      });
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -178,7 +305,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
     <>
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
         <div className="bg-white border-2 border-yellow-400 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
-          <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">New Project</h2>
+          <h2 className="text-3xl font-bold mb-6 text-black tracking-tight">{t("project.newProject")}</h2>
           {submitError && (
             <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
               {submitError}
@@ -186,19 +313,19 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
           )}
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Project Name *</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.projectName")} *</label>
               <input
+                ref={nameRef}
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               />
-              {errors.name && <span className="text-red-600 text-sm mt-1 block">{errors.name}</span>}
             </div>
             <div className="mb-5">
               <label className="block text-sm font-semibold text-black mb-2">
-                Employees
+                {t("project.employee")}
               </label>
 
               <div className="flex gap-2">
@@ -212,7 +339,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
                       {selectedEmployees.map((e) => e.email).join(", ")}
                     </div>
                   ) : (
-                    "Select employees"
+                    t("project.selectEmployees")
                   )}
                 </button>
 
@@ -229,8 +356,9 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Street Address</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.streetAddress")}</label>
               <input
+                ref={streetAddressRef}
                 type="text"
                 name="address.streetAddress"
                 value={formData.address.streetAddress}
@@ -240,91 +368,106 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">City *</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.city")}</label>
               <input
+                ref={cityRef}
                 type="text"
                 name="address.city"
                 value={formData.address.city}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               />
-              {errors.city && <span className="text-red-600 text-sm mt-1 block">{errors.city}</span>}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">{t("project.country")}</label>
+                <select
+                  ref={countryRef}
+                  name="address.country"
+                  value={formData.address.country}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
+                >
+                  <option value="">{t("project.select")}</option>
+                  {countries.map(c => (
+                    <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">{t("project.province")}</label>
+                <select
+                  ref={provinceRef}
+                  name="address.province"
+                  value={formData.address.province}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
+                  disabled={!formData.address.country}
+                >
+                  <option value="">{t("project.select")}</option>
+                  {formData.address.country && (provinces[countries.find(c => c.name === formData.address.country)?.code] || []).map(p => (
+                    <option key={p.code} value={p.name}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">{t("project.postalCode")}</label>
+                <input
+                  ref={postalCodeRef}
+                  type="text"
+                  name="address.postalCode"
+                  value={formData.address.postalCode}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
+                  placeholder={formData.address.country === "Canada" ? "A1A1A1" : formData.address.country === "United States" ? "10001" : ""}
+                />
+              </div>
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Province</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.startDate")}</label>
               <input
-                type="text"
-                name="address.province"
-                value={formData.address.province}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
-              />
-            </div>
-
-            <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Country</label>
-              <input
-                type="text"
-                name="address.country"
-                value={formData.address.country}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
-              />
-            </div>
-
-            <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Postal Code</label>
-              <input
-                type="text"
-                name="address.postalCode"
-                value={formData.address.postalCode}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
-              />
-            </div>
-
-            <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Start Date</label>
-              <input
+                ref={startDateRef}
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               />
-              {errors.startDate && <span className="text-red-600 text-sm mt-1 block">{errors.startDate}</span>}
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Due Date *</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.dueDate")} *</label>
               <input
+                ref={dueDateRef}
                 type="date"
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               />
-              {errors.dueDate && <span className="text-red-600 text-sm mt-1 block">{errors.dueDate}</span>}
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Project Type *</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.projectType")} *</label>
               <select
+                ref={projectTypeRef}
                 name="projectType"
                 value={formData.projectType}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-black/20 rounded-lg focus:border-yellow-400 focus:outline-none bg-white text-black"
               >
-                <option value="">Select</option>
-                <option value="APPOINTMENT">Appointment</option>
-                <option value="SCHEDULED">Scheduled</option>
+                <option value="">{t("project.select")}</option>
+                <option value="APPOINTMENT">{t("project.appointment")}</option>
+                <option value="SCHEDULED">{t("project.scheduled")}</option>
               </select>
-              {errors.projectType && <span className="text-red-600 text-sm mt-1 block">{errors.projectType}</span>}
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm font-semibold text-black mb-2">Estimated Cost</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.estimatedCost")}</label>
               <div className="flex gap-2">
                 <select
                   name="estimatedCostCurrency"
@@ -350,7 +493,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-black mb-2">Description</label>
+              <label className="block text-sm font-semibold text-black mb-2">{t("project.description")}</label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -365,13 +508,13 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated, defaultDate }) => 
                 onClick={handleClose}
                 className="px-8 py-3 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
                 className="px-8 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold shadow-lg"
               >
-                Create
+                {t("project.create")}
               </button>
             </div>
           </form>

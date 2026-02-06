@@ -259,6 +259,7 @@ const resources = {
       "project.city": "City",
       "project.province": "Province",
       "project.postalCode": "Postal Code",
+      "project.invalidPostalCode": "Invalid Postal Code format",
       "project.country": "Country",
       "project.startDate": "Start Date",
       "project.dueDate": "Due Date",
@@ -291,6 +292,11 @@ const resources = {
       "project.priorityMedium": "MEDIUM",
       "project.priorityHigh": "HIGH",
       "project.priorityUrgent": "URGENT",
+      "project.estimatedTime": "Estimated Time",
+      "project.years": "Years",
+      "project.months": "Months",
+      "project.days": "Days",
+      "project.hours": "Hours",
 
       // PDF Export Titles
       "project.reportTitle": "Project Report",
@@ -608,6 +614,7 @@ const resources = {
       "project.city": "Ville",
       "project.province": "Province",
       "project.postalCode": "Code Postal",
+      "project.invalidPostalCode": "Format de code postal invalide",
       "project.country": "Pays",
       "project.startDate": "Date de Début",
       "project.dueDate": "Date d'Échéance",
@@ -640,6 +647,11 @@ const resources = {
       "project.priorityMedium": "MOYEN",
       "project.priorityHigh": "ÉLEVÉ",
       "project.priorityUrgent": "URGENT",
+      "project.estimatedTime": "Temps Estimé",
+      "project.years": "Années",
+      "project.months": "Mois",
+      "project.days": "Jours",
+      "project.hours": "Heures",
 
       // PDF Export Titles
       "project.reportTitle": "Rapport de Projet",

@@ -64,6 +64,8 @@ test('create project and verify count', async ({ page, loginAs }) => {
   const projectName = `Playwright Test ${timestamp}`;
 
   await page.locator('form input[name="name"]').fill(projectName);
+  await page.locator('form select[name="address.country"]').selectOption('Canada');
+  await page.locator('form select[name="address.province"]').selectOption('Quebec');
   await page.locator('form input[name="address.city"]').fill('Montreal');
   await page.locator('form input[name="dueDate"]').fill('2026-12-31');
 
