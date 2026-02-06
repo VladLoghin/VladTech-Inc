@@ -90,7 +90,7 @@ renovation:
     labor: 50.00
     overhead: 0.15
     contingency: 0.10
-    tax: 0.13
+    tax: 0.15
 
 ---
 
@@ -116,7 +116,7 @@ renovation:
     labor: 50.00
     overhead: 0.15
     contingency: 0.10
-    tax: 0.13
+    tax: 0.15
 
 app:
   seed-db: false
@@ -154,7 +154,7 @@ renovation:
     labor: 50.00
     overhead: 0.15
     contingency: 0.10
-    tax: 0.13
+    tax: 0.15
 
 #maybe set to true when testing not sure
 app:

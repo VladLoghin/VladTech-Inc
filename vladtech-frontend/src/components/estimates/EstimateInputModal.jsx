@@ -681,67 +681,127 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
 
                     {selectedPreset && (
                         <form onSubmit={handleSubmit}>
-                            {selectedPreset.fields.map((field) => {
-                                if (field.name === "numSkylights" && !formData.hasSkylights) return null;
-                                if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
+                            {(() => {
+                                const checkboxFields = selectedPreset.fields.filter(f => f.type === "checkbox");
+                                const conditionalFieldNames = ["numSkylights", "applianceAllowance"];
+                                const otherFields = selectedPreset.fields.filter(f => f.type !== "checkbox" && !conditionalFieldNames.includes(f.name));
+                                const conditionalFields = selectedPreset.fields.filter(f => conditionalFieldNames.includes(f.name));
+                                
                                 return (
-                                    <div key={field.name}>
-                                        <label htmlFor={field.name}>{field.label}:</label>
-
-                                    {field.type === "select" ? (
-                                        <select
-                                            id={field.name}
-                                            name={field.name}
-                                            value={formData[field.name] ?? ""}
-                                            onChange={handleChange}
-                                            required={field.required}
-                                        >
-                                            <option value="" disabled>
-                                                {t.selectPreset}
-                                            </option>
-                                            {field.options.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>
-                                                    {opt.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : field.type === "checkbox" ? (
-                                        <input
-                                            id={field.name}
-                                            type="checkbox"
-                                            name={field.name}
-                                            checked={!!formData[field.name]}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <input
-                                            id={field.name}
-                                            type={field.type}
-                                            name={field.name}
-                                            value={formData[field.name] ?? ""}
-                                            onChange={handleChange}
-                                            required={field.required}
-                                            min={field.min !== undefined ? String(field.min) : undefined}
-                                            step={field.step}
-                                            onInvalid={(e) => {
-                                                if (e.target.validity.valueMissing) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
-                                                } else if (e.target.validity.rangeUnderflow) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
-                                                } else if (e.target.validity.typeMismatch) {
-                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
-                                                }
-                                            }}
-                                            onInput={(e) => e.target.setCustomValidity("")}
-                                        />
-                                    )}
-                                    {errors[field.name] && (
-                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
-                                            {errors[field.name]}
-                                        </span>
-                                    )}
-                                </div>
-                            );})}
+                                    <>
+                                        {/* Render non-checkbox, non-conditional fields first */}
+                                        {otherFields.map((field) => {
+                                            return (
+                                                <div key={field.name} className="form-group">
+                                                    <label htmlFor={field.name}>{field.label}:</label>
+                                                    {field.type === "select" ? (
+                                                        <select
+                                                            id={field.name}
+                                                            name={field.name}
+                                                            value={formData[field.name] ?? ""}
+                                                            onChange={handleChange}
+                                                            required={field.required}
+                                                        >
+                                                            <option value="" disabled>
+                                                                {t.selectPreset}
+                                                            </option>
+                                                            {field.options.map((opt) => (
+                                                                <option key={opt.value} value={opt.value}>
+                                                                    {opt.label}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    ) : (
+                                                        <input
+                                                            id={field.name}
+                                                            type={field.type}
+                                                            name={field.name}
+                                                            value={formData[field.name] ?? ""}
+                                                            onChange={handleChange}
+                                                            required={field.required}
+                                                            min={field.min !== undefined ? String(field.min) : undefined}
+                                                            step={field.step}
+                                                            onInvalid={(e) => {
+                                                                if (e.target.validity.valueMissing) {
+                                                                    e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                                } else if (e.target.validity.rangeUnderflow) {
+                                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                                } else if (e.target.validity.typeMismatch) {
+                                                                    e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                                }
+                                                            }}
+                                                            onInput={(e) => e.target.setCustomValidity("")}
+                                                        />
+                                                    )}
+                                                    {errors[field.name] && (
+                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                            {errors[field.name]}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        
+                                        {/* Render checkboxes in grid if any exist */}
+                                        {checkboxFields.length > 0 && (
+                                            <div className="checkboxes-grid">
+                                                {checkboxFields.map((field) => (
+                                                    <div key={field.name} className="checkbox-grid-item">
+                                                        <label htmlFor={field.name} className="checkbox-label">
+                                                            {field.label}
+                                                        </label>
+                                                        <input
+                                                            id={field.name}
+                                                            className="checkbox-input"
+                                                            type="checkbox"
+                                                            name={field.name}
+                                                            checked={!!formData[field.name]}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Render conditional fields last, below checkboxes */}
+                                        {conditionalFields.map((field) => {
+                                            if (field.name === "numSkylights" && !formData.hasSkylights) return null;
+                                            if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
+                                            
+                                            return (
+                                                <div key={field.name} className="collapsible-section">
+                                                    <label htmlFor={field.name}>{field.label}:</label>
+                                                    <input
+                                                        id={field.name}
+                                                        type={field.type}
+                                                        name={field.name}
+                                                        value={formData[field.name] ?? ""}
+                                                        onChange={handleChange}
+                                                        required={field.required}
+                                                        min={field.min !== undefined ? String(field.min) : undefined}
+                                                        step={field.step}
+                                                        onInvalid={(e) => {
+                                                            if (e.target.validity.valueMissing) {
+                                                                e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                            } else if (e.target.validity.rangeUnderflow) {
+                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                            } else if (e.target.validity.typeMismatch) {
+                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                            }
+                                                        }}
+                                                        onInput={(e) => e.target.setCustomValidity("")}
+                                                    />
+                                                    {errors[field.name] && (
+                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                            {errors[field.name]}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </>
+                                );
+                            })()}
 
                             <div className="modal-actions">
                                 <button type="submit">{t.submit}</button>
@@ -765,10 +825,158 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 >
                     <div className="modal-content">
                         <h2>{t.estimateResult}</h2>
-                        <p>
-                            <strong>{t.estimatedTotal}:</strong> ${result.totalPrice}
-                        </p>
+                        
+                        {/* Breakdown Section */}
+                        <div className="estimate-breakdown">
+                            <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem" }}>{t.costBreakdown}</h3>
+                            
+                            {/* Material Cost */}
+                            {result.materialCostPerSqFt && result.squareFeet && (
+                                <div className="breakdown-row">
+                                    <span>{t.materialCost}:</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.squareFeet) * parseFloat(result.materialCostPerSqFt)).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Labor Cost (laborRate is $/sqft) */}
+                            {result.laborRate && result.squareFeet && (
+                                <div className="breakdown-row">
+                                    <span>{t.labor} (${parseFloat(result.laborRate).toFixed(2)}/sqft):</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.squareFeet) * parseFloat(result.laborRate)).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Appliance Allowance (Kitchen Remodel) */}
+                            {formData.applianceAllowance && parseFloat(formData.applianceAllowance) > 0 && (
+                                <div className="breakdown-row">
+                                    <span>{t.applianceAllowance}:</span>
+                                    <span className="breakdown-amount">
+                                        ${parseFloat(formData.applianceAllowance).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Skylights (Roofing) */}
+                            {formData.hasSkylights && formData.numSkylights && parseFloat(formData.numSkylights) > 0 && (
+                                <div className="breakdown-row">
+                                    <span>{t.skylights} ({formData.numSkylights}):</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(formData.numSkylights) * 1000).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Tear Off Cost (Roofing) */}
+                            {formData.tearOffRequired && result.squareFeet && (
+                                <div className="breakdown-row">
+                                    <span>{t.tearOff}:</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.squareFeet) * 1.50).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Insulation (Siding) */}
+                            {formData.includeInsulation && result.squareFeet && (
+                                <div className="breakdown-row">
+                                    <span>{t.insulation}:</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.squareFeet) * 0.75).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Subfloor Repair (Floor Replace) */}
+                            {formData.subfloorRepairNeeded && result.squareFeet && (
+                                <div className="breakdown-row">
+                                    <span>{t.subfloorRepair}:</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.squareFeet) * 3.50).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Overhead Rate (as percentage) */}
+                            {result.overheadRate && (
+                                <div className="breakdown-row">
+                                    <span>{t.overhead} ({(parseFloat(result.overheadRate) * 100).toFixed(1)}%):</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.overheadRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Contingency Rate (as percentage) */}
+                            {result.contingencyRate && (
+                                <div className="breakdown-row">
+                                    <span>{t.contingency} ({(parseFloat(result.contingencyRate) * 100).toFixed(1)}%):</span>
+                                    <span className="breakdown-amount">
+                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.contingencyRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Location Factor */}
+                            {result.locationFactor && parseFloat(result.locationFactor) !== 1 && (
+                                <div className="breakdown-row">
+                                    <span>{t.locationAdjustment}:</span>
+                                    <span className="breakdown-amount">
+                                        {((parseFloat(result.locationFactor) - 1) * 100).toFixed(1)}%
+                                    </span>
+                                </div>
+                            )}
+                            
+                            {/* Tax Rate */}
+                            {result.taxRate && (
+                                <div className="breakdown-row">
+                                    <span>{t.tax} ({(parseFloat(result.taxRate) * 100).toFixed(1)}%):</span>
+                                    <span className="breakdown-amount">
+                                        ${parseFloat(result.taxAmount).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            
+                            <div className="breakdown-divider"></div>
+                            
+                            <div className="breakdown-row breakdown-total">
+                                <span><strong>{t.estimatedTotal}:</strong></span>
+                                <span className="breakdown-amount"><strong>${parseFloat(result.totalPrice).toFixed(2)}</strong></span>
+                            </div>
+                        </div>
+                        
+                        {/* Disclaimer */}
+                        <div style={{ 
+                            backgroundColor: "rgba(239, 68, 68, 0.1)", 
+                            border: "1px solid rgba(239, 68, 68, 0.3)",
+                            borderRadius: "8px",
+                            padding: "1rem",
+                            margin: "1rem 0",
+                            fontSize: "0.9rem",
+                            color: "var(--foreground, #000)"
+                        }}>
+                            <p style={{ margin: 0, lineHeight: "1.5" }}>
+                                {t.estimateDisclaimer}
+                            </p>
+                        </div>
+                        
                         <div className="modal-actions">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleCloseResultModal();
+                                    window.location.href = "/#contact";
+                                }}
+                                style={{ 
+                                    backgroundColor: "#FCC700",
+                                    color: "black"
+                                }}
+                            >
+                                {t.contactUs}
+                            </button>
                             <button
                                 type="button"
                                 onClick={handleCloseResultModal}
