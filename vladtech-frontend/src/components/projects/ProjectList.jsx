@@ -4,22 +4,35 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
 import { generateCsv, generatePdf } from "../../utils/exportUtils";
+import {
+  pinProject,
+  unpinProject,
+  isProjectPinned,
+} from "../../api/projects/projectPinApi";
 
-const formatAssignedEmployees = (assignedEmployeeIds, assignedEmployeeEmails, employeeIndex, t) => {
+const formatAssignedEmployees = (
+  assignedEmployeeIds,
+  assignedEmployeeEmails,
+  employeeIndex,
+  t,
+) => {
   // Prefer assignedEmployeeEmails if available - filter out any Auth0 IDs
   if (assignedEmployeeEmails && assignedEmployeeEmails.length > 0) {
-    const validEmails = assignedEmployeeEmails.filter(email => email && !/^auth0\|/.test(email));
+    const validEmails = assignedEmployeeEmails.filter(
+      (email) => email && !/^auth0\|/.test(email),
+    );
     if (validEmails.length > 0) return validEmails.join(", ");
   }
-  
-  if (!assignedEmployeeIds || assignedEmployeeIds.length === 0) return t("project.none");
+
+  if (!assignedEmployeeIds || assignedEmployeeIds.length === 0)
+    return t("project.none");
   const validIds = assignedEmployeeIds
     .map((id) => {
       const resolved = employeeIndex?.[id]?.email || employeeIndex?.[id]?.name;
       return resolved || null;
     })
     .filter(Boolean);
-  
+
   return validIds.length > 0 ? validIds.join(", ") : t("project.none");
 };
 
@@ -38,7 +51,8 @@ const formatArchivedAt = (archivedAt, locale) => {
 // ✅ When axios baseURL = "/api", requests should be "/uploads/..." not "/api/uploads/..."
 const toAxiosRelativePath = (photoUrl) => {
   if (!photoUrl) return "";
-  if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) return photoUrl;
+  if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://"))
+    return photoUrl;
 
   // Ensure it starts with "/"
   let path = photoUrl.startsWith("/") ? photoUrl : `/${photoUrl}`;
@@ -63,38 +77,38 @@ const formatMoney = (amount, currency, locale) => {
 
 const formatEstimatedTime = (seconds) => {
   if (!seconds || seconds <= 0) return null;
-  
-  const SECONDS_IN_YEAR = 31536000;  // 365 days
-  const SECONDS_IN_MONTH = 2592000;  // 30 days
+
+  const SECONDS_IN_YEAR = 31536000; // 365 days
+  const SECONDS_IN_MONTH = 2592000; // 30 days
   const SECONDS_IN_DAY = 86400;
   const SECONDS_IN_HOUR = 3600;
-  
+
   let remaining = seconds;
   const parts = [];
-  
+
   const years = Math.floor(remaining / SECONDS_IN_YEAR);
   if (years > 0) {
     parts.push(`${years}y`);
     remaining -= years * SECONDS_IN_YEAR;
   }
-  
+
   const months = Math.floor(remaining / SECONDS_IN_MONTH);
   if (months > 0) {
     parts.push(`${months}mo`);
     remaining -= months * SECONDS_IN_MONTH;
   }
-  
+
   const days = Math.floor(remaining / SECONDS_IN_DAY);
   if (days > 0) {
     parts.push(`${days}d`);
     remaining -= days * SECONDS_IN_DAY;
   }
-  
+
   const hours = Math.floor(remaining / SECONDS_IN_HOUR);
   if (hours > 0) {
     parts.push(`${hours}h`);
   }
-  
+
   return parts.length > 0 ? parts.join(" ") : null;
 };
 
@@ -156,6 +170,10 @@ const ProjectList = ({
   const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
+  // Pin-related state
+  const [pinnedProjects, setPinnedProjects] = useState(new Set());
+  const [pinLoading, setPinLoading] = useState(false);
+
   const [comments, setComments] = useState("");
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -196,7 +214,7 @@ const ProjectList = ({
     setPortfolioModalOpen(false);
     setActiveProject(null);
   };
- 
+
   const openExport = (project) => {
     setActiveProject(project);
     setExportOpen(true);
@@ -246,7 +264,11 @@ const ProjectList = ({
         setImageSrc(objectUrl);
       } catch (e) {
         console.error("Failed to load image:", e);
-        setImageError(t("project.imageFailedToLoad", { defaultValue: "Image failed to load." }));
+        setImageError(
+          t("project.imageFailedToLoad", {
+            defaultValue: "Image failed to load.",
+          }),
+        );
       } finally {
         setImageLoading(false);
       }
@@ -259,21 +281,100 @@ const ProjectList = ({
     };
   }, [viewOpen, latestInfo?.photoUrl, getToken, t]);
 
+  // Load pinned projects for current user
+  useEffect(() => {
+    const loadPinnedProjects = async () => {
+      if (!getToken) return;
+
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const pinStates = new Set();
+
+        // Check pin status for each project
+        for (const project of projects) {
+          try {
+            const isPinned = await isProjectPinned(
+              project.projectIdentifier,
+              token,
+            );
+            if (isPinned) {
+              pinStates.add(project.projectIdentifier);
+            }
+          } catch (error) {
+            console.error(
+              `Error checking pin status for ${project.projectIdentifier}:`,
+              error,
+            );
+          }
+        }
+
+        setPinnedProjects(pinStates);
+      } catch (error) {
+        console.error("Failed to load pinned projects:", error);
+      }
+    };
+
+    loadPinnedProjects();
+  }, [projects, getToken]);
+
+  const handleTogglePin = async (project) => {
+    if (!getToken) return;
+
+    try {
+      setPinLoading(true);
+      const token = await getToken();
+      if (!token) return;
+
+      if (pinnedProjects.has(project.projectIdentifier)) {
+        // Unpin
+        await unpinProject(project.projectIdentifier, token);
+        setPinnedProjects((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(project.projectIdentifier);
+          return newSet;
+        });
+      } else {
+        // Pin
+        await pinProject(project.projectIdentifier, token);
+        setPinnedProjects(
+          (prev) => new Set([...prev, project.projectIdentifier]),
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling project pin:", error);
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
+  // Sort projects with pinned ones first
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => {
+      const aPinned = pinnedProjects.has(a.projectIdentifier) ? 1 : 0;
+      const bPinned = pinnedProjects.has(b.projectIdentifier) ? 1 : 0;
+      return bPinned - aPinned;
+    });
+  }, [projects, pinnedProjects]);
+
   return (
     <>
       <div className="border-2 border-black rounded-xl bg-white p-4 space-y-4">
-        {projects.length === 0 && (
-          <p className="text-black/60 text-center py-8">{t("project.noProjectsFound")}</p>
+        {sortedProjects.length === 0 && (
+          <p className="text-black/60 text-center py-8">
+            {t("project.noProjectsFound")}
+          </p>
         )}
 
-        {projects.map((project) => {
+        {sortedProjects.map((project) => {
           const isArchived = project.state === "COMPLETE";
           const hasInfo = (project.photos || []).length > 0;
 
           const estimatedCostFormatted = formatMoney(
             project.estimatedCost,
             project.estimatedCostCurrency || "CAD",
-            locale
+            locale,
           );
 
           return (
@@ -283,14 +384,18 @@ const ProjectList = ({
                 }`}
             >
               {/* Buttons - grid layout on desktop, at bottom on mobile */}
-              <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">                {/* Send to Portfolio Button */}
+              <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">
+                {" "}
+                {/* Send to Portfolio Button */}
                 {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
                     className="px-3 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
-                    {t("project.sendToPortfolio", { defaultValue: "Send to Portfolio" })}
+                    {t("project.sendToPortfolio", {
+                      defaultValue: "Send to Portfolio",
+                    })}
                   </button>
                 )}
                 {/* Upload / View Information */}
@@ -300,23 +405,22 @@ const ProjectList = ({
                     onClick={() => openUpload(project)}
                     className="px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
-                    {t("project.uploadInformation", { defaultValue: "Upload Information" })}
+                    {t("project.uploadInformation", {
+                      defaultValue: "Upload Information",
+                    })}
                   </button>
                 )}
-
                 {showViewInformation && (
                   <button
                     type="button"
                     onClick={() => openView(project)}
                     className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
                   >
-                    {t("project.viewInformation", { defaultValue: "View Information" })}
+                    {t("project.viewInformation", {
+                      defaultValue: "View Information",
+                    })}
                   </button>
-
                 )}
-
-                
-
                 {/* Complete / Reactivate / Edit */}
                 {showReactivate && isArchived && (
                   <button
@@ -327,7 +431,6 @@ const ProjectList = ({
                     {t("project.reactivate")}
                   </button>
                 )}
-
                 {showComplete && !isArchived && (
                   <button
                     type="button"
@@ -337,7 +440,6 @@ const ProjectList = ({
                     {t("project.markComplete")}
                   </button>
                 )}
-
                 {showEdit && !isArchived && (
                   <button
                     type="button"
@@ -347,7 +449,25 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
- 
+                {/* Pin / Unpin Button */}
+                <button
+                  type="button"
+                  onClick={() => handleTogglePin(project)}
+                  disabled={pinLoading}
+                  className={`px-3 py-2 rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-1 ${pinnedProjects.has(project.projectIdentifier)
+                    ? "bg-orange-400 text-black hover:bg-orange-500"
+                    : "bg-gray-300 text-black hover:bg-gray-400"
+                    } disabled:opacity-50`}
+                >
+                  <span>
+                    {pinnedProjects.has(project.projectIdentifier)
+                      ? "📌"
+                      : "📍"}
+                  </span>
+                  {pinnedProjects.has(project.projectIdentifier)
+                    ? t("project.unpin", { defaultValue: "Unpin" })
+                    : t("project.pin", { defaultValue: "Pin" })}
+                </button>
                 {/* Single Export Button */}
                 <button
                   type="button"
@@ -355,7 +475,19 @@ const ProjectList = ({
                   className="px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm flex items-center justify-center gap-2"
                   title={t("project.export")}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
                   {t("project.export")}
                 </button>
               </div>
@@ -366,7 +498,9 @@ const ProjectList = ({
                   <h3 className="text-lg font-semibold">{project.name}</h3>
                   {project.state && (
                     <span
-                      className={`text-xs px-2 py-1 rounded font-medium ${isArchived ? "bg-gray-200 text-gray-700" : "bg-green-100 text-green-700"
+                      className={`text-xs px-2 py-1 rounded font-medium ${isArchived
+                        ? "bg-gray-200 text-gray-700"
+                        : "bg-green-100 text-green-700"
                         }`}
                     >
                       {isArchived ? t("project.archived") : t("project.active")}
@@ -376,8 +510,12 @@ const ProjectList = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                   <p>
-                    <strong className="text-black/60">{t("project.id")}:</strong>{" "}
-                    <span className="font-mono">{project.projectIdentifier}</span>
+                    <strong className="text-black/60">
+                      {t("project.id")}:
+                    </strong>{" "}
+                    <span className="font-mono">
+                      {project.projectIdentifier}
+                    </span>
                   </p>
 
                   {project.clientName && (
@@ -392,8 +530,12 @@ const ProjectList = ({
                   )}
 
                   <p>
-                    <strong className="text-black/60">{t("project.projectType")}:</strong>{" "}
-                    <span className="bg-yellow-100 px-2 py-1 rounded">{project.projectType}</span>
+                    <strong className="text-black/60">
+                      {t("project.projectType")}:
+                    </strong>{" "}
+                    <span className="bg-yellow-100 px-2 py-1 rounded">
+                      {project.projectType}
+                    </span>
                   </p>
 
                   <p>
@@ -421,78 +563,116 @@ const ProjectList = ({
                   </p>
 
                   <p>
-                    <strong className="text-black/60">{t("project.estimatedCost")}:</strong>{" "}
+                    <strong className="text-black/60">
+                      {t("project.estimatedCost")}:
+                    </strong>{" "}
                     {estimatedCostFormatted ? (
-                    <span>{estimatedCostFormatted}</span>
-                  ) : (
-                    <span className="text-gray-400">N/A</span>
-                  )}
-                </p>
+                      <span>{estimatedCostFormatted}</span>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
+                  </p>
 
-                <p>
-                  <strong className="text-black/60">{t("project.estimatedTime", { defaultValue: "Estimated Time" })}:</strong>{" "}
-                  {formatEstimatedTime(project.estimatedTime) ? (
-                    <span>{formatEstimatedTime(project.estimatedTime)}</span>
-                  ) : (
-                    <span className="text-gray-400">N/A</span>
-                  )}
-                </p>
-
-                <p>
-                  <strong className="text-black/60">{t("project.startDate")}:</strong> {project.startDate}
-                </p>
-
-                <p>
-                  <strong className="text-black/60">{t("project.dueDate")}:</strong> {project.dueDate}
-                </p>
-
-                {isArchived && project.archivedAt && (
                   <p>
-                    <strong className="text-black/60">{t("project.archivedAt")}:</strong>{" "}
-                    <span className="text-gray-600">{formatArchivedAt(project.archivedAt, locale)}</span>
+                    <strong className="text-black/60">
+                      {t("project.estimatedTime", {
+                        defaultValue: "Estimated Time",
+                      })}
+                      :
+                    </strong>{" "}
+                    {formatEstimatedTime(project.estimatedTime) ? (
+                      <span>{formatEstimatedTime(project.estimatedTime)}</span>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </p>
-                )}
 
-                {/* Assigned employees */}
-                {project.assignedEmployeeIds?.length > 0 && (
-                  <p className="md:col-span-2">
-                    <strong className="text-black/60">{t("project.assignedEmployees")}:</strong>{" "}
-                    {formatAssignedEmployees(project.assignedEmployeeIds, project.assignedEmployeeEmails, employeeIndex, t)}
+                  <p>
+                    <strong className="text-black/60">
+                      {t("project.startDate")}:
+                    </strong>{" "}
+                    {project.startDate}
                   </p>
-                )}
 
-                {/* Status badge/control */}
-                <p className="md:col-span-2">
-                  <strong className="text-black/60">{t("project.status")}:</strong>{" "}
-                  {showStatusControl ? (
-                    <select
-                      value={project.status || "PENDING"}
-                      onChange={(e) => onUpdateStatus?.(project, e.target.value)}
-                      className={`px-2 py-1 rounded border-none outline-none ${getStatusBadgeClasses(project.status)}`}
-                    >
-                      <option value="PENDING">{t("project.pending")}</option>
-                      <option value="IN_PROGRESS">{t("project.inProgress")}</option>
-                      <option value="COMPLETED">{t("project.completed")}</option>
-                    </select>
-                  ) : (
-                    <span className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}>
-                      {project.status === "COMPLETED"
-                        ? t("project.completed")
-                        : project.status === "IN_PROGRESS"
-                          ? t("project.inProgress")
-                          : t("project.pending")}
-                    </span>
+                  <p>
+                    <strong className="text-black/60">
+                      {t("project.dueDate")}:
+                    </strong>{" "}
+                    {project.dueDate}
+                  </p>
+
+                  {isArchived && project.archivedAt && (
+                    <p>
+                      <strong className="text-black/60">
+                        {t("project.archivedAt")}:
+                      </strong>{" "}
+                      <span className="text-gray-600">
+                        {formatArchivedAt(project.archivedAt, locale)}
+                      </span>
+                    </p>
                   )}
-                </p>
-              </div>
 
-              {showViewInformation && (
-                <p className="mt-3 text-sm text-black/60">
-                  {hasInfo
-                    ? t("project.informationAvailable", { defaultValue: "Information uploaded." })
-                    : t("project.noInformationYet", { defaultValue: "No information uploaded yet." })}
-                </p>
-              )}
+                  {/* Assigned employees */}
+                  {project.assignedEmployeeIds?.length > 0 && (
+                    <p className="md:col-span-2">
+                      <strong className="text-black/60">
+                        {t("project.assignedEmployees")}:
+                      </strong>{" "}
+                      {formatAssignedEmployees(
+                        project.assignedEmployeeIds,
+                        project.assignedEmployeeEmails,
+                        employeeIndex,
+                        t,
+                      )}
+                    </p>
+                  )}
+
+                  {/* Status badge/control */}
+                  <p className="md:col-span-2">
+                    <strong className="text-black/60">
+                      {t("project.status")}:
+                    </strong>{" "}
+                    {showStatusControl ? (
+                      <select
+                        value={project.status || "PENDING"}
+                        onChange={(e) =>
+                          onUpdateStatus?.(project, e.target.value)
+                        }
+                        className={`px-2 py-1 rounded border-none outline-none ${getStatusBadgeClasses(project.status)}`}
+                      >
+                        <option value="PENDING">{t("project.pending")}</option>
+                        <option value="IN_PROGRESS">
+                          {t("project.inProgress")}
+                        </option>
+                        <option value="COMPLETED">
+                          {t("project.completed")}
+                        </option>
+                      </select>
+                    ) : (
+                      <span
+                        className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}
+                      >
+                        {project.status === "COMPLETED"
+                          ? t("project.completed")
+                          : project.status === "IN_PROGRESS"
+                            ? t("project.inProgress")
+                            : t("project.pending")}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {showViewInformation && (
+                  <p className="mt-3 text-sm text-black/60">
+                    {hasInfo
+                      ? t("project.informationAvailable", {
+                        defaultValue: "Information uploaded.",
+                      })
+                      : t("project.noInformationYet", {
+                        defaultValue: "No information uploaded yet.",
+                      })}
+                  </p>
+                )}
               </div>
 
               {/* Mobile buttons at bottom */}
@@ -503,7 +683,9 @@ const ProjectList = ({
                     onClick={() => openPortfolioModal(project)}
                     className="flex-1 min-w-[140px] px-3 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold text-sm text-center"
                   >
-                    {t("project.sendToPortfolio", { defaultValue: "Send to Portfolio" })}
+                    {t("project.sendToPortfolio", {
+                      defaultValue: "Send to Portfolio",
+                    })}
                   </button>
                 )}
 
@@ -513,7 +695,9 @@ const ProjectList = ({
                     onClick={() => openUpload(project)}
                     className="flex-1 min-w-[140px] px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm text-center"
                   >
-                    {t("project.uploadInformation", { defaultValue: "Upload Information" })}
+                    {t("project.uploadInformation", {
+                      defaultValue: "Upload Information",
+                    })}
                   </button>
                 )}
 
@@ -523,7 +707,9 @@ const ProjectList = ({
                     onClick={() => openView(project)}
                     className="flex-1 min-w-[140px] px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center"
                   >
-                    {t("project.viewInformation", { defaultValue: "View Information" })}
+                    {t("project.viewInformation", {
+                      defaultValue: "View Information",
+                    })}
                   </button>
                 )}
 
@@ -556,14 +742,26 @@ const ProjectList = ({
                     {t("edit")}
                   </button>
                 )}
- 
+
                 {/* Single Export Button (Mobile) */}
                 <button
                   type="button"
                   onClick={() => openExport(project)}
                   className="flex-1 min-w-[140px] px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm flex items-center justify-center gap-2"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
                   {t("project.export")}
                 </button>
               </div>
@@ -574,7 +772,9 @@ const ProjectList = ({
 
       {uploadOpen && (
         <ModalShell
-          title={t("project.uploadInformation", { defaultValue: "Upload Information" })}
+          title={t("project.uploadInformation", {
+            defaultValue: "Upload Information",
+          })}
           onClose={() => setUploadOpen(false)}
         >
           <div className="space-y-4">
@@ -594,7 +794,9 @@ const ProjectList = ({
 
             <div>
               <label className="block text-sm font-semibold text-black/60 mb-2">
-                {t("project.choosePhotoOptional", { defaultValue: "Choose a photo (optional)" })}
+                {t("project.choosePhotoOptional", {
+                  defaultValue: "Choose a photo (optional)",
+                })}
               </label>
 
               <input
@@ -610,11 +812,17 @@ const ProjectList = ({
                   htmlFor={fileInputId}
                   className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-black/80"
                 >
-                  {t("project.choosePhotoOptional", { defaultValue: "Choose a photo (optional)" })}
+                  {t("project.choosePhotoOptional", {
+                    defaultValue: "Choose a photo (optional)",
+                  })}
                 </label>
 
                 <span className="text-sm text-black/60">
-                  {file ? file.name : t("project.noFileChosen", { defaultValue: "No file chosen" })}
+                  {file
+                    ? file.name
+                    : t("project.noFileChosen", {
+                      defaultValue: "No file chosen",
+                    })}
                 </span>
               </div>
             </div>
@@ -638,12 +846,16 @@ const ProjectList = ({
 
       {viewOpen && (
         <ModalShell
-          title={t("project.viewInformation", { defaultValue: "View Information" })}
+          title={t("project.viewInformation", {
+            defaultValue: "View Information",
+          })}
           onClose={() => setViewOpen(false)}
         >
           {!latestInfo ? (
             <p className="text-black/60">
-              {t("project.noInformationYet", { defaultValue: "No information uploaded yet." })}
+              {t("project.noInformationYet", {
+                defaultValue: "No information uploaded yet.",
+              })}
             </p>
           ) : (
             <div className="space-y-4">
@@ -654,11 +866,15 @@ const ProjectList = ({
 
                 {imageLoading && (
                   <p className="text-black/60">
-                    {t("project.loadingImage", { defaultValue: "Loading image..." })}
+                    {t("project.loadingImage", {
+                      defaultValue: "Loading image...",
+                    })}
                   </p>
                 )}
 
-                {imageError && <p className="text-sm text-red-600">{imageError}</p>}
+                {imageError && (
+                  <p className="text-sm text-red-600">{imageError}</p>
+                )}
 
                 {imageSrc && (
                   <img
@@ -692,7 +908,9 @@ const ProjectList = ({
           <div className="flex flex-col gap-4">
             <div className="text-center mb-2">
               <p className="text-black/60 text-sm uppercase tracking-widest font-bold opacity-70">
-                {t("project.exportFormatDescFull", { defaultValue: "Select Format For" })}
+                {t("project.exportFormatDescFull", {
+                  defaultValue: "Select Format For",
+                })}
               </p>
               <h4 className="text-xl font-light text-black mt-1">
                 {activeProject.name}
@@ -702,48 +920,80 @@ const ProjectList = ({
               <button
                 type="button"
                 onClick={() => {
-                  generateCsv([activeProject], `project_${activeProject.projectIdentifier}.csv`, {
-                    locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
-                  });
+                  generateCsv(
+                    [activeProject],
+                    `project_${activeProject.projectIdentifier}.csv`,
+                    {
+                      locale: i18n.language === "fr" ? "fr-CA" : "en-CA",
+                    },
+                  );
                 }}
                 className="flex flex-col items-center justify-center p-6 border-2 border-green-600 text-green-700 rounded-xl hover:bg-green-50 transition-all group shadow-sm hover:shadow-md"
               >
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
                   </svg>
                 </div>
                 <span className="font-bold">CSV</span>
-                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">Spreadsheet</span>
+                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">
+                  Spreadsheet
+                </span>
               </button>
- 
+
               <button
                 type="button"
                 onClick={() => {
                   const langSuffix = i18n.language === "fr" ? "-fr" : "-en";
-                  generatePdf([activeProject], `project_${activeProject.projectIdentifier}${langSuffix}.pdf`, {
-                    exporterName: user?.name || user?.email || "Staff",
-                    title: t("project.singleReport", { name: activeProject.name }),
-                    locale: i18n.language === "fr" ? "fr-CA" : "en-CA"
-                  });
+                  generatePdf(
+                    [activeProject],
+                    `project_${activeProject.projectIdentifier}${langSuffix}.pdf`,
+                    {
+                      exporterName: user?.name || user?.email || "Staff",
+                      title: t("project.singleReport", {
+                        name: activeProject.name,
+                      }),
+                      locale: i18n.language === "fr" ? "fr-CA" : "en-CA",
+                    },
+                  );
                 }}
                 className="flex flex-col items-center justify-center p-6 border-2 border-red-600 text-red-700 rounded-xl hover:bg-red-50 transition-all group shadow-sm hover:shadow-md"
               >
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <span className="font-bold">PDF</span>
-                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">Document</span>
+                <span className="text-[10px] uppercase tracking-widest mt-1 opacity-60">
+                  Document
+                </span>
               </button>
             </div>
-            
-
           </div>
         </ModalShell>
       )}
- 
+
       {/* Send to Portfolio Modal */}
       <SendToPortfolioModal
         project={activeProject}

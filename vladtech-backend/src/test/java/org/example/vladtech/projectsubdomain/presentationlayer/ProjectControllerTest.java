@@ -2,15 +2,16 @@ package org.example.vladtech.projectsubdomain.presentationlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.vladtech.projectsubdomain.businesslayer.ProjectService;
+import org.example.vladtech.projectsubdomain.businesslayer.UserProjectPinService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,9 +23,13 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import org.springframework.security.test.context.support.WithMockUser;
 
+@WithMockUser(authorities = "Admin")
 @WebMvcTest(ProjectController.class)
-@AutoConfigureMockMvc(addFilters = false) // <-- This disables Spring Security for tests
+@AutoConfigureMockMvc
 class ProjectControllerTest {
 
         @Autowired
@@ -36,12 +41,17 @@ class ProjectControllerTest {
         @MockitoBean
         private ProjectService projectService;
 
+        @MockitoBean
+        private UserProjectPinService userProjectPinService;
+
         private ProjectResponseModel responseModel;
         private ProjectRequestModel requestModel;
 
         @BeforeEach
         void setUp() {
                 responseModel = new ProjectResponseModel();
+                responseModel.setState("ACTIVE");
+                responseModel.setId("mongo-id-123");
                 responseModel.setProjectIdentifier("PROJ-1");
                 responseModel.setName("Test Project");
                 responseModel.setClientId("CLIENT-123");
@@ -118,6 +128,7 @@ class ProjectControllerTest {
 
                 // Act & Assert
                 mockMvc.perform(post("/api/projects")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestModel)))
                                 .andExpect(status().isCreated())
@@ -135,6 +146,7 @@ class ProjectControllerTest {
 
                 // Act & Assert
                 mockMvc.perform(put("/api/projects/PROJ-1")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(requestModel)))
                                 .andExpect(status().isOk())
@@ -150,7 +162,8 @@ class ProjectControllerTest {
                 doNothing().when(projectService).deleteProject("PROJ-1");
 
                 // Act & Assert
-                mockMvc.perform(delete("/api/projects/PROJ-1"))
+                mockMvc.perform(delete("/api/projects/PROJ-1")
+                                .with(csrf()))
                                 .andExpect(status().isNoContent());
 
                 verify(projectService, times(1)).deleteProject("PROJ-1");
@@ -162,7 +175,8 @@ class ProjectControllerTest {
                 when(projectService.assignEmployee("PROJ-1", "EMP-1")).thenReturn(responseModel);
 
                 // Act & Assert
-                mockMvc.perform(post("/api/projects/PROJ-1/assign/EMP-1"))
+                mockMvc.perform(post("/api/projects/PROJ-1/assign/EMP-1")
+                                .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"));
@@ -195,6 +209,7 @@ class ProjectControllerTest {
 
                 // Act & Assert
                 mockMvc.perform(post("/api/projects/PROJ-1/photos")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(photo)))
                                 .andExpect(status().isCreated())
@@ -209,7 +224,8 @@ class ProjectControllerTest {
                 doNothing().when(projectService).deleteProjectPhoto("PROJ-1", "PHOTO-1");
 
                 // Act & Assert
-                mockMvc.perform(delete("/api/projects/PROJ-1/photos/PHOTO-1"))
+                mockMvc.perform(delete("/api/projects/PROJ-1/photos/PHOTO-1")
+                                .with(csrf()))
                                 .andExpect(status().isNoContent());
 
                 verify(projectService, times(1)).deleteProjectPhoto("PROJ-1", "PHOTO-1");
@@ -262,7 +278,8 @@ class ProjectControllerTest {
                 when(projectService.completeProject("PROJ-1")).thenReturn(responseModel);
 
                 // Act & Assert
-                mockMvc.perform(put("/api/projects/PROJ-1/complete"))
+                mockMvc.perform(put("/api/projects/PROJ-1/complete")
+                                .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"))
@@ -312,7 +329,8 @@ class ProjectControllerTest {
                 when(projectService.reactivateProject("PROJ-1")).thenReturn(responseModel);
 
                 // Act & Assert
-                mockMvc.perform(put("/api/projects/PROJ-1/reactivate"))
+                mockMvc.perform(put("/api/projects/PROJ-1/reactivate")
+                                .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.projectIdentifier").value("PROJ-1"))
@@ -395,7 +413,8 @@ class ProjectControllerTest {
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                 .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
                                 .file("image", "test image content".getBytes())
-                                .param("type", type))
+                                .param("type", type)
+                                .with(csrf()))
                         .andExpect(status().isOk())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.portfolioId").value("portfolio-123"))
@@ -424,7 +443,8 @@ class ProjectControllerTest {
                 // Act & Assert
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                 .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
-                                .param("type", type))
+                                .param("type", type)
+                                .with(csrf()))
                         .andExpect(status().isOk())
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.portfolioId").value("portfolio-456"))
@@ -445,7 +465,8 @@ class ProjectControllerTest {
                 // Act & Assert
                 mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                 .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
-                                .param("type", type))
+                                .param("type", type)
+                                .with(csrf()))
                                 .andExpect(status().isBadRequest());
 
                 verify(projectService, times(1)).sendProjectToPortfolio(eq(projectIdentifier), eq(type), any());
@@ -469,11 +490,192 @@ class ProjectControllerTest {
                         // Act & Assert
                         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                                         .multipart("/api/projects/" + projectIdentifier + "/send-to-portfolio")
-                                        .param("type", type))
+                                        .param("type", type)
+                                        .with(csrf()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.type").value(type));
                 }
 
                 verify(projectService, times(types.length)).sendProjectToPortfolio(eq(projectIdentifier), any(), any());
+        }
+
+        // ========================================
+        // Tests for Pin Project Feature
+        // ========================================
+
+        @Test
+        void pinProject_ShouldReturnOk() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String userId = "user-123";
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(responseModel);
+                doNothing().when(userProjectPinService).pinProject(userId, "mongo-id-123");
+
+                // Act & Assert
+                mockMvc.perform(post("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk());
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).pinProject(userId, "mongo-id-123");
+        }
+
+        @Test
+        void unpinProject_ShouldReturnNoContent() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String userId = "user-123";
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(responseModel);
+                doNothing().when(userProjectPinService).unpinProject(userId, "mongo-id-123");
+
+                // Act & Assert
+                mockMvc.perform(delete("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isNoContent());
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).unpinProject(userId, "mongo-id-123");
+        }
+
+        @Test
+        void isProjectPinned_WhenPinned_ShouldReturnTrue() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String userId = "user-123";
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(responseModel);
+                when(userProjectPinService.isProjectPinned(userId, "mongo-id-123")).thenReturn(true);
+
+                // Act & Assert
+                mockMvc.perform(get("/api/projects/" + projectIdentifier + "/is-pinned")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string("true"));
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).isProjectPinned(userId, "mongo-id-123");
+        }
+
+        @Test
+        void isProjectPinned_WhenNotPinned_ShouldReturnFalse() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String userId = "user-123";
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(responseModel);
+                when(userProjectPinService.isProjectPinned(userId, "mongo-id-123")).thenReturn(false);
+
+                // Act & Assert
+                mockMvc.perform(get("/api/projects/" + projectIdentifier + "/is-pinned")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string("false"));
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).isProjectPinned(userId, "mongo-id-123");
+        }
+
+        @Test
+        void pinProject_WithDifferentProjectId_ShouldReturnOk() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-2";
+                String userId = "user-456";
+                ProjectResponseModel project2 = new ProjectResponseModel();
+                project2.setId("mongo-id-456");
+                project2.setProjectIdentifier("PROJ-2");
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(project2);
+                doNothing().when(userProjectPinService).pinProject(userId, "mongo-id-456");
+
+                // Act & Assert
+                mockMvc.perform(post("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk());
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).pinProject(userId, "mongo-id-456");
+        }
+
+        @Test
+        void unpinProject_WithDifferentProjectId_ShouldReturnNoContent() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-3";
+                String userId = "user-789";
+                ProjectResponseModel project3 = new ProjectResponseModel();
+                project3.setId("mongo-id-789");
+                project3.setProjectIdentifier("PROJ-3");
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(project3);
+                doNothing().when(userProjectPinService).unpinProject(userId, "mongo-id-789");
+
+                // Act & Assert
+                mockMvc.perform(delete("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isNoContent());
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(1)).unpinProject(userId, "mongo-id-789");
+        }
+
+        @Test
+        void isProjectPinned_MultipleProjects_ShouldReturnCorrectStatus() throws Exception {
+                // Test first project is pinned
+                String projectIdentifier1 = "PROJ-1";
+                String userId = "user-123";
+                when(projectService.getProjectByIdentifier(projectIdentifier1)).thenReturn(responseModel);
+                when(userProjectPinService.isProjectPinned(userId, "mongo-id-123")).thenReturn(true);
+
+                mockMvc.perform(get("/api/projects/" + projectIdentifier1 + "/is-pinned")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string("true"));
+
+                // Test second project is not pinned
+                String projectIdentifier2 = "PROJ-2";
+                ProjectResponseModel project2 = new ProjectResponseModel();
+                project2.setId("mongo-id-456");
+                project2.setProjectIdentifier("PROJ-2");
+                when(projectService.getProjectByIdentifier(projectIdentifier2)).thenReturn(project2);
+                when(userProjectPinService.isProjectPinned(userId, "mongo-id-456")).thenReturn(false);
+
+                mockMvc.perform(get("/api/projects/" + projectIdentifier2 + "/is-pinned")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId))))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string("false"));
+
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier1);
+                verify(projectService, times(1)).getProjectByIdentifier(projectIdentifier2);
+                verify(userProjectPinService, times(1)).isProjectPinned(userId, "mongo-id-123");
+                verify(userProjectPinService, times(1)).isProjectPinned(userId, "mongo-id-456");
+        }
+
+        @Test
+        void pinProject_MultipleUsers_ShouldPinCorrectly() throws Exception {
+                // Arrange
+                String projectIdentifier = "PROJ-1";
+                String userId1 = "user-111";
+                String userId2 = "user-222";
+                when(projectService.getProjectByIdentifier(projectIdentifier)).thenReturn(responseModel);
+                doNothing().when(userProjectPinService).pinProject(anyString(), eq("mongo-id-123"));
+
+                // Act - User 1 pins project
+                mockMvc.perform(post("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId1))))
+                                .andExpect(status().isOk());
+
+                // Act - User 2 pins same project
+                mockMvc.perform(post("/api/projects/" + projectIdentifier + "/pin")
+                                .with(jwt().authorities(new SimpleGrantedAuthority("Admin"))
+                                                .jwt(jwtBuilder -> jwtBuilder.claim("sub", userId2))))
+                                .andExpect(status().isOk());
+
+                // Assert
+                verify(projectService, times(2)).getProjectByIdentifier(projectIdentifier);
+                verify(userProjectPinService, times(2)).pinProject(anyString(), eq("mongo-id-123"));
         }
 }
