@@ -363,6 +363,31 @@ const resources = {
       "pdf.timeline": "Timeline & Financials",
       "pdf.personnel": "Assigned Personnel",
       "pdf.projectDescription": "Project Description",
+
+      // Client Finder Modal
+      "clientFinder.title": "Select Client",
+      "clientFinder.clientsFound": "{{count}} clients found",
+      "clientFinder.searchPlaceholder": "Search by email, name, or user ID...",
+      "clientFinder.search": "Search",
+      "clientFinder.clear": "Clear",
+      "clientFinder.error": "Failed to load clients",
+      "clientFinder.noClients": "No clients found",
+      "clientFinder.tryAgain": "Try again",
+      "clientFinder.noName": "No name",
+      "clientFinder.currentlySelected": "Currently Selected",
+
+      // Employee Finder Modal
+      "employeeFinder.title": "Select Employee",
+      "employeeFinder.employeesFound": "{{count}} employees found",
+      "employeeFinder.searchPlaceholder": "Search by email, name, or user ID...",
+      "employeeFinder.search": "Search",
+      "employeeFinder.clear": "Clear",
+      "employeeFinder.error": "Failed to load employees",
+      "employeeFinder.noEmployees": "No employees found",
+      "employeeFinder.tryAgain": "Try again",
+      "employeeFinder.noName": "No name",
+      "employeeFinder.selected": "Selected",
+      "employeeFinder.confirm": "Confirm",
     },
   },
   fr: {
@@ -727,6 +752,31 @@ const resources = {
       "pdf.timeline": "Calendrier et finances",
       "pdf.personnel": "Personnel assigné",
       "pdf.projectDescription": "Description du projet",
+
+      // Client Finder Modal
+      "clientFinder.title": "Sélectionner un Client",
+      "clientFinder.clientsFound": "{{count}} clients trouvés",
+      "clientFinder.searchPlaceholder": "Rechercher par email, nom ou ID utilisateur...",
+      "clientFinder.search": "Rechercher",
+      "clientFinder.clear": "Effacer",
+      "clientFinder.error": "Échec du chargement des clients",
+      "clientFinder.noClients": "Aucun client trouvé",
+      "clientFinder.tryAgain": "Réessayer",
+      "clientFinder.noName": "Aucun nom",
+      "clientFinder.currentlySelected": "Actuellement sélectionné",
+
+      // Employee Finder Modal
+      "employeeFinder.title": "Sélectionner un Employé",
+      "employeeFinder.employeesFound": "{{count}} employés trouvés",
+      "employeeFinder.searchPlaceholder": "Rechercher par email, nom ou ID utilisateur...",
+      "employeeFinder.search": "Rechercher",
+      "employeeFinder.clear": "Effacer",
+      "employeeFinder.error": "Échec du chargement des employés",
+      "employeeFinder.noEmployees": "Aucun employé trouvé",
+      "employeeFinder.tryAgain": "Réessayer",
+      "employeeFinder.noName": "Aucun nom",
+      "employeeFinder.selected": "Sélectionné",
+      "employeeFinder.confirm": "Confirmer",
     },
   },
 };

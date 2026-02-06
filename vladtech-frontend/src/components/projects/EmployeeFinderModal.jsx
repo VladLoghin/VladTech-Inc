@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 //import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 
 const EmployeeFinderModal = ({
@@ -11,6 +12,7 @@ const EmployeeFinderModal = ({
   onToggleEmployee,
 }) => {
   const { getAccessTokenSilently } = useAuth0();
+  const { t } = useTranslation();
   const [employees, setEmployees] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalEmployees, setTotalEmployees] = useState(0);
@@ -22,7 +24,7 @@ const EmployeeFinderModal = ({
   const perPage = 25;
 
 
-  const fetchEmployees = async (page, query = "") => {
+  const fetchEmployees = useCallback(async (page, query = "") => {
     setLoading(true);
     setError("");
 
@@ -61,7 +63,7 @@ const EmployeeFinderModal = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAccessTokenSilently, perPage]);
 
    
   useEffect(() => {
@@ -71,7 +73,7 @@ const EmployeeFinderModal = ({
       setSearchQuery("");
       fetchEmployees(0);
     }
-  }, [isOpen]);
+  }, [isOpen, fetchEmployees]);
 
 
    
@@ -79,7 +81,7 @@ const EmployeeFinderModal = ({
     if (isOpen && currentPage > 0) {
       fetchEmployees(currentPage, activeQuery);
     }
-  }, [currentPage, isOpen, activeQuery]);
+  }, [currentPage, isOpen, activeQuery, fetchEmployees]);
 
 
   const totalPages = Math.ceil(totalEmployees / perPage);
@@ -117,10 +119,10 @@ const EmployeeFinderModal = ({
         <div className="flex items-center justify-between p-6 border-b border-black/10">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              Select Employee
+              {t('employeeFinder.title')}
             </h2>
             <p className="text-sm text-black/60 mt-1">
-              {totalEmployees} employees found
+              {t('employeeFinder.employeesFound', { count: totalEmployees })}
             </p>
           </div>
           <button
@@ -140,7 +142,7 @@ const EmployeeFinderModal = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by email, name, or user ID..."
+                placeholder={t('employeeFinder.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-black/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               />
             </div>
@@ -148,7 +150,7 @@ const EmployeeFinderModal = ({
               type="submit"
               className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg transition-colors font-semibold"
             >
-              Search
+              {t('employeeFinder.search')}
             </button>
             {activeQuery && (
               <button
@@ -156,7 +158,7 @@ const EmployeeFinderModal = ({
                 onClick={handleClearSearch}
                 className="px-4 py-2 border border-black/20 hover:bg-black/5 rounded-lg transition-colors"
               >
-                Clear
+                {t('employeeFinder.clear')}
               </button>
             )}
           </form>
@@ -170,17 +172,17 @@ const EmployeeFinderModal = ({
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-600">{error}</p>
+              <p className="text-red-600">{t('employeeFinder.error')}</p>
               <button
                 onClick={() => fetchEmployees(currentPage, activeQuery)}
                 className="mt-4 text-sm text-yellow-600 hover:text-yellow-700"
               >
-                Try again
+                {t('employeeFinder.tryAgain')}
               </button>
             </div>
           ) : employees.length === 0 ? (
             <div className="text-center py-12 text-black/60">
-              No employees found
+              {t('employeeFinder.noEmployees')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -199,17 +201,17 @@ const EmployeeFinderModal = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-lg">
-                            {emp.name || "No name"}
+                            {emp.name || t('employeeFinder.noName')}
                           </p>
                           {isSelected && (
                             <span className="text-xs bg-yellow-400 px-2 py-1 rounded font-semibold">
-                              Selected
+                              {t('employeeFinder.selected')}
                             </span>
                           )}
                         </div>
                         <p className="text-sm text-black/60">{emp.email}</p>
                         <p className="text-xs text-black/40 mt-1">
-                          ID: {encodeURIComponent(emp.user_id)}
+                          {t('project.id')}: {encodeURIComponent(emp.user_id)}
                         </p>
                       </div>
 
@@ -239,12 +241,12 @@ const EmployeeFinderModal = ({
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            {t('previous')}
           </button>
 
           {/* Page info */}
           <div className="text-sm text-black/60">
-            Page {currentPage + 1} of {totalPages || 1}
+            {t('pageOf', { current: currentPage + 1, total: totalPages || 1 })}
           </div>
 
           {/* Next */}
@@ -253,7 +255,7 @@ const EmployeeFinderModal = ({
             disabled={currentPage >= totalPages - 1 || loading}
             className="flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg hover:bg-black/5 disabled:opacity-50 transition-colors"
           >
-            Next
+            {t('next')}
             <ChevronRight className="h-4 w-4" />
           </button>
 
@@ -262,7 +264,7 @@ const EmployeeFinderModal = ({
             onClick={onClose}
             className="ml-4 px-6 py-2 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-semibold shadow"
           >
-            Confirm
+            {t('employeeFinder.confirm')}
           </button>
 
         </div>
