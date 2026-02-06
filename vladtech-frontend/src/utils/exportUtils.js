@@ -27,6 +27,43 @@ const formatAddress = (addr) => {
   return parts.length > 0 ? parts.join(', ') : '-';
 };
 
+const formatEstimatedTime = (seconds) => {
+  if (!seconds || seconds <= 0) return '-';
+
+  const SECONDS_IN_YEAR = 31536000;
+  const SECONDS_IN_MONTH = 2592000;
+  const SECONDS_IN_DAY = 86400;
+  const SECONDS_IN_HOUR = 3600;
+
+  let remaining = seconds;
+  const parts = [];
+
+  const years = Math.floor(remaining / SECONDS_IN_YEAR);
+  if (years > 0) {
+    parts.push(`${years}y`);
+    remaining -= years * SECONDS_IN_YEAR;
+  }
+
+  const months = Math.floor(remaining / SECONDS_IN_MONTH);
+  if (months > 0) {
+    parts.push(`${months}mo`);
+    remaining -= months * SECONDS_IN_MONTH;
+  }
+
+  const days = Math.floor(remaining / SECONDS_IN_DAY);
+  if (days > 0) {
+    parts.push(`${days}d`);
+    remaining -= days * SECONDS_IN_DAY;
+  }
+
+  const hours = Math.floor(remaining / SECONDS_IN_HOUR);
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+
+  return parts.length > 0 ? parts.join(' ') : '-';
+};
+
 export const generateCsv = (projects, filename = 'projects.csv', options = {}) => {
   if (!projects || projects.length === 0) {
     console.warn("generateCsv: No projects to export");
@@ -217,6 +254,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
     const timelineData = [
       [t('project.startDate'), p.startDate || '-'],
       [t('project.dueDate'), p.dueDate || '-'],
+      [t('project.estimatedTime', { defaultValue: 'Estimated Time' }), formatEstimatedTime(p.estimatedTime)],
       [t('project.estimatedCost'), formatMoney(p.estimatedCost, p.estimatedCostCurrency, locale)],
       [t('project.addressLabel'), formatAddress(p.address)]
     ];
