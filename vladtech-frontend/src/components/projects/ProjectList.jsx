@@ -541,7 +541,7 @@ const ProjectList = ({
                       {t("project.projectType")}:
                     </strong>{" "}
                     <span className="bg-yellow-100 px-2 py-1 rounded">
-                      {project.projectType}
+                      {t(`project.${project.projectType?.toLowerCase() || 'none'}`)}
                     </span>
                   </p>
 
