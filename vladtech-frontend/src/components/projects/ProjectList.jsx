@@ -4,11 +4,23 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../api/http";
 import SendToPortfolioModal from "./SendToPortfolioModal";
 import { generateCsv, generatePdf } from "../../utils/exportUtils";
+import { MapPin } from "lucide-react";
 import {
   pinProject,
   unpinProject,
   isProjectPinned,
 } from "../../api/projects/projectPinApi";
+
+const formatAddress = (addr) => {
+  if (!addr) return null;
+  const parts = [];
+  if (addr.streetAddress) parts.push(addr.streetAddress);
+  const cityProv = [addr.city, addr.province].filter(Boolean).join(", ");
+  const cityProvPost = [cityProv, addr.postalCode].filter(Boolean).join(" ");
+  if (cityProvPost) parts.push(cityProvPost);
+  if (addr.country) parts.push(addr.country);
+  return parts.length > 0 ? parts.join(", ") : null;
+};
 
 const formatAssignedEmployees = (
   assignedEmployeeIds,
@@ -545,6 +557,13 @@ const ProjectList = ({
                     </span>
                   </p>
 
+                  <p className="md:col-span-2 flex items-center gap-2 mt-1">
+                    <MapPin className="w-4 h-4 text-black/40" />
+                    <span className="text-black/70 font-medium">
+                      {formatAddress(project.address) || t("project.none")}
+                    </span>
+                  </p>
+
                   <p>
                     <strong className="text-black/60">
                       {t("project.priority")}:
@@ -559,13 +578,7 @@ const ProjectList = ({
                             : "bg-blue-100 text-blue-800"
                         }`}
                     >
-                      {project.priority === "URGENT"
-                        ? t("project.priorityUrgent")
-                        : project.priority === "HIGH"
-                          ? t("project.priorityHigh")
-                          : project.priority === "LOW"
-                            ? t("project.priorityLow")
-                            : t("project.priorityMedium")}
+                      {t(`project.priority${project.priority?.charAt(0).toUpperCase() + project.priority?.slice(1).toLowerCase() || 'Medium'}`)}
                     </span>
                   </p>
 
@@ -659,11 +672,7 @@ const ProjectList = ({
                       <span
                         className={`px-2 py-1 rounded ${getStatusBadgeClasses(project.status)}`}
                       >
-                        {project.status === "COMPLETED"
-                          ? t("project.completed")
-                          : project.status === "IN_PROGRESS"
-                            ? t("project.inProgress")
-                            : t("project.pending")}
+                        {t(`project.${project.status === 'IN_PROGRESS' ? 'inProgress' : (project.status?.toLowerCase() || 'none')}`)}
                       </span>
                     )}
                   </p>
