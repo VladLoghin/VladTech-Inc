@@ -579,8 +579,10 @@ test.describe('Estimate Modal E2E', () => {
     await expect(resultModal).toBeVisible();
 
     // Check for total price display - look for the bold price in breakdown-total
-    const totalPrice = resultModal.locator('.breakdown-total strong').first();
+    const totalPrice = resultModal.locator('.breakdown-total .breakdown-amount strong');
     await expect(totalPrice).toBeVisible();
+    // Verify it contains a currency amount
+    await expect(totalPrice).toContainText(/\$[\d,.]+/);
   });
 
   // ============ Error Handling Tests ============
