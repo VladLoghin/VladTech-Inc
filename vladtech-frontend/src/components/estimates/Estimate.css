@@ -29,7 +29,7 @@
     color: var(--foreground, #000);
 }
 
-.modal-content label {
+.modal-content label:not(.checkbox-label) {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: var(--font-weight-medium, 500);
@@ -74,6 +74,122 @@
     background-color: var(--muted-hover, #aaa);
 }
 
+/* Styled Checkbox */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.checkbox-label {
+    cursor: pointer;
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--foreground, #000);
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Custom checkbox styling */
+.checkbox-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    border: 2px solid #999;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #d0d0d0;
+    flex-shrink: 0;
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cline x1='6' y1='6' x2='18' y2='18' stroke='%23555' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='18' y1='6' x2='6' y2='18' stroke='%23555' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px;
+}
+
+.checkbox-input:hover {
+    border-color: #FCC700;
+    box-shadow: 0 0 0 3px rgba(252, 199, 0, 0.1);
+}
+
+.checkbox-input:checked {
+    background-color: #FCC700;
+    border-color: #FCC700;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 10L9 13L15 7' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px;
+}
+
+.checkbox-input:focus {
+    outline: 2px solid #FCC700;
+    outline-offset: 2px;
+}
+
+/* Grid layout for checkboxes */
+.checkboxes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.checkbox-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-grid-item .checkbox-label {
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+/* Collapsible section for conditional fields */
+.collapsible-section {
+    margin-top: 0.5rem;
+    margin-left: 2rem;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    background-color: rgba(252, 199, 0, 0.05);
+    border-left: 3px solid #FCC700;
+    border-radius: 4px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+        overflow: visible;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -83,4 +199,55 @@
         opacity: 1;
         transform: scale(1);
     }
+}
+
+/* Cost Breakdown Styling */
+.estimate-breakdown {
+    background-color: rgba(252, 199, 0, 0.08);
+    border: 1px solid rgba(252, 199, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.breakdown-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+.breakdown-row span:first-child {
+    color: var(--foreground, #000);
+}
+
+.breakdown-amount {
+    font-weight: 600;
+    min-width: 100px;
+    text-align: right;
+    color: var(--foreground, #000);
+}
+
+.breakdown-percent {
+    min-width: 50px;
+    text-align: right;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.breakdown-divider {
+    height: 1px;
+    background-color: rgba(252, 199, 0, 0.3);
+    margin: 0.5rem 0;
+}
+
+.breakdown-total {
+    padding-top: 0.75rem;
+    font-size: 1.05rem;
+}
+
+.breakdown-total .breakdown-amount {
+    color: #FCC700;
 }
