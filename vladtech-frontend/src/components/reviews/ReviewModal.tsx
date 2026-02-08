@@ -134,7 +134,15 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             if (status === 409) {
                 setErrors({ submit: "You already reviewed this project." });
             } else if (status === 403) {
-                setErrors({ submit: "You are banned from creating reviews." });
+                const data = err?.response?.data;
+                if (data?.permanent) {
+                    setErrors({ submit: "You are permanently banned from creating reviews." });
+                } else if (data?.banUntil) {
+                    const until = new Date(data.banUntil).toLocaleString();
+                    setErrors({ submit: `You are banned from creating reviews until ${until}.` });
+                } else {
+                    setErrors({ submit: "You are banned from creating reviews." });
+                }
             } else {
                 setErrors({ submit: "Error submitting review." });
             }

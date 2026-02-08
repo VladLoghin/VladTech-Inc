@@ -26,6 +26,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
     const [deleting, setDeleting] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [banInfo, setBanInfo] = useState(null);
 
     const canToggleVisibility =
         isAuthenticated &&
@@ -116,11 +117,24 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const confirmDelete = async () => {
         setShowDeleteConfirm(false);
-        if (!onDelete) return;
         setDeleting(true);
         try {
-            await onDelete(reviewId);
+            const token = await getAccessTokenSilently({
+                authorizationParams: { audience: "https://vladtech/api" },
+            });
+
+            if (isAdmin) {
+                const res = await deleteReviewAdmin(reviewId, token);
+                setBanInfo(res.data);
+            } else {
+                await deleteReviewClient(reviewId, token);
+                setBanInfo(null);
+            }
+
+            if (onDelete) onDelete(reviewId);
             setShowSuccessModal(true);
+        } catch (err) {
+            console.error("Failed to delete review:", err);
         } finally {
             setDeleting(false);
         }
@@ -326,8 +340,19 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <FaCheckCircle className="success-modal-icon" />
-                        <h3 className="success-modal-title">Success!</h3>
-                        <p className="success-modal-text">Review added to portfolio</p>
+                        <h3 className="success-modal-title">Review Deleted</h3>
+                        {banInfo && (
+                            <p className="success-modal-text">
+                                {banInfo.permanent
+                                    ? `Strike ${banInfo.strikes}: Reviewer is now permanently banned from posting reviews.`
+                                    : banInfo.banUntil
+                                        ? `Strike ${banInfo.strikes}: Reviewer is banned from posting reviews until ${new Date(banInfo.banUntil).toLocaleString()}.`
+                                        : "Review deleted successfully."}
+                            </p>
+                        )}
+                        {!banInfo && (
+                            <p className="success-modal-text">Review deleted successfully.</p>
+                        )}
                     </div>
                 </div>
             )}

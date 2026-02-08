@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -387,7 +389,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void deleteReview(String reviewId) {
+    public Map<String, Object> deleteReview(String reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
@@ -395,6 +397,15 @@ public class ReviewServiceImpl implements ReviewService {
         applyReviewStrike(ownerId);
 
         reviewRepository.delete(review);
+
+        UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(ownerId);
+        Map<String, Object> banInfo = new HashMap<>();
+        if (profile != null) {
+            banInfo.put("strikes", profile.getDeletedReviewCount());
+            banInfo.put("permanent", profile.isReviewPermanentlyBanned());
+            banInfo.put("banUntil", profile.getReviewBanUntil());
+        }
+        return banInfo;
     }
 
     private void enforceReviewBan(String auth0Sub) {

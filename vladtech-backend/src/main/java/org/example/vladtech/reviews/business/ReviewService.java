@@ -30,7 +30,7 @@ public interface ReviewService {
     // Compute customer satisfaction percentage based on visible reviews
     double computeSatisfactionPercentage();
 
-    void deleteReview(String reviewId);
+    java.util.Map<String, Object> deleteReview(String reviewId);
 
     PortfolioResponseDto sendToPortfolio(String reviewId);
 

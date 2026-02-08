@@ -74,7 +74,7 @@ public class ReviewController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('Client')")
-    public ResponseEntity<ReviewResponseModel> createReview(
+    public ResponseEntity<?> createReview(
             @Valid @RequestPart("review") ReviewRequestModel reviewRequest,
             @RequestPart(value = "photos", required = false) MultipartFile[] photos,
             @AuthenticationPrincipal Jwt jwt
@@ -96,7 +96,7 @@ public class ReviewController {
                 body.put("banUntil", profile.getReviewBanUntil());
             }
 
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("already exists")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
@@ -139,13 +139,14 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('Admin')")
     @DeleteMapping("/admin/{reviewId}")
-    public void deleteReviewsByReviewId(@PathVariable String reviewId) {
+    public ResponseEntity<Map<String, Object>> deleteReviewsByReviewId(@PathVariable String reviewId) {
         if (reviewId == null || reviewId.isBlank()) {
             throw new IllegalArgumentException("Review ID must not be null or blank");
         }
 
         try {
-            reviewService.deleteReview(reviewId);
+            Map<String, Object> banInfo = reviewService.deleteReview(reviewId);
+            return ResponseEntity.ok(banInfo);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
