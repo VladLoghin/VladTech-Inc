@@ -1,11 +1,13 @@
 package org.example.vladtech.reviews.presentation;
 
+import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -48,6 +50,9 @@ class ReviewControllerIntegrationTest {
     private ContactServiceImpl contactService;
     @MockitoBean
     private ReviewService reviewService;
+
+    @MockitoBean
+    private UserProfileRepository userProfileRepository;
 
     private ReviewResponseModel r1;
     private ReviewResponseModel r2;

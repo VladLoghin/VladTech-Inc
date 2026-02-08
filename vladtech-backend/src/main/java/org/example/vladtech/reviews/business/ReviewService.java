@@ -38,5 +38,9 @@ public interface ReviewService {
 
     void resetPortfolioStatus(String reviewId);
 
+    void applyReviewStrike(String auth0Sub);
+
+    void enforceReviewBan(String auth0Sub);
+
 }
 

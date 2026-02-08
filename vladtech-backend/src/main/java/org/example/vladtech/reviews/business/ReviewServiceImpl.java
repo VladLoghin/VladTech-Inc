@@ -408,7 +408,8 @@ public class ReviewServiceImpl implements ReviewService {
         return banInfo;
     }
 
-    private void enforceReviewBan(String auth0Sub) {
+    @Override
+    public void enforceReviewBan(String auth0Sub) {
         UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(auth0Sub);
         if (profile == null) return;
 
@@ -422,7 +423,8 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
-    private void applyReviewStrike(String auth0Sub) {
+    @Override
+    public void applyReviewStrike(String auth0Sub) {
         if (auth0Sub == null || auth0Sub.isBlank()) return;
 
         UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(auth0Sub);
