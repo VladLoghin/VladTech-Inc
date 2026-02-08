@@ -133,6 +133,8 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             const status = err?.response?.status;
             if (status === 409) {
                 setErrors({ submit: "You already reviewed this project." });
+            } else if (status === 403) {
+                setErrors({ submit: "You are banned from creating reviews." });
             } else {
                 setErrors({ submit: "Error submitting review." });
             }

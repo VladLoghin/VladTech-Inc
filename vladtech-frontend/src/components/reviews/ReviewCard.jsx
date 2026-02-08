@@ -5,6 +5,7 @@ import { deleteReviewClient, deleteReviewAdmin } from "../../api/reviews/reviews
 import getImageUrl from "../../utils/getImageUrl.js";
 import "./Review.css";
 import { api } from "../../api/http";
+import DeleteConfirmModal from "./DeleteConfirmModal.jsx";
 
 const ReviewCard = ({ review, onClick, onDelete }) => {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -24,6 +25,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const [deleting, setDeleting] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const canToggleVisibility =
         isAuthenticated &&
@@ -106,34 +108,19 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
         }
     };
 
-    const handleDelete = async (e) => {
-        e.stopPropagation();
-        if (!reviewId) return;
+    const handleDeleteClick = (e) => {
+        e?.stopPropagation?.();
+        if (!canDelete || deleting) return;
+        setShowDeleteConfirm(true);
+    };
 
+    const confirmDelete = async () => {
+        setShowDeleteConfirm(false);
+        if (!onDelete) return;
+        setDeleting(true);
         try {
-            setDeleting(true);
-
-            const token = await getAccessTokenSilently({
-                authorizationParams: {
-                    audience: "https://vladtech/api",
-                },
-            });
-
-            const res = isAdmin
-                ? await deleteReviewAdmin(reviewId, token)
-                : await deleteReviewClient(reviewId, token);
-
-            if (res.status !== 200 && res.status !== 204) {
-                throw new Error(`Delete failed with status ${res.status}`);
-            }
-
-            // Call onDelete to notify parent component
-            if (onDelete) {
-                onDelete(reviewId);
-            }
-        } catch (err) {
-            console.error("Failed to delete review:", err);
-            alert("Failed to delete review. Please try again.");
+            await onDelete(reviewId);
+            setShowSuccessModal(true);
         } finally {
             setDeleting(false);
         }
@@ -308,7 +295,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                 {canDelete && (
                     <button
                         type="button"
-                        onClick={handleDelete}
+                        onClick={handleDeleteClick}
                         disabled={deleting}
                         style={{
                             backgroundColor: "#dc2626",
@@ -344,6 +331,14 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                     </div>
                 </div>
             )}
+
+            <DeleteConfirmModal
+                open={showDeleteConfirm}
+                title="Delete Review?"
+                message="This action cannot be undone. Deleting this review will count as a strike for the reviewer."
+                onConfirm={confirmDelete}
+                onCancel={() => setShowDeleteConfirm(false)}
+            />
         </>
     );
 };
