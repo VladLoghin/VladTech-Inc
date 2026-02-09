@@ -709,7 +709,7 @@ const resources = {
       "project.costPositiveError": "Le coût doit être un nombre positif",
 
       // Calendar
-      "calendar.today": "aujourd’hui",
+      "calendar.today": "Aujourd’hui",
 
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
