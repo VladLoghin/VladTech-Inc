@@ -24,8 +24,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PortfolioResponseDto> getAllPortfolioItems() {
-        log.info("Fetching all non-archived portfolio items");
-        List<PortfolioItem> portfolioItems = portfolioRepository.findByArchivedFalse();
+        log.info("Fetching all portfolio items");
+        List<PortfolioItem> portfolioItems = portfolioRepository.findAll();
         return portfolioItems.stream()
                 .map(portfolioMapper::entityToResponseDto)
                 .collect(Collectors.toList());
@@ -33,8 +33,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PortfolioResponseDto> getPortfolioItemsByType(String type) {
-        log.info("Fetching non-archived portfolio items by type: {}", type);
-        List<PortfolioItem> portfolioItems = portfolioRepository.findByTypeAndArchivedFalse(type);
+        log.info("Fetching portfolio items by type: {}", type);
+        List<PortfolioItem> portfolioItems = portfolioRepository.findByType(type);
         return portfolioItems.stream()
                 .map(portfolioMapper::entityToResponseDto)
                 .collect(Collectors.toList());
@@ -96,36 +96,14 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public void archivePortfolioItem(String portfolioId) {
-        log.info("Archiving portfolio item with id: {}", portfolioId);
+    public void deletePortfolioItem(String portfolioId) {
+        log.info("Deleting portfolio item with id: {}", portfolioId);
 
         PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
 
-        portfolioItem.setArchived(true);
-        portfolioRepository.save(portfolioItem);
-        log.info("Portfolio item archived successfully with id: {}", portfolioId);
-    }
-
-    @Override
-    public void unarchivePortfolioItem(String portfolioId) {
-        log.info("Unarchiving portfolio item with id: {}", portfolioId);
-
-        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
-
-        portfolioItem.setArchived(false);
-        portfolioRepository.save(portfolioItem);
-        log.info("Portfolio item unarchived successfully with id: {}", portfolioId);
-    }
-
-    @Override
-    public List<PortfolioResponseDto> getArchivedPortfolioItems() {
-        log.info("Fetching all archived portfolio items");
-        List<PortfolioItem> portfolioItems = portfolioRepository.findByArchivedTrue();
-        return portfolioItems.stream()
-                .map(portfolioMapper::entityToResponseDto)
-                .collect(Collectors.toList());
+        portfolioRepository.delete(portfolioItem);
+        log.info("Portfolio item deleted successfully with id: {}", portfolioId);
     }
 }
 

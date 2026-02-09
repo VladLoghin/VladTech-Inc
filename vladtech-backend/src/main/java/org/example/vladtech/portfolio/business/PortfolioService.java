@@ -11,7 +11,5 @@ public interface PortfolioService {
     PortfolioResponseDto getPortfolioItemById(String portfolioId);
     PortfolioCommentDto addComment(String portfolioId, String commentText, String userId, String userName);
     PortfolioResponseDto createPortfolioItem(String title, String imageUrl, String type);
-    void archivePortfolioItem(String portfolioId);
-    void unarchivePortfolioItem(String portfolioId);
-    List<PortfolioResponseDto> getArchivedPortfolioItems();
+    void deletePortfolioItem(String portfolioId);
 }
