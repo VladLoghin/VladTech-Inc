@@ -196,6 +196,10 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
       />
       
       <style>{`
+        .fc-toolbar-title,
+        .fc-col-header-cell-cushion {
+          text-transform: capitalize;
+        }
         .fc-daygrid-day {
           cursor: pointer;
           transition: background-color 0.2s;

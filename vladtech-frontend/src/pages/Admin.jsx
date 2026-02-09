@@ -425,12 +425,27 @@ const Admin = () => {
     const date = new Date(Number(year), Number(month) - 1, Number(day));
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
-    return date.toLocaleDateString(locale, {
+    const parts = new Intl.DateTimeFormat(locale, {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
-    });
+    }).formatToParts(date);
+
+    const titleCasePart = (value) => {
+      if (!value) return value;
+      const lower = value.toLocaleLowerCase(locale);
+      return lower.charAt(0).toLocaleUpperCase(locale) + lower.slice(1);
+    };
+
+    return parts
+      .map((part) => {
+        if (part.type === "weekday" || part.type === "month") {
+          return titleCasePart(part.value);
+        }
+        return part.value;
+      })
+      .join("");
   };
 
   // Handle stat card clicks - scroll to projects and apply filter
