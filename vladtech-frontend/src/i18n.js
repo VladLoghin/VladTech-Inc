@@ -77,7 +77,7 @@ const resources = {
       // Admin Page
       "admin.title": "Admin Panel",
       "admin.createPortfolio": "Create Portfolio",
-      "admin.deletePortfolio": "Delete Portfolio",
+      "admin.archivePortfolio": "Archive Portfolio",
       "admin.roleFinder": "Role Finder",
       "admin.roleManager": "Role Manager",
       "admin.projectCalendar": "Project Calendar",
@@ -91,7 +91,7 @@ const resources = {
       "admin.projectCompleted": 'Project "{{name}}" has been archived.',
       "admin.projectReactivated": 'Project "{{name}}" has been reactivated.',
       "admin.portfolioCreated": "Portfolio item created successfully!",
-      "admin.portfolioDeleted": "Portfolio item deleted successfully!",
+      "admin.portfolioArchived": "Portfolio item archived successfully!",
       "admin.failedFetchActive": "Failed to fetch active projects.",
       "admin.failedFetchArchived": "Failed to fetch archived projects.",
       "admin.failedComplete": "Failed to complete project.",
@@ -324,7 +324,7 @@ const resources = {
 
       // Portfolio Modals
       "portfolio.createItem": "Create Portfolio Item",
-      "portfolio.deleteItem": "Delete Portfolio Item",
+      "portfolio.archiveItem": "Archive Portfolio Item",
       "portfolio.title": "Title",
       "portfolio.image": "Image",
       "portfolio.clickUpload": "Click to upload image",
@@ -465,7 +465,7 @@ const resources = {
       // Admin Page
       "admin.title": "Panneau Admin",
       "admin.createPortfolio": "Créer un Portfolio",
-      "admin.deletePortfolio": "Supprimer un Portfolio",
+      "admin.archivePortfolio": "Archiver un Portfolio",
       "admin.roleFinder": "Recherche de Rôle",
       "admin.roleManager": "Entretien de Role",
       "admin.projectCalendar": "Calendrier projet",
@@ -479,7 +479,7 @@ const resources = {
       "admin.projectCompleted": 'Le projet "{{name}}" a été archivé.',
       "admin.projectReactivated": 'Le projet "{{name}}" a été réactivé.',
       "admin.portfolioCreated": "Élément de portfolio créé avec succès!",
-      "admin.portfolioDeleted": "Élément de portfolio supprimé avec succès!",
+      "admin.portfolioArchived": "Élément de portfolio archivé avec succès!",
       "admin.failedFetchActive": "Échec de la récupération des projets actifs.",
       "admin.failedFetchArchived": "Échec de la récupération des projets archivés.",
       "admin.failedComplete": "Échec de l'achèvement du projet.",
@@ -713,7 +713,7 @@ const resources = {
 
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
-      "portfolio.deleteItem": "Supprimer un Élément de Portfolio",
+      "portfolio.archiveItem": "Archiver un Élément de Portfolio",
       "portfolio.title": "Titre",
       "portfolio.image": "Image",
       "portfolio.clickUpload": "Cliquez pour télécharger l'image",
