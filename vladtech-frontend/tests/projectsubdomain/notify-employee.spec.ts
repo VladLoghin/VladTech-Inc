@@ -1,172 +1,142 @@
-// tests/projectsubdomain/admin-assign-sends-email.mailhog.spec.ts
-import { test, expect, Page, Locator } from '@playwright/test';
+import { test, expect } from '../fixtures/fixtures.js';
 
-const MAILHOG_BASE = 'http://localhost:8025';
+test.describe('Notify employee when assigned to project', () => {
+  test('send email notification when employee is assigned to project', async ({ page, loginAs, createProject }) => {
+    const targetEmployeeEmail = 'employee.vladtech@cle4rwater.ca';
 
-// ---------- tiny helpers (same idea as your other file) ----------
-async function safeClick(locator: Locator) {
-  await locator.scrollIntoViewIfNeeded();
-  await locator.waitFor({ state: 'visible' });
-  await locator.click({ force: true });
-}
+    // 1) Login as admin
+    await loginAs('admin');
 
-async function clickLogin(page: Page) {
-  const viewport = page.viewportSize();
-  const isMobile = viewport && viewport.width < 768;
+    // 2) Create a project to assign employee to
+    const projectName = await createProject('Notify Employee Test');
 
-  await page.goto('http://localhost:5173/');
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(200);
+    // 3) Wait for page to be ready
+    await page.waitForTimeout(500);
 
-  if (isMobile) {
-    await safeClick(page.locator('button:has(svg)').first());
+    // 4) Find our project and open edit modal
+    const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
+    await expect(projectCard).toBeVisible({ timeout: 5000 });
+    await projectCard.getByRole('button', { name: 'Edit' }).click();
+
+    // Wait for the ProjectModal to appear
+    const projectModalTitle = page.getByRole('heading', {
+      name: /Edit Project|New Project/i,
+    });
+    await expect(projectModalTitle).toBeVisible();
+
+    // 5) Scroll down to find the employee assignment field
+    await page.evaluate(() => {
+      const modal = document.querySelector('.overflow-y-auto');
+      if (modal) modal.scrollTop = 400;
+    });
     await page.waitForTimeout(300);
-    await safeClick(page.getByRole('button', { name: 'LOGIN' }).last());
-  } else {
-    await safeClick(page.getByRole('button', { name: 'LOGIN' }).first());
-  }
-}
 
-async function loginAuth0(page: Page, email: string, password: string) {
-  const emailBox = page.getByRole('textbox', { name: /email/i }).first();
-  await emailBox.waitFor({ state: 'visible', timeout: 20000 });
-  await emailBox.fill(email);
+    // 6) Open Employee picker
+    const employeePickerButton = page.getByRole('button', {
+      name: /Select employees?|Select employee/i,
+    });
+    await employeePickerButton.click();
 
-  await page.locator('input[type="password"]').first().fill(password);
+    // Wait for EmployeeFinderModal
+    await expect(
+      page.getByRole('heading', { name: /Select Employee/i })
+    ).toBeVisible();
 
-  await safeClick(page.getByRole('button', { name: /continue/i }).first());
+    // 7) Click the employee row for employee.vladtech@cle4rwater.ca
+    const employeeRow = page
+      .getByRole('button')
+      .filter({ hasText: targetEmployeeEmail })
+      .first();
 
-  await page.waitForURL(/http:\/\/localhost:5173\/?$/, { timeout: 30000 });
-}
+    await expect(employeeRow).toBeVisible({ timeout: 15000 });
+    await employeeRow.click(); // toggles selection, modal stays open
 
-async function gotoAdminPanel(page: Page) {
-  const viewport = page.viewportSize();
-  const isMobile = viewport && viewport.width < 768;
+    // 8) Click the Confirm button inside the modal
+    const confirmButton = page.getByRole('button', { name: /^Confirm$/i });
+    await confirmButton.click();
 
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(200);
+    // Modal should close
+    await expect(
+      page.getByRole('heading', { name: /Select Employee/i })
+    ).toBeHidden();
 
-  if (isMobile) {
-    await safeClick(page.locator('button:has(svg)').first());
-    await page.waitForTimeout(300);
-    await safeClick(page.getByRole('button', { name: /admin panel/i }).first());
-  } else {
-    await safeClick(page.getByRole('button', { name: /admin panel/i }).first());
-  }
+    // 9) Check that the employee email now appears in the Employee field in the modal
+    await expect(
+      page.getByRole('button', {
+        name: new RegExp(targetEmployeeEmail.replace('.', '\\.'), 'i'),
+      })
+    ).toBeVisible();
 
-  await expect(page.getByRole('heading', { name: /admin panel/i })).toBeVisible({ timeout: 20000 });
-}
+    // 10) Save the project
+    const saveButton = page.getByRole('button', { name: 'Save' });
+    await saveButton.click();
 
-// ---------- MailHog helpers ----------
-async function mailhogClear(request: any) {
-  // MailHog supports DELETE /api/v1/messages
-  await request.delete(`${MAILHOG_BASE}/api/v1/messages`).catch(() => { });
-}
-
-async function mailhogWaitForMessage(
-  request: any,
-  opts: { toEmail: string; subjectIncludes?: string; timeoutMs?: number }
-) {
-  const timeoutMs = opts.timeoutMs ?? 20000;
-  const deadline = Date.now() + timeoutMs;
-
-  while (Date.now() < deadline) {
-    const res = await request.get(`${MAILHOG_BASE}/api/v2/messages`);
-    if (res.ok()) {
-      const data = await res.json();
-
-      // v2 format: { total, count, items: [...] }
-      const items = (data?.items ?? []) as any[];
-
-      const found = items.find((msg) => {
-        const headers = msg?.Content?.Headers ?? {};
-        const toList: string[] = (headers?.To ?? []).map((x: any) => String(x));
-        const subjectList: string[] = (headers?.Subject ?? []).map((x: any) => String(x));
-
-        const toMatch = toList.some((t) => t.toLowerCase().includes(opts.toEmail.toLowerCase()));
-        const subjectMatch = opts.subjectIncludes
-          ? subjectList.some((s) => s.toLowerCase().includes(opts.subjectIncludes!.toLowerCase()))
-          : true;
-
-        return toMatch && subjectMatch;
-      });
-
-      if (found) return found;
+    // Wait for modal to close
+    try {
+      await expect(projectModalTitle).toBeHidden({ timeout: 15000 });
+    } catch (e) {
+      // If modal is still open, check for error message
+      const errorAlert = page.locator('div.bg-red-100.border-red-400');
+      if (await errorAlert.isVisible()) {
+        const errorText = await errorAlert.innerText();
+        throw new Error(`Project update failed with error: ${errorText}`);
+      }
+      throw e;
     }
 
-    await new Promise((r) => setTimeout(r, 750));
-  }
+    // 11) Wait a moment to ensure backend processes the assignment and sends email
+    await page.waitForTimeout(2000);
 
-  throw new Error(
-    `Timed out waiting for MailHog email to "${opts.toEmail}"` +
-    (opts.subjectIncludes ? ` with subject containing "${opts.subjectIncludes}"` : '')
-  );
-}
+    // 12) Check mailhog for the notification email
+    // Navigate to mailhog API and fetch recent messages
+    const mailhogResponse = await page.request.get('http://localhost:8025/api/v2/messages');
+    expect(mailhogResponse.ok()).toBeTruthy();
 
-test('admin creates project, assigns employee, MailHog receives assignment email', async ({ page, request }) => {
-  // If MailHog isn’t running, fail with a clear error
-  const ping = await request.get(`${MAILHOG_BASE}/api/v2/messages`).catch(() => null);
-  if (!ping || !ping.ok()) {
-    throw new Error(
-      `MailHog not reachable at ${MAILHOG_BASE}. Start it in docker compose (port 8025).`
-    );
-  }
+    const mailhogData = await mailhogResponse.json();
+    console.log('Mailhog response:', JSON.stringify(mailhogData, null, 2));
+    
+    // Look for an email sent to the target employee
+    const emailToEmployee = mailhogData.items?.find((item: any) => {
+      // Try different recipient formats
+      const recipients = item.To || [];
+      const rawRecipients = item.Raw?.To || [];
+      
+      // Check both structured and raw recipient formats
+      const foundInStructured = recipients.some((recipient: any) => {
+        const email = typeof recipient === 'string' ? recipient : recipient.Mailbox + '@' + recipient.Domain;
+        return email.includes(targetEmployeeEmail);
+      });
+      
+      const foundInRaw = rawRecipients.some((recipient: any) => {
+        const email = typeof recipient === 'string' ? recipient : recipient;
+        return email.includes(targetEmployeeEmail);
+      });
+      
+      return foundInStructured || foundInRaw;
+    });
 
-  await mailhogClear(request);
+    // Log all email recipients for debugging
+    if (!emailToEmployee) {
+      console.log('All emails in mailhog:');
+      mailhogData.items?.forEach((item: any, index: number) => {
+        console.log(`Email ${index}:`, {
+          To: item.To,
+          From: item.From,
+          Subject: item.Content?.Headers?.Subject?.[0],
+        });
+      });
+    }
 
-  // ---------------- Admin login ----------------
-  await clickLogin(page);
-  await loginAuth0(page, 'admin@dragoshosting.ca', 'Potts#1083');
+    // Assert that the email was found
+    expect(emailToEmployee).toBeDefined();
+    expect(emailToEmployee).not.toBeNull();
 
-  // ---------------- Go to admin ----------------
-  await gotoAdminPanel(page);
-
-  // ---------------- Create project + assign employee in modal (based on your recorded flow) ----------------
-  const projectName = `Testing-${Date.now()}`;
-  const employeeEmail = 'cunninghamemployee4399@gmail.com';
-
-  await safeClick(page.getByRole('button', { name: 'ADD' }));
-
-  await page.locator('form input[name="name"]').fill(projectName);
-
-  // Assign employee (your modal has this)
-  await safeClick(page.getByRole('button', { name: /select employees/i }));
-  await safeClick(page.getByRole('button', { name: /cunninghamemployee4399@gmail/i }));
-  await safeClick(page.getByRole('button', { name: /confirm/i }));
-
-  await page.locator('form input[name="address.streetAddress"]').fill('test');
-  await page.locator('form input[name="address.city"]').fill('test');
-
-  await page.locator('form input[name="dueDate"]').fill('2026-12-31');
-  await page.getByRole('combobox').first().selectOption('SCHEDULED');
-
-  await safeClick(page.getByRole('button', { name: 'Create', exact: true }));
-
-  // Wait for modal to close before searching
-  await expect(page.getByRole('heading', { name: /new project/i })).toBeHidden();
-  await page.waitForTimeout(1000); // Allow list refresh
-
-  // Search for project to handle pagination
-  await page.locator('input[name="search"]').fill(projectName);
-  await page.keyboard.press('Enter');
-
-  // Ensure it appears
-  await expect(page.getByRole('heading', { name: projectName }).first()).toBeVisible({ timeout: 20000 });
-
-  // ---------------- Verify email in MailHog ----------------
-  // Adjust subjectIncludes if you know the exact subject text
-  const msg = await mailhogWaitForMessage(request, {
-    toEmail: employeeEmail,
-    subjectIncludes: 'assigned', // change to whatever your subject contains, or remove this line
-    timeoutMs: 25000,
+    // 13) Verify email contains relevant project information
+    const emailBody = emailToEmployee.Content?.Body || emailToEmployee.Raw?.Data || '';
+    expect(emailBody).toContain(projectName);
+    
+    // 14) Verify the email subject mentions project assignment
+    const emailSubject = emailToEmployee.Content?.Headers?.Subject?.[0] || '';
+    expect(emailSubject.toLowerCase()).toContain('project');
   });
-
-  // Basic assertions (MailHog JSON structure)
-  const headers = msg?.Content?.Headers ?? {};
-  const toHeader = (headers.To ?? []).join(' ');
-  const subjectHeader = (headers.Subject ?? []).join(' ');
-
-  expect(toHeader.toLowerCase()).toContain(employeeEmail.toLowerCase());
-  // If your subject is different, change this assertion
-  expect(subjectHeader.toLowerCase()).toContain('assigned');
 });
