@@ -47,6 +47,13 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const handleClose = () => {
+    setConfirmAction(null);
+    setError("");
+    setProcessing(null);
+    onClose();
+  };
+
   const handleAction = (portfolioId, title, action) => {
     setConfirmAction({ portfolioId, title, action });
   };
@@ -117,12 +124,20 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div 
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        onClick={(e) => {
+          // Close modal when clicking the backdrop (not the modal content)
+          if (e.target === e.currentTarget) {
+            handleClose();
+          }
+        }}
+      >
         <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col relative">
           <div className="p-6 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-2xl font-bold">{t('portfolio.manageArchive', { defaultValue: 'Manage Portfolio Archive' })}</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-gray-400 hover:text-gray-600"
             >
               <X className="h-6 w-6" />
@@ -211,7 +226,7 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
 
           <div className="p-6 border-t border-gray-200">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
             >
               {t('close')}

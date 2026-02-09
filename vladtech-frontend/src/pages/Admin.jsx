@@ -20,6 +20,18 @@ const Admin = () => {
   const [message, setMessage] = useState("");
   const [isMessageVisible, setIsMessageVisible] = useState(false);
 
+  // Auto-show and auto-dismiss toast messages
+  useEffect(() => {
+    if (message) {
+      setIsMessageVisible(true);
+      const timer = setTimeout(() => {
+        setIsMessageVisible(false);
+        setTimeout(() => setMessage(""), 300);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const [projects, setProjects] = useState([]);
   const [archivedProjects, setArchivedProjects] = useState([]);
   const [projectStats, setProjectStats] = useState(null);
@@ -329,7 +341,7 @@ const Admin = () => {
 
         {message && (
           <div
-            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            className={`fixed top-6 inset-x-0 flex justify-center z-50 transition-all duration-300 ${isMessageVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
               }`}
           >
             <div className="bg-yellow-100 border-l-4 border-yellow-400 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 relative">
