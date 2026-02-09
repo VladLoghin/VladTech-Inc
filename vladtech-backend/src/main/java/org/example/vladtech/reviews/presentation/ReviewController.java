@@ -2,6 +2,8 @@ package org.example.vladtech.reviews.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.example.vladtech.auth.dataaccess.UserProfile;
+import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.business.ReviewServiceImpl;
@@ -20,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -28,8 +32,8 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
-
     private final ContactServiceImpl contactService;
+    private final UserProfileRepository userProfileRepository;
 
     @PreAuthorize("hasAnyAuthority('Admin', 'Employee')")
     @GetMapping()
@@ -70,7 +74,7 @@ public class ReviewController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('Client')")
-    public ResponseEntity<ReviewResponseModel> createReview(
+    public ResponseEntity<?> createReview(
             @Valid @RequestPart("review") ReviewRequestModel reviewRequest,
             @RequestPart(value = "photos", required = false) MultipartFile[] photos,
             @AuthenticationPrincipal Jwt jwt
@@ -82,9 +86,20 @@ public class ReviewController {
         try {
             contactService.notifyAdminReviewSubmitted(reviewRequest);
             return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos, userId));
+        } catch (IllegalStateException e) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", e.getMessage());
+
+            UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(userId);
+            if (profile != null) {
+                body.put("permanent", profile.isReviewPermanentlyBanned());
+                body.put("banUntil", profile.getReviewBanUntil());
+            }
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("already exists")) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);  // 409 Conflict
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
             }
             throw e;
         }
@@ -124,13 +139,14 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('Admin')")
     @DeleteMapping("/admin/{reviewId}")
-    public void deleteReviewsByReviewId(@PathVariable String reviewId) {
+    public ResponseEntity<Map<String, Object>> deleteReviewsByReviewId(@PathVariable String reviewId) {
         if (reviewId == null || reviewId.isBlank()) {
             throw new IllegalArgumentException("Review ID must not be null or blank");
         }
 
         try {
-            reviewService.deleteReview(reviewId);
+            Map<String, Object> banInfo = reviewService.deleteReview(reviewId);
+            return ResponseEntity.ok(banInfo);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }

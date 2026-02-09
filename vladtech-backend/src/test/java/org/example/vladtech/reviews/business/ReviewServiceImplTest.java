@@ -1,5 +1,7 @@
 package org.example.vladtech.reviews.business;
 
+import org.example.vladtech.auth.dataaccess.UserProfile;
+import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 import org.example.vladtech.filestorageservice.FileStorageService;
 import org.example.vladtech.portfolio.business.PortfolioServiceImpl;
 import org.example.vladtech.portfolio.data.PortfolioItem;
@@ -22,7 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -54,6 +58,8 @@ class ReviewServiceImplTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private UserProfileRepository userProfileRepository;
     @Test
     void getAllVisibleReviews_returnsMappedList() {
         Review r1 = new Review("PID","client1", "abc234", "Jamie", "appt1", true, Rating.THREE, false, "Interior");
@@ -583,24 +589,29 @@ class ReviewServiceImplTest {
     @Test
     void deleteReview_successfulDeletion() {
         String reviewId = "review123";
-        when(reviewRepository.existsById(reviewId)).thenReturn(true);
+        Review review = new Review();
+        review.setReviewId(reviewId);
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
         reviewService.deleteReview(reviewId);
 
-        verify(reviewRepository, times(1)).existsById(reviewId);
-        verify(reviewRepository, times(1)).deleteReviewByReviewId(reviewId);
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(reviewRepository, times(1)).delete(review);
         verifyNoMoreInteractions(reviewRepository);
     }
 
     @Test
     void deleteReview_reviewNotFound_throwsException() {
         String reviewId = "nonexistent";
-        when(reviewRepository.existsById(reviewId)).thenReturn(false);
+
+        // Remove unnecessary stubbing for existsById if findById is used in the implementation
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> reviewService.deleteReview(reviewId));
-        assertEquals("Review with ID " + reviewId + " does not exist", exception.getMessage());
+        assertEquals("Review not found", exception.getMessage());
 
-        verify(reviewRepository, times(1)).existsById(reviewId);
+        verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).deleteReviewByReviewId(anyString());
         verifyNoMoreInteractions(reviewRepository);
     }
@@ -1127,4 +1138,127 @@ class ReviewServiceImplTest {
         verify(reviewRepository).findByVisibleTrueAndCommentContainingIgnoreCase(comment);
     }
 
+    @Test
+    void enforceReviewBan_profileIsNull_doesNotThrowException() {
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(null);
+
+        assertDoesNotThrow(() -> reviewService.enforceReviewBan("auth0Sub"));
+
+        verify(userProfileRepository).findUserProfileByAuth0Sub("auth0Sub");
+    }
+
+    @Test
+    void enforceReviewBan_permanentlyBanned_throwsException() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .reviewPermanentlyBanned(true)
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> reviewService.enforceReviewBan("auth0Sub"));
+        assertEquals("You are permanently banned from posting reviews.", exception.getMessage());
+
+        verify(userProfileRepository).findUserProfileByAuth0Sub("auth0Sub");
+    }
+
+    @Test
+    void enforceReviewBan_temporarilyBanned_throwsException() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .reviewBanUntil(Instant.now().plus(1, ChronoUnit.DAYS))
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> reviewService.enforceReviewBan("auth0Sub"));
+        assertTrue(exception.getMessage().contains("You are temporarily banned from posting reviews until"));
+
+        verify(userProfileRepository).findUserProfileByAuth0Sub("auth0Sub");
+    }
+
+    @Test
+    void enforceReviewBan_notBanned_doesNotThrowException() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .reviewBanUntil(null)
+                .reviewPermanentlyBanned(false)
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        assertDoesNotThrow(() -> reviewService.enforceReviewBan("auth0Sub"));
+
+        verify(userProfileRepository).findUserProfileByAuth0Sub("auth0Sub");
+    }
+
+    @Test
+    void applyReviewStrike_auth0SubIsNull_doesNotThrowException() {
+        assertDoesNotThrow(() -> reviewService.applyReviewStrike(null));
+
+        verifyNoInteractions(userProfileRepository);
+    }
+
+    @Test
+    void applyReviewStrike_profileDoesNotExist_createsNewProfile() {
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(null);
+
+        reviewService.applyReviewStrike("auth0Sub");
+
+        verify(userProfileRepository).findUserProfileByAuth0Sub("auth0Sub");
+        verify(userProfileRepository).save(argThat(profile ->
+                profile.getAuth0Sub().equals("auth0Sub") &&
+                        profile.getDeletedReviewCount() == 1 &&
+                        profile.getReviewBanUntil() != null &&
+                        !profile.isReviewPermanentlyBanned()
+        ));
+    }
+
+    @Test
+    void applyReviewStrike_profileWithZeroStrikes_appliesOneDayBan() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .deletedReviewCount(0)
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        reviewService.applyReviewStrike("auth0Sub");
+
+        verify(userProfileRepository).save(argThat(savedProfile ->
+                savedProfile.getDeletedReviewCount() == 1 &&
+                        savedProfile.getReviewBanUntil() != null &&
+                        !savedProfile.isReviewPermanentlyBanned()
+        ));
+    }
+
+    @Test
+    void applyReviewStrike_profileWithOneStrike_appliesTwoDayBan() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .deletedReviewCount(1)
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        reviewService.applyReviewStrike("auth0Sub");
+
+        verify(userProfileRepository).save(argThat(savedProfile ->
+                savedProfile.getDeletedReviewCount() == 2 &&
+                        savedProfile.getReviewBanUntil() != null &&
+                        !savedProfile.isReviewPermanentlyBanned()
+        ));
+    }
+
+    @Test
+    void applyReviewStrike_profileWithTwoStrikes_permanentlyBansUser() {
+        UserProfile profile = UserProfile.builder()
+                .auth0Sub("auth0Sub")
+                .deletedReviewCount(2)
+                .build();
+        when(userProfileRepository.findUserProfileByAuth0Sub("auth0Sub")).thenReturn(profile);
+
+        reviewService.applyReviewStrike("auth0Sub");
+
+        verify(userProfileRepository).save(argThat(savedProfile ->
+                savedProfile.getDeletedReviewCount() == 3 &&
+                        savedProfile.getReviewBanUntil() == null &&
+                        savedProfile.isReviewPermanentlyBanned()
+        ));
+    }
 }

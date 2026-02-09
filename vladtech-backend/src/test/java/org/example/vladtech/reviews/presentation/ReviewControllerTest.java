@@ -220,7 +220,7 @@ class ReviewControllerTest {
         when(reviewService.createReview(eq(requestModel), isNull(), eq("auth0|user123"))).thenReturn(createdReview);
 
         // Act
-        ResponseEntity<ReviewResponseModel> response = reviewController.createReview(requestModel, null, jwt);
+        ResponseEntity<ReviewResponseModel> response = (ResponseEntity<ReviewResponseModel>) reviewController.createReview(requestModel, null, jwt);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -249,7 +249,7 @@ class ReviewControllerTest {
         when(reviewService.createReview(eq(requestModel), eq(photos), eq("auth0|user123"))).thenReturn(createdReview);
 
         // Act
-        ResponseEntity<ReviewResponseModel> response = reviewController.createReview(requestModel, photos, jwt);
+        ResponseEntity<ReviewResponseModel> response = (ResponseEntity<ReviewResponseModel>) reviewController.createReview(requestModel, photos, jwt);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());

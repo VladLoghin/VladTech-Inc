@@ -102,16 +102,12 @@
 /* Modal backdrop */
 .review-modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1000;
-    padding: 20px;
+    justify-content: center;
+    z-index: 9999;
 }
 
 /* Modal content container */
@@ -401,4 +397,50 @@
     font-size: 1rem;
     color: #6b7280;
     margin: 0;
+}
+
+/* Review modal */
+.review-modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 22px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.review-modal-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.review-modal-message {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    color: #444;
+}
+
+.review-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-danger {
+    background: #d32f2f;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: #eee;
+    color: #222;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
 }

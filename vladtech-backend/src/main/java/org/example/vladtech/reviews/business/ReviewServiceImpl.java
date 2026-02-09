@@ -19,10 +19,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.example.vladtech.portfolio.data.PortfolioItem;
+import org.example.vladtech.auth.dataaccess.UserProfile;
+import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +43,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final PortfolioServiceImpl portfolioService;
     private final PortfolioRepository portfolioRepository;
     private final PortfolioMapper portfolioMapper;
+    private final UserProfileRepository userProfileRepository;
 
     @Override
     public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type, String comment) {
@@ -126,48 +133,86 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
+    @Override
+    public PortfolioResponseDto sendToPortfolio(String reviewId) {
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
 
+        if (existing.isSentToPortfolio()) {
+            throw new RuntimeException("Review has already been sent to portfolio");
+        }
 
+        String title = "Review by " + existing.getClientName();
+        String imageUrl = existing.getPhotos().isEmpty()
+                ? ""
+                : existing.getPhotos().get(0).getUrl();
+        String type = existing.getType();
+
+        PortfolioItem portfolioItem = new PortfolioItem();
+        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
+        portfolioItem.setReviewId(reviewId);
+        portfolioItem.setReviewerName(existing.getClientName());
+        portfolioItem.setTitle(title);
+        portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setComments(new java.util.ArrayList<>());
+        portfolioItem.setType(type);
+
+        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+
+        existing.setSentToPortfolio(true);
+        reviewRepository.save(existing);
+
+        return portfolioMapper.entityToResponseDto(savedItem);
+    }
 
     @Override
-    public ReviewResponseModel createReview(ReviewRequestModel reviewRequest, MultipartFile[] photos, String OwnerAuth0Id) {
+    public void resetPortfolioStatus(String reviewId) {
+        Review existing = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        existing.setSentToPortfolio(false);
+        reviewRepository.save(existing);
+    }
+
+    @Override
+    public ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos, String ownerAuth0Id) {
+        enforceReviewBan(ownerAuth0Id);
         // Validate project ID is provided
-        if (reviewRequest.getProjectId() == null || reviewRequest.getProjectId().isBlank()) {
+        if (request.getProjectId() == null || request.getProjectId().isBlank()) {
             throw new RuntimeException("Project ID is required");
         }
 
         // Check if review already exists for this project and client
         boolean reviewExists = reviewRepository.existsByProjectIdAndClientId(
-                reviewRequest.getProjectId(), 
-                reviewRequest.getClientId()
+                request.getProjectId(),
+                request.getClientId()
         );
-        
+
         if (reviewExists) {
             throw new RuntimeException("A review for this project already exists. You cannot create another review for the same project.");
         }
 
-        Review review = requestMapper.requestModelToEntity(reviewRequest);
+        Review review = requestMapper.requestModelToEntity(request);
 
-        review.setOwnerAuth0Id(OwnerAuth0Id);
-        review.setProjectId(reviewRequest.getProjectId());  // SET PROJECT ID
-        review.setClientId(reviewRequest.getClientId());
-        review.setClientName(reviewRequest.getClientName());
-        review.setVisible(reviewRequest.getVisible());
-        review.setRating(reviewRequest.getRating());
-        review.setOwnerAuth0Id(OwnerAuth0Id);
-        review.setType(reviewRequest.getType());
+        review.setOwnerAuth0Id(ownerAuth0Id);
+        review.setProjectId(request.getProjectId());  // SET PROJECT ID
+        review.setClientId(request.getClientId());
+        review.setClientName(request.getClientName());
+        review.setVisible(request.getVisible());
+        review.setRating(request.getRating());
+        review.setOwnerAuth0Id(ownerAuth0Id);
+        review.setType(request.getType());
 
         if (photos != null) {
             List<Photo> photoList = Arrays.stream(photos)
                     .map(file -> {
                         try {
                             String filename = fileStorageService.save(file);
-                            return new Photo(reviewRequest.getClientId(), filename, file.getContentType(), "/api/uploads/reviews/" + filename);
+                            return new Photo(request.getClientId(), filename, file.getContentType(), "/api/uploads/reviews/" + filename);
                         } catch (IOException e) {
                             throw new RuntimeException("Failed to save photo", e);
                         }
                     })
-
                     .collect(Collectors.toList());
 
             review.setPhotos(photoList);
@@ -344,54 +389,64 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void deleteReview(String reviewId) {
-        boolean exists = reviewRepository.existsById(reviewId);
-        if (!exists) {
-            throw new RuntimeException("Review with ID " + reviewId + " does not exist");
+    public Map<String, Object> deleteReview(String reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        String ownerId = review.getOwnerAuth0Id() != null ? review.getOwnerAuth0Id() : review.getClientId();
+        applyReviewStrike(ownerId);
+
+        reviewRepository.delete(review);
+
+        UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(ownerId);
+        Map<String, Object> banInfo = new HashMap<>();
+        if (profile != null) {
+            banInfo.put("strikes", profile.getDeletedReviewCount());
+            banInfo.put("permanent", profile.isReviewPermanentlyBanned());
+            banInfo.put("banUntil", profile.getReviewBanUntil());
         }
-        reviewRepository.deleteReviewByReviewId(reviewId);
+        return banInfo;
     }
 
     @Override
-    public PortfolioResponseDto sendToPortfolio(String reviewId) {
-        Review existing = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+    public void enforceReviewBan(String auth0Sub) {
+        UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(auth0Sub);
+        if (profile == null) return;
 
-        if (existing.isSentToPortfolio()) {
-            throw new RuntimeException("Review has already been sent to portfolio");
+        if (profile.isReviewPermanentlyBanned()) {
+            throw new IllegalStateException("You are permanently banned from posting reviews.");
         }
 
-        String title = "Review by " + existing.getClientName();
-        String imageUrl = existing.getPhotos().isEmpty()
-                ? ""
-                : existing.getPhotos().get(0).getUrl();
-        String type = existing.getType();
-
-        PortfolioItem portfolioItem = new PortfolioItem();
-        portfolioItem.setPortfolioId(java.util.UUID.randomUUID().toString());
-        portfolioItem.setReviewId(reviewId);
-        portfolioItem.setReviewerName(existing.getClientName());
-        portfolioItem.setTitle(title);
-        portfolioItem.setImageUrl(imageUrl);
-        portfolioItem.setComments(new java.util.ArrayList<>());
-        portfolioItem.setType(type);
-
-        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
-
-        existing.setSentToPortfolio(true);
-        reviewRepository.save(existing);
-
-        return portfolioMapper.entityToResponseDto(savedItem);
+        Instant banUntil = profile.getReviewBanUntil();
+        if (banUntil != null && banUntil.isAfter(Instant.now())) {
+            throw new IllegalStateException("You are temporarily banned from posting reviews until " + banUntil + ".");
+        }
     }
 
-
     @Override
-    public void resetPortfolioStatus(String reviewId) {
-        Review existing = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+    public void applyReviewStrike(String auth0Sub) {
+        if (auth0Sub == null || auth0Sub.isBlank()) return;
 
-        existing.setSentToPortfolio(false);
-        reviewRepository.save(existing);
+        UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(auth0Sub);
+        if (profile == null) {
+            profile = UserProfile.builder().auth0Sub(auth0Sub).build();
+        }
+
+        int strikes = profile.getDeletedReviewCount() + 1;
+        profile.setDeletedReviewCount(strikes);
+
+        if (strikes == 1) {
+            profile.setReviewBanUntil(Instant.now().plus(1, ChronoUnit.DAYS));
+            profile.setReviewPermanentlyBanned(false);
+        } else if (strikes == 2) {
+            profile.setReviewBanUntil(Instant.now().plus(2, ChronoUnit.DAYS));
+            profile.setReviewPermanentlyBanned(false);
+        } else if (strikes >= 3) {
+            profile.setReviewBanUntil(null);
+            profile.setReviewPermanentlyBanned(true);
+        }
+
+        userProfileRepository.save(profile);
     }
 }
 
