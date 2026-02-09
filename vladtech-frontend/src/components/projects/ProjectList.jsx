@@ -822,12 +822,23 @@ const ProjectList = ({
         >
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-black/60 mb-1">
-                {t("project.comments", { defaultValue: "Comments" })}
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold text-black/60">
+                  {t("project.comments", { defaultValue: "Comments" })}
+                </label>
+                <span className={`text-xs font-medium ${comments.trim().split(/\s+/).filter(w => w).length > 200 ? "text-red-600" : "text-black/40"}`}>
+                  {comments.trim().split(/\s+/).filter(w => w).length} / 200 words
+                </span>
+              </div>
               <textarea
                 value={comments}
-                onChange={(e) => setComments(e.target.value)}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  const wordCount = text.trim().split(/\s+/).filter(w => w).length;
+                  if (wordCount <= 200) {
+                    setComments(text);
+                  }
+                }}
                 className="w-full min-h-[110px] px-3 py-2 border-2 border-black/20 rounded-lg"
                 placeholder={t("project.commentsPlaceholder", {
                   defaultValue: "Write what you did today...",
