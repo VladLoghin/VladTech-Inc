@@ -10,7 +10,7 @@ import RoleAssignmentModal from "../components/userManagement/RoleAssignmentModa
 import ProjectModal from "../components/projects/ProjectModal.jsx";
 import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
-import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
+import ArchivePortfolioModal from "../components/portfolio/ArchivePortfolioModal.jsx";
 import { api } from "../api/http";
 import { generateCsv, generatePdf } from "../utils/exportUtils";
 
@@ -69,7 +69,7 @@ const Admin = () => {
   }, [fetchEmployees]);
 
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
-  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
+  const [isArchivePortfolioModalOpen, setIsArchivePortfolioModalOpen] = useState(false);
 
   // ✅ token helper used by ProjectList to load images with auth
   const getApiToken = useCallback(async () => {
@@ -606,10 +606,10 @@ const Admin = () => {
                 {t("admin.createPortfolio")}
               </button>
               <button
-                onClick={() => setIsDeletePortfolioModalOpen(true)}
+                onClick={() => setIsArchivePortfolioModalOpen(true)}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
               >
-                {t("admin.deletePortfolio")}
+                {t("admin.archivePortfolio")}
               </button>
               <button
                 onClick={() => setIsRoleFinderModalOpen(true)}
@@ -653,10 +653,10 @@ const Admin = () => {
           onSuccess={() => setMessage(t("admin.portfolioCreated"))}
         />
 
-        <DeletePortfolioModal
-          isOpen={isDeletePortfolioModalOpen}
-          onClose={() => setIsDeletePortfolioModalOpen(false)}
-          onSuccess={() => setMessage(t("admin.portfolioDeleted"))}
+        <ArchivePortfolioModal
+          isOpen={isArchivePortfolioModalOpen}
+          onClose={() => setIsArchivePortfolioModalOpen(false)}
+          onSuccess={() => setMessage(t("admin.portfolioArchived"))}
         />
 
         <ProjectModal

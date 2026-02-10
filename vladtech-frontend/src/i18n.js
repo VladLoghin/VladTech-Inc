@@ -77,6 +77,7 @@ const resources = {
       // Admin Page
       "admin.title": "Admin Panel",
       "admin.createPortfolio": "Create Portfolio",
+      "admin.archivePortfolio": "Archive Portfolio",
       "admin.deletePortfolio": "Delete Portfolio",
       "admin.roleFinder": "Role Finder",
       "admin.roleManager": "Role Manager",
@@ -91,6 +92,7 @@ const resources = {
       "admin.projectCompleted": 'Project "{{name}}" has been archived.',
       "admin.projectReactivated": 'Project "{{name}}" has been reactivated.',
       "admin.portfolioCreated": "Portfolio item created successfully!",
+      "admin.portfolioArchived": "Portfolio item has been archived.",
       "admin.portfolioDeleted": "Portfolio item deleted successfully!",
       "admin.failedFetchActive": "Failed to fetch active projects.",
       "admin.failedFetchArchived": "Failed to fetch archived projects.",
@@ -466,6 +468,7 @@ const resources = {
       // Admin Page
       "admin.title": "Panneau Admin",
       "admin.createPortfolio": "Créer un Portfolio",
+      "admin.archivePortfolio": "Archiver un Portfolio",
       "admin.deletePortfolio": "Supprimer un Portfolio",
       "admin.roleFinder": "Recherche de Rôle",
       "admin.roleManager": "Entretien de Role",
@@ -480,6 +483,7 @@ const resources = {
       "admin.projectCompleted": 'Le projet "{{name}}" a été archivé.',
       "admin.projectReactivated": 'Le projet "{{name}}" a été réactivé.',
       "admin.portfolioCreated": "Élément de portfolio créé avec succès!",
+      "admin.portfolioArchived": "L'élément de portfolio a été archivé.",
       "admin.portfolioDeleted": "Élément de portfolio supprimé avec succès!",
       "admin.failedFetchActive": "Échec de la récupération des projets actifs.",
       "admin.failedFetchArchived": "Échec de la récupération des projets archivés.",
