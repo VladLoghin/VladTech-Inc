@@ -1,7 +1,7 @@
 package org.example.vladtech.fileservice;
 
-import org.bson.Document;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
+import org.example.vladtech.filestorageservice.FileResourceWithMetadata;
 import org.example.vladtech.filestorageservice.ProjectUploadsController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,7 +24,7 @@ import static org.mockito.Mockito.*;
 class ProjectUploadsControllerTest {
 
     @Mock
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @Test
     void getProjectPhoto_returns200_withInlineDisposition_andCacheHeaders_andContentTypeFromMetadata() throws Exception {
@@ -34,8 +36,10 @@ class ProjectUploadsControllerTest {
 
         Resource resource = new ByteArrayResource("img".getBytes());
         String contentType = "image/jpeg";
-        FileStorageService.FileResourceWithMetadata fm =
-                new FileStorageService.FileResourceWithMetadata(resource, new Document("contentType", contentType), contentType);
+        
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("contentType", contentType);
+        FileResourceWithMetadata fm = new FileResourceWithMetadata(resource, metadata, contentType);
 
         when(fileStorageService.loadResourceWithMetadata(photoId)).thenReturn(fm);
 
@@ -73,8 +77,8 @@ class ProjectUploadsControllerTest {
         Resource resource = new ByteArrayResource("img".getBytes());
         String invalidContentType = "not/a real type;;;";
 
-        FileStorageService.FileResourceWithMetadata fm =
-                new FileStorageService.FileResourceWithMetadata(resource, new Document(), invalidContentType);
+        Map<String, Object> metadata = new HashMap<>();
+        FileResourceWithMetadata fm = new FileResourceWithMetadata(resource, metadata, invalidContentType);
 
         when(fileStorageService.loadResourceWithMetadata(photoId)).thenReturn(fm);
 
@@ -119,8 +123,10 @@ class ProjectUploadsControllerTest {
 
         Resource resource = new ByteArrayResource("img".getBytes());
         String contentType = "image/png";
-        FileStorageService.FileResourceWithMetadata fm =
-                new FileStorageService.FileResourceWithMetadata(resource, new Document("contentType", contentType), contentType);
+        
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("contentType", contentType);
+        FileResourceWithMetadata fm = new FileResourceWithMetadata(resource, metadata, contentType);
 
         when(fileStorageService.loadResourceWithMetadata(photoId)).thenReturn(fm);
 

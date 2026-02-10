@@ -5,7 +5,7 @@ import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
 import org.example.vladtech.reviews.mapperlayer.ReviewRequestMapper;
 import org.example.vladtech.reviews.mapperlayer.ReviewResponseMapper;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ class SatisfactionPercentageTest {
     private ReviewResponseMapper responseMapper;
 
     @Mock
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @InjectMocks
     private ReviewServiceImpl reviewService;

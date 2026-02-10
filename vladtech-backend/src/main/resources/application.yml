@@ -242,6 +242,11 @@ spring:
           starttls:
             enable: true
 
+vladtech:
+  aws:
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
+
 email:
   noreply: ${NOREPLY_EMAIL}
   admin: ${CONTACT_EMAIL}

@@ -1,6 +1,6 @@
 package org.example.vladtech.portfolio.presentation;
 
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -32,7 +32,7 @@ class UploadPortfolioImageControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
 
     @BeforeEach

@@ -2,7 +2,7 @@ package org.example.vladtech.reviews.business;
 
 import org.example.vladtech.auth.dataaccess.UserProfile;
 import org.example.vladtech.auth.dataaccess.UserProfileRepository;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.portfolio.business.PortfolioServiceImpl;
 import org.example.vladtech.portfolio.data.PortfolioItem;
 import org.example.vladtech.portfolio.data.PortfolioRepository;
@@ -56,7 +56,7 @@ class ReviewServiceImplTest {
     private ReviewServiceImpl reviewService;
 
     @Mock
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @Mock
     private UserProfileRepository userProfileRepository;

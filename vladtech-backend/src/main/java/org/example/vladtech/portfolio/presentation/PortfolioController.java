@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.portfolio.business.PortfolioService;
 import org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
-    private final FileStorageService fileStorageService; // use GridFS for all uploads
+    private final IFileStorageService fileStorageService; // use GridFS for all uploads
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {

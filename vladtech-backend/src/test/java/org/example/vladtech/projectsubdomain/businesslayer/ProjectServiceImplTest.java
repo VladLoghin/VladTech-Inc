@@ -2,7 +2,7 @@
 package org.example.vladtech.projectsubdomain.businesslayer;
 
 import org.example.vladtech.auth.service.UserManagementService;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
 import org.example.vladtech.projectsubdomain.exceptions.InvalidEmployeeIdException;
@@ -55,7 +55,7 @@ class ProjectServiceImplTest {
     private ProjectService projectServiceMock;
 
     @Mock
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @Mock
     private org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository;

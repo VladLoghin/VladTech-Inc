@@ -10,7 +10,7 @@ import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.reviews.mapperlayer.ReviewRequestMapper;
 import org.example.vladtech.reviews.mapperlayer.ReviewResponseMapper;
 import org.example.vladtech.reviews.presentation.ReviewRequestModel;
@@ -39,7 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewRequestMapper requestMapper;
     private final ReviewResponseMapper responseMapper;
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
     private final PortfolioServiceImpl portfolioService;
     private final PortfolioRepository portfolioRepository;
     private final PortfolioMapper portfolioMapper;

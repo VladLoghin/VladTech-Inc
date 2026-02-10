@@ -3,7 +3,8 @@ package org.example.vladtech.fileservice;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.example.vladtech.filestorageservice.FileController;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
+import org.example.vladtech.filestorageservice.FileResourceWithMetadata;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,7 +34,7 @@ class FileControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @MockitoBean
     private GridFsResource gridFsResource;
@@ -128,8 +129,8 @@ class FileControllerTest {
         byte[] content = "test image content".getBytes();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
+        FileResourceWithMetadata fileData =
+                new FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
 
         when(fileStorageService.loadResourceWithMetadata(testFileId)).thenReturn(fileData);
         when(gridFsResource.getInputStream()).thenReturn(inputStream);
@@ -155,8 +156,8 @@ class FileControllerTest {
         byte[] content = "test image content".getBytes();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
+        FileResourceWithMetadata fileData =
+                new FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
 
         when(fileStorageService.loadResourceWithMetadata(testFileId)).thenReturn(fileData);
         when(gridFsResource.getInputStream()).thenReturn(inputStream);
@@ -177,8 +178,8 @@ class FileControllerTest {
         byte[] content = "test image content".getBytes();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, null, "image/jpeg");
+        FileResourceWithMetadata fileData =
+                new FileResourceWithMetadata(gridFsResource, null, "image/jpeg");
 
         when(fileStorageService.loadResourceWithMetadata(testFileId)).thenReturn(fileData);
         when(gridFsResource.getInputStream()).thenReturn(inputStream);
@@ -199,8 +200,8 @@ class FileControllerTest {
         byte[] content = "test image content".getBytes();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
+        FileResourceWithMetadata fileData =
+                new FileResourceWithMetadata(gridFsResource, testMetadata, "image/jpeg");
 
         when(fileStorageService.loadResourceWithMetadata(testFileId)).thenReturn(fileData);
         when(gridFsResource.getInputStream()).thenReturn(inputStream);
