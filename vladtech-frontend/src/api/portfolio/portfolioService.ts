@@ -122,18 +122,48 @@ export const updatePortfolioItem = async (
   }
 };
 
-export const deletePortfolioItem = async (
+export const archivePortfolioItem = async (
   portfolioId: string,
   accessToken: string
 ) => {
   try {
-    await api.delete(`${API_BASE}/${portfolioId}`, {
+    await api.put(`${API_BASE}/${portfolioId}/archive`, {}, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
   } catch (error) {
-    console.error("Error deleting portfolio item:", error);
+    console.error("Error archiving portfolio item:", error);
+    throw error;
+  }
+};
+
+export const unarchivePortfolioItem = async (
+  portfolioId: string,
+  accessToken: string
+) => {
+  try {
+    await api.put(`${API_BASE}/${portfolioId}/unarchive`, {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    console.error("Error unarchiving portfolio item:", error);
+    throw error;
+  }
+};
+
+export const getArchivedPortfolioItems = async (accessToken: string) => {
+  try {
+    const response = await api.get(`${API_BASE}/archived`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching archived portfolio items:", error);
     throw error;
   }
 };
