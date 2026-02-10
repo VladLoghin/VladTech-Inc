@@ -66,6 +66,7 @@ export const getPortfolioItemById = async (portfolioId: string) => {
 export const createPortfolioItem = async (
   title: string,
   imageUrl: string,
+  imageUrls: string[],
   type: string,
   accessToken: string
 ) => {
@@ -75,7 +76,7 @@ export const createPortfolioItem = async (
       {
         title,
         imageUrl,
-        rating: 5.0,
+        imageUrls,
         type,
       },
       {
@@ -88,6 +89,35 @@ export const createPortfolioItem = async (
     return response.data;
   } catch (error) {
     console.error("Error creating portfolio item:", error);
+    throw error;
+  }
+};
+
+export const updatePortfolioItem = async (
+  portfolioId: string,
+  title: string,
+  imageUrls: string[],
+  type: string,
+  accessToken: string
+) => {
+  try {
+    const response = await api.put(
+      `${API_BASE}/${portfolioId}`,
+      {
+        title,
+        imageUrls,
+        type,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating portfolio item:", error);
     throw error;
   }
 };

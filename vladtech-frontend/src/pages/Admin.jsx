@@ -10,6 +10,7 @@ import RoleAssignmentModal from "../components/userManagement/RoleAssignmentModa
 import ProjectModal from "../components/projects/ProjectModal.jsx";
 import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
+import EditPortfolioModal from "../components/portfolio/EditPortfolioModal.jsx";
 import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
 import { api } from "../api/http";
 import { generateCsv, generatePdf } from "../utils/exportUtils";
@@ -69,6 +70,8 @@ const Admin = () => {
   }, [fetchEmployees]);
 
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
+  const [isEditPortfolioModalOpen, setIsEditPortfolioModalOpen] = useState(false);
+  const [editPortfolioItem, setEditPortfolioItem] = useState(null);
   const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
 
   // ✅ token helper used by ProjectList to load images with auth
@@ -606,6 +609,12 @@ const Admin = () => {
                 {t("admin.createPortfolio")}
               </button>
               <button
+                onClick={() => setIsEditPortfolioModalOpen(true)}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.editPortfolio")}
+              </button>
+              <button
                 onClick={() => setIsDeletePortfolioModalOpen(true)}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
               >
@@ -657,6 +666,16 @@ const Admin = () => {
           isOpen={isDeletePortfolioModalOpen}
           onClose={() => setIsDeletePortfolioModalOpen(false)}
           onSuccess={() => setMessage(t("admin.portfolioDeleted"))}
+        />
+
+        <EditPortfolioModal
+          isOpen={isEditPortfolioModalOpen}
+          onClose={() => {
+            setIsEditPortfolioModalOpen(false);
+            setEditPortfolioItem(null);
+          }}
+          onSuccess={() => setMessage(t("admin.portfolioUpdated"))}
+          portfolioItem={editPortfolioItem}
         />
 
         <ProjectModal

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,12 +24,30 @@ public class PortfolioResponseDto {
     @NotBlank(message = "Title cannot be empty")
     private String title;
 
-    @NotBlank(message = "Image URL cannot be empty")
+    @Nullable
     private String imageUrl;
+
+    private List<String> imageUrls = new ArrayList<>(); // Multiple images support
 
     @NotBlank(message = "Type cannot be empty")
     private String type; // Interior, Kitchen, Bathroom, Exterior, Garden/Landscaping
 
+    private boolean archived;
+
     private List<PortfolioCommentDto> comments;
+
+    // Backward-compatible constructor (without imageUrls and archived)
+    public PortfolioResponseDto(String portfolioId, String reviewId, String reviewerName,
+                                String title, String imageUrl, String type,
+                                List<PortfolioCommentDto> comments) {
+        this.portfolioId = portfolioId;
+        this.reviewId = reviewId;
+        this.reviewerName = reviewerName;
+        this.title = title;
+        this.imageUrl = imageUrl;
+        this.imageUrls = imageUrl != null ? new ArrayList<>(List.of(imageUrl)) : new ArrayList<>();
+        this.type = type;
+        this.comments = comments;
+    }
 }
 

@@ -11,6 +11,7 @@ import org.example.vladtech.portfolio.presentation.PortfolioResponseDto;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PortfolioResponseDto> getAllPortfolioItems() {
-        log.info("Fetching all portfolio items");
-        List<PortfolioItem> portfolioItems = portfolioRepository.findAll();
+        log.info("Fetching all non-archived portfolio items");
+        List<PortfolioItem> portfolioItems = portfolioRepository.findByArchivedFalse();
         return portfolioItems.stream()
                 .map(portfolioMapper::entityToResponseDto)
                 .collect(Collectors.toList());
@@ -33,8 +34,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public List<PortfolioResponseDto> getPortfolioItemsByType(String type) {
-        log.info("Fetching portfolio items by type: {}", type);
-        List<PortfolioItem> portfolioItems = portfolioRepository.findByType(type);
+        log.info("Fetching non-archived portfolio items by type: {}", type);
+        List<PortfolioItem> portfolioItems = portfolioRepository.findByTypeAndArchivedFalse(type);
         return portfolioItems.stream()
                 .map(portfolioMapper::entityToResponseDto)
                 .collect(Collectors.toList());
@@ -80,12 +81,13 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public PortfolioResponseDto createPortfolioItem(String title, String imageUrl, String type) {
+    public PortfolioResponseDto createPortfolioItem(String title, String imageUrl, List<String> imageUrls, String type) {
         log.info("Creating new portfolio item with title: {} and type: {}", title, type);
 
         PortfolioItem portfolioItem = new PortfolioItem();
         portfolioItem.setTitle(title);
         portfolioItem.setImageUrl(imageUrl);
+        portfolioItem.setImageUrls(imageUrls != null && !imageUrls.isEmpty() ? imageUrls : (imageUrl != null ? List.of(imageUrl) : new java.util.ArrayList<>()));
         portfolioItem.setType(type);
         portfolioItem.setComments(new java.util.ArrayList<>());
 
@@ -96,14 +98,75 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    public PortfolioResponseDto updatePortfolioItem(String portfolioId, String title, List<String> imageUrls, String type) {
+        log.info("Updating portfolio item with id: {}", portfolioId);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException(
+                        "Portfolio item not found with id: " + portfolioId));
+
+        if (title != null && !title.isBlank()) {
+            portfolioItem.setTitle(title);
+        }
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            portfolioItem.setImageUrls(imageUrls);
+            portfolioItem.setImageUrl(imageUrls.get(0)); // First image is the primary
+        }
+        if (type != null && !type.isBlank()) {
+            portfolioItem.setType(type);
+        }
+
+        PortfolioItem savedItem = portfolioRepository.save(portfolioItem);
+        log.info("Portfolio item updated successfully with id: {}", savedItem.getPortfolioId());
+
+        return portfolioMapper.entityToResponseDto(savedItem);
+    }
+
+    @Override
     public void deletePortfolioItem(String portfolioId) {
         log.info("Deleting portfolio item with id: {}", portfolioId);
 
         PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException(
+                        "Portfolio item not found with id: " + portfolioId));
 
         portfolioRepository.delete(portfolioItem);
         log.info("Portfolio item deleted successfully with id: {}", portfolioId);
+    }
+
+    @Override
+    public void archivePortfolioItem(String portfolioId) {
+        log.info("Archiving portfolio item with id: {}", portfolioId);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException(
+                        "Portfolio item not found with id: " + portfolioId));
+
+        portfolioItem.setArchived(true);
+        portfolioRepository.save(portfolioItem);
+        log.info("Portfolio item archived successfully with id: {}", portfolioId);
+    }
+
+    @Override
+    public void unarchivePortfolioItem(String portfolioId) {
+        log.info("Unarchiving portfolio item with id: {}", portfolioId);
+
+        PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException(
+                        "Portfolio item not found with id: " + portfolioId));
+
+        portfolioItem.setArchived(false);
+        portfolioRepository.save(portfolioItem);
+        log.info("Portfolio item unarchived successfully with id: {}", portfolioId);
+    }
+
+    @Override
+    public List<PortfolioResponseDto> getArchivedPortfolioItems() {
+        log.info("Fetching all archived portfolio items");
+        List<PortfolioItem> portfolioItems = portfolioRepository.findByArchivedTrue();
+        return portfolioItems.stream()
+                .map(portfolioMapper::entityToResponseDto)
+                .collect(Collectors.toList());
     }
 }
 
