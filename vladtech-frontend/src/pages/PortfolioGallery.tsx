@@ -14,6 +14,7 @@ interface PortfolioItem {
   reviewId?: string;
   title: string;
   imageUrl: string;
+  imageUrls?: string[];
   type: string;
   reviewerName?: string; // Optional: name of reviewer if sent from review
   comments: PortfolioComment[];
@@ -40,6 +41,7 @@ export default function PortfolioGallery() {
   const itemsPerPage = 6;
   const [selectedType, setSelectedType] = useState<string>("All");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Helper function to calculate time ago
   const getTimeAgo = (timestamp: string): string => {
@@ -259,7 +261,7 @@ export default function PortfolioGallery() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
-                onClick={() => setSelectedItem(item)}
+                onClick={() => { setCurrentImageIndex(0); setSelectedItem(item); }}
                 className="cursor-pointer overflow-hidden aspect-square relative group"
               >
                 <img
@@ -342,13 +344,49 @@ export default function PortfolioGallery() {
               onClick={(e) => e.stopPropagation()}
               className="bg-black border border-yellow-400/30 rounded-3xl overflow-hidden max-w-5xl w-full max-h-[90vh] grid md:grid-cols-2 shadow-2xl"
             >
-              {/* Image Side */}
+              {/* Image Side with Carousel */}
               <div className="relative bg-black">
-                <img
-                  src={getImageUrl(selectedItem.imageUrl)}
-                  alt={selectedItem.title}
-                  className="w-full h-full object-cover"
-                />
+                {(() => {
+                  const images = selectedItem.imageUrls && selectedItem.imageUrls.length > 0
+                    ? selectedItem.imageUrls
+                    : [selectedItem.imageUrl];
+                  return (
+                    <>
+                      <img
+                        src={getImageUrl(images[currentImageIndex] ?? images[0] ?? selectedItem.imageUrl)}
+                        alt={selectedItem.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
+                          >
+                            <ChevronLeft className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
+                          >
+                            <ChevronRight className="h-5 w-5" />
+                          </button>
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                            {images.map((_, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => setCurrentImageIndex(idx)}
+                                className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                  idx === currentImageIndex ? 'bg-yellow-400' : 'bg-white/50 hover:bg-white/80'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Comments Side */}

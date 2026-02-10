@@ -178,7 +178,7 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
 
           <div className="flex-1 overflow-y-auto p-6">
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading portfolio items...</div>
+              <div className="text-center py-8 text-gray-500">{t('portfolio.loadingItems', { defaultValue: 'Loading portfolio items...' })}</div>
             ) : currentItems.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 {activeTab === "active" 
@@ -214,7 +214,7 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
                     >
                       {isArchiveAction ? <Archive className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
                       {processing === item.portfolioId 
-                        ? (isArchiveAction ? "Archiving..." : "Restoring...") 
+                        ? (isArchiveAction ? t('portfolio.archiving', { defaultValue: 'Archiving...' }) : t('portfolio.restoring', { defaultValue: 'Restoring...' })) 
                         : (isArchiveAction ? t('archive', { defaultValue: 'Archive' }) : t('restore', { defaultValue: 'Restore' }))
                       }
                     </button>
@@ -267,8 +267,8 @@ export default function ArchivePortfolioModal({ isOpen, onClose, onSuccess }) {
               
               <p className="text-gray-700 mb-6">
                 {confirmAction.action === "archive" 
-                  ? `Are you sure you want to archive "${confirmAction.title}"?`
-                  : `Are you sure you want to restore "${confirmAction.title}"?`
+                  ? t('portfolio.archiveConfirmMessage', { title: confirmAction.title, defaultValue: `Are you sure you want to archive "${confirmAction.title}"?` })
+                  : t('portfolio.restoreConfirmMessage', { title: confirmAction.title, defaultValue: `Are you sure you want to restore "${confirmAction.title}"?` })
                 }
               </p>
 

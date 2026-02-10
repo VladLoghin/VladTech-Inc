@@ -10,7 +10,9 @@ public interface PortfolioService {
     List<PortfolioResponseDto> getPortfolioItemsByType(String type);
     PortfolioResponseDto getPortfolioItemById(String portfolioId);
     PortfolioCommentDto addComment(String portfolioId, String commentText, String userId, String userName);
-    PortfolioResponseDto createPortfolioItem(String title, String imageUrl, String type);
+    PortfolioResponseDto createPortfolioItem(String title, String imageUrl, List<String> imageUrls, String type);
+    PortfolioResponseDto updatePortfolioItem(String portfolioId, String title, List<String> imageUrls, String type);
+    void deletePortfolioItem(String portfolioId);
     void archivePortfolioItem(String portfolioId);
     void unarchivePortfolioItem(String portfolioId);
     List<PortfolioResponseDto> getArchivedPortfolioItems();

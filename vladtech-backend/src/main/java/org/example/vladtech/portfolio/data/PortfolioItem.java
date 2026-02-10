@@ -23,13 +23,15 @@ public class PortfolioItem {
 
     private String title;
     private String imageUrl;
+    private List<String> imageUrls = new ArrayList<>(); // Multiple images support
     private String type; // Type: Interior, Kitchen, Bathroom, Exterior/Yard
-    private List<PortfolioComment> comments = new ArrayList<>();
     private boolean archived = false;
+    private List<PortfolioComment> comments = new ArrayList<>();
 
     public PortfolioItem(String title, String imageUrl, String type, List<PortfolioComment> comments) {
         this.title = title;
         this.imageUrl = imageUrl;
+        this.imageUrls = imageUrl != null ? new ArrayList<>(List.of(imageUrl)) : new ArrayList<>();
         this.type = type;
         this.comments = comments != null ? comments : new ArrayList<>();
         this.archived = false;

@@ -102,10 +102,28 @@ public class PortfolioController {
         PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
                 request.getTitle(),
                 request.getImageUrl(),
+                request.getImageUrls(),
                 request.getType()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @PutMapping("/{portfolioId}")
+    public ResponseEntity<PortfolioResponseDto> updatePortfolioItem(
+            @PathVariable String portfolioId,
+            @RequestBody PortfolioResponseDto request) {
+        log.info("PUT request to /api/portfolio/{} - Updating portfolio item", portfolioId);
+
+        PortfolioResponseDto updatedItem = portfolioService.updatePortfolioItem(
+                portfolioId,
+                request.getTitle(),
+                request.getImageUrls(),
+                request.getType()
+        );
+
+        return ResponseEntity.ok(updatedItem);
     }
 
     @PutMapping("/{portfolioId}/archive")
@@ -127,6 +145,13 @@ public class PortfolioController {
         log.info("GET request to /api/portfolio/archived - Fetching archived portfolio items");
         List<PortfolioResponseDto> archivedItems = portfolioService.getArchivedPortfolioItems();
         return ResponseEntity.ok(archivedItems);
+    }
+
+    @DeleteMapping("/{portfolioId}")
+    public ResponseEntity<Void> deletePortfolioItem(@PathVariable String portfolioId) {
+        log.info("DELETE request to /api/portfolio/{} - Deleting portfolio item", portfolioId);
+        portfolioService.deletePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{portfolioId}/comments")
