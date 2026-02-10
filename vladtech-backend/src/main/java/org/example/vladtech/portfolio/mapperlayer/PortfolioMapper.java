@@ -21,15 +21,17 @@ public class PortfolioMapper {
                 .map(this::commentToDto)
                 .collect(Collectors.toList());
 
-        return new PortfolioResponseDto(
-                portfolioItem.getPortfolioId(),
-                portfolioItem.getReviewId(),
-                portfolioItem.getReviewerName(),
-                portfolioItem.getTitle(),
-                portfolioItem.getImageUrl(),
-                portfolioItem.getType(),
-                commentDtos
-        );
+        PortfolioResponseDto dto = new PortfolioResponseDto();
+        dto.setPortfolioId(portfolioItem.getPortfolioId());
+        dto.setReviewId(portfolioItem.getReviewId());
+        dto.setReviewerName(portfolioItem.getReviewerName());
+        dto.setTitle(portfolioItem.getTitle());
+        dto.setImageUrl(portfolioItem.getImageUrl());
+        dto.setImageUrls(portfolioItem.getImageUrls() != null ? portfolioItem.getImageUrls() : new java.util.ArrayList<>());
+        dto.setType(portfolioItem.getType());
+        dto.setArchived(portfolioItem.isArchived());
+        dto.setComments(commentDtos);
+        return dto;
     }
 
     private PortfolioCommentDto commentToDto(PortfolioComment comment) {

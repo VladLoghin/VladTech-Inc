@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useTranslation } from "react-i18next";
 import { createPortfolioItem } from "../../api/portfolio/portfolioService";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Trash2, Plus } from "lucide-react";
 import { api } from "../../api/http";
 
 export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
@@ -10,10 +10,10 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   const { getAccessTokenSilently } = useAuth0();
   const [formData, setFormData] = useState({
     title: "",
-    imageFile: null,
     type: "Interior",
   });
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,80 +25,102 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
   ];
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file size (10MB limit)
-      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    const files = Array.from(e.target.files);
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    for (const file of files) {
       if (file.size > maxSize) {
-        setError("Image file is too large. Maximum size is 10MB. Please compress or resize the image.");
+        setError("One or more images exceed 10MB. Please compress or resize.");
         return;
       }
+    }
 
-      setFormData({ ...formData, imageFile: file });
-      setError(""); // Clear any previous errors
-      
-      // Create preview
+    setError("");
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
+
+    // Create previews for the new files
+    files.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreviews((prev) => [...prev, reader.result]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeImage = (index) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  // Validate image file
-  if (!formData.imageFile) {
-    setError("Please select an image file");
-    return;
-  }
+    if (imageFiles.length === 0) {
+      setError("Please select at least one image file");
+      return;
+    }
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: { audience: "https://vladtech/api" },
-    });
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
 
-    // Upload image first
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", formData.imageFile);
+      // Upload all images
+      const uploadedUrls = [];
+      for (const file of imageFiles) {
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
 
-    const uploadResponse = await api.post("/portfolio/upload", formDataUpload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        // DO NOT set Content-Type manually for FormData
-      },
-    });
+        const uploadResponse = await api.post("/portfolio/upload", formDataUpload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    const { imageUrl } = uploadResponse.data;
+        uploadedUrls.push(uploadResponse.data.imageUrl);
+      }
 
-    // Create portfolio item with uploaded image path
-    await createPortfolioItem(formData.title, imageUrl, formData.type, token);
+      // Create portfolio item with all uploaded image URLs
+      await createPortfolioItem(
+        formData.title,
+        uploadedUrls[0], // Primary image
+        uploadedUrls,     // All images
+        formData.type,
+        token
+      );
 
-    setFormData({ title: "", imageFile: null, type: "Interior" });
-    setImagePreview(null);
-    onSuccess?.();
+      // Reset form
+      setFormData({ title: "", type: "Interior" });
+      setImageFiles([]);
+      setImagePreviews([]);
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      console.error("Error creating portfolio item:", err);
+      setError("Failed to create portfolio item. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetAndClose = () => {
+    setFormData({ title: "", type: "Interior" });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setError("");
     onClose();
-  } catch (err) {
-    console.error("Error creating portfolio item:", err);
-    setError("Failed to create portfolio item. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6 relative">
+      <div className="bg-white rounded-xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
         <button
-          onClick={onClose}
+          onClick={resetAndClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
         >
           <X className="h-6 w-6" />
@@ -120,9 +142,7 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
@@ -134,16 +154,12 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
             </label>
             <select
               value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             >
               {portfolioTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
+                <option key={type} value={type}>{type}</option>
               ))}
             </select>
           </div>
@@ -152,24 +168,52 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
             <label className="block text-sm font-semibold mb-2">
               {t('portfolio.image')} <span className="text-red-500">*</span>
             </label>
+
+            {/* Image previews grid */}
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                    />
+                    {index === 0 && (
+                      <span className="absolute top-1 left-1 bg-yellow-400 text-black text-xs px-1.5 py-0.5 rounded font-bold">
+                        Main
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload area */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-yellow-400 transition-colors">
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleImageChange}
                 className="hidden"
                 id="image-upload"
               />
-              <label
-                htmlFor="image-upload"
-                className="cursor-pointer flex flex-col items-center"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="max-h-48 rounded-lg mb-2"
-                  />
+              <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
+                {imagePreviews.length > 0 ? (
+                  <>
+                    <Plus className="h-8 w-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">
+                      {t('portfolio.addMoreImages', { defaultValue: 'Add more images' })}
+                    </span>
+                  </>
                 ) : (
                   <>
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -183,12 +227,17 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }) {
                 )}
               </label>
             </div>
+            {imagePreviews.length > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {imagePreviews.length} image{imagePreviews.length !== 1 ? 's' : ''} selected. First image will be the main thumbnail.
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={resetAndClose}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
               disabled={isSubmitting}
             >

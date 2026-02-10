@@ -10,7 +10,8 @@ import RoleAssignmentModal from "../components/userManagement/RoleAssignmentModa
 import ProjectModal from "../components/projects/ProjectModal.jsx";
 import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
-import DeletePortfolioModal from "../components/portfolio/DeletePortfolioModal.jsx";
+import EditPortfolioModal from "../components/portfolio/EditPortfolioModal.jsx";
+import ArchivePortfolioModal from "../components/portfolio/ArchivePortfolioModal.jsx";
 import { api } from "../api/http";
 import { generateCsv, generatePdf } from "../utils/exportUtils";
 
@@ -69,7 +70,9 @@ const Admin = () => {
   }, [fetchEmployees]);
 
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
-  const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
+  const [isEditPortfolioModalOpen, setIsEditPortfolioModalOpen] = useState(false);
+  const [editPortfolioItem, setEditPortfolioItem] = useState(null);
+  const [isArchivePortfolioModalOpen, setIsArchivePortfolioModalOpen] = useState(false);
 
   // ✅ token helper used by ProjectList to load images with auth
   const getApiToken = useCallback(async () => {
@@ -425,12 +428,27 @@ const Admin = () => {
     const date = new Date(Number(year), Number(month) - 1, Number(day));
     const locale = i18n.language === "fr" ? "fr-CA" : "en-CA";
 
-    return date.toLocaleDateString(locale, {
+    const parts = new Intl.DateTimeFormat(locale, {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
-    });
+    }).formatToParts(date);
+
+    const titleCasePart = (value) => {
+      if (!value) return value;
+      const lower = value.toLocaleLowerCase(locale);
+      return lower.charAt(0).toLocaleUpperCase(locale) + lower.slice(1);
+    };
+
+    return parts
+      .map((part) => {
+        if (part.type === "weekday" || part.type === "month") {
+          return titleCasePart(part.value);
+        }
+        return part.value;
+      })
+      .join("");
   };
 
   // Handle stat card clicks - scroll to projects and apply filter
@@ -591,10 +609,16 @@ const Admin = () => {
                 {t("admin.createPortfolio")}
               </button>
               <button
-                onClick={() => setIsDeletePortfolioModalOpen(true)}
+                onClick={() => setIsEditPortfolioModalOpen(true)}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+              >
+                {t("admin.editPortfolio")}
+              </button>
+              <button
+                onClick={() => setIsArchivePortfolioModalOpen(true)}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
               >
-                {t("admin.deletePortfolio")}
+                {t("admin.archivePortfolio")}
               </button>
               <button
                 onClick={() => setIsRoleFinderModalOpen(true)}
@@ -638,10 +662,20 @@ const Admin = () => {
           onSuccess={() => setMessage(t("admin.portfolioCreated"))}
         />
 
-        <DeletePortfolioModal
-          isOpen={isDeletePortfolioModalOpen}
-          onClose={() => setIsDeletePortfolioModalOpen(false)}
-          onSuccess={() => setMessage(t("admin.portfolioDeleted"))}
+        <ArchivePortfolioModal
+          isOpen={isArchivePortfolioModalOpen}
+          onClose={() => setIsArchivePortfolioModalOpen(false)}
+          onSuccess={() => setMessage(t("admin.portfolioArchived"))}
+        />
+
+        <EditPortfolioModal
+          isOpen={isEditPortfolioModalOpen}
+          onClose={() => {
+            setIsEditPortfolioModalOpen(false);
+            setEditPortfolioItem(null);
+          }}
+          onSuccess={() => setMessage(t("admin.portfolioUpdated"))}
+          portfolioItem={editPortfolioItem}
         />
 
         <ProjectModal

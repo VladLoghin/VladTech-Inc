@@ -102,10 +102,49 @@ public class PortfolioController {
         PortfolioResponseDto createdItem = portfolioService.createPortfolioItem(
                 request.getTitle(),
                 request.getImageUrl(),
+                request.getImageUrls(),
                 request.getType()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    }
+
+    @PreAuthorize("hasAuthority('Admin')")
+    @PutMapping("/{portfolioId}")
+    public ResponseEntity<PortfolioResponseDto> updatePortfolioItem(
+            @PathVariable String portfolioId,
+            @RequestBody PortfolioResponseDto request) {
+        log.info("PUT request to /api/portfolio/{} - Updating portfolio item", portfolioId);
+
+        PortfolioResponseDto updatedItem = portfolioService.updatePortfolioItem(
+                portfolioId,
+                request.getTitle(),
+                request.getImageUrls(),
+                request.getType()
+        );
+
+        return ResponseEntity.ok(updatedItem);
+    }
+
+    @PutMapping("/{portfolioId}/archive")
+    public ResponseEntity<Void> archivePortfolioItem(@PathVariable String portfolioId) {
+        log.info("PUT request to /api/portfolio/{}/archive - Archiving portfolio item", portfolioId);
+        portfolioService.archivePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{portfolioId}/unarchive")
+    public ResponseEntity<Void> unarchivePortfolioItem(@PathVariable String portfolioId) {
+        log.info("PUT request to /api/portfolio/{}/unarchive - Unarchiving portfolio item", portfolioId);
+        portfolioService.unarchivePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/archived")
+    public ResponseEntity<List<PortfolioResponseDto>> getArchivedPortfolioItems() {
+        log.info("GET request to /api/portfolio/archived - Fetching archived portfolio items");
+        List<PortfolioResponseDto> archivedItems = portfolioService.getArchivedPortfolioItems();
+        return ResponseEntity.ok(archivedItems);
     }
 
     @DeleteMapping("/{portfolioId}")

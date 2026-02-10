@@ -66,6 +66,7 @@ export const getPortfolioItemById = async (portfolioId: string) => {
 export const createPortfolioItem = async (
   title: string,
   imageUrl: string,
+  imageUrls: string[],
   type: string,
   accessToken: string
 ) => {
@@ -75,7 +76,7 @@ export const createPortfolioItem = async (
       {
         title,
         imageUrl,
-        rating: 5.0,
+        imageUrls,
         type,
       },
       {
@@ -92,18 +93,77 @@ export const createPortfolioItem = async (
   }
 };
 
-export const deletePortfolioItem = async (
+export const updatePortfolioItem = async (
+  portfolioId: string,
+  title: string,
+  imageUrls: string[],
+  type: string,
+  accessToken: string
+) => {
+  try {
+    const response = await api.put(
+      `${API_BASE}/${portfolioId}`,
+      {
+        title,
+        imageUrls,
+        type,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating portfolio item:", error);
+    throw error;
+  }
+};
+
+export const archivePortfolioItem = async (
   portfolioId: string,
   accessToken: string
 ) => {
   try {
-    await api.delete(`${API_BASE}/${portfolioId}`, {
+    await api.put(`${API_BASE}/${portfolioId}/archive`, {}, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
   } catch (error) {
-    console.error("Error deleting portfolio item:", error);
+    console.error("Error archiving portfolio item:", error);
+    throw error;
+  }
+};
+
+export const unarchivePortfolioItem = async (
+  portfolioId: string,
+  accessToken: string
+) => {
+  try {
+    await api.put(`${API_BASE}/${portfolioId}/unarchive`, {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    console.error("Error unarchiving portfolio item:", error);
+    throw error;
+  }
+};
+
+export const getArchivedPortfolioItems = async (accessToken: string) => {
+  try {
+    const response = await api.get(`${API_BASE}/archived`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching archived portfolio items:", error);
     throw error;
   }
 };

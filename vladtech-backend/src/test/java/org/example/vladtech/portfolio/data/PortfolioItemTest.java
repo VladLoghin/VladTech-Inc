@@ -21,10 +21,11 @@ class PortfolioItemTest {
         assertNull(item.getImageUrl());
         assertNotNull(item.getComments());
         assertTrue(item.getComments().isEmpty());
+        assertFalse(item.isArchived());
     }
 
     @Test
-    void testFourParameterConstructor() {
+    void testCustomConstructor() {
         // Arrange
         List<PortfolioComment> comments = new ArrayList<>();
         comments.add(new PortfolioComment("John", "auth0|123", java.time.Instant.now(), "Great!"));
@@ -37,10 +38,11 @@ class PortfolioItemTest {
         assertEquals("/images/project-a.jpg", item.getImageUrl());
         assertEquals(1, item.getComments().size());
         assertEquals("John", item.getComments().get(0).getAuthorName());
+        assertFalse(item.isArchived());
     }
 
     @Test
-    void testFourParameterConstructorWithNullComments() {
+    void testCustomConstructor_WithNullComments_ShouldDefaultToEmptyList() {
         // Act
         PortfolioItem item = new PortfolioItem("Project A", "/images/project-a.jpg", "Interior", null);
 
@@ -56,13 +58,14 @@ class PortfolioItemTest {
         comments.add(new PortfolioComment("Jane", "auth0|456", java.time.Instant.now(), "Amazing!"));
 
         // Act
-        PortfolioItem item = new PortfolioItem("id123", "review-456", null, "Project B", "/images/project-b.jpg", "Interior", comments);
+        PortfolioItem item = new PortfolioItem("id123", "review-456", null, "Project B", "/images/project-b.jpg", List.of("/images/project-b.jpg"), "Interior", false, comments);
 
         // Assert
         assertEquals("id123", item.getPortfolioId());
         assertEquals("Project B", item.getTitle());
         assertEquals("/images/project-b.jpg", item.getImageUrl());
         assertEquals(1, item.getComments().size());
+        assertFalse(item.isArchived());
     }
 
     @Test
