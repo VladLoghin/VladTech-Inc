@@ -86,8 +86,14 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         PortfolioItem portfolioItem = new PortfolioItem();
         portfolioItem.setTitle(title);
-        portfolioItem.setImageUrl(imageUrl);
-        portfolioItem.setImageUrls(imageUrls != null && !imageUrls.isEmpty() ? imageUrls : (imageUrl != null ? List.of(imageUrl) : new java.util.ArrayList<>()));
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            List<String> distinctUrls = imageUrls.stream().filter(url -> url != null && !url.isBlank()).distinct().collect(Collectors.toList());
+            portfolioItem.setImageUrls(distinctUrls);
+            portfolioItem.setImageUrl(distinctUrls.isEmpty() ? imageUrl : distinctUrls.get(0));
+        } else {
+            portfolioItem.setImageUrl(imageUrl);
+            portfolioItem.setImageUrls(imageUrl != null && !imageUrl.isBlank() ? new java.util.ArrayList<>(List.of(imageUrl)) : new java.util.ArrayList<>());
+        }
         portfolioItem.setType(type);
         portfolioItem.setComments(new java.util.ArrayList<>());
 
@@ -109,8 +115,25 @@ public class PortfolioServiceImpl implements PortfolioService {
             portfolioItem.setTitle(title);
         }
         if (imageUrls != null && !imageUrls.isEmpty()) {
-            portfolioItem.setImageUrls(imageUrls);
-            portfolioItem.setImageUrl(imageUrls.get(0)); // First image is the primary
+            // Identify images to delete: images in the old list that are NOT in the new list
+            List<String> oldImages = portfolioItem.getImageUrls();
+            if (oldImages != null) {
+                for (String oldUrl : oldImages) {
+                    if (oldUrl != null && !oldUrl.isEmpty() && !imageUrls.contains(oldUrl)) {
+                        try {
+                            String fileId = extractFileIdFromUrl(oldUrl);
+                            fileStorageService.delete(fileId);
+                            log.info("Deleted orphaned portfolio image from storage: {}", fileId);
+                        } catch (Exception e) {
+                            log.warn("Failed to delete orphaned image {}: {}", oldUrl, e.getMessage());
+                        }
+                    }
+                }
+            }
+
+            List<String> distinctUrls = imageUrls.stream().filter(url -> url != null && !url.isBlank()).distinct().collect(Collectors.toList());
+            portfolioItem.setImageUrls(distinctUrls);
+            portfolioItem.setImageUrl(distinctUrls.get(0)); // First image is the primary
         }
         if (type != null && !type.isBlank()) {
             portfolioItem.setType(type);
@@ -130,15 +153,19 @@ public class PortfolioServiceImpl implements PortfolioService {
                 .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException(
                         "Portfolio item not found with id: " + portfolioId));
 
-        // Delete associated image file from storage (S3 or GridFS)
-        if (portfolioItem.getImageUrl() != null && !portfolioItem.getImageUrl().isEmpty()) {
-            try {
-                String fileId = extractFileIdFromUrl(portfolioItem.getImageUrl());
-                fileStorageService.delete(fileId);
-                log.info("Deleted image file: {}", fileId);
-            } catch (Exception e) {
-                log.error("Failed to delete image file for portfolio {}: {}", portfolioId, e.getMessage());
-                // Continue with portfolio deletion even if file deletion fails
+        // Delete all associated image files from storage (S3 or GridFS)
+        List<String> images = portfolioItem.getImageUrls();
+        if (images != null && !images.isEmpty()) {
+            for (String url : images) {
+                if (url != null && !url.isEmpty()) {
+                    try {
+                        String fileId = extractFileIdFromUrl(url);
+                        fileStorageService.delete(fileId);
+                        log.info("Deleted image file from storage: {}", fileId);
+                    } catch (Exception e) {
+                        log.error("Failed to delete image file {} for portfolio {}: {}", url, portfolioId, e.getMessage());
+                    }
+                }
             }
         }
 

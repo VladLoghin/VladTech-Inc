@@ -363,6 +363,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Unauthorized to delete this review");
         }
 
+        cleanupReviewPhotos(existing);
         reviewRepository.delete(existing);
         return responseMapper.entityToResponseModel(existing);
     }
@@ -396,6 +397,7 @@ public class ReviewServiceImpl implements ReviewService {
         String ownerId = review.getOwnerAuth0Id() != null ? review.getOwnerAuth0Id() : review.getClientId();
         applyReviewStrike(ownerId);
 
+        cleanupReviewPhotos(review);
         reviewRepository.delete(review);
 
         UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(ownerId);
@@ -447,6 +449,21 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         userProfileRepository.save(profile);
+    }
+
+    private void cleanupReviewPhotos(Review review) {
+        if (review.getPhotos() != null && !review.getPhotos().isEmpty()) {
+            for (Photo photo : review.getPhotos()) {
+                if (photo.getFilename() != null && !photo.getFilename().isEmpty()) {
+                    try {
+                        fileStorageService.delete(photo.getFilename());
+                        log.info("Deleted review photo from storage: {}", photo.getFilename());
+                    } catch (Exception e) {
+                        log.error("Failed to delete review photo {}: {}", photo.getFilename(), e.getMessage());
+                    }
+                }
+            }
+        }
     }
 }
 
