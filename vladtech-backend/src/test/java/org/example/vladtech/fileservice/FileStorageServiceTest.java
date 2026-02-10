@@ -3,6 +3,8 @@ package org.example.vladtech.fileservice;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.bson.BsonObjectId;
+import java.util.Date;
 import org.example.vladtech.filestorageservice.GridFsFileStorageService;
 import org.example.vladtech.filestorageservice.FileResourceWithMetadata;
 import org.junit.jupiter.api.BeforeEach;
@@ -426,9 +428,18 @@ class FileStorageServiceTest {
     void loadResourceWithMetadata_WithValidId_ShouldReturnCorrectResource() throws FileNotFoundException {
         // Arrange
         Document metadata = new Document();
-        when(gridFsTemplate.findOne(any(Query.class))).thenReturn(gridFSFile);
-        when(gridFsOperations.getResource(any(com.mongodb.client.gridfs.model.GridFSFile.class))).thenReturn(gridFsResource);
-        when(gridFSFile.getMetadata()).thenReturn(metadata);
+        
+        com.mongodb.client.gridfs.model.GridFSFile realGridFsFile = new com.mongodb.client.gridfs.model.GridFSFile(
+                new BsonObjectId(new ObjectId()),
+                "test.txt",
+                100L,
+                1024,
+                new Date(),
+                metadata
+        );
+
+        when(gridFsTemplate.findOne(any(Query.class))).thenReturn(realGridFsFile);
+        when(gridFsOperations.getResource(realGridFsFile)).thenReturn(gridFsResource);
 
         // Act
         FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
