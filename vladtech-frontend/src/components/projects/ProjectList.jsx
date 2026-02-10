@@ -396,14 +396,14 @@ const ProjectList = ({
                 }`}
             >
               {/* Buttons - grid layout on desktop, at bottom on mobile */}
-              <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[280px] lg:max-w-[400px]">
+              <div className="hidden sm:grid absolute right-4 top-4 gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-[300px] lg:max-w-[450px]">
                 {" "}
                 {/* Send to Portfolio Button */}
                 {isAdmin && !isArchived && (
                   <button
                     type="button"
                     onClick={() => openPortfolioModal(project)}
-                    className="px-3 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("project.sendToPortfolio", {
                       defaultValue: "Send to Portfolio",
@@ -415,7 +415,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => openUpload(project)}
-                    className="px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("project.uploadInformation", {
                       defaultValue: "Upload Information",
@@ -426,7 +426,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => openView(project)}
-                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("project.viewInformation", {
                       defaultValue: "View Information",
@@ -438,7 +438,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onReactivate?.(project)}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("project.reactivate")}
                   </button>
@@ -447,7 +447,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onComplete?.(project)}
-                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("project.markComplete")}
                   </button>
@@ -456,7 +456,7 @@ const ProjectList = ({
                   <button
                     type="button"
                     onClick={() => onEdit?.(project)}
-                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center"
+                    className="px-3 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center flex items-center justify-center"
                   >
                     {t("edit")}
                   </button>
@@ -466,13 +466,13 @@ const ProjectList = ({
                   type="button"
                   onClick={() => handleTogglePin(project)}
                   disabled={pinLoading}
-                  className={`px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
+                  className={`px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm text-center flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
                     ? "bg-black text-white hover:bg-black/80"
                     : "bg-white text-black hover:bg-black hover:text-white"
                     } disabled:opacity-50`}
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 flex-shrink-0"
                     fill={pinnedProjects.has(project.projectIdentifier) ? "currentColor" : "none"}
                     stroke="currentColor"
                     strokeWidth="2"
@@ -491,11 +491,11 @@ const ProjectList = ({
                 <button
                   type="button"
                   onClick={() => openExport(project)}
-                  className="px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm flex items-center justify-center gap-2"
+                  className="px-3 py-2 bg-white border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-all font-semibold text-sm text-center flex items-center justify-center gap-2"
                   title={t("project.export")}
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -512,7 +512,7 @@ const ProjectList = ({
               </div>
 
               {/* Content area with margin to avoid button overlap on desktop */}
-              <div className="sm:mr-[190px] md:mr-[280px] lg:mr-[420px]">
+              <div className="sm:mr-[210px] md:mr-[310px] lg:mr-[470px]">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-lg font-semibold">{project.name}</h3>
                   {project.state && (
@@ -764,13 +764,13 @@ const ProjectList = ({
                   type="button"
                   onClick={() => handleTogglePin(project)}
                   disabled={pinLoading}
-                  className={`flex-1 min-w-[140px] px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm whitespace-nowrap flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
+                  className={`flex-1 min-w-[140px] px-3 py-2 border-2 border-black rounded-lg transition-all font-semibold text-sm text-center flex items-center justify-center gap-2 ${pinnedProjects.has(project.projectIdentifier)
                     ? "bg-black text-white hover:bg-black/80"
                     : "bg-white text-black hover:bg-black hover:text-white"
                     } disabled:opacity-50`}
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 flex-shrink-0"
                     fill={pinnedProjects.has(project.projectIdentifier) ? "currentColor" : "none"}
                     stroke="currentColor"
                     strokeWidth="2"
@@ -822,12 +822,23 @@ const ProjectList = ({
         >
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-black/60 mb-1">
-                {t("project.comments", { defaultValue: "Comments" })}
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold text-black/60">
+                  {t("project.comments", { defaultValue: "Comments" })}
+                </label>
+                <span className={`text-xs font-medium ${comments.trim().split(/\s+/).filter(w => w).length > 200 ? "text-red-600" : "text-black/40"}`}>
+                  {comments.trim().split(/\s+/).filter(w => w).length} / 200 words
+                </span>
+              </div>
               <textarea
                 value={comments}
-                onChange={(e) => setComments(e.target.value)}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  const wordCount = text.trim().split(/\s+/).filter(w => w).length;
+                  if (wordCount <= 200) {
+                    setComments(text);
+                  }
+                }}
                 className="w-full min-h-[110px] px-3 py-2 border-2 border-black/20 rounded-lg"
                 placeholder={t("project.commentsPlaceholder", {
                   defaultValue: "Write what you did today...",

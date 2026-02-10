@@ -250,6 +250,7 @@ const resources = {
       "project.noComments": "No comments.",
       "project.commentsPlaceholder": "Write what you did today...",
       "project.choosePhoto": "Choose a photo",
+      "project.choosePhotoOptional": "Choose a photo (optional)",
       "project.noFileChosen": "No file chosen",
       "project.workProof": "Work proof",
       "project.imageFailedToLoad": "Image failed to load.",
@@ -639,6 +640,7 @@ const resources = {
       "project.noComments": "Aucun commentaire.",
       "project.commentsPlaceholder": "Écris ce que tu as fait aujourd’hui...",
       "project.choosePhoto": "Choisir une photo",
+      "project.choosePhotoOptional": "Choisir une photo (facultatif)",
       "project.noFileChosen": "Aucun fichier choisi",
       "project.workProof": "Preuve du travail",
       "project.imageFailedToLoad": "Impossible d’afficher l’image.",
@@ -709,7 +711,7 @@ const resources = {
       "project.costPositiveError": "Le coût doit être un nombre positif",
 
       // Calendar
-      "calendar.today": "aujourd’hui",
+      "calendar.today": "Aujourd’hui",
 
       // Portfolio Modals
       "portfolio.createItem": "Créer un Élément de Portfolio",
