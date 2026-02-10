@@ -26,7 +26,7 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Profile("!prod")
+@Profile("!prod & !s3-test")
 @RequiredArgsConstructor
 public class GridFsFileStorageService implements IFileStorageService {
 

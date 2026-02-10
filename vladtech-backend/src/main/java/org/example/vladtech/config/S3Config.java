@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 @Slf4j
 @Configuration
-@Profile("prod")
+@Profile({"prod", "s3-test"})
 public class S3Config {
 
     @Value("${AWS_REGION:us-east-1}")

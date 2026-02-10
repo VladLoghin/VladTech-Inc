@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Profile("prod")
+@Profile({"prod", "s3-test"})
 @RequiredArgsConstructor
 public class S3FileStorageService implements IFileStorageService {
 

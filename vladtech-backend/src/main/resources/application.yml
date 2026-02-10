@@ -250,3 +250,14 @@ vladtech:
 email:
   noreply: ${NOREPLY_EMAIL}
   admin: ${CONTACT_EMAIL}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: s3-test
+
+vladtech:
+  aws:
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
