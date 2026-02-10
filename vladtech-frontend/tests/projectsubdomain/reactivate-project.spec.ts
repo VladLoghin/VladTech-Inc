@@ -18,10 +18,10 @@ test('reactivate project', async ({ page, loginAs, createProject }) => {
     const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
     await expect(projectCard).toBeVisible({ timeout: 5000 });
 
-    await projectCard.getByRole('button', { name: /Mark Complete/i }).click();
+    await projectCard.getByRole('button', { name: /Archive/i }).click();
 
     // Wait for archive action to complete
-    await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/has been archived/i)).toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
 
     // Switch to Archived tab

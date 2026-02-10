@@ -21,16 +21,16 @@ test('archive project', async ({ page, loginAs, createProject }) => {
     const projectCard = page.locator('div.border.border-black\\/10.rounded-lg.p-4').filter({ hasText: projectName });
     await expect(projectCard).toBeVisible({ timeout: 5000 });
 
-    await projectCard.getByRole('button', { name: /Mark Complete/i }).click();
+    await projectCard.getByRole('button', { name: /Archive/i }).click();
 
     // Verify success message
     try {
-        await expect(page.getByText(/has been marked as complete/i)).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText(/has been archived/i)).toBeVisible({ timeout: 15000 });
     } catch (e) {
         // If success message not found, check if error message is present
-        const errorMsg = page.getByText('Failed to complete project.');
+        const errorMsg = page.getByText('Failed to archive project.');
         if (await errorMsg.isVisible()) {
-            throw new Error('Backend failed to complete project: UI reported "Failed to complete project."');
+            throw new Error('Backend failed to archive project: UI reported "Failed to archive project."');
         }
         throw e;
     }
