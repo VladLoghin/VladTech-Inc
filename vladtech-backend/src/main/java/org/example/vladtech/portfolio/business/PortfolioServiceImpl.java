@@ -21,6 +21,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
     private final PortfolioMapper portfolioMapper;
+    private final org.example.vladtech.filestorageservice.IFileStorageService fileStorageService;
 
     @Override
     public List<PortfolioResponseDto> getAllPortfolioItems() {
@@ -102,8 +103,26 @@ public class PortfolioServiceImpl implements PortfolioService {
         PortfolioItem portfolioItem = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new org.example.vladtech.portfolio.exceptions.PortfolioNotFoundException("Portfolio item not found with id: " + portfolioId));
 
+        // Delete associated image file from storage (S3 or GridFS)
+        if (portfolioItem.getImageUrl() != null && !portfolioItem.getImageUrl().isEmpty()) {
+            try {
+                String fileId = extractFileIdFromUrl(portfolioItem.getImageUrl());
+                fileStorageService.delete(fileId);
+                log.info("Deleted image file: {}", fileId);
+            } catch (Exception e) {
+                log.error("Failed to delete image file for portfolio {}: {}", portfolioId, e.getMessage());
+                // Continue with portfolio deletion even if file deletion fails
+            }
+        }
+
         portfolioRepository.delete(portfolioItem);
         log.info("Portfolio item deleted successfully with id: {}", portfolioId);
+    }
+
+    private String extractFileIdFromUrl(String imageUrl) {
+        // URL format: /api/uploads/portfolio/{fileId} or /api/uploads/project/{fileId}
+        String[] parts = imageUrl.split("/");
+        return parts[parts.length - 1];
     }
 }
 

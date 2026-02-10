@@ -35,6 +35,9 @@ class PortfolioServiceImplTest {
     @Mock
     private PortfolioMapper portfolioMapper;
 
+    @Mock
+    private org.example.vladtech.filestorageservice.IFileStorageService fileStorageService;
+
     @InjectMocks
     private PortfolioServiceImpl portfolioService;
 
@@ -260,12 +263,15 @@ class PortfolioServiceImplTest {
     }
 
     @Test
-    void deletePortfolioItem_ShouldDeleteSuccessfully() {
+    void deletePortfolioItem_ShouldDeleteSuccessfully() throws Exception {
         // Arrange
         String portfolioId = "portfolio-to-delete";
+        String imageUrl = "/api/uploads/portfolio/delete-me.jpg";
+        String fileId = "delete-me.jpg";
+        
         PortfolioItem itemToDelete = new PortfolioItem(
                 "Item to Delete",
-                "/uploads/portfolio/delete-me.jpg",
+                imageUrl,
                 null,
                 new ArrayList<>());
         itemToDelete.setPortfolioId(portfolioId);
@@ -277,11 +283,12 @@ class PortfolioServiceImplTest {
 
         // Assert
         verify(portfolioRepository).findById(portfolioId);
+        verify(fileStorageService).delete(fileId);
         verify(portfolioRepository).delete(itemToDelete);
     }
 
     @Test
-    void deletePortfolioItem_WhenPortfolioNotFound_ShouldThrowException() {
+    void deletePortfolioItem_WhenPortfolioNotFound_ShouldThrowException() throws Exception {
         // Arrange
         String portfolioId = "non-existent-id";
         when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.empty());
@@ -293,6 +300,77 @@ class PortfolioServiceImplTest {
 
         verify(portfolioRepository).findById(portfolioId);
         verify(portfolioRepository, never()).delete(any());
+        verify(fileStorageService, never()).delete(any());
+    }
+
+    @Test
+    void deletePortfolioItem_WhenImageUrlIsNull_ShouldNotDeleteFile() throws Exception {
+        // Arrange
+        String portfolioId = "portfolio-no-image";
+        PortfolioItem itemWithoutImage = new PortfolioItem(
+                "Item Without Image",
+                null,
+                null,
+                new ArrayList<>());
+        itemWithoutImage.setPortfolioId(portfolioId);
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(itemWithoutImage));
+
+        // Act
+        portfolioService.deletePortfolioItem(portfolioId);
+
+        // Assert
+        verify(portfolioRepository).findById(portfolioId);
+        verify(fileStorageService, never()).delete(any());
+        verify(portfolioRepository).delete(itemWithoutImage);
+    }
+
+    @Test
+    void deletePortfolioItem_WhenImageUrlIsEmpty_ShouldNotDeleteFile() throws Exception {
+        // Arrange
+        String portfolioId = "portfolio-empty-image";
+        PortfolioItem itemWithEmptyImage = new PortfolioItem(
+                "Item With Empty Image",
+                "",
+                null,
+                new ArrayList<>());
+        itemWithEmptyImage.setPortfolioId(portfolioId);
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(itemWithEmptyImage));
+
+        // Act
+        portfolioService.deletePortfolioItem(portfolioId);
+
+        // Assert
+        verify(portfolioRepository).findById(portfolioId);
+        verify(fileStorageService, never()).delete(any());
+        verify(portfolioRepository).delete(itemWithEmptyImage);
+    }
+
+    @Test
+    void deletePortfolioItem_WhenFileDeleteFails_ShouldStillDeletePortfolio() throws Exception {
+        // Arrange
+        String portfolioId = "portfolio-with-file-error";
+        String imageUrl = "/api/uploads/portfolio/problem-file.jpg";
+        String fileId = "problem-file.jpg";
+        
+        PortfolioItem itemToDelete = new PortfolioItem(
+                "Item With File Error",
+                imageUrl,
+                null,
+                new ArrayList<>());
+        itemToDelete.setPortfolioId(portfolioId);
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(itemToDelete));
+        doThrow(new RuntimeException("S3 service unavailable")).when(fileStorageService).delete(fileId);
+
+        // Act
+        portfolioService.deletePortfolioItem(portfolioId);
+
+        // Assert - Portfolio should still be deleted even if file deletion fails
+        verify(portfolioRepository).findById(portfolioId);
+        verify(fileStorageService).delete(fileId);
+        verify(portfolioRepository).delete(itemToDelete);
     }
 
     @Test
