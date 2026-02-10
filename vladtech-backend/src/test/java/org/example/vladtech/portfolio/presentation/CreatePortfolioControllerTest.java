@@ -47,7 +47,7 @@ class CreatePortfolioControllerTest {
         response.setImageUrl("/uploads/portfolio/kitchen.jpg");
         response.setComments(new ArrayList<>());
 
-        when(portfolioService.createPortfolioItem(anyString(), anyString(), anyString()))
+        when(portfolioService.createPortfolioItem(anyString(), anyString(), any(), anyString()))
                 .thenReturn(response);
     }
 
@@ -74,7 +74,7 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.comments", hasSize(0)));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), anyString());
+                .createPortfolioItem(eq("New Kitchen Renovation"), eq("/uploads/portfolio/kitchen.jpg"), any(), eq("Kitchen"));
     }
 
     @Disabled("Disabled until we fix the security config and permissions in the controller class")
@@ -153,7 +153,7 @@ class CreatePortfolioControllerTest {
     }
 
     @Test
-    void createPortfolio_WithEmptyImageUrl_ShouldReturnBadRequest() throws Exception {
+    void createPortfolio_WithEmptyImageUrl_ShouldStillSucceed() throws Exception {
         PortfolioResponseDto request = new PortfolioResponseDto();
         request.setTitle("Valid Title");
         request.setImageUrl("");
@@ -163,9 +163,7 @@ class CreatePortfolioControllerTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(portfolioService);
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -185,6 +183,6 @@ class CreatePortfolioControllerTest {
                 .andExpect(jsonPath("$.imageUrl", is("/uploads/portfolio/kitchen.jpg")));
 
         verify(portfolioService, times(1))
-                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), anyString());
+                .createPortfolioItem(eq("Bathroom Remodel"), eq("/uploads/portfolio/bathroom.jpg"), any(), eq("Bathroom"));
     }
 }

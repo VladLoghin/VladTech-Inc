@@ -27,7 +27,6 @@ public class PortfolioItem {
     private String type; // Type: Interior, Kitchen, Bathroom, Exterior/Yard
     private boolean archived = false;
     private List<PortfolioComment> comments = new ArrayList<>();
-    private boolean archived = false;
 
     public PortfolioItem(String title, String imageUrl, String type, List<PortfolioComment> comments) {
         this.title = title;
