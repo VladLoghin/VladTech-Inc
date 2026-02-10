@@ -31,6 +31,9 @@ public class S3FileStorageService implements IFileStorageService {
     @Value("${vladtech.aws.s3.bucket-name}")
     private String bucketName;
 
+    @Value("${vladtech.aws.s3.folder-prefix:images}")
+    private String folderPrefix;
+
     // File size limit: 10MB
     public static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -91,7 +94,7 @@ public class S3FileStorageService implements IFileStorageService {
 
         // Generate unique key for S3
         String fileId = UUID.randomUUID().toString();
-        String s3Key = "images/" + fileId;
+        String s3Key = folderPrefix + "/" + fileId;
 
         // Prepare metadata
         Map<String, String> metadata = new HashMap<>();
@@ -121,7 +124,8 @@ public class S3FileStorageService implements IFileStorageService {
 
     @Override
     public FileResourceWithMetadata loadResourceWithMetadata(String id) throws FileNotFoundException {
-        String s3Key = "images/" + id;
+        log.info("Loading file with id: {}", id);
+        String s3Key = folderPrefix + "/" + id;
 
         try {
             // Get object metadata first
@@ -168,12 +172,13 @@ public class S3FileStorageService implements IFileStorageService {
 
     @Override
     public Map<String, Object> getMetadata(String id) throws FileNotFoundException {
+        log.info("Getting metadata for file with id: {}", id);
         return loadResourceWithMetadata(id).getMetadata();
     }
 
     @Override
     public void delete(String id) throws FileNotFoundException {
-        String s3Key = "images/" + id;
+        String s3Key = folderPrefix + "/" + id;
 
         try {
             // Check if object exists first
