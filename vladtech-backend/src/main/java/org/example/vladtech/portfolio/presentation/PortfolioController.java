@@ -108,11 +108,25 @@ public class PortfolioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }
 
-    @DeleteMapping("/{portfolioId}")
-    public ResponseEntity<Void> deletePortfolioItem(@PathVariable String portfolioId) {
-        log.info("DELETE request to /api/portfolio/{} - Deleting portfolio item", portfolioId);
-        portfolioService.deletePortfolioItem(portfolioId);
+    @PutMapping("/{portfolioId}/archive")
+    public ResponseEntity<Void> archivePortfolioItem(@PathVariable String portfolioId) {
+        log.info("PUT request to /api/portfolio/{}/archive - Archiving portfolio item", portfolioId);
+        portfolioService.archivePortfolioItem(portfolioId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{portfolioId}/unarchive")
+    public ResponseEntity<Void> unarchivePortfolioItem(@PathVariable String portfolioId) {
+        log.info("PUT request to /api/portfolio/{}/unarchive - Unarchiving portfolio item", portfolioId);
+        portfolioService.unarchivePortfolioItem(portfolioId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/archived")
+    public ResponseEntity<List<PortfolioResponseDto>> getArchivedPortfolioItems() {
+        log.info("GET request to /api/portfolio/archived - Fetching archived portfolio items");
+        List<PortfolioResponseDto> archivedItems = portfolioService.getArchivedPortfolioItems();
+        return ResponseEntity.ok(archivedItems);
     }
 
     @PostMapping("/{portfolioId}/comments")
