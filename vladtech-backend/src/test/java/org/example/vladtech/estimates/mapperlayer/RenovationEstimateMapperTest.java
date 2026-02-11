@@ -30,8 +30,8 @@ class RenovationEstimateMapperTest {
 
     @BeforeEach
     void setUp() {
-        requestMapper = Mappers.getMapper(RenovationEstimateRequestMapper.class);
-        responseMapper = Mappers.getMapper(RenovationEstimateResponseMapper.class);
+        requestMapper = new RenovationEstimateRequestMapperImpl();
+        responseMapper = new RenovationEstimateResponseMapperImpl();
     }
 
     @Test

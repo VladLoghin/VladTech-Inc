@@ -2,7 +2,7 @@ package org.example.vladtech.utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.portfolio.data.PortfolioComment;
 import org.example.vladtech.portfolio.data.PortfolioItem;
 import org.example.vladtech.portfolio.data.PortfolioRepository;
@@ -37,7 +37,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final ReviewRepository reviewRepository;
     private final PortfolioRepository portfolioRepository;
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
 
     //TODO turn this to true when you want to seed the DB see the yaml file if you need to test with seeding further
     @Value("${app.seed-db:false}")

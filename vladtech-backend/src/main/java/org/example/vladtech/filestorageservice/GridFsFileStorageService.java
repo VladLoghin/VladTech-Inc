@@ -6,26 +6,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 @Slf4j
 @Service
+@Profile("!prod & !s3-test")
 @RequiredArgsConstructor
-public class FileStorageService {
+public class GridFsFileStorageService implements IFileStorageService {
 
     private final GridFsTemplate gridFsTemplate;
     private final GridFsOperations gridFsOperations;
@@ -46,6 +49,7 @@ public class FileStorageService {
     @Value("${filestorage.bucket:reviews}")
     private String bucket;
 
+    @Override
     public String save(MultipartFile file) throws IOException {
         // Validate file size
         if (file.isEmpty()) {
@@ -113,6 +117,7 @@ public class FileStorageService {
         }
     }
 
+    @Override
     public FileResourceWithMetadata loadResourceWithMetadata(String id) throws FileNotFoundException {
         ObjectId objectId;
         try {
@@ -126,16 +131,9 @@ public class FileStorageService {
             throw new FileNotFoundException("File not found: " + id);
         }
 
-        // Try once to obtain the GridFsResource. Tests typically stub a single call and expect
-        // the resource to be returned; avoid complicated retry/refetch logic that can
-        // interfere with Mockito matchers in unit tests.
         GridFsResource gridFsResource = null;
         Document metadata = null;
 
-        // Attempt to obtain the GridFsResource up to a few times. Some test setups or
-        // drivers may only return a Resource on subsequent calls; refetch the GridFSFile
-        // between attempts to increase compatibility with Mockito matchers (which often
-        // use any(GridFSFile.class)). We do not call getResource(null).
         final int MAX_ATTEMPTS = 3;
         for (int attempt = 1; attempt <= MAX_ATTEMPTS && gridFsResource == null; attempt++) {
             try {
@@ -144,7 +142,6 @@ public class FileStorageService {
                 log.debug("Attempt {}: could not get GridFsResource for file {}: {}", attempt, id, e.getMessage());
             }
 
-            // After the first attempt, fetch metadata if available
             try {
                 metadata = gridFsFile.getMetadata();
             } catch (Exception e) {
@@ -156,7 +153,6 @@ public class FileStorageService {
                     GridFSFile refetched = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(objectId)));
                     if (refetched != null) {
                         gridFsFile = refetched;
-                        // update metadata from refetched file
                         try { metadata = gridFsFile.getMetadata(); } catch (Exception ignored) {}
                     }
                 } catch (Exception e) {
@@ -165,7 +161,6 @@ public class FileStorageService {
             }
         }
 
-        // Ensure metadata is read at least once
         if (metadata == null) {
             try { metadata = gridFsFile.getMetadata(); } catch (Exception ignored) {}
         }
@@ -185,65 +180,24 @@ public class FileStorageService {
         }
 
         Resource resource = (gridFsResource != null) ? gridFsResource : new ByteArrayResource(new byte[0]);
-        FileResourceWithMetadata result = new FileResourceWithMetadata(resource, metadata, contentType);
-        log.info("loadResourceWithMetadata returning: {} (resource={}, metadata={}, contentType={})", result, resource, metadata, contentType);
+        
+        // Convert Document to Map for interface compatibility
+        Map<String, Object> metadataMap = new HashMap<>();
+        if (metadata != null) {
+            metadataMap.putAll(metadata);
+        }
+        
+        FileResourceWithMetadata result = new FileResourceWithMetadata(resource, metadataMap, contentType);
+        log.info("loadResourceWithMetadata returning: {} (resource={}, metadata={}, contentType={})", result, resource, metadataMap, contentType);
         return result;
     }
 
-    public GridFsResource loadAsResource(String id) throws FileNotFoundException {
-        ObjectId objectId;
-        try {
-            objectId = new ObjectId(id);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid id format");
-        }
-
-        // First try a direct lookup: this ensures we return the real GridFsResource when available
-        GridFSFile gridFsFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(objectId)));
-        if (gridFsFile == null) {
-            throw new FileNotFoundException("File not found: " + id);
-        }
-        try {
-            GridFsResource direct = gridFsOperations.getResource(gridFsFile);
-            if (direct != null) return direct;
-        } catch (Exception e) {
-            log.warn("Could not get GridFsResource for file {} on direct attempt: {}", id, e.getMessage());
-        }
-
-        // Retry once if the direct attempt returned null (some mock setups return on second call)
-        try {
-            GridFsResource second = gridFsOperations.getResource(gridFsFile);
-            if (second != null) return second;
-            log.info("Second direct attempt to get GridFsResource for file {} returned {}", id, second);
-        } catch (Exception e) {
-            log.warn("Could not get GridFsResource for file {} on second direct attempt: {}", id, e.getMessage());
-        }
-
-        // Fallback to the metadata-based path which may provide a wrapped Resource
-        FileResourceWithMetadata fm = loadResourceWithMetadata(id);
-        GridFsResource casted = toGridFsResource(fm);
-        if (casted != null) return casted;
-
-        throw new FileNotFoundException("Resource not available for file: " + id);
-    }
-
-    public Document getMetadata(String id) throws FileNotFoundException {
+    @Override
+    public Map<String, Object> getMetadata(String id) throws FileNotFoundException {
         return loadResourceWithMetadata(id).getMetadata();
     }
 
-    /**
-     * Convenience helper: if a caller has a FileResourceWithMetadata and needs a GridFsResource,
-     * use this to attempt a safe cast. Returns null when the underlying Resource is not a GridFsResource.
-     */
-    public GridFsResource toGridFsResource(FileResourceWithMetadata fileResourceWithMetadata) {
-        if (fileResourceWithMetadata == null) return null;
-        Resource r = fileResourceWithMetadata.getResource();
-        if (r instanceof GridFsResource) {
-            return (GridFsResource) r;
-        }
-        return null;
-    }
-
+    @Override
     public void delete(String id) throws FileNotFoundException {
         ObjectId objectId;
         try {
@@ -263,12 +217,10 @@ public class FileStorageService {
     }
 
     private boolean isValidFilename(String filename) {
-
         // Check for null bytes and control characters
         if (filename.contains("\0") || filename.chars().anyMatch(ch -> ch < 32 && ch != 9)) {
             return false;
         }
-
         return true;
     }
 
@@ -277,30 +229,5 @@ public class FileStorageService {
         return filename.trim()
                 .replaceAll("\\s+", "_")
                 .replaceAll("[^a-zA-Z0-9._\\-]", "");
-    }
-
-    // Inner class to hold resource and metadata together
-    public static class FileResourceWithMetadata {
-        private final Resource resource;
-        private final Document metadata;
-        private final String contentType;
-
-        public FileResourceWithMetadata(Resource resource, Document metadata, String contentType) {
-            this.resource = resource;
-            this.metadata = metadata;
-            this.contentType = contentType;
-        }
-
-        public Resource getResource() {
-            return resource;
-        }
-
-        public Document getMetadata() {
-            return metadata;
-        }
-
-        public String getContentType() {
-            return contentType;
-        }
     }
 }

@@ -3,7 +3,10 @@ package org.example.vladtech.fileservice;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.bson.BsonObjectId;
+import java.util.Date;
+import org.example.vladtech.filestorageservice.GridFsFileStorageService;
+import org.example.vladtech.filestorageservice.FileResourceWithMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -20,9 +23,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +49,7 @@ class FileStorageServiceTest {
     private GridFsResource gridFsResource;
 
     @InjectMocks
-    private FileStorageService fileStorageService;
+    private GridFsFileStorageService fileStorageService;
 
     private ObjectId testObjectId;
     private String testFileId;
@@ -125,7 +126,7 @@ class FileStorageServiceTest {
     @Test
     void save_WithFileTooLarge_ShouldThrowException() {
         // Arrange
-        byte[] largeContent = new byte[(int) FileStorageService.MAX_FILE_SIZE + 1];
+        byte[] largeContent = new byte[(int) GridFsFileStorageService.MAX_FILE_SIZE + 1];
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "large.jpg",
@@ -360,7 +361,7 @@ class FileStorageServiceTest {
         when(gridFSFile.getMetadata()).thenReturn(metadata);
 
         // Act
-        FileStorageService.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
+        org.example.vladtech.filestorageservice.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
 
         // Assert
         assertNotNull(result);
@@ -401,7 +402,7 @@ class FileStorageServiceTest {
         when(gridFsResource.getContentType()).thenReturn("image/jpg");
 
         // Act
-        FileStorageService.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
+        org.example.vladtech.filestorageservice.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
 
         // Assert
         assertEquals("image/jpg", result.getContentType());
@@ -417,27 +418,36 @@ class FileStorageServiceTest {
         when(gridFsResource.getContentType()).thenReturn(null);
 
         // Act
-        FileStorageService.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
+        org.example.vladtech.filestorageservice.FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
 
         // Assert
         assertEquals(MediaType.APPLICATION_OCTET_STREAM_VALUE, result.getContentType());
     }
 
-    @Disabled("Disabled until fixed")
     @Test
-    void loadAsResource_WithValidId_ShouldReturnResource() throws FileNotFoundException {
+    @Disabled("Flaky test - mock issue with GridFsResource")
+    void loadResourceWithMetadata_WithValidId_ShouldReturnCorrectResource() throws FileNotFoundException {
         // Arrange
         Document metadata = new Document();
-        when(gridFsTemplate.findOne(any(Query.class))).thenReturn(gridFSFile);
+        
+        com.mongodb.client.gridfs.model.GridFSFile realGridFsFile = new com.mongodb.client.gridfs.model.GridFSFile(
+                new BsonObjectId(new ObjectId()),
+                "test.txt",
+                100L,
+                1024,
+                new Date(),
+                metadata
+        );
+
+        when(gridFsTemplate.findOne(any(Query.class))).thenReturn(realGridFsFile);
         when(gridFsOperations.getResource(any(com.mongodb.client.gridfs.model.GridFSFile.class))).thenReturn(gridFsResource);
-        when(gridFSFile.getMetadata()).thenReturn(metadata);
 
         // Act
-        GridFsResource result = fileStorageService.loadAsResource(testFileId);
+        FileResourceWithMetadata result = fileStorageService.loadResourceWithMetadata(testFileId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(gridFsResource, result);
+        assertEquals(gridFsResource, result.getResource());
     }
 
     @Test
@@ -452,11 +462,11 @@ class FileStorageServiceTest {
         when(gridFsResource.getContentType()).thenReturn("image/jpeg");
 
         // Act
-        Document result = fileStorageService.getMetadata(testFileId);
+        java.util.Map<String, Object> result = fileStorageService.getMetadata(testFileId);
 
         // Assert
         assertNotNull(result);
-        assertEquals("test.jpg", result.getString("originalFilename"));
+        assertEquals("test.jpg", result.get("originalFilename"));
     }
 
     @Test
@@ -496,12 +506,13 @@ class FileStorageServiceTest {
     @Test
     void fileResourceWithMetadata_Getters_ShouldReturnCorrectValues() {
         // Arrange
-        Document metadata = new Document("key", "value");
+        java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+        metadata.put("key", "value");
         String contentType = "image/jpeg";
 
         // Act
-        FileStorageService.FileResourceWithMetadata fileData =
-                new FileStorageService.FileResourceWithMetadata(gridFsResource, metadata, contentType);
+        org.example.vladtech.filestorageservice.FileResourceWithMetadata fileData =
+                new org.example.vladtech.filestorageservice.FileResourceWithMetadata(gridFsResource, metadata, contentType);
 
         // Assert
         assertEquals(gridFsResource, fileData.getResource());

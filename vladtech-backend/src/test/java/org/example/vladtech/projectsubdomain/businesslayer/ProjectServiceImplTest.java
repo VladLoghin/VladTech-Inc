@@ -2,7 +2,7 @@
 package org.example.vladtech.projectsubdomain.businesslayer;
 
 import org.example.vladtech.auth.service.UserManagementService;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.*;
 import org.example.vladtech.projectsubdomain.domain.ProjectNotificationEmail;
 import org.example.vladtech.projectsubdomain.exceptions.InvalidEmployeeIdException;
@@ -55,7 +55,7 @@ class ProjectServiceImplTest {
     private ProjectService projectServiceMock;
 
     @Mock
-    private FileStorageService fileStorageService;
+    private IFileStorageService fileStorageService;
 
     @Mock
     private org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository;
@@ -2395,6 +2395,56 @@ class ProjectServiceImplTest {
     
     }
     
+    @Test
+    void createProject_ShouldSucceed_WhenEstimatedCostAndCurrencyAreNull() {
+        // Arrange
+        requestModel.setEstimatedCost(null);
+        requestModel.setEstimatedCostCurrency(null);
+        
+        when(projectRepository.count()).thenReturn(5L);
+        when(projectRequestMapper.requestModelToEntity(requestModel)).thenReturn(project);
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.createProject(requestModel);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+
+    @Test
+    void updateProject_ShouldSucceed_WhenEstimatedCostAndCurrencyAreNull() {
+        // Arrange
+        ProjectRequestModel updateRequest = new ProjectRequestModel();
+        updateRequest.setName("Updated Project");
+        updateRequest.setEstimatedCost(null);
+        updateRequest.setEstimatedCostCurrency(null);
+        
+        when(projectRepository.findByProjectIdentifier("PROJ-1")).thenReturn(Optional.of(project));
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectResponseMapper.entityToResponseModel(project)).thenReturn(responseModel);
+        
+        // Act
+        ProjectResponseModel result = projectService.updateProject("PROJ-1", updateRequest);
+        
+        // Assert
+        assertNotNull(result);
+        verify(projectRepository, times(1)).save(any(Project.class));
+    }
+
+    @Test
+    void createProject_ShouldThrowInvalidProjectDataException_WhenEstimatedCostIsNegative() {
+        // Arrange
+        requestModel.setEstimatedCost(java.math.BigDecimal.valueOf(-1.00));
+        
+        // Act & Assert
+        assertThrows(org.example.vladtech.projectsubdomain.exceptions.InvalidProjectDataException.class,
+                () -> projectService.createProject(requestModel));
+        verify(projectRepository, never()).save(any());
+    }
+
     @Test
     void assignClient_ShouldReturnNull() {
         // Act

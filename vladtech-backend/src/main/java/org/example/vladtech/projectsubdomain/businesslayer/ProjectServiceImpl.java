@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectState;
 import org.example.vladtech.projectsubdomain.exceptions.ProjectArchivedException;
 import org.example.vladtech.auth.service.UserManagementService;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.projectsubdomain.dataaccesslayer.ProjectPhoto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,7 +44,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectEmailMapper projectEmailMapper;
     private final ProjectEmailSender projectEmailSender;
     private final UserManagementService userManagementService;
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
     private final org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository;
     private final org.example.vladtech.portfolio.mapperlayer.PortfolioMapper portfolioMapper;
 
@@ -59,7 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectEmailMapper projectEmailMapper,
             ProjectEmailSender projectEmailSender,
             UserManagementService userManagementService,
-            FileStorageService fileStorageService,
+            IFileStorageService fileStorageService,
             org.example.vladtech.portfolio.data.PortfolioRepository portfolioRepository,
             org.example.vladtech.portfolio.mapperlayer.PortfolioMapper portfolioMapper) {
         this.projectRepository = projectRepository;

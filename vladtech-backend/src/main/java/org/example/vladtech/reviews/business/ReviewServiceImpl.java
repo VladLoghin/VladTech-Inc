@@ -10,7 +10,7 @@ import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
 import org.example.vladtech.reviews.data.Review;
 import org.example.vladtech.reviews.data.ReviewRepository;
-import org.example.vladtech.filestorageservice.FileStorageService;
+import org.example.vladtech.filestorageservice.IFileStorageService;
 import org.example.vladtech.reviews.mapperlayer.ReviewRequestMapper;
 import org.example.vladtech.reviews.mapperlayer.ReviewResponseMapper;
 import org.example.vladtech.reviews.presentation.ReviewRequestModel;
@@ -39,7 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewRequestMapper requestMapper;
     private final ReviewResponseMapper responseMapper;
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
     private final PortfolioServiceImpl portfolioService;
     private final PortfolioRepository portfolioRepository;
     private final PortfolioMapper portfolioMapper;
@@ -363,6 +363,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new RuntimeException("Unauthorized to delete this review");
         }
 
+        cleanupReviewPhotos(existing);
         reviewRepository.delete(existing);
         return responseMapper.entityToResponseModel(existing);
     }
@@ -396,6 +397,7 @@ public class ReviewServiceImpl implements ReviewService {
         String ownerId = review.getOwnerAuth0Id() != null ? review.getOwnerAuth0Id() : review.getClientId();
         applyReviewStrike(ownerId);
 
+        cleanupReviewPhotos(review);
         reviewRepository.delete(review);
 
         UserProfile profile = userProfileRepository.findUserProfileByAuth0Sub(ownerId);
@@ -447,6 +449,21 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         userProfileRepository.save(profile);
+    }
+
+    private void cleanupReviewPhotos(Review review) {
+        if (review.getPhotos() != null && !review.getPhotos().isEmpty()) {
+            for (Photo photo : review.getPhotos()) {
+                if (photo.getFilename() != null && !photo.getFilename().isEmpty()) {
+                    try {
+                        fileStorageService.delete(photo.getFilename());
+                        log.info("Deleted review photo from storage: {}", photo.getFilename());
+                    } catch (Exception e) {
+                        log.error("Failed to delete review photo {}: {}", photo.getFilename(), e.getMessage());
+                    }
+                }
+            }
+        }
     }
 }
 

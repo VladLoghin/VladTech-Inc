@@ -242,6 +242,23 @@ spring:
           starttls:
             enable: true
 
+vladtech:
+  aws:
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
+
 email:
   noreply: ${NOREPLY_EMAIL}
   admin: ${CONTACT_EMAIL}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: s3-test
+
+vladtech:
+  aws:
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
+      folder-prefix: ${S3_FOLDER_PREFIX:images-test}

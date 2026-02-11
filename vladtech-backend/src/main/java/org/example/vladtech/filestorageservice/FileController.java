@@ -2,7 +2,6 @@ package org.example.vladtech.filestorageservice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.Document;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class FileController {
 
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
 
     // ---------------------------------------------------------------------
     // Reviews
@@ -90,14 +89,14 @@ public class FileController {
     @GetMapping("/reviews/{id}/metadata")
     public ResponseEntity<?> getFileMetadata(@PathVariable String id) {
         try {
-            Document metadata = fileStorageService.getMetadata(id);
+            Map<String, Object> metadata = fileStorageService.getMetadata(id);
 
             Map<String, Object> response = new HashMap<>();
             if (metadata != null) {
-                response.put("originalFilename", metadata.getString("originalFilename"));
-                response.put("contentType", metadata.getString("contentType"));
-                response.put("size", metadata.getLong("size"));
-                response.put("uploadedAt", metadata.getLong("uploadedAt"));
+                response.put("originalFilename", metadata.get("originalFilename"));
+                response.put("contentType", metadata.get("contentType"));
+                response.put("size", metadata.get("size"));
+                response.put("uploadedAt", metadata.get("uploadedAt"));
             }
             response.put("id", id);
 
@@ -159,13 +158,13 @@ public class FileController {
     @GetMapping("/portfolio/{id}/metadata")
     public ResponseEntity<?> getPortfolioFileMetadata(@PathVariable String id) {
         try {
-            Document metadata = fileStorageService.getMetadata(id);
+            Map<String, Object> metadata = fileStorageService.getMetadata(id);
             Map<String, Object> response = new HashMap<>();
             if (metadata != null) {
-                response.put("originalFilename", metadata.getString("originalFilename"));
-                response.put("contentType", metadata.getString("contentType"));
-                response.put("size", metadata.getLong("size"));
-                response.put("uploadedAt", metadata.getLong("uploadedAt"));
+                response.put("originalFilename", metadata.get("originalFilename"));
+                response.put("contentType", metadata.get("contentType"));
+                response.put("size", metadata.get("size"));
+                response.put("uploadedAt", metadata.get("uploadedAt"));
             }
             response.put("id", id);
             return ResponseEntity.ok(response);
@@ -210,15 +209,15 @@ public class FileController {
     // ---------------------------------------------------------------------
     private ResponseEntity<StreamingResponseBody> streamFileById(String id, boolean forceDownload) {
         try {
-            FileStorageService.FileResourceWithMetadata fileData =
+            FileResourceWithMetadata fileData =
                     fileStorageService.loadResourceWithMetadata(id);
 
             Resource resource = fileData.getResource();
-            Document metadata = fileData.getMetadata();
+            Map<String, Object> metadata = fileData.getMetadata();
             String contentType = fileData.getContentType();
 
             String originalFilename = (metadata != null && metadata.containsKey("originalFilename"))
-                    ? metadata.getString("originalFilename")
+                    ? String.valueOf(metadata.get("originalFilename"))
                     : (resource != null ? resource.getFilename() : "file");
 
             HttpHeaders headers = new HttpHeaders();

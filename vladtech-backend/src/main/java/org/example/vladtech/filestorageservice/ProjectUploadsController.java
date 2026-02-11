@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ProjectUploadsController {
 
-    private final FileStorageService fileStorageService;
+    private final IFileStorageService fileStorageService;
 
     // GET /api/uploads/projects/{projectIdentifier}/{photoId}
     @GetMapping("/{projectIdentifier}/{photoId}")
