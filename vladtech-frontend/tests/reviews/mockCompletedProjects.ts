@@ -100,3 +100,25 @@ export async function mockAllReviews(page: Page) {
         }
     });
 }
+
+export async function mockReviewSubmission(page: Page) {
+    await page.route('**/api/reviews', (route, request) => {
+        if (request.method() === 'POST') {
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    reviewId: 'test-review-new',
+                    clientName: 'Charlie',
+                    comment: 'E2E test review',
+                    rating: 'FOUR',
+                    visible: false,
+                    type: 'Interior',
+                    photos: [],
+                }),
+            });
+        } else {
+            route.continue();
+        }
+    });
+}

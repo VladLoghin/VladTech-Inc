@@ -28,6 +28,7 @@ const resources = {
       "nav.employeeTools": "EMPLOYEE TOOLS",
       "nav.clientArea": "CLIENT AREA",
       "nav.dashboard": "DASHBOARD",
+      "nav.reviews": "REVIEWS",
       "nav.login": "LOGIN",
       "nav.logout": "LOGOUT",
 
@@ -362,6 +363,13 @@ const resources = {
       archive: "Archive",
       restore: "Restore",
 
+      // Portfolio Gallery Page
+      "portfolio.filterAll": "All",
+      "portfolio.noComments": "No comments yet. Be the first to comment!",
+      "portfolio.addComment": "Add a comment...",
+      "portfolio.signInToComment": "Sign in to leave a comment",
+      "portfolio.signIn": "Sign In",
+
       // Role Finder Modal
       "roleFinder.title": "Role Finder",
       "roleFinder.usersFound": "{{count}} users found",
@@ -416,6 +424,21 @@ const resources = {
       "employeeFinder.noName": "No name",
       "employeeFinder.selected": "Selected",
       "employeeFinder.confirm": "Confirm",
+
+      // Reviews Page
+      "reviews.customerHighlights": "Customer Highlights",
+      "reviews.searchByName": "Search by Name",
+      "reviews.searchByComment": "Search by Comment",
+      "reviews.allRatings": "All ratings",
+      "reviews.allTypes": "All types",
+      "reviews.interior": "Interior",
+      "reviews.kitchen": "Kitchen",
+      "reviews.bathroom": "Bathroom",
+      "reviews.exteriorYard": "Exterior/Yard",
+      "reviews.reset": "Reset",
+      "reviews.showOnlyMine": "Show only my reviews",
+      "reviews.addReview": "Add Review",
+      "reviews.footer": "© 2026 VladTech. All rights reserved.",
     },
   },
   fr: {
@@ -443,6 +466,7 @@ const resources = {
       "nav.employeeTools": "OUTILS EMPLOYÉ",
       "nav.clientArea": "ESPACE CLIENT",
       "nav.dashboard": "TABLEAU DE BORD",
+      "nav.reviews": "AVIS",
       "nav.login": "CONNEXION",
       "nav.logout": "DÉCONNEXION",
 
@@ -779,6 +803,13 @@ const resources = {
       archive: "Archiver",
       restore: "Restaurer",
 
+      // Portfolio Gallery Page
+      "portfolio.filterAll": "Tous",
+      "portfolio.noComments": "Aucun commentaire. Soyez le premier à commenter !",
+      "portfolio.addComment": "Ajouter un commentaire...",
+      "portfolio.signInToComment": "Connectez-vous pour laisser un commentaire",
+      "portfolio.signIn": "Se connecter",
+
       // Role Finder Modal
       "roleFinder.title": "Recherche de Rôle",
       "roleFinder.usersFound": "{{count}} utilisateurs trouvés",
@@ -833,6 +864,21 @@ const resources = {
       "employeeFinder.noName": "Aucun nom",
       "employeeFinder.selected": "Sélectionné",
       "employeeFinder.confirm": "Confirmer",
+
+      // Reviews Page
+      "reviews.customerHighlights": "Avis clients",
+      "reviews.searchByName": "Rechercher par nom",
+      "reviews.searchByComment": "Rechercher par commentaire",
+      "reviews.allRatings": "Toutes les notes",
+      "reviews.allTypes": "Tous les types",
+      "reviews.interior": "Intérieur",
+      "reviews.kitchen": "Cuisine",
+      "reviews.bathroom": "Salle de bain",
+      "reviews.exteriorYard": "Extérieur/Cour",
+      "reviews.reset": "Réinitialiser",
+      "reviews.showOnlyMine": "Afficher uniquement mes avis",
+      "reviews.addReview": "Ajouter un avis",
+      "reviews.footer": "© 2026 VladTech. Tous droits réservés.",
     },
   },
 };

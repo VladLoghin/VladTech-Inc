@@ -3,11 +3,12 @@ import { X, Send, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "../components/button.js";
 import { Textarea } from "../components/textarea.js";
 import { motion, AnimatePresence } from "motion/react";
-import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { addComment } from "../api/portfolio/portfolioService.js";
 import getImageUrl from "../utils/getImageUrl.js";
 import {api} from "../api/http.js";
+import Navbar from "../components/Navbar";
 
 interface PortfolioItem {
   portfolioId: string;
@@ -30,8 +31,8 @@ interface PortfolioComment {
 const PORTFOLIO_TYPES = ["All", "Interior", "Kitchen", "Bathroom", "Exterior/Yard"];
 
 export default function PortfolioGallery() {
-  const navigate = useNavigate();
   const { isAuthenticated, user, getAccessTokenSilently, loginWithRedirect } = useAuth0();
+  const { t } = useTranslation();
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
@@ -175,49 +176,25 @@ export default function PortfolioGallery() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-yellow-400 text-2xl tracking-wider">LOADING...</div>
+        <div className="text-yellow-400 text-2xl tracking-wider">{t("loading")}</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Glossy Navigation Bar with Dropdown */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-yellow-400/20 shadow-2xl">
-        <div className="container mx-auto px-8 py-6 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/")}
-            className="text-2xl text-white tracking-widest hover:text-yellow-400 transition-colors"
-          >
-            VLADTECH
-          </button>
-
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-12">
-            <button
-              onClick={() => navigate("/portfolio")}
-              className="text-white hover:text-yellow-400 transition-colors tracking-wider text-sm border-b-2 border-yellow-400"
-            >
-              PORTFOLIO
-            </button>
-            <button
-              onClick={() => navigate("/reviews")}
-              className="text-white/40 hover:text-yellow-400 transition-colors tracking-wider text-sm"
-            >
-              REVIEWS
-            </button>
-          </div>
-
-          {/* Filter Dropdown */}
+      <Navbar
+        isNavbarDark={true}
+        rightSlot={
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-medium hover:bg-yellow-500 transition-all"
             >
-              {selectedType}
+              {selectedType === "All" ? t("portfolio.filterAll") : selectedType === "Interior" ? t("reviews.interior") : selectedType === "Kitchen" ? t("reviews.kitchen") : selectedType === "Bathroom" ? t("reviews.bathroom") : t("reviews.exteriorYard")}
               <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Dropdown Menu */}
             <AnimatePresence>
               {isDropdownOpen && (
                 <motion.div
@@ -225,7 +202,7 @@ export default function PortfolioGallery() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-56 bg-black border border-yellow-400/30 rounded-lg shadow-2xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-56 bg-black border border-yellow-400/30 rounded-lg shadow-2xl overflow-hidden z-50"
                 >
                   {PORTFOLIO_TYPES.map((type) => (
                     <button
@@ -240,15 +217,15 @@ export default function PortfolioGallery() {
                           : "text-white hover:bg-yellow-400/10"
                       }`}
                     >
-                      {type}
+                      {type === "All" ? t("portfolio.filterAll") : type === "Interior" ? t("reviews.interior") : type === "Kitchen" ? t("reviews.kitchen") : type === "Bathroom" ? t("reviews.bathroom") : t("reviews.exteriorYard")}
                     </button>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        </div>
-      </nav>
+        }
+      />
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
       <div className="pt-[88px] min-h-screen flex flex-col">
@@ -407,7 +384,7 @@ export default function PortfolioGallery() {
                 {/* Comments List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   {selectedItem.comments.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No comments yet. Be the first to comment!</p>
+                    <p className="text-center text-gray-500 py-8">{t("portfolio.noComments")}</p>
                   ) : (
                     selectedItem.comments.map((comment, idx) => (
                       <div key={idx} className="flex gap-3">
@@ -433,7 +410,7 @@ export default function PortfolioGallery() {
                       <Textarea
                         value={newComment}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewComment(e.target.value)}
-                        placeholder="Add a comment..."
+                        placeholder={t("portfolio.addComment")}
                         className="flex-1 resize-none bg-black/50 border-yellow-400/20 focus:border-yellow-400 text-white placeholder:text-gray-500 rounded-xl"
                         rows={2}
                         disabled={isSubmitting}
@@ -450,14 +427,14 @@ export default function PortfolioGallery() {
                 ) : (
                   <div className="p-6 border-t border-yellow-400/20">
                     <div className="text-center">
-                      <p className="text-gray-400 mb-3">Sign in to leave a comment</p>
+                      <p className="text-gray-400 mb-3">{t("portfolio.signInToComment")}</p>
                       <Button
                         onClick={() => loginWithRedirect({
                           appState: { returnTo: window.location.pathname }
                         })}
                         className="bg-yellow-400 hover:bg-yellow-500 text-black px-6"
                       >
-                        Sign In
+                        {t("portfolio.signIn")}
                       </Button>
                     </div>
                   </div>

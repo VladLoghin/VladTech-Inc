@@ -32,13 +32,11 @@ test('admin toggles review visibility, client views reviews', async ({ page, log
     await toggles.first().check();
   }
 
-  // Logout admin
-  await page.getByRole('button', { name: 'VLADTECH' }).click();
-  await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: 'LOGOUT' }).click();
+  // Logout admin via global navbar
+  await page.getByRole('button', { name: /logout/i }).click();
 
   // Ensure we are logged out before next login
-  await expect(page.getByRole('button', { name: 'LOGIN' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: /login/i })).toBeVisible({ timeout: 15000 });
 
   // --------------------
   // CLIENT FLOW

@@ -8,14 +8,14 @@ import {
   getMyReviews,
 } from "../api/reviews/reviewsService";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Navbar from "../components/Navbar";
 import "../components/reviews/Review.css";
 import { api } from "../api/http"; // ✅ ADD
 
 const ReviewsPage = () => {
-  const navigate = useNavigate();
-
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { t } = useTranslation();
 
   const [reviews, setReviews] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -138,37 +138,11 @@ const ReviewsPage = () => {
   return (
     <>
       <div className="reviews-page" data-testid="reviews-page">
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-yellow-400/20 backdrop-blur-xl">
-          <div className="container mx-auto px-4 sm:px-8 py-4 sm:py-6 flex items-center justify-between gap-4 sm:gap-0">
-            <button
-              onClick={() => navigate("/")}
-              className="text-lg sm:text-2xl text-white hover:text-yellow-400 font-semibold whitespace-nowrap"
-            >
-              VLADTECH
-            </button>
-
-            <div className="flex flex-1 justify-center gap-4 sm:gap-12">
-              <button
-                onClick={() => navigate("/portfolio")}
-                className="text-xs sm:text-base text-white/40 hover:text-yellow-400 whitespace-nowrap"
-              >
-                PORTFOLIO
-              </button>
-              <button
-                onClick={() => navigate("/reviews")}
-                className="text-xs sm:text-base text-white border-b-2 border-yellow-400 whitespace-nowrap"
-              >
-                REVIEWS
-              </button>
-            </div>
-
-            <div className="w-12 sm:w-14" aria-hidden="true" />
-          </div>
-        </nav>
+        <Navbar isNavbarDark={true} />
 
         <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
           <h2 className="title text-4xl font-extrabold tracking-wide text-black mb-4">
-            Customer Highlights
+            {t("reviews.customerHighlights")}
           </h2>
 
           {/* Filter Controls */}
@@ -178,7 +152,7 @@ const ReviewsPage = () => {
               <div className="flex flex-wrap items-center gap-4">
                 <input
                   type="text"
-                  placeholder="Search by Name"
+                  placeholder={t("reviews.searchByName")}
                   value={filters.clientName}
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, clientName: e.target.value }))
@@ -188,7 +162,7 @@ const ReviewsPage = () => {
 
                 <input
                   type="text"
-                  placeholder="Search by Comment"
+                  placeholder={t("reviews.searchByComment")}
                   value={filters.comment}
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, comment: e.target.value }))
@@ -203,7 +177,7 @@ const ReviewsPage = () => {
                   }
                   className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
                 >
-                  <option value="">All ratings</option>
+                  <option value="">{t("reviews.allRatings")}</option>
                   <option value="FIVE">★★★★★</option>
                   <option value="FOUR">★★★★☆</option>
                   <option value="THREE">★★★☆☆</option>
@@ -218,18 +192,18 @@ const ReviewsPage = () => {
                   }
                   className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
                 >
-                  <option value="">All types</option>
-                  <option value="Interior">Interior</option>
-                  <option value="Kitchen">Kitchen</option>
-                  <option value="Bathroom">Bathroom</option>
-                  <option value="Exterior/Yard">Exterior/Yard</option>
+                  <option value="">{t("reviews.allTypes")}</option>
+                  <option value="Interior">{t("reviews.interior")}</option>
+                  <option value="Kitchen">{t("reviews.kitchen")}</option>
+                  <option value="Bathroom">{t("reviews.bathroom")}</option>
+                  <option value="Exterior/Yard">{t("reviews.exteriorYard")}</option>
                 </select>
 
                 <button
                   onClick={handleReset}
                   className="px-5 py-3 rounded-full border border-gray-300 text-sm font-semibold text-gray-900 bg-white hover:bg-yellow-100 hover:border-yellow-400 shadow-sm transition-colors duration-300"
                 >
-                  Reset
+                  {t("reviews.reset")}
                 </button>
               </div>
 
@@ -266,7 +240,7 @@ const ReviewsPage = () => {
                       />
                     </div>
                     <span className="text-sm font-semibold text-white whitespace-nowrap">
-                      Show only my reviews
+                      {t("reviews.showOnlyMine")}
                     </span>
                   </label>
 
@@ -277,7 +251,7 @@ const ReviewsPage = () => {
                       data-testid="Add Review"
                       className="px-5 py-3 rounded-full bg-yellow-400 text-black font-semibold hover:bg-yellow-500 shadow-sm transition-colors duration-300"
                     >
-                      Add Review
+                      {t("reviews.addReview")}
                     </button>
                   )}
                 </div>
@@ -320,7 +294,7 @@ const ReviewsPage = () => {
         />
       </div>
       <footer className="reviews-footer">
-        © 2026 VladTech. All rights reserved.
+        {t("reviews.footer")}
       </footer>
     </>
   );

@@ -71,3 +71,7 @@ HELP.md
 
 # ENV files
 .env
+
+# Playwright
+/test-results/
+/playwright-report/
