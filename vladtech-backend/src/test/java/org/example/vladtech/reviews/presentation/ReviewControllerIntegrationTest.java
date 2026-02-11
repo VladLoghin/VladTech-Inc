@@ -2,6 +2,7 @@ package org.example.vladtech.reviews.presentation;
 
 import org.example.vladtech.auth.dataaccess.UserProfileRepository;
 import org.example.vladtech.contact.businesslayer.ContactServiceImpl;
+import org.example.vladtech.reviews.business.BadWordFilterService;
 import org.example.vladtech.reviews.business.ReviewService;
 import org.example.vladtech.reviews.data.Photo;
 import org.example.vladtech.reviews.data.Rating;
@@ -24,10 +25,14 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.mock.web.MockMultipartFile;
 
 
 import java.util.List;
@@ -53,6 +58,9 @@ class ReviewControllerIntegrationTest {
 
     @MockitoBean
     private UserProfileRepository userProfileRepository;
+
+    @MockitoBean
+    private BadWordFilterService badWordFilterService;
 
     private ReviewResponseModel r1;
     private ReviewResponseModel r2;
@@ -415,6 +423,42 @@ class ReviewControllerIntegrationTest {
     }
 
 
+
+    @Test
+    void createReview_withBadWords_returns422() throws Exception {
+        Jwt jwtWithSub = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .claim("sub", "test-sub")
+                .build();
+
+        String reviewJson = """
+                {
+                    "projectId": "project123",
+                    "clientId": "test-sub",
+                    "appointmentId": "appt123",
+                    "clientName": "John Doe",
+                    "comment": "This is shit service",
+                    "visible": false,
+                    "rating": "FIVE",
+                    "sentToPortfolio": false,
+                    "type": "Interior"
+                }
+                """;
+
+        MockMultipartFile reviewPart = new MockMultipartFile(
+                "review", "", "application/json", reviewJson.getBytes()
+        );
+
+        when(reviewService.createReview(any(), any(), eq("test-sub")))
+                .thenThrow(new IllegalArgumentException("Your review contains inappropriate language. Please remove any profanity."));
+
+        mockMvc.perform(multipart("/api/reviews")
+                        .file(reviewPart)
+                        .with(jwt().jwt(jwtWithSub).authorities(new SimpleGrantedAuthority("Client")))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("Your review contains inappropriate language. Please remove any profanity."));
+    }
 
     @TestConfiguration
     @EnableMethodSecurity

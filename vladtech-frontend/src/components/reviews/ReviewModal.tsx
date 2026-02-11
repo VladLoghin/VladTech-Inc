@@ -15,6 +15,34 @@ interface ReviewModalProps {
     appointmentId?: string;
 }
 
+const BAD_WORDS = [
+    "fuck", "shit", "ass", "bitch", "damn", "bastard",
+    "dick", "piss", "crap", "cunt", "asshole",
+    "motherfucker", "fucker", "bullshit", "dumbass",
+    "jackass", "nigger", "nigga", "faggot", "slut",
+    "whore", "retard", "cock", "pussy", "poop", "poopy", "wanker", "a-hole", "arsehole", 
+    "cockeye", "douche", "douchebag", "douchecanoe", "douchelord", "douchemonster",
+    "douchewaffle", "douchemonster", "asshat", "niggerboy", "niggergirl",
+    "niggerwoman", "niggerman", "niggerchild", "tard", "niggerlover", "slaveboy", "slavegirl", "slaveman",
+    "slavechild", "slavelover", "hook-nosed", "porstitute", "creampie", "rimjob", "blowjob", "handjob", 
+    "cunnilingus", "anilingus", "fisting",
+    "cretinous", "imbecile", "idiot", "moron", "cuntface", "cuntlaper", "crotle", "dickhead", "cockface",
+    "cocklaper", "dicklaper", "dickface", "pussyface", "curry muncher", "sanddweller", "camel humper", "dipshit",
+    "dyke", "fap", "fapmaster", "fapwaffle", "fapcanoe", "faplord", "fapmonster", "fuckwit", "fucktwat", "hoe",
+    "incest", "jizz", "arse", "mimbo", "manwhore", "nuts", "orgasm", "pissprat", "prick", "punani", "queer", "rimjobber", "scrote", "sperm",
+    "seks", "sex", "buttsex", "titty", "shitfaced", "tits", "nipples", "harlot", "pegging", "suck", "sucker", "suckme", "suckmy", "vagina", "penis",
+    "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs"
+
+];
+
+function containsBadWord(text: string): boolean {
+    const lower = text.toLowerCase();
+    return BAD_WORDS.some(word => {
+        const regex = new RegExp(`\\b${word}\\b`);
+        return regex.test(lower);
+    });
+}
+
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
 
     const { getAccessTokenSilently, user } = useAuth0();
@@ -75,7 +103,9 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
 
         const newErrors: { name?: string; comment?: string; projectId?: string } = {};
         if (!clientName.trim()) newErrors.name = "Name is required";
+        else if (containsBadWord(clientName)) newErrors.name = "Your name contains inappropriate language";
         if (!comment.trim()) newErrors.comment = "Description is required";
+        else if (containsBadWord(comment)) newErrors.comment = "Your review contains inappropriate language";
         if (!projectId) newErrors.projectId = "Please select a project";
 
         if (Object.keys(newErrors).length > 0) {
@@ -131,7 +161,10 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             setProjectId("");
         } catch (err: any) {
             const status = err?.response?.status;
-            if (status === 409) {
+            if (status === 422) {
+                const message = err?.response?.data?.message || "Your review contains inappropriate language.";
+                setErrors({ submit: message });
+            } else if (status === 409) {
                 setErrors({ submit: "You already reviewed this project." });
             } else if (status === 403) {
                 const data = err?.response?.data;

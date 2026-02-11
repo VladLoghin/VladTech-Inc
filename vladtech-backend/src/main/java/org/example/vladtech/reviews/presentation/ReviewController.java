@@ -86,6 +86,10 @@ public class ReviewController {
         try {
             contactService.notifyAdminReviewSubmitted(reviewRequest);
             return ResponseEntity.ok(reviewService.createReview(reviewRequest, photos, userId));
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
         } catch (IllegalStateException e) {
             Map<String, Object> body = new HashMap<>();
             body.put("message", e.getMessage());
