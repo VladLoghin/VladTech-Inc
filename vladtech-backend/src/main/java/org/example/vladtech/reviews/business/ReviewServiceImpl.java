@@ -44,6 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final PortfolioRepository portfolioRepository;
     private final PortfolioMapper portfolioMapper;
     private final UserProfileRepository userProfileRepository;
+    private final BadWordFilterService badWordFilterService;
 
     @Override
     public List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type, String comment) {
@@ -177,6 +178,14 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos, String ownerAuth0Id) {
         enforceReviewBan(ownerAuth0Id);
+
+        if (badWordFilterService.containsBadWords(request.getClientName())) {
+            throw new IllegalArgumentException("Your name contains inappropriate language. Please remove any profanity.");
+        }
+        if (badWordFilterService.containsBadWords(request.getComment())) {
+            throw new IllegalArgumentException("Your review contains inappropriate language. Please remove any profanity.");
+        }
+
         // Validate project ID is provided
         if (request.getProjectId() == null || request.getProjectId().isBlank()) {
             throw new RuntimeException("Project ID is required");

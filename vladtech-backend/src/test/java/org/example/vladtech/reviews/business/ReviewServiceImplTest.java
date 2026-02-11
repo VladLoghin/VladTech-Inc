@@ -60,6 +60,9 @@ class ReviewServiceImplTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
+
+    @Mock
+    private BadWordFilterService badWordFilterService;
     @Test
     void getAllVisibleReviews_returnsMappedList() {
         Review r1 = new Review("PID","client1", "abc234", "Jamie", "appt1", true, Rating.THREE, false, "Interior");
@@ -1260,5 +1263,81 @@ class ReviewServiceImplTest {
                         savedProfile.getReviewBanUntil() == null &&
                         savedProfile.isReviewPermanentlyBanned()
         ));
+    }
+
+    @Test
+    void createReview_withBadWordInComment_throwsIllegalArgumentException() {
+        ReviewRequestModel requestModel = new ReviewRequestModel();
+        requestModel.setClientId("client123");
+        requestModel.setClientName("John Doe");
+        requestModel.setAppointmentId("appt123");
+        requestModel.setComment("This is shit service");
+        requestModel.setRating(Rating.FIVE);
+        requestModel.setVisible(false);
+        requestModel.setProjectId("project123");
+
+        when(badWordFilterService.containsBadWords("John Doe")).thenReturn(false);
+        when(badWordFilterService.containsBadWords("This is shit service")).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                reviewService.createReview(requestModel, null, "auth0|owner123")
+        );
+        assertEquals("Your review contains inappropriate language. Please remove any profanity.", exception.getMessage());
+
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void createReview_withBadWordInClientName_throwsIllegalArgumentException() {
+        ReviewRequestModel requestModel = new ReviewRequestModel();
+        requestModel.setClientId("client123");
+        requestModel.setClientName("fuck face");
+        requestModel.setAppointmentId("appt123");
+        requestModel.setComment("Great service!");
+        requestModel.setRating(Rating.FIVE);
+        requestModel.setVisible(false);
+        requestModel.setProjectId("project123");
+
+        when(badWordFilterService.containsBadWords("fuck face")).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                reviewService.createReview(requestModel, null, "auth0|owner123")
+        );
+        assertEquals("Your name contains inappropriate language. Please remove any profanity.", exception.getMessage());
+
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void createReview_withCleanText_doesNotThrowBadWordException() {
+        ReviewRequestModel requestModel = new ReviewRequestModel();
+        requestModel.setClientId("client123");
+        requestModel.setClientName("John Doe");
+        requestModel.setAppointmentId("appt123");
+        requestModel.setComment("Great service!");
+        requestModel.setRating(Rating.FIVE);
+        requestModel.setVisible(false);
+        requestModel.setProjectId("project123");
+
+        when(badWordFilterService.containsBadWords("John Doe")).thenReturn(false);
+        when(badWordFilterService.containsBadWords("Great service!")).thenReturn(false);
+
+        Review review = new Review();
+        review.setClientId("client123");
+
+        Review savedReview = new Review();
+        savedReview.setReviewId("r1");
+
+        ReviewResponseModel responseModel = new ReviewResponseModel();
+        responseModel.setReviewId("r1");
+
+        when(requestMapper.requestModelToEntity(requestModel)).thenReturn(review);
+        when(reviewRepository.save(any(Review.class))).thenReturn(savedReview);
+        when(responseMapper.entityToResponseModel(savedReview)).thenReturn(responseModel);
+
+        ReviewResponseModel result = reviewService.createReview(requestModel, null, "auth0|owner123");
+
+        assertNotNull(result);
+        assertEquals("r1", result.getReviewId());
     }
 }
