@@ -9,7 +9,7 @@ import UserMenu from "./UserMenu.jsx";
 import MobileUserProfile from "./MobileUserProfile.jsx";
 import { motion } from "motion/react"; // eslint-disable-line no-unused-vars
 
-const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks = false }) => {
+const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks = false, rightSlot = null }) => {
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   const { language, toggleLanguage } = useLanguage();
   const { t } = useTranslation();
@@ -138,6 +138,15 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               </>
             )}
 
+            <button
+              onClick={() => navigate("/reviews")}
+              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                isNavbarDark ? "text-white" : "text-black"
+              }`}
+            >
+              {t("nav.reviews")}
+            </button>
+
             {isAuthenticated && isAdmin && (
               <button
                 onClick={() => navigate("/admin")}
@@ -160,7 +169,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               </button>
             )}
 
-            {isAuthenticated && !isAdmin && (
+            {isAuthenticated && !isAdmin && !isClient && (
               <button
                 onClick={() => navigate("/dashboard")}
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
@@ -210,6 +219,8 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 {t("nav.logout")}
               </button>
             )}
+
+            {rightSlot}
           </div>
 
           {/* Mobile hamburger */}
@@ -272,6 +283,15 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             </>
           )}
 
+          <button
+            onClick={closeAnd(() => navigate("/reviews"))}
+            className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+              isNavbarDark ? "text-white" : "text-black"
+            }`}
+          >
+            {t("nav.reviews")}
+          </button>
+
           {isAuthenticated && isAdmin && (
             <button
               onClick={closeAnd(() => navigate("/admin"))}
@@ -294,7 +314,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             </button>
           )}
 
-          {isAuthenticated && !isAdmin && (
+          {isAuthenticated && !isAdmin && !isClient && (
             <button
               onClick={closeAnd(() => navigate("/dashboard"))}
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
