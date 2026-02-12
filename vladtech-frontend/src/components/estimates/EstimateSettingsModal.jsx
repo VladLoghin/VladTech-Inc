@@ -343,6 +343,7 @@ const EstimateSettingsModal = ({ isOpen, onClose, onSuccess }) => {
             onClick={onClose}
             className="p-2 hover:bg-black/5 rounded-lg transition-colors"
             disabled={saving}
+            aria-label={t("close")}
           >
             <X className="h-6 w-6" />
           </button>

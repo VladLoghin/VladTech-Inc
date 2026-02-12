@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vladtech.estimates.data.EstimateSettings;
 import org.example.vladtech.estimates.data.EstimateSettingsRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -14,6 +16,7 @@ public class EstimateSettingsServiceImpl implements EstimateSettingsService {
     private final EstimateSettingsRepository estimateSettingsRepository;
 
     @Override
+    @Cacheable(value = "estimateSettings", key = "'default'")
     public EstimateSettings getSettings() {
         return estimateSettingsRepository.findById(EstimateSettings.DEFAULT_ID)
                 .map(this::applyDefaults)
@@ -21,6 +24,7 @@ public class EstimateSettingsServiceImpl implements EstimateSettingsService {
     }
 
     @Override
+    @CacheEvict(value = "estimateSettings", key = "'default'")
     public EstimateSettings updateSettings(EstimateSettings updates) {
         if (updates == null) {
             throw new IllegalArgumentException("Estimate settings payload is required");

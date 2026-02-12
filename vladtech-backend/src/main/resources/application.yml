@@ -55,6 +55,11 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  cache:
+    type: caffeine
+    caffeine:
+      spec: expireAfterWrite=10m
+
 email:
   noreply: noreply@email.com
   admin: admin@email.com
