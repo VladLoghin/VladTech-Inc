@@ -1,5 +1,6 @@
 package org.example.vladtech.estimates.business;
 
+import org.example.vladtech.estimates.data.EstimateSettings;
 import org.example.vladtech.estimates.data.RenovationProject;
 import org.example.vladtech.estimates.data.kitchen.KitchenRemodel;
 import org.example.vladtech.estimates.data.roof.RoofMaterial;
@@ -16,64 +17,30 @@ import org.example.vladtech.estimates.data.shared.FlooringMaterial;
 import org.example.vladtech.estimates.exceptions.EstimationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EstimationServiceImplTest {
 
     private EstimationServiceImpl service;
+    
+    @Mock
+    private EstimateSettingsService estimateSettingsService;
 
     @BeforeEach
     void setUp() {
-        service = new EstimationServiceImpl();
-        // Align with defaults used in production to make assertions predictable
-        setField("laborRate", new BigDecimal("50.00"));
-        setField("overheadRate", new BigDecimal("0.15"));
-        setField("contingencyRate", new BigDecimal("0.10"));
-        setField("taxRate", new BigDecimal("0.15"));
-
-        setField("vinylFactor", BigDecimal.ONE);
-        setField("woodFactor", new BigDecimal("1.10"));
-        setField("fiberCementFactor", new BigDecimal("1.20"));
-        setField("brickFactor", new BigDecimal("1.30"));
-        setField("stoneVeneerFactor", new BigDecimal("1.45"));
-
-        setField("asphaltFactor", BigDecimal.ONE);
-        setField("metalFactor", new BigDecimal("1.20"));
-        setField("clayFactor", new BigDecimal("1.50"));
-        setField("slateFactor", new BigDecimal("1.80"));
-        setField("syntheticFactor", new BigDecimal("1.30"));
-
-        // Window factors
-        setField("casementFactor", BigDecimal.ONE);
-        setField("sliderFactor", new BigDecimal("0.95"));
-        setField("doubleHungFactor", new BigDecimal("1.05"));
-        setField("awningFactor", new BigDecimal("1.10"));
-        setField("fixedFactor", new BigDecimal("0.85"));
-
-        // Door factors
-        setField("woodDoorFactor", BigDecimal.ONE);
-        setField("fiberglassDoorFactor", new BigDecimal("1.15"));
-        setField("steelDoorFactor", new BigDecimal("1.05"));
-        setField("glassPanelDoorFactor", new BigDecimal("1.30"));
-
-        // Deck factors
-        setField("woodDeckFactor", BigDecimal.ONE);
-        setField("compositeDeckFactor", new BigDecimal("1.25"));
-        setField("pvcDeckFactor", new BigDecimal("1.40"));
-        setField("aluminumDeckFactor", new BigDecimal("1.50"));
-
-        // Flooring factors
-        setField("hardwoodFloorFactor", BigDecimal.ONE);
-        setField("engineeredHardwoodFloorFactor", new BigDecimal("0.85"));
-        setField("laminateFloorFactor", new BigDecimal("0.60"));
-        setField("vinylFloorFactor", new BigDecimal("0.50"));
-        setField("tileFloorFactor", new BigDecimal("0.90"));
-        setField("carpetFloorFactor", new BigDecimal("0.70"));
-        setField("polishedConcreteFloorFactor", new BigDecimal("0.95"));
+        // Use default settings for all tests
+        EstimateSettings defaultSettings = EstimateSettings.defaultSettings();
+        lenient().when(estimateSettingsService.getSettings()).thenReturn(defaultSettings);
+        
+        service = new EstimationServiceImpl(estimateSettingsService);
     }
 
     @Test
@@ -707,15 +674,5 @@ class EstimationServiceImplTest {
         assertEquals(new BigDecimal("26825.00"), floorReplace.getEstimatePrice());
         assertEquals(new BigDecimal("4023.75"), floorReplace.getTaxAmount());
         assertEquals(new BigDecimal("30848.75"), floorReplace.getTotalPrice());
-    }
-
-    private void setField(String name, BigDecimal value) {
-        try {
-            Field f = EstimationServiceImpl.class.getDeclaredField(name);
-            f.setAccessible(true);
-            f.set(service, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -85,13 +85,6 @@ auth0:
     client:
       roleId: ${AUTH0_ROLE_DEFAULT}
 
-renovation:
-  rates:
-    labor: 50.00
-    overhead: 0.15
-    contingency: 0.10
-    tax: 0.15
-
 ---
 
 spring:
@@ -110,13 +103,6 @@ spring:
         jwt:
           issuer-uri: ""
           audience: ""
-
-renovation:
-  rates:
-    labor: 50.00
-    overhead: 0.15
-    contingency: 0.10
-    tax: 0.15
 
 app:
   seed-db: false
@@ -148,13 +134,6 @@ spring:
         jwt:
           issuer-uri: ""
           audience: ""
-
-renovation:
-  rates:
-    labor: 50.00
-    overhead: 0.15
-    contingency: 0.10
-    tax: 0.15
 
 #maybe set to true when testing not sure
 app:
