@@ -10,6 +10,10 @@ import {
   unpinProject,
   isProjectPinned,
 } from "../../api/projects/projectPinApi";
+import {
+  isValidStatusTransition,
+  getStatusTransitionErrorMessage,
+} from "../../utils/statusValidation";
 
 const formatAddress = (addr) => {
   if (!addr) return null;
@@ -194,6 +198,9 @@ const ProjectList = ({
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState("");
 
+  // Status validation state
+  const [statusWarning, setStatusWarning] = useState(null);
+
   const fileInputId = useMemo(() => {
     if (!activeProject?.projectIdentifier) return "project-info-file";
     return `project-info-file-${activeProject.projectIdentifier}`;
@@ -230,6 +237,30 @@ const ProjectList = ({
   const openExport = (project) => {
     setActiveProject(project);
     setExportOpen(true);
+  };
+
+  const handleStatusChange = (project, newStatus) => {
+    // Check if the transition is valid
+    if (!isValidStatusTransition(project.status, newStatus)) {
+      const errorMessage = getStatusTransitionErrorMessage(
+        project.status,
+        newStatus,
+        t,
+      );
+      setStatusWarning({
+        message: errorMessage,
+        currentStatus: project.status,
+        newStatus,
+      });
+      return;
+    }
+
+    // Valid transition, proceed with update
+    onUpdateStatus?.(project, newStatus);
+  };
+
+  const cancelStatusChange = () => {
+    setStatusWarning(null);
   };
 
   const submitUpload = async () => {
@@ -656,7 +687,7 @@ const ProjectList = ({
                       <select
                         value={project.status || "PENDING"}
                         onChange={(e) =>
-                          onUpdateStatus?.(project, e.target.value)
+                          handleStatusChange(project, e.target.value)
                         }
                         className={`px-2 py-1 rounded border-none outline-none ${getStatusBadgeClasses(project.status)}`}
                       >
@@ -1056,6 +1087,56 @@ const ProjectList = ({
         onSuccess={handlePortfolioSuccess}
         getToken={getToken}
       />
+
+      {/* Status Transition Warning Modal */}
+      {statusWarning && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-xl border-2 border-yellow-500 shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-yellow-200 bg-yellow-50">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-6 h-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4v2m0-6a9 9 0 110 18 9 9 0 010-18z"
+                  />
+                </svg>
+                <h3 className="text-lg font-bold text-yellow-900">
+                  {t("project.invalidStatusTransition", {
+                    defaultValue: "Invalid Status Change",
+                  })}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={cancelStatusChange}
+                className="text-xl font-bold leading-none px-2 hover:text-black/70"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-black/70 mb-6">{statusWarning.message}</p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={cancelStatusChange}
+                  className="flex-1 px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-black/5 transition-all font-semibold"
+                >
+                  {t("common.dismiss", { defaultValue: "Dismiss" })}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
