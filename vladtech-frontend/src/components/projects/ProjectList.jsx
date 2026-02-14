@@ -200,7 +200,6 @@ const ProjectList = ({
 
   // Status validation state
   const [statusWarning, setStatusWarning] = useState(null);
-  const [pendingStatusChange, setPendingStatusChange] = useState(null);
 
   const fileInputId = useMemo(() => {
     if (!activeProject?.projectIdentifier) return "project-info-file";
@@ -260,16 +259,8 @@ const ProjectList = ({
     onUpdateStatus?.(project, newStatus);
   };
 
-  const confirmStatusChange = () => {
-    if (!pendingStatusChange) return;
-    onUpdateStatus?.(pendingStatusChange.project, pendingStatusChange.newStatus);
-    setPendingStatusChange(null);
-    setStatusWarning(null);
-  };
-
   const cancelStatusChange = () => {
     setStatusWarning(null);
-    setPendingStatusChange(null);
   };
 
   const submitUpload = async () => {
