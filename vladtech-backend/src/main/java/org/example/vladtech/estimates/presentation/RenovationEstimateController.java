@@ -130,7 +130,7 @@ public class RenovationEstimateController {
             project = kitchen;
         } else if ("WINDOW_DOOR_REPLACE".equalsIgnoreCase(projectType)) {
             WindowDoorReplace windowDoor = new WindowDoorReplace();
-            windowDoor.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            windowDoor.setTaxRate(taxRate);
             windowDoor.setWindowType(windowType);
             windowDoor.setDoorType(doorType);
             windowDoor.setWindowCount(windowCount != null ? windowCount : 0);
@@ -138,7 +138,7 @@ public class RenovationEstimateController {
             project = windowDoor;
         } else if ("DECK_PATIO_ADDITION".equalsIgnoreCase(projectType)) {
             DeckPatioAddition deckPatio = new DeckPatioAddition();
-            deckPatio.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            deckPatio.setTaxRate(taxRate);
             deckPatio.setLocationFactor(locationFactor != null ? locationFactor : BigDecimal.ONE);
             deckPatio.setDeckMaterial(deckMaterial);
             deckPatio.setHasRailing(hasRailing != null ? hasRailing : false);
@@ -151,7 +151,7 @@ public class RenovationEstimateController {
             floorReplace.setSquareFeet(sqft);
             floorReplace.setMaterialCostPerSqFt(materialCostPerSqFt);
             floorReplace.setLocationFactor(locationFactor);
-            floorReplace.setTaxRate(taxRate != null ? taxRate : BigDecimal.valueOf(0.15));
+            floorReplace.setTaxRate(taxRate);
             floorReplace.setExistingFloorMaterial(existingFloorMaterial);
             floorReplace.setNewFloorMaterial(newFloorMaterial);
             floorReplace.setSubfloorRepairNeeded(subfloorRepairNeeded != null ? subfloorRepairNeeded : false);

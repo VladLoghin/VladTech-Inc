@@ -12,6 +12,7 @@ import ProjectStatsCards from "../components/projects/ProjectStatsCards.jsx";
 import CreatePortfolioModal from "../components/portfolio/CreatePortfolioModal.jsx";
 import EditPortfolioModal from "../components/portfolio/EditPortfolioModal.jsx";
 import ArchivePortfolioModal from "../components/portfolio/ArchivePortfolioModal.jsx";
+import EstimateSettingsModal from "../components/estimates/EstimateSettingsModal.jsx";
 import { api } from "../api/http";
 import { generateCsv, generatePdf } from "../utils/exportUtils";
 
@@ -36,6 +37,7 @@ const Admin = () => {
 
   const [isRoleFinderModalOpen, setIsRoleFinderModalOpen] = useState(false);
   const [isRoleAssignmentModalOpen, setIsRoleAssignmentModalOpen] = useState(false);
+  const [isEstimateSettingsModalOpen, setIsEstimateSettingsModalOpen] = useState(false);
 
   const [editProject, setEditProject] = useState(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -73,6 +75,16 @@ const Admin = () => {
   const [isEditPortfolioModalOpen, setIsEditPortfolioModalOpen] = useState(false);
   const [editPortfolioItem, setEditPortfolioItem] = useState(null);
   const [isArchivePortfolioModalOpen, setIsArchivePortfolioModalOpen] = useState(false);
+
+  const isAdmin = useMemo(() => {
+    const rawRoles = user?.["https://vladtech.com/roles"];
+    const rolesArray = Array.isArray(rawRoles)
+      ? rawRoles
+      : typeof rawRoles === "string"
+        ? [rawRoles]
+        : [];
+    return rolesArray.map((role) => String(role).toLowerCase()).includes("admin");
+  }, [user]);
 
   // ✅ token helper used by ProjectList to load images with auth
   const getApiToken = useCallback(async () => {
@@ -632,6 +644,14 @@ const Admin = () => {
               >
                 {t("admin.roleManager")}
               </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setIsEstimateSettingsModalOpen(true)}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg transition-all font-semibold shadow-lg w-full lg:w-auto"
+                >
+                  {t("admin.estimateSettings")}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -676,6 +696,12 @@ const Admin = () => {
           }}
           onSuccess={() => setMessage(t("admin.portfolioUpdated"))}
           portfolioItem={editPortfolioItem}
+        />
+
+        <EstimateSettingsModal
+          isOpen={isEstimateSettingsModalOpen}
+          onClose={() => setIsEstimateSettingsModalOpen(false)}
+          onSuccess={() => setMessage(t("admin.estimateSettingsSavedToast"))}
         />
 
         <ProjectModal

@@ -1,0 +1,15 @@
+# Ignore environment files containing secrets
+.env
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+*.iml
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
