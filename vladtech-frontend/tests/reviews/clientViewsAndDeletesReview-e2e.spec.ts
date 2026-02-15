@@ -1,7 +1,7 @@
 // @ts-ignore
 import { test, expect } from '../fixtures/fixtures.ts';
 // @ts-ignore
-import { mockAllReviews, mockVisibleReviews } from './mockCompletedProjects.ts';
+import { mockAllReviews, mockVisibleReviews, mockMyReviews } from './mockCompletedProjects.ts';
 
 // Auth0 login flow can be slow — increase timeout for this multi-step test
 test.setTimeout(60000);
@@ -13,6 +13,7 @@ test('admin toggles review visibility, client views reviews', async ({ page, log
   // Mock the admin reviews endpoint so there is data to toggle
   await mockAllReviews(page);
   await mockVisibleReviews(page);
+  await mockMyReviews(page);
 
   await loginAs('admin');
 

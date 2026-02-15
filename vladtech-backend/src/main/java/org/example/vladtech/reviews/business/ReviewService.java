@@ -15,7 +15,7 @@ public interface ReviewService {
     // Create a new review
     ReviewResponseModel createReview(ReviewRequestModel request, MultipartFile[] photos, String OwnerAuth0Id);
 
-    List<ReviewResponseModel> getAllReviews(String clientName, Rating ratingValue, String type, String comment);
+    List<ReviewResponseModel> getAllReviews(String clientName, List<Rating> ratings, String type, String comment);
 
     ReviewResponseModel updateReviewVisibility(String reviewId, boolean visible);
 
@@ -23,7 +23,7 @@ public interface ReviewService {
 
     ReviewResponseModel deleteReviewAsClient(String reviewId, String clientId);
 
-    List<ReviewResponseModel> getAllVisibleReviews(String clientName, Rating ratingValue, String type, String comment);
+    List<ReviewResponseModel> getAllVisibleReviews(String clientName, List<Rating> ratings, String type, String comment);
 
     List<ReviewResponseModel> getReviewsByOwnerAuth0Id(String ownerAuth0Id);
 

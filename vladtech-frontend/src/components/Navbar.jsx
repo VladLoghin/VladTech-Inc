@@ -139,6 +139,15 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             )}
 
             <button
+              onClick={() => navigate("/portfolio")}
+              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                isNavbarDark ? "text-white" : "text-black"
+              }`}
+            >
+              {t("nav.portfolio")}
+            </button>
+
+            <button
               onClick={() => navigate("/reviews")}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
@@ -282,6 +291,15 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               </button>
             </>
           )}
+
+          <button
+            onClick={closeAnd(() => navigate("/portfolio"))}
+            className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+              isNavbarDark ? "text-white" : "text-black"
+            }`}
+          >
+            {t("nav.portfolio")}
+          </button>
 
           <button
             onClick={closeAnd(() => navigate("/reviews"))}

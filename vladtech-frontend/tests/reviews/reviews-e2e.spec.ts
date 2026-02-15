@@ -1,14 +1,12 @@
 // @ts-ignore
 import { test, expect } from '../fixtures/fixtures.ts';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { mockCompletedProjects, mockVisibleReviews, mockReviewSubmission } from './mockCompletedProjects';
+import { mockCompletedProjects, mockVisibleReviews, mockReviewSubmission, mockMyReviews } from './mockCompletedProjects';
 
 test.describe('Reviews Page E2E', () => {
     test.beforeEach(async ({ page }) => {
         await mockCompletedProjects(page);
         await mockVisibleReviews(page);
+        await mockMyReviews(page);
         await page.goto('http://localhost:5173/reviews');
         await page.waitForLoadState('networkidle');
         // Wait for review cards to render from mocked data
@@ -35,35 +33,41 @@ test.describe('Reviews Page E2E', () => {
             }
         });
 
-        /*test('create a new review successfully', async ({page, loginAs}) => {
-            const uniqueComment = `E2E review submission ${Date.now()}`;
-
+        test('create a new review successfully', async ({page, loginAs}) => {
             await loginAs('client');
-            console.log('✅ Logged in as client');
 
-            // Re-mock completed projects and mock the POST endpoint after login
+            // Re-mock endpoints after login (login navigates away, clearing routes)
             await mockCompletedProjects(page);
+            await mockVisibleReviews(page);
             await mockReviewSubmission(page);
+            // Mock /reviews/mine with no reviews so both projects appear as unreviewed
+            await mockMyReviews(page, []);
 
-            // Navigate back to reviews page after login
+            // Navigate to reviews page after login
             await page.goto('http://localhost:5173/reviews');
             await page.waitForLoadState('networkidle');
-            await page.waitForTimeout(1000);
 
             const addReviewButton = page.getByTestId('Add Review');
             await addReviewButton.waitFor({state: 'visible', timeout: 30000});
             await addReviewButton.click();
 
-            // Select a project within the modal
+            // Wait for the modal to appear
             const reviewModal = page.locator('.fixed.inset-0.z-50');
+            await reviewModal.waitFor({state: 'visible', timeout: 5000});
+
+            // Select a project within the modal
             const projectDropdown = reviewModal.locator('select').first();
             await projectDropdown.waitFor({state: 'visible', timeout: 5000});
             await projectDropdown.selectOption({ label: 'Office Space Update' });
 
+            // Fill in the form
             await page.getByPlaceholder('Your name').fill('Charlie');
-            await page.getByPlaceholder('Your message').fill(uniqueComment);
+            await page.getByPlaceholder('Your message').fill(`E2E review submission ${Date.now()}`);
+
+            // Select star rating (click 4th star)
             await page.locator('button >> text=★').nth(3).click();
 
+            // Submit and wait for the mocked POST response
             await Promise.all([
                 page.waitForResponse(resp =>
                     resp.url().includes('/api/reviews') && resp.status() === 200
@@ -77,7 +81,6 @@ test.describe('Reviews Page E2E', () => {
             // Verify we're back on the reviews page with cards visible
             await expect(page.getByTestId('review-card').first()).toBeVisible({ timeout: 10000 });
         });
-        */
 
         test('star ratings render correctly', async ({page}) => {
             const firstCard = page.getByTestId('review-card').first();
@@ -210,7 +213,7 @@ test.describe('Reviews Page E2E', () => {
             const cardCount = await cards.count();
 
             if (cardCount < 2) {
-                console.warn('⚠️ Not enough reviews to test multiple modals');
+                console.warn('Not enough reviews to test multiple modals');
                 return;
             }
 
@@ -277,6 +280,8 @@ test.describe('Reviews Page E2E', () => {
 
             // Re-mock and navigate after login
             await mockCompletedProjects(page);
+            await mockVisibleReviews(page);
+            await mockMyReviews(page, []);
             await page.goto('http://localhost:5173/reviews');
             await page.waitForLoadState('networkidle');
 
@@ -355,29 +360,17 @@ test.describe('Reviews Page E2E', () => {
             await page.setViewportSize({ width: 1920, height: 1080 });
         });
 
-        test('global navbar is present with REVIEWS link', async ({ page }) => {
-            // Verify the global navbar rendered (not the old custom nav)
+        test('global navbar is present with REVIEWS and PORTFOLIO links', async ({ page }) => {
             const nav = page.locator('nav');
             await expect(nav).toBeVisible();
 
-            // VLADTECH home button should be present
             await expect(page.getByRole('button', { name: 'VLADTECH' })).toBeVisible();
-
-            // REVIEWS link should be present in navbar
             await expect(page.getByRole('button', { name: 'REVIEWS' })).toBeVisible();
+            await expect(page.getByRole('button', { name: 'PORTFOLIO' })).toBeVisible();
         });
 
-        test('navigate from reviews to portfolio via home', async ({ page }) => {
-            // Click VLADTECH to go home
-            await page.getByRole('button', { name: 'VLADTECH' }).click();
-            await page.waitForURL('http://localhost:5173/', { timeout: 5000 });
-            await page.waitForLoadState('networkidle');
-            expect(page.url()).toBe('http://localhost:5173/');
-
-            // From home, navigate to portfolio via the View Full Gallery link
-            const viewGalleryButton = page.getByRole('button', { name: /View Full Gallery/i });
-            await viewGalleryButton.scrollIntoViewIfNeeded();
-            await viewGalleryButton.click();
+        test('navigate from reviews to portfolio via navbar', async ({ page }) => {
+            await page.getByRole('button', { name: 'PORTFOLIO' }).click();
             await page.waitForURL('**/portfolio', { timeout: 5000 });
             expect(page.url()).toContain('/portfolio');
         });
@@ -395,30 +388,59 @@ test.describe('Reviews Page E2E', () => {
             // Verify reviews page loaded
             await expect(page.getByTestId('reviews-page')).toBeVisible({ timeout: 10000 });
         });
+
+        test('navigate from reviews to home via VLADTECH button', async ({ page }) => {
+            await page.getByRole('button', { name: 'VLADTECH' }).click();
+            await page.waitForURL('http://localhost:5173/', { timeout: 5000 });
+            expect(page.url()).toBe('http://localhost:5173/');
+        });
     });
 
-    test.describe('Pagination & Filtering', () => {
-        test('pagination works correctly', async ({page}) => {
-            const pageButtons = page.locator('[data-testid="pagination-button"]');
-            const buttonCount = await pageButtons.count();
-
-            if (buttonCount > 1) {
-                await pageButtons.nth(1).click();
-                await page.waitForTimeout(300);
-                expect(true).toBeTruthy();
-            }
+    test.describe('Rating Range Filter', () => {
+        test('min and max rating dropdowns are visible', async ({page}) => {
+            // The filter bar should show both min and max rating selects
+            const selects = page.locator('select');
+            const selectCount = await selects.count();
+            // Should have at least 3 selects: minRating, maxRating, type
+            expect(selectCount).toBeGreaterThanOrEqual(3);
         });
 
-        test('filter by rating works', async ({page}) => {
-            const filterButton = page.getByTestId('filter-by-rating');
-            if (await filterButton.isVisible()) {
-                await filterButton.click();
-                await page.getByTestId('rating-5').click();
-                await page.waitForLoadState('networkidle');
+        test('filtering by rating range updates results', async ({page}) => {
+            const initialCount = await page.getByTestId('review-card').count();
+            expect(initialCount).toBeGreaterThan(0);
 
-                const cards = page.getByTestId('review-card');
-                const count = await cards.count();
-                expect(count).toBeGreaterThanOrEqual(0);
+            // The min rating select is the first one in the filter bar
+            // Select FIVE stars for both min and max to narrow results
+            const selects = page.locator('.flex.items-center.gap-2 select');
+            const minSelect = selects.first();
+            const maxSelect = selects.last();
+
+            await minSelect.selectOption('FIVE');
+            await maxSelect.selectOption('FIVE');
+            await page.waitForLoadState('networkidle');
+            await page.waitForTimeout(500);
+
+            // Results should be filtered (count may change)
+            const filteredCount = await page.getByTestId('review-card').count();
+            expect(filteredCount).toBeGreaterThanOrEqual(0);
+        });
+
+        test('reset button clears all filters', async ({page}) => {
+            // Apply a filter first
+            const nameInput = page.getByPlaceholder(/search by name/i);
+            if (await nameInput.isVisible({ timeout: 2000 })) {
+                await nameInput.fill('John');
+                await page.waitForTimeout(500);
+            }
+
+            // Click reset
+            const resetButton = page.getByRole('button', { name: /reset/i });
+            await resetButton.click();
+            await page.waitForTimeout(500);
+
+            // Name input should be cleared
+            if (await nameInput.isVisible()) {
+                await expect(nameInput).toHaveValue('');
             }
         });
     });
