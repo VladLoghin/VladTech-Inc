@@ -72,19 +72,30 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                     authorizationParams: { audience: "https://vladtech/api" },
                 });
 
-                const res = await api.get("/projects/client/completed", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const [projectsRes, reviewsRes] = await Promise.all([
+                    api.get("/projects/client/completed", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    api.get("/reviews/mine", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
 
-                const projectOptions: ProjectOption[] = res.data.map((p: any) => ({
-                    projectIdentifier: p.projectIdentifier,
-                    name: p.name,
-                }));
+                const reviewedProjectIds = new Set(
+                    (reviewsRes.data || []).map((r: any) => r.projectId).filter(Boolean)
+                );
+
+                const projectOptions: ProjectOption[] = projectsRes.data
+                    .filter((p: any) => !reviewedProjectIds.has(p.projectIdentifier))
+                    .map((p: any) => ({
+                        projectIdentifier: p.projectIdentifier,
+                        name: p.name,
+                    }));
 
                 setProjects(projectOptions);
 
                 if (projectOptions.length > 0) {
-                    setProjectId(projectOptions[0].projectIdentifier); // auto‑select first
+                    setProjectId(projectOptions[0].projectIdentifier);
                 }
             } catch {
                 setErrors({ submit: "Failed to load projects." });
@@ -151,7 +162,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
             });
 
             const createdReview = res.data;
-            onSubmitSuccess?.(createdReview);
+            await onSubmitSuccess?.(createdReview);
             onClose();
 
             setClientName("");

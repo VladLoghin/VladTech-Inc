@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import org.springframework.mock.web.MockMultipartFile;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -134,15 +135,17 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
-    void getAllReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
+    void getAllReviews_withClientNameAndRatingRange_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews("client1", Rating.FIVE, null, null)).thenReturn(List.of(r1));
+        List<Rating> expectedRatings = List.of(Rating.FIVE);
+        when(reviewService.getAllReviews("client1", expectedRatings, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
                         .param("clientName", "client1")
-                        .param("rating", "FIVE")
+                        .param("minRating", "FIVE")
+                        .param("maxRating", "FIVE")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -167,19 +170,20 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
-    void getAllReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
+    void getAllReviews_withRatingRangeOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllReviews(null, Rating.FIVE, null, null)).thenReturn(List.of(r1));
+        List<Rating> expectedRatings = List.of(Rating.THREE, Rating.FOUR, Rating.FIVE);
+        when(reviewService.getAllReviews(null, expectedRatings, null, null)).thenReturn(List.of(r1, r2));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Admin")))
-                        .param("rating", "FIVE")
+                        .param("minRating", "THREE")
+                        .param("maxRating", "FIVE")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].rating").value("FIVE"));
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
     @Test
@@ -199,15 +203,17 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
-    void getAllVisibleReviews_withClientNameAndRating_returnsFilteredReviews() throws Exception {
+    void getAllVisibleReviews_withClientNameAndRatingRange_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews("client1", Rating.FIVE, null, null)).thenReturn(List.of(r1));
+        List<Rating> expectedRatings = List.of(Rating.FIVE);
+        when(reviewService.getAllVisibleReviews("client1", expectedRatings, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
                         .param("clientName", "client1")
-                        .param("rating", "FIVE")
+                        .param("minRating", "FIVE")
+                        .param("maxRating", "FIVE")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -232,14 +238,16 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
-    void getAllVisibleReviews_withRatingOnly_returnsFilteredReviews() throws Exception {
+    void getAllVisibleReviews_withRatingRangeOnly_returnsFilteredReviews() throws Exception {
         // Arrange
-        when(reviewService.getAllVisibleReviews(null, Rating.FIVE, null, null)).thenReturn(List.of(r1));
+        List<Rating> expectedRatings = List.of(Rating.FIVE);
+        when(reviewService.getAllVisibleReviews(null, expectedRatings, null, null)).thenReturn(List.of(r1));
 
         // Act & Assert
         mockMvc.perform(get("/api/reviews/visible")
                         .with(jwt().authorities(new SimpleGrantedAuthority("Client")))
-                        .param("rating", "FIVE")
+                        .param("minRating", "FIVE")
+                        .param("maxRating", "FIVE")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

@@ -25,6 +25,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const [deleting, setDeleting] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successAction, setSuccessAction] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [banInfo, setBanInfo] = useState(null);
 
@@ -132,6 +133,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             }
 
             if (onDelete) onDelete(reviewId);
+            setSuccessAction("deleted");
             setShowSuccessModal(true);
         } catch (err) {
             console.error("Failed to delete review:", err);
@@ -169,6 +171,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             }
 
             setPortfolioError("");
+            setSuccessAction("portfolio");
             setShowSuccessModal(true);
             setTimeout(() => setShowSuccessModal(false), 3000);
         } catch (err) {
@@ -340,18 +343,26 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <FaCheckCircle className="success-modal-icon" />
-                        <h3 className="success-modal-title">Review Deleted</h3>
-                        {banInfo && (
-                            <p className="success-modal-text">
-                                {banInfo.permanent
-                                    ? `Strike ${banInfo.strikes}: Reviewer is now permanently banned from posting reviews.`
-                                    : banInfo.banUntil
-                                        ? `Strike ${banInfo.strikes}: Reviewer is banned from posting reviews until ${new Date(banInfo.banUntil).toLocaleString()}.`
-                                        : "Review deleted successfully."}
-                            </p>
-                        )}
-                        {!banInfo && (
-                            <p className="success-modal-text">Review deleted successfully.</p>
+                        <h3 className="success-modal-title">
+                            {successAction === "portfolio" ? "Sent to Portfolio" : "Review Deleted"}
+                        </h3>
+                        {successAction === "portfolio" ? (
+                            <p className="success-modal-text">Review has been successfully sent to the portfolio.</p>
+                        ) : (
+                            <>
+                                {banInfo && (
+                                    <p className="success-modal-text">
+                                        {banInfo.permanent
+                                            ? `Strike ${banInfo.strikes}: Reviewer is now permanently banned from posting reviews.`
+                                            : banInfo.banUntil
+                                                ? `Strike ${banInfo.strikes}: Reviewer is banned from posting reviews until ${new Date(banInfo.banUntil).toLocaleString()}.`
+                                                : "Review deleted successfully."}
+                                    </p>
+                                )}
+                                {!banInfo && (
+                                    <p className="success-modal-text">Review deleted successfully.</p>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -360,7 +371,9 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             <DeleteConfirmModal
                 open={showDeleteConfirm}
                 title="Delete Review?"
-                message="This action cannot be undone. Deleting this review will count as a strike for the reviewer."
+                message={isAdmin
+                    ? "This action cannot be undone. Deleting this review will count as a strike for the reviewer."
+                    : "This action cannot be undone. Are you sure you want to delete your review?"}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteConfirm(false)}
             />

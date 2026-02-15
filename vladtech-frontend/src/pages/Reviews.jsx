@@ -26,7 +26,8 @@ const ReviewsPage = () => {
   // Filter state
   const [filters, setFilters] = useState({
     clientName: "",
-    rating: "",
+    minRating: "",
+    maxRating: "",
     type: "",
     comment: "",
   });
@@ -73,8 +74,16 @@ const ReviewsPage = () => {
           );
         }
         
-        if (filters.rating) {
-          filtered = filtered.filter(r => r.rating === filters.rating);
+        if (filters.minRating || filters.maxRating) {
+          const ratingOrder = ["ONE", "TWO", "THREE", "FOUR", "FIVE"];
+          const minIdx = filters.minRating ? ratingOrder.indexOf(filters.minRating) : 0;
+          const maxIdx = filters.maxRating ? ratingOrder.indexOf(filters.maxRating) : ratingOrder.length - 1;
+          const effectiveMin = Math.min(minIdx, maxIdx);
+          const effectiveMax = Math.max(minIdx, maxIdx);
+          filtered = filtered.filter(r => {
+            const idx = ratingOrder.indexOf(r.rating);
+            return idx >= effectiveMin && idx <= effectiveMax;
+          });
         }
         
         if (filters.type) {
@@ -103,37 +112,48 @@ const ReviewsPage = () => {
   }, [isLoading, isClient, isStaff, showMine, filters]);
 
   const handleReset = () => {
-    setFilters({ clientName: "", rating: "", type: "", comment: "" });
+    setFilters({ clientName: "", minRating: "", maxRating: "", type: "", comment: "" });
   };
 
-  const [hasCompletedProjects, setHasCompletedProjects] = useState(false); // ✅ ADD
-  const [loadingProjects, setLoadingProjects] = useState(false); // ✅ ADD
+  const [hasUnreviewedProjects, setHasUnreviewedProjects] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+
+  const checkUnreviewedProjects = useCallback(async () => {
+    if (!isClient || isLoading) return;
+    setLoadingProjects(true);
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: "https://vladtech/api" },
+      });
+
+      const [projectsRes, myReviews] = await Promise.all([
+        api.get("/projects/client/completed", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        getMyReviews(token),
+      ]);
+
+      const completedProjects = Array.isArray(projectsRes.data) ? projectsRes.data : [];
+      const reviewedProjectIds = new Set(
+        myReviews.map((r) => r.projectId).filter(Boolean)
+      );
+
+      const hasUnreviewed = completedProjects.some(
+        (p) => !reviewedProjectIds.has(p.projectIdentifier)
+      );
+
+      setHasUnreviewedProjects(hasUnreviewed);
+    } catch (err) {
+      console.error("Failed to check unreviewed projects:", err);
+      setHasUnreviewedProjects(false);
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, [isClient, isLoading, getAccessTokenSilently]);
 
   useEffect(() => {
-    if (!isClient || isLoading) return;
-
-    const fetchCompletedProjects = async () => {
-      setLoadingProjects(true);
-      try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: { audience: "https://vladtech/api" },
-        });
-
-        const res = await api.get("/projects/client/completed", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setHasCompletedProjects(Array.isArray(res.data) && res.data.length > 0);
-      } catch (err) {
-        console.error("Failed to fetch completed projects:", err);
-        setHasCompletedProjects(false);
-      } finally {
-        setLoadingProjects(false);
-      }
-    };
-
-    fetchCompletedProjects();
-  }, [isClient, isLoading, getAccessTokenSilently]);
+    checkUnreviewedProjects();
+  }, [checkUnreviewedProjects]);
 
   return (
     <>
@@ -170,20 +190,37 @@ const ReviewsPage = () => {
                   className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
                 />
 
-                <select
-                  value={filters.rating}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, rating: e.target.value }))
-                  }
-                  className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
-                >
-                  <option value="">{t("reviews.allRatings")}</option>
-                  <option value="FIVE">★★★★★</option>
-                  <option value="FOUR">★★★★☆</option>
-                  <option value="THREE">★★★☆☆</option>
-                  <option value="TWO">★★☆☆☆</option>
-                  <option value="ONE">★☆☆☆☆</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={filters.minRating}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, minRating: e.target.value }))
+                    }
+                    className="px-4 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
+                  >
+                    <option value="">{t("reviews.minRating")}</option>
+                    <option value="ONE">★☆☆☆☆</option>
+                    <option value="TWO">★★☆☆☆</option>
+                    <option value="THREE">★★★☆☆</option>
+                    <option value="FOUR">★★★★☆</option>
+                    <option value="FIVE">★★★★★</option>
+                  </select>
+                  <span className="text-white text-sm font-semibold">{t("reviews.to")}</span>
+                  <select
+                    value={filters.maxRating}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, maxRating: e.target.value }))
+                    }
+                    className="px-4 py-3 rounded-full border border-gray-300 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
+                  >
+                    <option value="">{t("reviews.maxRating")}</option>
+                    <option value="ONE">★☆☆☆☆</option>
+                    <option value="TWO">★★☆☆☆</option>
+                    <option value="THREE">★★★☆☆</option>
+                    <option value="FOUR">★★★★☆</option>
+                    <option value="FIVE">★★★★★</option>
+                  </select>
+                </div>
 
                 <select
                   value={filters.type}
@@ -245,7 +282,7 @@ const ReviewsPage = () => {
                   </label>
 
                   {/* Add Review Button */}
-                  {hasCompletedProjects && !loadingProjects && (
+                  {hasUnreviewedProjects && !loadingProjects && (
                     <button
                       onClick={() => setShowModal(true)}
                       data-testid="Add Review"
@@ -266,10 +303,11 @@ const ReviewsPage = () => {
                 setSelectedReview(review);
                 setShowDetailModal(true);
               }}
-              onDelete={(deletedId) => {
+              onDelete={async (deletedId) => {
                 setReviews((prev) =>
                   prev.filter((r) => (r.id ?? r.reviewId) !== deletedId)
                 );
+                await checkUnreviewedProjects();
               }}
             />
           </section>
@@ -281,6 +319,7 @@ const ReviewsPage = () => {
           onSubmitSuccess={async () => {
             setShowModal(false);
             await fetchReviews();
+            await checkUnreviewedProjects();
           }}
         />
 

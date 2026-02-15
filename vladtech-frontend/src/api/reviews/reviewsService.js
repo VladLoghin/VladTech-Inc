@@ -9,8 +9,11 @@ export const getAllVisibleReviews = async (filters = {}) => {
     if (filters.clientName?.trim()) {
         params.clientName = filters.clientName.trim();
     }
-    if (filters.rating) {
-        params.rating = filters.rating;
+    if (filters.minRating) {
+        params.minRating = filters.minRating;
+    }
+    if (filters.maxRating) {
+        params.maxRating = filters.maxRating;
     }
     if (filters.type) {
         params.type = filters.type;
@@ -29,8 +32,11 @@ export const getAllReviews = async (token, filters = {}) => {
     if (filters.clientName?.trim()) {
         params.clientName = filters.clientName.trim();
     }
-    if (filters.rating) {
-        params.rating = filters.rating;
+    if (filters.minRating) {
+        params.minRating = filters.minRating;
+    }
+    if (filters.maxRating) {
+        params.maxRating = filters.maxRating;
     }
     if (filters.type) {
         params.type = filters.type;

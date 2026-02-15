@@ -13,86 +13,53 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByOwnerAuth0Id(String ownerAuth0Id);
 
-    List<Review> findByClientNameAndRating(String clientName, Rating rating);
-
-    //Filtering queries
-    List<Review> findByClientNameContainingIgnoreCase(String clientName);
-
-    List<Review> findByClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
-
-    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCase(String clientName);
-
-    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRating(String clientName, Rating rating);
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCase(String type);
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameAndRating(String type, String clientName, Rating rating);
-    List<Review> findByTypeContainingIgnoreCaseAndClientNameAndRating(String type, String clientName, Rating rating);
-
-    List<Review> findByTypeContainingIgnoreCase(String type);
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRating(String type, Rating rating);
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(String type, String clientName, Rating rating);
-
-    List<Review> findByTypeContainingIgnoreCaseAndRating(String type, Rating rating);
-
-    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
-
-    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRating(String type, String clientName, Rating rating);
-
+    //Filtering queries (using RatingIn for range support)
 
     // Single-filter
+    List<Review> findByClientNameContainingIgnoreCase(String clientName);
+    List<Review> findByTypeContainingIgnoreCase(String type);
+    List<Review> findByRatingIn(List<Rating> ratings);
     List<Review> findByCommentContainingIgnoreCase(String comment);
 
     // Two-filters
+    List<Review> findByClientNameContainingIgnoreCaseAndRatingIn(String clientName, List<Rating> ratings);
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
+    List<Review> findByTypeContainingIgnoreCaseAndRatingIn(String type, List<Rating> ratings);
     List<Review> findByClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String clientName, String comment);
     List<Review> findByTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String comment);
-    List<Review> findByRatingAndCommentContainingIgnoreCase(Rating rating, String comment);
+    List<Review> findByRatingInAndCommentContainingIgnoreCase(List<Rating> ratings, String comment);
 
+    // Three-filters
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingIn(String type, String clientName, List<Rating> ratings);
     List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String clientName, String comment);
+    List<Review> findByTypeContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String type, List<Rating> ratings, String comment);
+    List<Review> findByClientNameContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String clientName, List<Rating> ratings, String comment);
 
-    List<Review> findByTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String type, Rating rating, String comment);
+    // Four-filters
+    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String type, String clientName, List<Rating> ratings, String comment);
 
-    List<Review> findByClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String clientName, Rating rating, String comment);
-
-    List<Review> findByTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(String type, String clientName, Rating rating, String comment);
-
-    // Visible + comment only
+    // Visible + single-filter
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCase(String clientName);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCase(String type);
+    List<Review> findByVisibleTrueAndRatingIn(List<Rating> ratings);
     List<Review> findByVisibleTrueAndCommentContainingIgnoreCase(String comment);
 
-    // Visible + (name/type/rating) + comment
-    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
-            String clientName, String comment
-    );
+    // Visible + two-filters
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRatingIn(String clientName, List<Rating> ratings);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCase(String type, String clientName);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRatingIn(String type, List<Rating> ratings);
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String clientName, String comment);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String comment);
+    List<Review> findByVisibleTrueAndRatingInAndCommentContainingIgnoreCase(List<Rating> ratings, String comment);
 
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndCommentContainingIgnoreCase(
-            String type, String comment
-    );
+    // Visible + three-filters
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingIn(String type, String clientName, List<Rating> ratings);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(String type, String clientName, String comment);
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String type, List<Rating> ratings, String comment);
+    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String clientName, List<Rating> ratings, String comment);
 
-    List<Review> findByVisibleTrueAndRatingAndCommentContainingIgnoreCase(
-            Rating rating, String comment
-    );
-
-    // Visible + 3 filters including comment
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndCommentContainingIgnoreCase(
-            String type, String clientName, String comment
-    );
-
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
-            String type, Rating rating, String comment
-    );
-
-    List<Review> findByVisibleTrueAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
-            String clientName, Rating rating, String comment
-    );
-
-    // Visible + all 4 filters
-    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingAndCommentContainingIgnoreCase(
-            String type, String clientName, Rating rating, String comment
-    );
+    // Visible + four-filters
+    List<Review> findByVisibleTrueAndTypeContainingIgnoreCaseAndClientNameContainingIgnoreCaseAndRatingInAndCommentContainingIgnoreCase(String type, String clientName, List<Rating> ratings, String comment);
 
     boolean existsByProjectIdAndClientId(String projectId, String clientId);
 
@@ -100,16 +67,5 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByProjectIdAndClientIdAndAppointmentId(String projectId, String clientId, String appointmentId);
 
-    List<Review> findByVisibleTrueAndRating(Rating rating);
-
-    List<Review> findByRating(Rating rating);
-
     void deleteReviewByReviewId(String reviewId);
-//
-//    // Get reviews by client ID
-//    List<Review> findByClientId(String clientId);
-//
-//    // Get reviews by appointment ID
-//    List<Review> findByAppointmentId(String appointmentId);
 }
-

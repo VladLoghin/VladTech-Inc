@@ -21,9 +21,11 @@ import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -39,10 +41,12 @@ public class ReviewController {
     @GetMapping()
     public ResponseEntity<List<ReviewResponseModel>> getAllReviews(@AuthenticationPrincipal Jwt jwt,
                                                                    @RequestParam(required = false) String clientName,
-                                                                   @RequestParam(required = false) Rating rating,
+                                                                   @RequestParam(required = false) Rating minRating,
+                                                                   @RequestParam(required = false) Rating maxRating,
                                                                    @RequestParam(required = false) String type,
                                                                    @RequestParam(required = false) String comment) {
-        return ResponseEntity.ok(reviewService.getAllReviews(clientName, rating, type, comment));
+        List<Rating> ratings = buildRatingRange(minRating, maxRating);
+        return ResponseEntity.ok(reviewService.getAllReviews(clientName, ratings, type, comment));
     }
 
 
@@ -66,10 +70,12 @@ public class ReviewController {
 
     @GetMapping("/visible")
     public ResponseEntity<List<ReviewResponseModel>> getAllVisibleReviews(@RequestParam(required = false) String clientName,
-                                                                           @RequestParam(required = false) Rating rating,
+                                                                           @RequestParam(required = false) Rating minRating,
+                                                                           @RequestParam(required = false) Rating maxRating,
                                                                           @RequestParam(required = false) String type,
                                                                           @RequestParam(required = false) String comment) {
-        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, rating, type, comment));
+        List<Rating> ratings = buildRatingRange(minRating, maxRating);
+        return ResponseEntity.ok(reviewService.getAllVisibleReviews(clientName, ratings, type, comment));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -175,6 +181,27 @@ public class ReviewController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    private List<Rating> buildRatingRange(Rating minRating, Rating maxRating) {
+        if (minRating == null && maxRating == null) {
+            return null;
+        }
+        Rating effectiveMin = minRating != null ? minRating : Rating.ONE;
+        Rating effectiveMax = maxRating != null ? maxRating : Rating.FIVE;
+
+        // Ensure min <= max by swapping if necessary
+        if (effectiveMin.getValue() > effectiveMax.getValue()) {
+            Rating temp = effectiveMin;
+            effectiveMin = effectiveMax;
+            effectiveMax = temp;
+        }
+
+        Rating finalMin = effectiveMin;
+        Rating finalMax = effectiveMax;
+        return Arrays.stream(Rating.values())
+                .filter(r -> r.getValue() >= finalMin.getValue() && r.getValue() <= finalMax.getValue())
+                .collect(Collectors.toList());
     }
 }
 

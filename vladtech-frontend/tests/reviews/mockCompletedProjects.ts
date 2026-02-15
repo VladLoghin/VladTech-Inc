@@ -76,6 +76,16 @@ export async function mockCompletedProjects(page: Page) {
     });
 }
 
+export async function mockMyReviews(page: Page, reviews: any[] = []) {
+    await page.route('**/api/reviews/mine*', (route) => {
+        route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(reviews),
+        });
+    });
+}
+
 export async function mockVisibleReviews(page: Page) {
     await page.route('**/api/reviews/visible*', (route) => {
         route.fulfill({
