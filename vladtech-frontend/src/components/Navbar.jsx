@@ -112,14 +112,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             {showHomeLinks && onScrollToSection && (
               <>
                 <button
-                  onClick={() => onScrollToSection("portfolio")}
-                  className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
-                  }`}
-                >
-                  {t("nav.portfolio")}
-                </button>
-                <button
                   onClick={() => onScrollToSection("about")}
                   className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                     isNavbarDark ? "text-white" : "text-black"
@@ -265,14 +257,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
 
           {showHomeLinks && onScrollToSection && (
             <>
-              <button
-                onClick={() => scrollTo("portfolio")}
-                className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
-              >
-                {t("nav.portfolio")}
-              </button>
               <button
                 onClick={() => scrollTo("about")}
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
