@@ -69,6 +69,16 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         []
     );
 
+    // Deck & Patio base and factors
+    const deckBaseMaterialCost = 25;
+    const deckMaterialFactors = {
+        WOOD: 1,
+        COMPOSITE: 1.25,
+        PVC: 1.4,
+        ALUMINUM: 1.5,
+    };
+
+
     const builtInPresets = useMemo(
     () => [
         {
@@ -255,6 +265,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 stairsCount: "0",
                 isCovered: false,
                 deckAreaSqFt: "",
+                materialCostPerSqFt: "",
                 locationFactor: "1.00",
             },
             fields: [
@@ -271,10 +282,12 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         { value: "ALUMINUM", label: t?.deckMaterialOptions?.ALUMINUM ?? "Aluminum" },
                     ],
                 },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
                 { name: "hasRailing", label: t.hasRailing ?? "Include Railing", type: "checkbox", required: false },
                 { name: "stairsCount", label: t.stairsCount ?? "Number of Stair Sets", type: "number", required: false, min: 0, step: "1" },
                 { name: "isCovered", label: t.isCovered ?? "Include Roof Cover", type: "checkbox", required: false },
             ],
+            // ...existing code...
         },
         {
             name: t.floorReplacePreset ?? "Floor Replace",
@@ -505,7 +518,18 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 }));
             }
         }
-    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+
+        if (selectedPreset.projectType === "DECK_PATIO_ADDITION") {
+            const material = formData.deckMaterial;
+            if (!material) return;
+            const factor = deckMaterialFactors[material] ?? 1;
+            const autoPrice = (deckBaseMaterialCost * factor).toFixed(2);
+            setFormData((prev) => ({
+                ...prev,
+                materialCostPerSqFt: String(autoPrice),
+            }));
+        }
+    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, formData.deckMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
 
     const handlePresetSelect = (presetName) => {
         const preset = sortedPresets.find((p) => p.name === presetName);
@@ -830,25 +854,34 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         <div className="estimate-breakdown">
                             <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem" }}>{t.costBreakdown}</h3>
                             
-                            {/* Material Cost */}
-                            {result.materialCostPerSqFt && result.squareFeet && (
-                                <div className="breakdown-row">
-                                    <span>{t.materialCost}:</span>
-                                    <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * parseFloat(result.materialCostPerSqFt)).toFixed(2)}
-                                    </span>
-                                </div>
-                            )}
-                            
-                            {/* Labor Cost (laborRate is $/sqft) */}
-                            {result.laborRate && result.squareFeet && (
-                                <div className="breakdown-row">
-                                    <span>{t.labor} (${parseFloat(result.laborRate).toFixed(2)}/sqft):</span>
-                                    <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * parseFloat(result.laborRate)).toFixed(2)}
-                                    </span>
-                                </div>
-                            )}
+                            {/* Material & Labor Cost */}
+                            {(() => {
+                                const area = result.areaSqFt ?? result.squareFeet ?? formData.deckAreaSqFt ?? formData.squareFeet;
+                                const areaNum = area ? parseFloat(area) : NaN;
+                                const mat = result.materialCostPerSqFt;
+                                const lab = result.laborRate;
+
+                                return (
+                                    <>
+                                        {!isNaN(areaNum) && mat && (
+                                            <div className="breakdown-row">
+                                                <span>{t.materialCost}:</span>
+                                                <span className="breakdown-amount">
+                                                    ${(areaNum * parseFloat(mat)).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {!isNaN(areaNum) && lab && (
+                                            <div className="breakdown-row">
+                                                <span>{t.labor} (${parseFloat(lab).toFixed(2)}/sqft):</span>
+                                                <span className="breakdown-amount">
+                                                    ${(areaNum * parseFloat(lab)).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                             
                             {/* Appliance Allowance (Kitchen Remodel) */}
                             {formData.applianceAllowance && parseFloat(formData.applianceAllowance) > 0 && (

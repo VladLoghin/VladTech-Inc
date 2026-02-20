@@ -174,7 +174,10 @@ public class EstimationServiceImpl implements EstimationService {
             BigDecimal areaSqFt = BigDecimal.valueOf(deckPatio.getAreaSqFt() != null ? deckPatio.getAreaSqFt() : 0.0);
             
             // Material cost: areaSqFt × baseCost × materialFactor
-            BigDecimal materialCost = areaSqFt.multiply(baseMaterialCostPerSqFt).multiply(deckMaterialFactor);
+            BigDecimal materialCostPerSqFt = baseMaterialCostPerSqFt.multiply(deckMaterialFactor);
+            BigDecimal materialCost = areaSqFt.multiply(materialCostPerSqFt);
+            // Expose per-sqft material cost back on the project so frontend can show breakdown
+            deckPatio.setMaterialCostPerSqFt(round2(materialCostPerSqFt));
             
             // Labor cost: areaSqFt × laborRate
             BigDecimal laborCost = areaSqFt.multiply(laborRate);
