@@ -9,28 +9,67 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
-    const sidingBasePrices = useMemo(
-        () => ({
+    // Load estimate settings early so all derived useMemo hooks can access them
+    const [estimateSettings, setEstimateSettings] = React.useState(null);
+    React.useEffect(() => {
+        let mounted = true;
+        const fetchSettings = async () => {
+            try {
+                const resp = await api.get("/estimates/config");
+                if (!mounted) return;
+                setEstimateSettings(resp.data || null);
+            } catch (err) {
+                if (!mounted) return;
+                setEstimateSettings(null);
+            }
+        };
+        fetchSettings();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const sidingBasePrices = useMemo(() => {
+        const f = estimateSettings?.sidingFactors;
+        if (f) {
+            return {
+                VINYL: Number(f.vinyl ?? 3.5),
+                WOOD: Number(f.wood ?? 6.0),
+                FIBER_CEMENT: Number(f.fiberCement ?? 5.0),
+                BRICK: Number(f.brick ?? 12.0),
+                STONE_VENEER: Number(f.stoneVeneer ?? 15.0),
+                OTHER: 0,
+            };
+        }
+        return {
             VINYL: 3.5,
             WOOD: 6.0,
             FIBER_CEMENT: 5.0,
             BRICK: 12.0,
             STONE_VENEER: 15.0,
             OTHER: 0,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
 
-    const roofBasePrices = useMemo(
-        () => ({
+    const roofBasePrices = useMemo(() => {
+        const f = estimateSettings?.roofFactors;
+        if (f) {
+            return {
+                ASPHALT: Number(f.asphalt ?? 4.0),
+                METAL: Number(f.metal ?? 7.5),
+                CLAY: Number(f.clay ?? 9.0),
+                SLATE: Number(f.slate ?? 12.0),
+                SYNTHETIC: Number(f.synthetic ?? 6.0),
+            };
+        }
+        return {
             ASPHALT: 4.0,
             METAL: 7.5,
             CLAY: 9.0,
             SLATE: 12.0,
             SYNTHETIC: 6.0,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
 
     const kitchenBasePrices = useMemo(
         () => ({
@@ -56,8 +95,20 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         []
     );
 
-    const flooringBasePrices = useMemo(
-        () => ({
+    const flooringBasePrices = useMemo(() => {
+        const f = estimateSettings?.flooringFactors;
+        if (f) {
+            return {
+                HARDWOOD: Number(f.hardwood ?? 8),
+                ENGINEERED_HARDWOOD: Number(f.engineeredHardwood ?? 6),
+                LAMINATE: Number(f.laminate ?? 3),
+                VINYL: Number(f.vinyl ?? 2.5),
+                TILE: Number(f.tile ?? 5),
+                CARPET: Number(f.carpet ?? 3.5),
+                POLISHED_CONCRETE: Number(f.polishedConcrete ?? 6),
+            };
+        }
+        return {
             HARDWOOD: 8,
             ENGINEERED_HARDWOOD: 6,
             LAMINATE: 3,
@@ -65,18 +116,28 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             TILE: 5,
             CARPET: 3.5,
             POLISHED_CONCRETE: 6,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
 
-    // Deck & Patio base and factors
-    const deckBaseMaterialCost = 25;
-    const deckMaterialFactors = {
-        WOOD: 1,
-        COMPOSITE: 1.25,
-        PVC: 1.4,
-        ALUMINUM: 1.5,
+    // Deck & Patio defaults (effective values are read from `estimateSettings` above)
+    const defaultDeckBaseMaterialCost = 25;
+    const defaultDeckMaterialCosts = {
+        WOOD: 25.0,
+        COMPOSITE: 31.25,
+        PVC: 35.0,
+        ALUMINUM: 37.5,
     };
+
+    const deckBaseMaterialCost = estimateSettings?.deckBaseMaterialCostPerSqFt ?? defaultDeckBaseMaterialCost;
+    const deckMaterialCosts = React.useMemo(() => {
+        const f = estimateSettings?.deckFactors || {};
+        return {
+            WOOD: f.wood ?? defaultDeckMaterialCosts.WOOD,
+            COMPOSITE: f.composite ?? defaultDeckMaterialCosts.COMPOSITE,
+            PVC: f.pvc ?? defaultDeckMaterialCosts.PVC,
+            ALUMINUM: f.aluminum ?? defaultDeckMaterialCosts.ALUMINUM,
+        };
+    }, [estimateSettings]);
 
 
     const builtInPresets = useMemo(
@@ -270,6 +331,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             },
             fields: [
                 { name: "deckAreaSqFt", label: t.deckAreaSqFt ?? "Deck Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
                 {
                     name: "deckMaterial",
                     label: t.deckMaterial ?? "Deck Material",
@@ -282,7 +344,6 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         { value: "ALUMINUM", label: t?.deckMaterialOptions?.ALUMINUM ?? "Aluminum" },
                     ],
                 },
-                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
                 { name: "hasRailing", label: t.hasRailing ?? "Include Railing", type: "checkbox", required: false },
                 { name: "stairsCount", label: t.stairsCount ?? "Number of Stair Sets", type: "number", required: false, min: 0, step: "1" },
                 { name: "isCovered", label: t.isCovered ?? "Include Roof Cover", type: "checkbox", required: false },
@@ -522,12 +583,14 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         if (selectedPreset.projectType === "DECK_PATIO_ADDITION") {
             const material = formData.deckMaterial;
             if (!material) return;
-            const factor = deckMaterialFactors[material] ?? 1;
-            const autoPrice = (deckBaseMaterialCost * factor).toFixed(2);
-            setFormData((prev) => ({
-                ...prev,
-                materialCostPerSqFt: String(autoPrice),
-            }));
+            const cost = deckMaterialCosts[material];
+            if (cost !== undefined) {
+                const autoPrice = Number(cost).toFixed(2);
+                setFormData((prev) => ({
+                    ...prev,
+                    materialCostPerSqFt: String(autoPrice),
+                }));
+            }
         }
     }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, formData.deckMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
 

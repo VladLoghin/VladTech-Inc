@@ -76,7 +76,16 @@ public class EstimationServiceImpl implements EstimationService {
         BigDecimal tearOffCost = ZERO;
 
         if (project instanceof SidingReplace siding) {
-            typeFactor = resolveSidingMaterialFactor(settings, siding.getSidingMaterial());
+            // If the client did not supply material cost, use the per-material amount from settings
+            if (siding.getMaterialCostPerSqFt() == null) {
+                switch (siding.getSidingMaterial()) {
+                    case VINYL -> materialPerSqFt = ns(settings.getSidingFactors().getVinyl());
+                    case WOOD -> materialPerSqFt = ns(settings.getSidingFactors().getWood());
+                    case FIBER_CEMENT -> materialPerSqFt = ns(settings.getSidingFactors().getFiberCement());
+                    case BRICK -> materialPerSqFt = ns(settings.getSidingFactors().getBrick());
+                    case STONE_VENEER -> materialPerSqFt = ns(settings.getSidingFactors().getStoneVeneer());
+                }
+            }
 
             int extraStories = Math.max(0, siding.getStories() - 1);
             extraLaborPerStory = laborRate.multiply(settings.getSidingExtraLaborPerStoryRate()
@@ -86,7 +95,16 @@ public class EstimationServiceImpl implements EstimationService {
                 insulationAdderPerSqFt = settings.getInsulationAdderPerSqFt();
             }
         } else if (project instanceof RoofingReplace roofing) {
-            typeFactor = resolveRoofMaterialFactor(settings, roofing.getRoofMaterial());
+            // If client didn't supply material cost, use per-material roof amounts from settings
+            if (roofing.getMaterialCostPerSqFt() == null) {
+                switch (roofing.getRoofMaterial()) {
+                    case ASPHALT -> materialPerSqFt = ns(settings.getRoofFactors().getAsphalt());
+                    case METAL -> materialPerSqFt = ns(settings.getRoofFactors().getMetal());
+                    case CLAY -> materialPerSqFt = ns(settings.getRoofFactors().getClay());
+                    case SLATE -> materialPerSqFt = ns(settings.getRoofFactors().getSlate());
+                    case SYNTHETIC -> materialPerSqFt = ns(settings.getRoofFactors().getSynthetic());
+                }
+            }
 
             int extraStories = Math.max(0, roofing.getStories() - 1);
             extraLaborPerStory = laborRate.multiply(settings.getRoofingExtraLaborPerStoryRate()
@@ -136,20 +154,23 @@ public class EstimationServiceImpl implements EstimationService {
             
             return project;
         } else if (project instanceof WindowDoorReplace windowDoor) {
+            // Window/door settings are factors; multiply the base per-unit cost by the material factor
             BigDecimal windowCostPerUnit = settings.getWindowBaseCostPerUnit();
             BigDecimal doorCostPerUnit = settings.getDoorBaseCostPerUnit();
-            
+
             BigDecimal windowMaterialFactor = resolveWindowMaterialFactor(settings, windowDoor.getWindowType());
             BigDecimal doorMaterialFactor = resolveDoorMaterialFactor(settings, windowDoor.getDoorType());
-            
-            BigDecimal windowMaterialCost = BigDecimal.valueOf(windowDoor.getWindowCount()).multiply(windowCostPerUnit).multiply(windowMaterialFactor);
-            BigDecimal doorMaterialCost = BigDecimal.valueOf(windowDoor.getDoorCount()).multiply(doorCostPerUnit).multiply(doorMaterialFactor);
-            
+
+            BigDecimal windowMaterialCost = BigDecimal.valueOf(windowDoor.getWindowCount())
+                .multiply(windowCostPerUnit.multiply(windowMaterialFactor));
+            BigDecimal doorMaterialCost = BigDecimal.valueOf(windowDoor.getDoorCount())
+                .multiply(doorCostPerUnit.multiply(doorMaterialFactor));
+
             // 3 labor rates per window and per door
             BigDecimal windowLaborCost = BigDecimal.valueOf(windowDoor.getWindowCount())
-                    .multiply(laborRate.multiply(settings.getWindowDoorLaborRateMultiplier()));
+                .multiply(laborRate.multiply(settings.getWindowDoorLaborRateMultiplier()));
             BigDecimal doorLaborCost = BigDecimal.valueOf(windowDoor.getDoorCount())
-                    .multiply(laborRate.multiply(settings.getWindowDoorLaborRateMultiplier()));
+                .multiply(laborRate.multiply(settings.getWindowDoorLaborRateMultiplier()));
             
             BigDecimal baseCost = windowMaterialCost.add(doorMaterialCost).add(windowLaborCost).add(doorLaborCost);
             
@@ -168,13 +189,20 @@ public class EstimationServiceImpl implements EstimationService {
             
             return project;
         } else if (project instanceof DeckPatioAddition deckPatio) {
-            BigDecimal baseMaterialCostPerSqFt = settings.getDeckBaseMaterialCostPerSqFt();
-            BigDecimal deckMaterialFactor = resolveDeckMaterialFactor(settings, deckPatio.getDeckMaterial());
-            
             BigDecimal areaSqFt = BigDecimal.valueOf(deckPatio.getAreaSqFt() != null ? deckPatio.getAreaSqFt() : 0.0);
-            
-            // Material cost: areaSqFt × baseCost × materialFactor
-            BigDecimal materialCostPerSqFt = baseMaterialCostPerSqFt.multiply(deckMaterialFactor);
+
+            // Prefer project-provided per-sqft material cost; otherwise use settings per-material amounts
+            BigDecimal materialCostPerSqFt = ns(deckPatio.getMaterialCostPerSqFt());
+            if (materialCostPerSqFt.compareTo(ZERO) == 0) {
+                materialCostPerSqFt = switch (deckPatio.getDeckMaterial()) {
+                    case WOOD -> ns(settings.getDeckFactors().getWood());
+                    case COMPOSITE -> ns(settings.getDeckFactors().getComposite());
+                    case PVC -> ns(settings.getDeckFactors().getPvc());
+                    case ALUMINUM -> ns(settings.getDeckFactors().getAluminum());
+                    default -> ns(settings.getDeckBaseMaterialCostPerSqFt());
+                };
+            }
+
             BigDecimal materialCost = areaSqFt.multiply(materialCostPerSqFt);
             // Expose per-sqft material cost back on the project so frontend can show breakdown
             deckPatio.setMaterialCostPerSqFt(round2(materialCostPerSqFt));
@@ -228,27 +256,28 @@ public class EstimationServiceImpl implements EstimationService {
             return project;
         } else if (project instanceof FloorReplace floorReplace) {
             BigDecimal area = ns(floorReplace.getSquareFeet());
-            BigDecimal baseMaterialCostPerSqFt = ns(floorReplace.getMaterialCostPerSqFt());
-            
-            BigDecimal newFloorFactor = resolveFlooringMaterialFactor(settings, floorReplace.getNewFloorMaterial());
-            
-            // Material cost: area × baseCost × materialFactor
-            BigDecimal materialCost = area.multiply(baseMaterialCostPerSqFt).multiply(newFloorFactor);
-            
+            BigDecimal providedMaterialCostPerSqFt = ns(floorReplace.getMaterialCostPerSqFt());
+
+            BigDecimal settingsMaterialPerSqFt = resolveFlooringMaterialFactor(settings, floorReplace.getNewFloorMaterial());
+            BigDecimal effectiveMaterialPerSqFt = providedMaterialCostPerSqFt.compareTo(ZERO) > 0 ? providedMaterialCostPerSqFt : settingsMaterialPerSqFt;
+
+            // Material cost: area × effective per-sqft material cost
+            BigDecimal materialCost = area.multiply(effectiveMaterialPerSqFt);
+
             // Labor cost: area × laborRate
             BigDecimal laborCost = area.multiply(laborRate);
-            
+
             BigDecimal baseCost = materialCost.add(laborCost);
-            
+
             // Add subfloor repair cost if needed
             if (Boolean.TRUE.equals(floorReplace.getSubfloorRepairNeeded())) {
                 BigDecimal subfloorRepairCost = area.multiply(settings.getFloorSubfloorRepairCostPerSqFt());
                 baseCost = baseCost.add(subfloorRepairCost);
             }
-            
+
             // Add removal cost for existing floor (varies by material)
-            BigDecimal removalFactor = resolveFlooringRemovalFactor(settings, floorReplace.getExistingFloorMaterial());
-            BigDecimal removalCost = area.multiply(settings.getFloorRemovalBaseCostPerSqFt()).multiply(removalFactor);
+            BigDecimal removalAmount = resolveFlooringRemovalFactor(settings, floorReplace.getExistingFloorMaterial());
+            BigDecimal removalCost = area.multiply(removalAmount);
             baseCost = baseCost.add(removalCost);
             
             // Apply location factor

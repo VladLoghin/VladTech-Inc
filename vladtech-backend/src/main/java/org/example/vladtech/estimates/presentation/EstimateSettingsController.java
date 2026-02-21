@@ -18,7 +18,6 @@ public class EstimateSettingsController {
 
     private final EstimateSettingsService estimateSettingsService;
 
-    @PreAuthorize("hasAuthority('Admin')")
     @GetMapping
     public ResponseEntity<EstimateSettings> getSettings() {
         return ResponseEntity.ok(estimateSettingsService.getSettings());
