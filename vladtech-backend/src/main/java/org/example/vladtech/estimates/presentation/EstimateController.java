@@ -7,6 +7,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -108,9 +109,22 @@ public class EstimateController {
         try {
             byte[] data = Files.readAllBytes(pdfPath);
             ByteArrayResource resource = new ByteArrayResource(data);
-            return ResponseEntity.ok()
+
+            // Use the saved estimate title as the download filename when possible
+            String title = maybe.get().getTitle();
+            if (title == null || title.isBlank()) {
+                title = "estimate-" + id;
+            }
+            // sanitize filename: allow letters, numbers, space, dash, underscore, dot
+            // keep regex simple to avoid Java string escape issues
+            String safe = title.replaceAll("[^a-zA-Z0-9 _.-]", "_");
+            if (safe.length() > 120) safe = safe.substring(0, 120);
+            String filename = safe + ".pdf";
+
+                return ResponseEntity.ok()
                     .contentLength(data.length)
                     .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                     .body(resource);
         } catch (IOException ex) {
             return ResponseEntity.status(500).build();

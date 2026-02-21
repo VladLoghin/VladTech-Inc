@@ -88,17 +88,24 @@ const EstimatesPage = () => {
                   <button
                     onClick={async (e) => {
                       e.preventDefault();
-                      try {
-                        const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
-                        const resp = await api.get(`/estimates/${est.estimateId}/pdf`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
-                        const blob = new Blob([resp.data], { type: 'application/pdf' });
-                        const url = window.URL.createObjectURL(blob);
-                        window.open(url, '_blank');
-                      } catch (err) {
-                        console.error('Failed to fetch PDF', err);
-                        setToast({ type: 'error', message: err.response?.status === 403 ? 'Forbidden' : 'Failed to open PDF' });
-                        setTimeout(() => setToast(null), 3000);
-                      }
+                          try {
+                            const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
+                            const resp = await api.get(`/estimates/${est.estimateId}/pdf`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
+                            const blob = new Blob([resp.data], { type: 'application/pdf' });
+
+                            // Use the estimate title as the suggested filename when downloading
+                            const url = window.URL.createObjectURL(blob);
+
+                            // Auto-open in a new tab (users can still save from the new tab)
+                            window.open(url, '_blank');
+
+                            // Revoke URL after a short delay to allow the new tab to load
+                            setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+                          } catch (err) {
+                            console.error('Failed to fetch PDF', err);
+                            setToast({ type: 'error', message: err.response?.status === 403 ? 'Forbidden' : 'Failed to open PDF' });
+                            setTimeout(() => setToast(null), 3000);
+                          }
                     }}
                     className="underline text-sm"
                   >
