@@ -55,14 +55,15 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
       <div className="container mx-auto px-8 py-6 flex items-center justify-between">
         {/* LEFT cluster (matches hosted screenshot) */}
         <div className="flex items-center gap-4 min-w-0">
-          <button
-            onClick={() => navigate("/")}
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); navigate("/"); }}
             className={`tracking-widest transition-colors truncate ${
               isNavbarDark ? "text-white hover:text-yellow-400" : "text-black hover:text-yellow-400"
             }`}
           >
             VLADTECH
-          </button>
+          </a>
 
           {/* Language toggle (reverted look + placement) */}
           <button
@@ -112,74 +113,81 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
           <div className="hidden md:flex gap-12 items-center">
             {showHomeLinks && onScrollToSection && (
               <>
-                <button
-                  onClick={() => onScrollToSection("about")}
+                <a
+                  href="#about"
+                  onClick={(e) => { e.preventDefault(); onScrollToSection("about"); }}
                   className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
                   {t("nav.about")}
-                </button>
-                <button
-                  onClick={() => onScrollToSection("contact")}
+                </a>
+                <a
+                  href="#contact"
+                  onClick={(e) => { e.preventDefault(); onScrollToSection("contact"); }}
                   className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
                   {t("nav.contact")}
-                </button>
+                </a>
               </>
             )}
 
-            <button
-              onClick={() => navigate("/portfolio")}
+            <a
+              href="/portfolio"
+              onClick={(e) => { e.preventDefault(); navigate("/portfolio"); }}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
               }`}
             >
               {t("nav.portfolio")}
-            </button>
+            </a>
 
-            <button
-              onClick={() => navigate("/reviews")}
+            <a
+              href="/reviews"
+              onClick={(e) => { e.preventDefault(); navigate("/reviews"); }}
               className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
               }`}
             >
               {t("nav.reviews")}
-            </button>
+            </a>
 
             {isAuthenticated && isAdmin && (
-              <button
-                onClick={() => navigate("/admin")}
+              <a
+                href="/admin"
+                onClick={(e) => { e.preventDefault(); navigate("/admin"); }}
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
                 {t("nav.adminPanel")}
-              </button>
+              </a>
             )}
 
             {isAuthenticated && isEmployee && (
-              <button
-                onClick={() => navigate("/employee")}
+              <a
+                href="/employee"
+                onClick={(e) => { e.preventDefault(); navigate("/employee"); }}
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
                 {t("nav.employeeTools")}
-              </button>
+              </a>
             )}
 
             {isAuthenticated && !isAdmin && !isClient && (
-              <button
-                onClick={() => navigate("/dashboard")}
+              <a
+                href="/dashboard"
+                onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}
                 className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
                 {t("nav.dashboard")}
-              </button>
+              </a>
             )}
 
             {isAuthenticated && (isAdmin || isEmployee || isClient) && (
@@ -205,7 +213,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-4 w-4" aria-hidden="true" />
                 {t("nav.login")}
               </button>
             ) : (
@@ -217,7 +225,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4" aria-hidden="true" />
                 {t("nav.logout")}
               </button>
             )}
@@ -261,74 +269,81 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
 
           {showHomeLinks && onScrollToSection && (
             <>
-              <button
-                onClick={() => scrollTo("about")}
+              <a
+                href="#about"
+                onClick={(e) => { e.preventDefault(); scrollTo("about"); }}
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
                 {t("nav.about")}
-              </button>
-              <button
-                onClick={() => scrollTo("contact")}
+              </a>
+              <a
+                href="#contact"
+                onClick={(e) => { e.preventDefault(); scrollTo("contact"); }}
                 className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
                 {t("nav.contact")}
-              </button>
+              </a>
             </>
           )}
 
-          <button
-            onClick={closeAnd(() => navigate("/portfolio"))}
+          <a
+            href="/portfolio"
+            onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/portfolio"))(); }}
             className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
               isNavbarDark ? "text-white" : "text-black"
             }`}
           >
             {t("nav.portfolio")}
-          </button>
+          </a>
 
-          <button
-            onClick={closeAnd(() => navigate("/reviews"))}
+          <a
+            href="/reviews"
+            onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/reviews"))(); }}
             className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
               isNavbarDark ? "text-white" : "text-black"
             }`}
           >
             {t("nav.reviews")}
-          </button>
+          </a>
 
           {isAuthenticated && isAdmin && (
-            <button
-              onClick={closeAnd(() => navigate("/admin"))}
+            <a
+              href="/admin"
+              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/admin"))(); }}
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
               }`}
             >
               {t("nav.adminPanel")}
-            </button>
+            </a>
           )}
 
           {isAuthenticated && isEmployee && (
-            <button
-              onClick={closeAnd(() => navigate("/employee"))}
+            <a
+              href="/employee"
+              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/employee"))(); }}
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
               }`}
             >
               {t("nav.employeeTools")}
-            </button>
+            </a>
           )}
 
           {isAuthenticated && !isAdmin && !isClient && (
-            <button
-              onClick={closeAnd(() => navigate("/dashboard"))}
+            <a
+              href="/dashboard"
+              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/dashboard"))(); }}
               className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
                 isNavbarDark ? "text-white" : "text-black"
               }`}
             >
               {t("nav.dashboard")}
-            </button>
+            </a>
           )}
 
           {!isAuthenticated ? (
@@ -340,7 +355,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   : "bg-black text-white hover:bg-yellow-400 hover:text-black"
               }`}
             >
-              <LogIn className="h-4 w-4" />
+              <LogIn className="h-4 w-4" aria-hidden="true" />
               {t("nav.login")}
             </button>
           ) : (
@@ -352,7 +367,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   : "bg-black text-white hover:bg-yellow-400 hover:text-black"
               }`}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden="true" />
               {t("nav.logout")}
             </button>
           )}

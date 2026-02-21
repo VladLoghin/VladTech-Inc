@@ -228,7 +228,7 @@ export default function HomePage({
         <div className="container mx-auto px-8 relative">
           <div className="relative flex items-center justify-center">
             {/* Sliding VLADTECH Text */}
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none" aria-hidden="true">
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none" aria-hidden="true" role="presentation">
               <motion.div
                 className="flex whitespace-nowrap"
                 animate={{ x: ["0%", "50%"] }}
@@ -349,14 +349,13 @@ export default function HomePage({
               </motion.div>
             ))}
 
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10" role="tablist" aria-label="Portfolio slides">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10" role="group" aria-label="Portfolio slides">
               {[0, 1, 2].map((index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  role="tab"
-                  aria-selected={currentSlide === index}
-                  aria-label={`Slide ${index + 1}`}
+                  aria-current={currentSlide === index ? "true" : undefined}
+                  aria-label={`Go to slide ${index + 1}`}
                   className={`w-2 h-2 rounded-full transition-all ${
                     currentSlide === index ? "bg-yellow-400 w-8" : "bg-white/40"
                   }`}
@@ -499,7 +498,7 @@ export default function HomePage({
                 onClick={onOpenContactModal}
                 className="w-full max-w-md mx-auto bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black h-14 tracking-widest transition-all duration-300 shadow-lg shadow-yellow-400/20"
               >
-                <Send className="mr-3 h-5 w-5" />
+                <Send className="mr-3 h-5 w-5" aria-hidden="true" />
                 {t("home.contactUs")}
               </Button>
             </motion.div>
