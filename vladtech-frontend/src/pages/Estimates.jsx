@@ -78,8 +78,9 @@ const EstimatesPage = () => {
                 key={est.estimateId}
                 className="p-4 border rounded-md flex justify-between items-center"
                 style={{
-                  cursor: 'default'
+                  cursor: 'pointer'
                 }}
+                onClick={() => { setSelectedEstimate(est); setOpenEstimateModal(true); }}
               >
                 <div>
                   <div className="font-semibold">{est.title || "Untitled"}</div>
@@ -88,6 +89,7 @@ const EstimatesPage = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={async (e) => {
+                      e.stopPropagation();
                       e.preventDefault();
                       try {
                         // Generate PDF client-side from the stored estimate data
@@ -117,7 +119,7 @@ const EstimatesPage = () => {
                   >
                     PDF
                   </button>
-                  <button onClick={() => handleDelete(est.estimateId)} className="text-sm text-red-600">
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(est.estimateId); }} className="text-sm text-red-600">
                     Delete
                   </button>
                 </div>
@@ -143,9 +145,19 @@ const EstimatesPage = () => {
           <EstimateInputModal
             isOpen={openEstimateModal}
             onClose={() => { setOpenEstimateModal(false); setSelectedEstimate(null); }}
+            onSave={(saved) => {
+              if (!saved) return;
+              setEstimates((prev) => {
+                const exists = prev.some(e => e.estimateId === saved.estimateId);
+                if (exists) {
+                  return prev.map(e => e.estimateId === saved.estimateId ? saved : e);
+                }
+                return [saved, ...prev];
+              });
+            }}
             initialProject={selectedEstimate ? (selectedEstimate.project || selectedEstimate) : null}
             initialSavedEstimate={selectedEstimate}
-            openResultInitially={true}
+            openResultInitially={false}
             fromSavedList={true}
           />
         )}

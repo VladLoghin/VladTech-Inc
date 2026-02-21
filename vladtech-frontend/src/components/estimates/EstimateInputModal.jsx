@@ -7,7 +7,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { estimateTranslations } from "../../translations/estimateTranslations";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false, fromSavedList = false }) => {
+const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false, fromSavedList = false }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
@@ -434,6 +434,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [saveTitle, setSaveTitle] = useState("");
     const [savedEstimate, setSavedEstimate] = useState(null);
+    const initSavedIdRef = React.useRef(null);
 
     // Initialize savedEstimate when modal is opened from saved list
     useEffect(() => {
@@ -502,27 +503,68 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
 
 
     useEffect(() => {
-        if (isOpen && sortedPresets.length > 0) {
+        // Only initialize the default preset when opening the modal for a new estimate
+        // Do not overwrite when editing a saved estimate (use `initialSavedEstimate` to detect saved opens)
+        if (isOpen && sortedPresets.length > 0 && !initialSavedEstimate && !initialProject) {
             const defaultPreset = sortedPresets[0];
             const initialValues = withAutoPrice(defaultPreset, defaultPreset.defaultValues || {});
             setSelectedPreset(defaultPreset);
             setFormData(initialValues);
         }
-    }, [isOpen, sortedPresets, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+    }, [isOpen, sortedPresets, initialSavedEstimate, initialProject]);
 
-    // If an initial project is provided (e.g., opening a saved estimate), populate form and result
+    // If an initial project is provided (e.g., opening a saved estimate), populate form (editable)
     useEffect(() => {
-        if (initialProject && isOpen) {
-            try {
-                // initialProject may contain both inputs and derived fields
-                setFormData(initialProject);
-                setResult(initialProject);
-                setIsResultModalOpen(Boolean(openResultInitially));
-            } catch (err) {
-                console.error('Failed to load initial project into modal', err);
+        if (!initialProject || !isOpen) return;
+        // Only initialize once per saved estimate to avoid repeatedly overwriting user edits
+        const incomingId = initialSavedEstimate?.estimateId || initialProject?.estimateId || initialProject?.id || null;
+        if (initSavedIdRef.current && incomingId && initSavedIdRef.current === incomingId) return;
+
+        try {
+            // Match a preset: prefer exact projectType/key match, otherwise score by field overlap
+            let match = null;
+            if (initialProject.projectType) {
+                match = sortedPresets?.find(p => (p.projectType && p.projectType.toString().toUpperCase() === initialProject.projectType.toString().toUpperCase()) || (p.key && p.key.toString().toUpperCase() === initialProject.projectType.toString().toUpperCase()) || (p.key && p.key.toString().toUpperCase() === (initialProject.key || '').toString().toUpperCase()));
             }
+
+            if (!match && sortedPresets && sortedPresets.length > 0) {
+                // Score presets by how many of their field names exist on the incoming project
+                const scores = sortedPresets.map(p => {
+                    const names = (p.fields || []).map(f => f.name);
+                    const count = names.reduce((acc, n) => acc + (initialProject && initialProject[n] !== undefined ? 1 : 0), 0);
+                    return { preset: p, score: count };
+                });
+                scores.sort((a, b) => b.score - a.score);
+                if (scores[0] && scores[0].score > 0) match = scores[0].preset;
+            }
+
+            if (match) {
+                setSelectedPreset(match);
+                // merge listed defaults with incoming project values and apply auto pricing
+                const merged = { ...(match.defaultValues || {}), ...(initialProject || {}) };
+                const values = withAutoPrice(match, merged);
+                setFormData(values);
+            } else {
+                // fallback: use the incoming project directly so fields are editable
+                setSelectedPreset(null);
+                setFormData(initialProject);
+            }
+
+            // Only open the read-only result panel if explicitly requested
+            setResult(openResultInitially ? initialProject : null);
+            setIsResultModalOpen(Boolean(openResultInitially));
+
+            // mark initialized for this saved estimate id (if present)
+            if (incomingId) initSavedIdRef.current = incomingId;
+        } catch (err) {
+            console.error('Failed to load initial project into modal', err);
         }
-    }, [initialProject, isOpen, openResultInitially]);
+    }, [initialProject, isOpen, openResultInitially, sortedPresets]);
+
+    // Reset the initialized ref when modal closes so subsequent openings reinitialize correctly
+    useEffect(() => {
+        if (!isOpen) initSavedIdRef.current = null;
+    }, [isOpen]);
 
     useEffect(() => {
         if (toast) {
@@ -628,7 +670,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         const nextValue = type === "checkbox" ? checked : value;
-
+        console.log('handleChange', { name, value: nextValue, type });
         setFormData((prevData) => {
             const updated = { ...prevData, [name]: nextValue };
             if (selectedPreset?.projectType === "SIDING_REPLACE" && name === "sidingMaterial") {
@@ -706,6 +748,11 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
         }
     };
 
+    // Debug: log when formData actually updates
+    useEffect(() => {
+        console.log('formData changed:', formData);
+    }, [formData]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
@@ -728,19 +775,34 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
 
     const { getAccessTokenSilently } = useAuth0();
 
-    const handleCloseResultModal = () => {
+    // Close only the result view and return to the edit form (keep `formData` intact)
+    const handleBackToEdit = () => {
+        setIsResultModalOpen(false);
+        setResult(null);
+    };
+
+    // Close the entire modal (result and edit) — used for 'Close' action
+    const handleCloseAll = () => {
         setIsResultModalOpen(false);
         setResult(null);
         onClose();
     };
 
     const handleSaveEstimate = async () => {
-        // open inline modal to ask for title
+        // If this is an existing saved estimate, update it directly (PUT) using current values
+        const existingId = initialSavedEstimate?.estimateId || savedEstimate?.estimateId;
+        if (existingId) {
+            const titleLocal = initialSavedEstimate?.title || savedEstimate?.title || selectedPreset?.name || "Estimate";
+            await confirmSaveEstimate(titleLocal);
+            return;
+        }
+
+        // otherwise open inline modal to ask for title for a new save
         setSaveTitle(selectedPreset?.name || "Estimate");
         setIsSaveModalOpen(true);
     };
 
-    const confirmSaveEstimate = async () => {
+    const confirmSaveEstimate = async (titleParam = null) => {
         try {
             const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
 
@@ -748,13 +810,30 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
             const project = { ...formData, ...result };
 
             const payload = {
-                title: saveTitle || "Untitled",
+                title: titleParam ?? saveTitle ?? "Untitled",
                 project,
             };
 
-            const resp = await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
+            let resp;
+            // If editing an existing saved estimate, update it via PUT
+            const existingId = initialSavedEstimate?.estimateId || savedEstimate?.estimateId;
+            if (existingId) {
+                resp = await api.put(`/estimates/${existingId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+            } else {
+                resp = await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
+            }
             const saved = resp.data || null;
             setSavedEstimate(saved);
+
+            // Notify parent that an estimate was saved/updated so lists can refresh
+            if (onSave && typeof onSave === 'function') {
+                try {
+                    onSave(saved);
+                } catch (err) {
+                    // swallow parent handler errors
+                    console.error('onSave handler threw', err);
+                }
+            }
 
             // Auto-generate and upload PDF using existing exporter style
             (async () => {
@@ -865,39 +944,99 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                         </div>
                     )}
 
-                    {selectedPreset && (
+                    {(selectedPreset || (formData && Object.keys(formData).length > 0)) && (
                         <form onSubmit={handleSubmit}>
-                            {(() => {
-                                const checkboxFields = selectedPreset.fields.filter(f => f.type === "checkbox");
-                                const conditionalFieldNames = ["numSkylights", "applianceAllowance"];
-                                const otherFields = selectedPreset.fields.filter(f => f.type !== "checkbox" && !conditionalFieldNames.includes(f.name));
-                                const conditionalFields = selectedPreset.fields.filter(f => conditionalFieldNames.includes(f.name));
-                                
-                                return (
-                                    <>
-                                        {/* Render non-checkbox, non-conditional fields first */}
-                                        {otherFields.map((field) => {
-                                            return (
-                                                <div key={field.name} className="form-group">
-                                                    <label htmlFor={field.name}>{field.label}:</label>
-                                                    {field.type === "select" ? (
-                                                        <select
-                                                            id={field.name}
-                                                            name={field.name}
-                                                            value={formData[field.name] ?? ""}
-                                                            onChange={handleChange}
-                                                            required={field.required}
-                                                        >
-                                                            <option value="" disabled>
-                                                                {t.selectPreset}
-                                                            </option>
-                                                            {field.options.map((opt) => (
-                                                                <option key={opt.value} value={opt.value}>
-                                                                    {opt.label}
+                            {selectedPreset ? (
+                                (() => {
+                                    const checkboxFields = selectedPreset.fields.filter(f => f.type === "checkbox");
+                                    const conditionalFieldNames = ["numSkylights", "applianceAllowance"];
+                                    const otherFields = selectedPreset.fields.filter(f => f.type !== "checkbox" && !conditionalFieldNames.includes(f.name));
+                                    const conditionalFields = selectedPreset.fields.filter(f => conditionalFieldNames.includes(f.name));
+                                    
+                                    return (
+                                        <>
+                                            {/* Render non-checkbox, non-conditional fields first */}
+                                            {otherFields.map((field) => {
+                                                return (
+                                                    <div key={field.name} className="form-group">
+                                                        <label htmlFor={field.name}>{field.label}:</label>
+                                                        {field.type === "select" ? (
+                                                            <select
+                                                                id={field.name}
+                                                                name={field.name}
+                                                                value={formData[field.name] ?? ""}
+                                                                onChange={handleChange}
+                                                                required={field.required}
+                                                            >
+                                                                <option value="" disabled>
+                                                                    {t.selectPreset}
                                                                 </option>
-                                                            ))}
-                                                        </select>
-                                                    ) : (
+                                                                {field.options.map((opt) => (
+                                                                    <option key={opt.value} value={opt.value}>
+                                                                        {opt.label}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <input
+                                                                id={field.name}
+                                                                type={field.type}
+                                                                name={field.name}
+                                                                value={formData[field.name] ?? ""}
+                                                                onChange={handleChange}
+                                                                required={field.required}
+                                                                min={field.min !== undefined ? String(field.min) : undefined}
+                                                                step={field.step}
+                                                                onInvalid={(e) => {
+                                                                    if (e.target.validity.valueMissing) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                                    } else if (e.target.validity.rangeUnderflow) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                                    } else if (e.target.validity.typeMismatch) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                                    }
+                                                                }}
+                                                                onInput={(e) => e.target.setCustomValidity("")}
+                                                            />
+                                                        )}
+                                                        {errors[field.name] && (
+                                                            <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                                {errors[field.name]}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                            
+                                            {/* Render checkboxes in grid if any exist */}
+                                            {checkboxFields.length > 0 && (
+                                                <div className="checkboxes-grid">
+                                                    {checkboxFields.map((field) => (
+                                                        <div key={field.name} className="checkbox-grid-item">
+                                                            <label htmlFor={field.name} className="checkbox-label">
+                                                                {field.label}
+                                                            </label>
+                                                            <input
+                                                                id={field.name}
+                                                                className="checkbox-input"
+                                                                type="checkbox"
+                                                                name={field.name}
+                                                                checked={!!formData[field.name]}
+                                                                onChange={handleChange}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Render conditional fields last, below checkboxes */}
+                                            {conditionalFields.map((field) => {
+                                                if (field.name === "numSkylights" && !formData.hasSkylights) return null;
+                                                if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
+                                                
+                                                return (
+                                                    <div key={field.name} className="collapsible-section">
+                                                        <label htmlFor={field.name}>{field.label}:</label>
                                                         <input
                                                             id={field.name}
                                                             type={field.type}
@@ -918,76 +1057,37 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                                                             }}
                                                             onInput={(e) => e.target.setCustomValidity("")}
                                                         />
-                                                    )}
-                                                    {errors[field.name] && (
-                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
-                                                            {errors[field.name]}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                        
-                                        {/* Render checkboxes in grid if any exist */}
-                                        {checkboxFields.length > 0 && (
-                                            <div className="checkboxes-grid">
-                                                {checkboxFields.map((field) => (
-                                                    <div key={field.name} className="checkbox-grid-item">
-                                                        <label htmlFor={field.name} className="checkbox-label">
-                                                            {field.label}
-                                                        </label>
-                                                        <input
-                                                            id={field.name}
-                                                            className="checkbox-input"
-                                                            type="checkbox"
-                                                            name={field.name}
-                                                            checked={!!formData[field.name]}
-                                                            onChange={handleChange}
-                                                        />
+                                                        {errors[field.name] && (
+                                                            <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                                {errors[field.name]}
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        
-                                        {/* Render conditional fields last, below checkboxes */}
-                                        {conditionalFields.map((field) => {
-                                            if (field.name === "numSkylights" && !formData.hasSkylights) return null;
-                                            if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
-                                            
-                                            return (
-                                                <div key={field.name} className="collapsible-section">
-                                                    <label htmlFor={field.name}>{field.label}:</label>
-                                                    <input
-                                                        id={field.name}
-                                                        type={field.type}
-                                                        name={field.name}
-                                                        value={formData[field.name] ?? ""}
-                                                        onChange={handleChange}
-                                                        required={field.required}
-                                                        min={field.min !== undefined ? String(field.min) : undefined}
-                                                        step={field.step}
-                                                        onInvalid={(e) => {
-                                                            if (e.target.validity.valueMissing) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
-                                                            } else if (e.target.validity.rangeUnderflow) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
-                                                            } else if (e.target.validity.typeMismatch) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
-                                                            }
-                                                        }}
-                                                        onInput={(e) => e.target.setCustomValidity("")}
-                                                    />
-                                                    {errors[field.name] && (
-                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
-                                                            {errors[field.name]}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </>
-                                );
-                            })()}
+                                                );
+                                            })}
+                                        </>
+                                    );
+                                })()
+                            ) : (
+                                // Generic editable form when no preset matches: render simple inputs for each formData key
+                                Object.keys(formData).map((k) => {
+                                    // skip internal metadata keys
+                                    if (["estimateId", "createdAt", "ownerAuth0Id", "pdfUrl"].includes(k)) return null;
+                                    const val = formData[k];
+                                    const isBool = typeof val === 'boolean';
+                                    const isNumberLike = !isBool && val !== null && val !== undefined && !Number.isNaN(Number(val)) && String(val) !== '';
+                                    return (
+                                        <div key={k} className="form-group">
+                                            <label htmlFor={k}>{k}:</label>
+                                            {isBool ? (
+                                                <input id={k} type="checkbox" name={k} checked={!!val} onChange={handleChange} />
+                                            ) : (
+                                                <input id={k} type={isNumberLike ? "number" : "text"} name={k} value={val ?? ""} onChange={handleChange} />
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
 
                             <div className="modal-actions">
                                 <button type="submit">{t.submit}</button>
@@ -1159,33 +1259,43 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                         </div>
                         
                         <div className="modal-actions">
-                            {!fromSavedList && (
-                                <button
-                                    type="button"
-                                    onClick={handleSaveEstimate}
-                                    data-testid="estimate-result-save"
-                                    style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
-                                >
-                                    {t.save ?? "Save"}
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={handleSaveEstimate}
+                                data-testid="estimate-result-save"
+                                style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
+                            >
+                                {t.save ?? "Save"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleBackToEdit}
+                                style={{ marginLeft: 8 }}
+                            >
+                                {t.back ?? "Back"}
+                            </button>
+
                             <button
                                 type="button"
                                 onClick={() => {
-                                    handleCloseResultModal();
+                                    handleCloseAll();
                                     window.location.href = "/#contact";
                                 }}
                                 style={{ 
                                     backgroundColor: "#FCC700",
-                                    color: "black"
+                                    color: "black",
+                                    marginLeft: 8
                                 }}
                             >
                                 {t.contactUs}
                             </button>
+
                             <button
                                 type="button"
-                                onClick={handleCloseResultModal}
+                                onClick={handleCloseAll}
                                 data-testid="estimate-result-close"
+                                style={{ marginLeft: 8 }}
                             >
                                 {t.close}
                             </button>
@@ -1216,7 +1326,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                             />
                         </div>
                         <div className="modal-actions" style={{ marginTop: 12 }}>
-                            <button onClick={confirmSaveEstimate} style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}>
+                            <button onClick={() => confirmSaveEstimate()} style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}>
                                 {t.save ?? "Save"}
                             </button>
                             <button onClick={cancelSaveEstimate} style={{ marginLeft: 8 }}>

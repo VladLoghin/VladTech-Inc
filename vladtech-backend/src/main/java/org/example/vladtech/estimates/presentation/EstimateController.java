@@ -150,14 +150,8 @@ public class EstimateController {
             Files.createDirectories(uploadDir);
             Path outFile = uploadDir.resolve(id + ".pdf");
 
-            // Enforce single PDF per estimate
-            if (e.getPdfUrl() != null && !e.getPdfUrl().isEmpty()) {
-                return ResponseEntity.status(409).build();
-            }
-            if (Files.exists(outFile)) {
-                return ResponseEntity.status(409).build();
-            }
-
+            // Allow overwriting existing PDF for this estimate. Write the uploaded bytes
+            // and update the saved estimate record accordingly.
             Files.write(outFile, file.getBytes());
             e.setPdfUrl("/api/estimates/" + id + "/pdf");
             estimateRepository.save(e);
