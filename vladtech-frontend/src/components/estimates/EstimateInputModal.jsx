@@ -7,7 +7,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { estimateTranslations } from "../../translations/estimateTranslations";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false, fromSavedList = false }) => {
+const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
@@ -21,9 +21,10 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
                 if (!mounted) return;
                 setEstimateSettings(resp.data || null);
             } catch (err) {
-                if (!mounted) return;
-                setEstimateSettings(null);
-            }
+                    if (!mounted) return;
+                    console.error(err);
+                    setEstimateSettings(null);
+                }
         };
         fetchSettings();
         return () => {
@@ -122,16 +123,13 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
     }, [estimateSettings]);
 
     // Deck & Patio defaults (effective values are read from `estimateSettings` above)
-    const defaultDeckBaseMaterialCost = 25;
-    const defaultDeckMaterialCosts = {
-        WOOD: 25.0,
-        COMPOSITE: 31.25,
-        PVC: 35.0,
-        ALUMINUM: 37.5,
-    };
-
-    const deckBaseMaterialCost = estimateSettings?.deckBaseMaterialCostPerSqFt ?? defaultDeckBaseMaterialCost;
     const deckMaterialCosts = React.useMemo(() => {
+        const defaultDeckMaterialCosts = {
+            WOOD: 25.0,
+            COMPOSITE: 31.25,
+            PVC: 35.0,
+            ALUMINUM: 37.5,
+        };
         const f = estimateSettings?.deckFactors || {};
         return {
             WOOD: f.wood ?? defaultDeckMaterialCosts.WOOD,
@@ -460,7 +458,7 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
         return "";
     };
 
-    const withAutoPrice = (preset, data) => {
+    const withAutoPrice = React.useCallback((preset, data) => {
         if (!preset) return data;
         const hasPrice = data.materialCostPerSqFt !== undefined && data.materialCostPerSqFt !== "";
 
@@ -499,7 +497,7 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
         }
 
         return data;
-    };
+    }, [sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
 
 
     useEffect(() => {
@@ -511,7 +509,7 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
             setSelectedPreset(defaultPreset);
             setFormData(initialValues);
         }
-    }, [isOpen, sortedPresets, initialSavedEstimate, initialProject]);
+    }, [isOpen, sortedPresets, initialSavedEstimate, initialProject, withAutoPrice]);
 
     // If an initial project is provided (e.g., opening a saved estimate), populate form (editable)
     useEffect(() => {
@@ -559,7 +557,7 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
         } catch (err) {
             console.error('Failed to load initial project into modal', err);
         }
-    }, [initialProject, isOpen, openResultInitially, sortedPresets]);
+    }, [initialProject, isOpen, openResultInitially, sortedPresets, initialSavedEstimate, withAutoPrice]);
 
     // Reset the initialized ref when modal closes so subsequent openings reinitialize correctly
     useEffect(() => {
@@ -658,7 +656,7 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
                 }));
             }
         }
-    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, formData.deckMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, formData.deckMaterial, selectedPreset, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices, deckMaterialCosts]);
 
     const handlePresetSelect = (presetName) => {
         const preset = sortedPresets.find((p) => p.name === presetName);
@@ -920,6 +918,11 @@ const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, init
         if (e.target === e.currentTarget) {
             e.currentTarget.dataset.pointerStartedOutside = 'true';
         }
+    };
+
+    const handleCloseResultModal = () => {
+        setIsResultModalOpen(false);
+        setResult(null);
     };
 
     const handleResultBackdropPointerUp = (e) => {
