@@ -178,4 +178,5 @@
 
 html {
   font-size: var(--font-size);
+  scroll-padding-top: 5rem;
 }

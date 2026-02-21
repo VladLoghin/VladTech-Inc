@@ -42,7 +42,10 @@ public class BadWordFilterService {
     "dyke", "fap", "fapmaster", "fapwaffle", "fapcanoe", "faplord", "fapmonster", "fuckwit", "fucktwat", "hoe",
     "incest", "jizz", "arse", "mimbo", "manwhore", "nuts", "orgasm", "pissprat", "prick", "punani", "queer", "rimjobber", "scrote", "sperm",
     "seks", "sex", "buttsex", "titty", "shitfaced", "tits", "nipples", "harlot", "pegging", "suck", "sucker", "suckme", "suckmy", "vagina", "penis",
-    "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs"
+    "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs",
+
+    "tabarnak", "câlice", "ciboire", "hostie", "ostie", "sacrament", "sainte-câlice", "sainte-hostie", "sainte-sacrament",
+    "putain", "merde", "con", "connard", "salop", "enculé", "bordel", "ta gueule", "nique ta mère", "nique sa mère", "nique vos mères", "nique le front national"
     );
 
     public boolean containsBadWords(String text) {
@@ -54,7 +57,7 @@ public class BadWordFilterService {
         String normalizedText = normalizeText(lowerText);
 
         for (String word : BAD_WORDS) {
-            Pattern pattern = Pattern.compile("\\b" + Pattern.quote(word) + "\\b");
+            Pattern pattern = Pattern.compile("\\b" + Pattern.quote(word) + "\\b", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
             if (pattern.matcher(lowerText).find() || pattern.matcher(normalizedText).find()) {
                 return true;
             }
