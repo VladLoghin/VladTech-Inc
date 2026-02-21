@@ -472,6 +472,54 @@ export const generateEstimatePdfBlob = (projects, filename = 'estimate.pdf', opt
       cursorY += 8;
     }
 
+    // Render a small "Selections" table listing form choices (area, materials, options)
+    const selections = [];
+    const pushSelection = (label, value) => {
+      if (value === undefined || value === null) return;
+      const str = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+      if (str.trim() === '') return;
+      selections.push([label, str]);
+    };
+
+    // Area / square footage
+    const areaLabel = 'Area (sq ft)';
+    const areaVal = p.areaSqFt ?? p.squareFeet ?? p.deckAreaSqFt ?? p.area;
+    if (areaVal !== undefined) pushSelection(areaLabel, areaVal);
+
+    // Common material/choice fields
+    pushSelection('Siding Material', p.sidingMaterial);
+    pushSelection('Roof Material', p.roofMaterial);
+    pushSelection('Countertop Material', p.countertopMaterial);
+    pushSelection('New Floor Material', p.newFloorMaterial);
+    pushSelection('Deck Material', p.deckMaterial);
+    pushSelection('Cabinet Quality', p.cabinetQuality);
+    pushSelection('Flooring Material', p.flooringMaterial);
+    pushSelection('Window Type', p.windowType);
+    pushSelection('Door Type', p.doorType);
+    pushSelection('Stories', p.stories);
+    pushSelection('Has Railing', p.hasRailing);
+    pushSelection('Stairs Count', p.stairsCount);
+    pushSelection('Is Covered', p.isCovered);
+    pushSelection('Include Insulation', p.includeInsulation);
+    pushSelection('Tear Off Required', p.tearOffRequired);
+    pushSelection('Number of Skylights', p.numSkylights);
+    pushSelection('Appliance Allowance', p.applianceAllowance);
+
+    if (selections.length > 0) {
+      autoTable(doc, {
+        head: [[ 'Selection', 'Value' ]],
+        body: selections,
+        startY: cursorY,
+        margin: { left: 14, right: 14 },
+        theme: 'plain',
+        headStyles: { fillColor: [245, 245, 245], textColor: [40, 40, 40], fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        columnStyles: { 0: { cellWidth: 100 }, 1: { halign: 'left' } }
+      });
+
+      cursorY = doc.lastAutoTable.finalY + 6;
+    }
+
     // Build cost breakdown rows tailored per preset/projectType and omit empty values
     const rows = [];
     const area = p.areaSqFt ?? p.squareFeet ?? p.deckAreaSqFt ?? p.area;
