@@ -182,6 +182,7 @@ export default function HomePage({
         onScrollToSection={scrollToSection}
       />
 
+      <main>
       {/* Hero Section */}
       <div className="relative min-h-screen bg-white flex items-center justify-center overflow-hidden pt-20">
         {/* Decorative Dots */}
@@ -227,19 +228,19 @@ export default function HomePage({
         <div className="container mx-auto px-8 relative">
           <div className="relative flex items-center justify-center">
             {/* Sliding VLADTECH Text */}
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none">
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none" aria-hidden="true">
               <motion.div
                 className="flex whitespace-nowrap"
                 animate={{ x: ["0%", "50%"] }}
                 transition={{ duration: 90, ease: "linear", repeat: Infinity }}
               >
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <h1
+                  <span
                     key={i}
                     className="text-[180px] md:text-[240px] lg:text-[320px] tracking-tighter text-yellow-400 leading-none mr-40"
                   >
                     VLADTECH
-                  </h1>
+                  </span>
                 ))}
               </motion.div>
             </div>
@@ -332,6 +333,7 @@ export default function HomePage({
                 transition={{ duration: 1, ease: "easeInOut" }}
                 className="absolute inset-0 grid grid-cols-3 gap-0"
                 style={{ pointerEvents: currentSlide === slideIndex ? "auto" : "none" }}
+                aria-hidden={currentSlide !== slideIndex}
               >
                 {portfolioImages
                   .slice(slideIndex * 3, slideIndex * 3 + 3)
@@ -347,11 +349,14 @@ export default function HomePage({
               </motion.div>
             ))}
 
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10" role="tablist" aria-label="Portfolio slides">
               {[0, 1, 2].map((index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
+                  role="tab"
+                  aria-selected={currentSlide === index}
+                  aria-label={`Slide ${index + 1}`}
                   className={`w-2 h-2 rounded-full transition-all ${
                     currentSlide === index ? "bg-yellow-400 w-8" : "bg-white/40"
                   }`}
@@ -501,6 +506,8 @@ export default function HomePage({
           </div>
         </div>
       </div>
+
+      </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-black/10 py-12">

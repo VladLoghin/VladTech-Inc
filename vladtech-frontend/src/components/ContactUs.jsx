@@ -126,9 +126,12 @@ function ContactUs({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/0 backdrop-blur-0 animate-in fade-in duration-300"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('contact.title')}
       style={{
         animation: 'fadeInBackdrop 0.3s ease-out forwards'
       }}
@@ -169,6 +172,7 @@ function ContactUs({ isOpen, onClose }) {
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close contact form"
           className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors"
         >
           <X className="h-6 w-6" />

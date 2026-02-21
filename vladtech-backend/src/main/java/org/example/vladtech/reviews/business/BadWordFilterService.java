@@ -42,7 +42,10 @@ public class BadWordFilterService {
     "dyke", "fap", "fapmaster", "fapwaffle", "fapcanoe", "faplord", "fapmonster", "fuckwit", "fucktwat", "hoe",
     "incest", "jizz", "arse", "mimbo", "manwhore", "nuts", "orgasm", "pissprat", "prick", "punani", "queer", "rimjobber", "scrote", "sperm",
     "seks", "sex", "buttsex", "titty", "shitfaced", "tits", "nipples", "harlot", "pegging", "suck", "sucker", "suckme", "suckmy", "vagina", "penis",
-    "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs"
+    "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs",
+
+    "Tabarnak", "Câlice", "Ciboire", "Hostie", "Ostie", "Sacrament", "Sainte-Câlice", "Sainte-Hostie", "Sainte-Sacrament",
+    "putain", "merde", "con", "connard", "salop", "enculé", "bordel", "ta gueule", "nique ta mère", "nique sa mère", "nique vos mères", "nique le front national"
     );
 
     public boolean containsBadWords(String text) {

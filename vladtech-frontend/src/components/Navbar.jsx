@@ -46,6 +46,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
   return (
     <nav
       ref={navRef}
+      aria-label="Main navigation"
       className={`fixed top-0 left-0 right-0 z-[50] backdrop-blur-sm border-b transition-all duration-300 ${
         isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
       }`}
@@ -64,12 +65,12 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
           </button>
 
           {/* Language toggle (reverted look + placement) */}
-          <div
+          <button
+            type="button"
             onClick={toggleLanguage}
             className={`relative flex items-center w-20 h-8 rounded-full cursor-pointer transition-all ${
               isNavbarDark ? "bg-white/20" : "bg-black/20"
             }`}
-            aria-label="Toggle language"
             role="switch"
             aria-checked={language === "fr"}
           >
@@ -97,12 +98,12 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               FR
             </span>
 
-            <div
-              className={`absolute w-6 h-6 rounded-full bg-yellow-400 shadow-md transition-all duration-300 ${
+            <span
+              className={`absolute w-6 h-6 rounded-full bg-yellow-400 shadow-md transition-all duration-300 block ${
                 language === "en" ? "left-1" : "left-[calc(100%-1.75rem)]"
               }`}
             />
-          </div>
+          </button>
         </div>
 
         {/* RIGHT cluster */}
@@ -230,6 +231,8 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             onClick={() => setIsMobileMenuOpen((v) => !v)}
             className={`md:hidden transition-colors ${isNavbarDark ? "text-white" : "text-black"}`}
             aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -238,6 +241,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
 
       {/* Mobile dropdown */}
       <motion.div
+        id="mobile-menu"
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: isMobileMenuOpen ? 1 : 0, height: isMobileMenuOpen ? "auto" : 0 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
