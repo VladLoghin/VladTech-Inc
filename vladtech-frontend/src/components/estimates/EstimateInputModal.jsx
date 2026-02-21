@@ -4,8 +4,9 @@ import "./Estimate.css";
 import { api } from "../../api/http";
 import { useLanguage } from "../../context/LanguageContext";
 import { estimateTranslations } from "../../translations/estimateTranslations";
+import { useAuth0 } from "@auth0/auth0-react";
 
-const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
+const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = null, openResultInitially = false }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
@@ -429,6 +430,8 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const [result, setResult] = useState(null);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [toast, setToast] = useState(null);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [saveTitle, setSaveTitle] = useState("");
 
     // Helper to auto-fill materialCostPerSqFt when missing based on preset type
     const validateField = (field, value) => {
@@ -499,6 +502,20 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             setFormData(initialValues);
         }
     }, [isOpen, sortedPresets, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+
+    // If an initial project is provided (e.g., opening a saved estimate), populate form and result
+    useEffect(() => {
+        if (initialProject && isOpen) {
+            try {
+                // initialProject may contain both inputs and derived fields
+                setFormData(initialProject);
+                setResult(initialProject);
+                setIsResultModalOpen(Boolean(openResultInitially));
+            } catch (err) {
+                console.error('Failed to load initial project into modal', err);
+            }
+        }
+    }, [initialProject, isOpen, openResultInitially]);
 
     useEffect(() => {
         if (toast) {
@@ -702,10 +719,45 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
     };
 
+    const { getAccessTokenSilently } = useAuth0();
+
     const handleCloseResultModal = () => {
         setIsResultModalOpen(false);
         setResult(null);
         onClose();
+    };
+
+    const handleSaveEstimate = async () => {
+        // open inline modal to ask for title
+        setSaveTitle(selectedPreset?.name || "Estimate");
+        setIsSaveModalOpen(true);
+    };
+
+    const confirmSaveEstimate = async () => {
+        try {
+            const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
+
+            // Merge inputs and calculated result into a project object
+            const project = { ...formData, ...result };
+
+            const payload = {
+                title: saveTitle || "Untitled",
+                project,
+            };
+
+            await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
+            setToast({ type: "success", message: "Estimate saved" });
+            // show toast confirmation and close the save modal
+            setToast({ type: "success", message: "Estimate saved successfully." });
+            setIsSaveModalOpen(false);
+        } catch (err) {
+            console.error("Failed to save estimate", err);
+            setToast({ type: "error", message: "Failed to save estimate" });
+        }
+    };
+
+    const cancelSaveEstimate = () => {
+        setIsSaveModalOpen(false);
     };
 
     const handleBackdropPointerDown = (e) => {
@@ -1062,6 +1114,14 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         <div className="modal-actions">
                             <button
                                 type="button"
+                                onClick={handleSaveEstimate}
+                                data-testid="estimate-result-save"
+                                style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
+                            >
+                                {t.save ?? "Save"}
+                            </button>
+                            <button
+                                type="button"
                                 onClick={() => {
                                     handleCloseResultModal();
                                     window.location.href = "/#contact";
@@ -1085,9 +1145,52 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 </div>
             )}
 
+            {isSaveModalOpen && (
+                <div
+                    className="modal"
+                    role="dialog"
+                    aria-modal="true"
+                    data-testid="estimate-save-modal"
+                    onPointerDown={(e) => { if (e.target === e.currentTarget) e.currentTarget.dataset.pointerStartedOutside = 'true'; }}
+                    onPointerUp={(e) => { if (e.target === e.currentTarget && e.currentTarget.dataset.pointerStartedOutside === 'true') { cancelSaveEstimate(); } delete e.currentTarget.dataset.pointerStartedOutside; }}
+                >
+                    <div className="modal-content">
+                        <h2>{t.saveEstimateTitle ?? "Save Estimate"}</h2>
+                        <div style={{ marginTop: 8 }}>
+                            <label style={{ display: 'block', marginBottom: 6 }}>{t.estimateName ?? "Name"}</label>
+                            <input
+                                type="text"
+                                value={saveTitle}
+                                onChange={(e) => setSaveTitle(e.target.value)}
+                                style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #ddd' }}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="modal-actions" style={{ marginTop: 12 }}>
+                            <button onClick={confirmSaveEstimate} style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}>
+                                {t.save ?? "Save"}
+                            </button>
+                            <button onClick={cancelSaveEstimate} style={{ marginLeft: 8 }}>
+                                {t.cancel ?? "Cancel"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {toast && (
-                <div className={`toast toast-${toast.type}`} role="alert" data-testid="estimate-toast">
-                    {toast.message}
+                <div data-testid="estimate-toast" style={{ position: "fixed", top: 16, right: 16, zIndex: 1000 }}>
+                    <div style={{
+                        backgroundColor: toast.type === "success" ? "#10B981" : "#EF4444",
+                        color: "white",
+                        padding: "0.75rem 1rem",
+                        borderRadius: 8,
+                        boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+                        minWidth: 200,
+                        textAlign: "center",
+                    }}>
+                        {toast.message}
+                    </div>
                 </div>
             )}
         </>

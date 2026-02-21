@@ -10,6 +10,7 @@ import Employee from "./pages/Employee";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import ReviewsPage from "./pages/Reviews.jsx";
+import EstimatesPage from "./pages/Estimates.jsx";
 import PortfolioGallery from "./pages/PortfolioGallery";
 
 function Layout({ children }) {
@@ -79,6 +80,14 @@ function App() {
         <Route
             path="/reviews"
             element={<ReviewsPage />}
+        />
+        <Route
+            path="/estimates"
+            element={
+              <ProtectedRoute>
+                <EstimatesPage />
+              </ProtectedRoute>
+            }
         />
         <Route
             path="/portfolio"
