@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../api/http";
 
 interface ProjectOption {
@@ -22,7 +23,7 @@ const BAD_WORDS = [
     "jackass", "nigger", "nigga", "faggot", "slut",
     "whore", "retard", "cock", "pussy", "poop", "poopy", "wanker", "a-hole", "arsehole", 
     "cockeye", "douche", "douchebag", "douchecanoe", "douchelord", "douchemonster",
-    "douchewaffle", "douchemonster", "asshat", "niggerboy", "niggergirl",
+    "douchewaffle", "asshat", "niggerboy", "niggergirl",
     "niggerwoman", "niggerman", "niggerchild", "tard", "niggerlover", "slaveboy", "slavegirl", "slaveman",
     "slavechild", "slavelover", "hook-nosed", "porstitute", "creampie", "rimjob", "blowjob", "handjob", 
     "cunnilingus", "anilingus", "fisting",
@@ -33,8 +34,9 @@ const BAD_WORDS = [
     "seks", "sex", "buttsex", "titty", "shitfaced", "tits", "nipples", "harlot", "pegging", "suck", "sucker", "suckme", "suckmy", "vagina", "penis",
     "penishead", "gay", "lesbian", "trans", "boob", "boobies", "manboobs",
 
-    "Tabarnak", "Câlice", "Ciboire", "Hostie", "Ostie", "Sacrament", "Sainte-Câlice", "Sainte-Hostie", "Sainte-Sacrament",
-    "putain", "merde", "con", "connard", "salop", "enculé", "bordel", "ta gueule", "nique ta mère", "nique sa mère", "nique vos mères", "nique le front national"
+    "tabarnak", "câlice", "ciboire", "hostie", "ostie", "sacrament", "sainte-câlice", "sainte-hostie", "sainte-sacrament",
+    "putain", "merde", "con", "connard", "salop", "enculé", "bordel", "ta gueule", "nique ta mère", "nique sa mère", "nique vos mères", "nique le front national",
+    "calisse"
     
 
 ];
@@ -42,7 +44,8 @@ const BAD_WORDS = [
 function containsBadWord(text: string): boolean {
     const lower = text.toLowerCase();
     return BAD_WORDS.some(word => {
-        const regex = new RegExp(`\\b${word}\\b`);
+        const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<!\\p{L})${escaped}(?!\\p{L})`, 'iu');
         return regex.test(lower);
     });
 }
@@ -50,7 +53,8 @@ function containsBadWord(text: string): boolean {
 export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmentId }: ReviewModalProps) {
 
     const { getAccessTokenSilently, user } = useAuth0();
-    
+    const { t } = useTranslation();
+
     const clientId = user?.sub;
 
     const [clientName, setClientName] = useState("");
@@ -62,7 +66,12 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
     const [loadingProjects, setLoadingProjects] = useState(false);
     const [errors, setErrors] = useState<{ name?: string; comment?: string; projectId?: string; submit?: string }>({});
 
-    const reviewTypes = ["Interior", "Kitchen", "Bathroom", "Exterior/Yard"];
+    const reviewTypes = [
+        { value: "Interior", labelKey: "reviews.interior" },
+        { value: "Kitchen", labelKey: "reviews.kitchen" },
+        { value: "Bathroom", labelKey: "reviews.bathroom" },
+        { value: "Exterior/Yard", labelKey: "reviews.exteriorYard" },
+    ];
 
     const [type, setType] = useState("Interior");
 
@@ -102,7 +111,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                     setProjectId(projectOptions[0].projectIdentifier);
                 }
             } catch {
-                setErrors({ submit: "Failed to load projects." });
+                setErrors({ submit: t("reviews.modal.loadProjectsError") });
             } finally {
                 setLoadingProjects(false);
             }
@@ -117,11 +126,11 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         e.preventDefault();
 
         const newErrors: { name?: string; comment?: string; projectId?: string } = {};
-        if (!clientName.trim()) newErrors.name = "Name is required";
-        else if (containsBadWord(clientName)) newErrors.name = "Your name contains inappropriate language";
-        if (!comment.trim()) newErrors.comment = "Description is required";
-        else if (containsBadWord(comment)) newErrors.comment = "Your review contains inappropriate language";
-        if (!projectId) newErrors.projectId = "Please select a project";
+        if (!clientName.trim()) newErrors.name = t("reviews.modal.nameRequired");
+        else if (containsBadWord(clientName)) newErrors.name = t("reviews.modal.nameInappropriate");
+        if (!comment.trim()) newErrors.comment = t("reviews.modal.descriptionRequired");
+        else if (containsBadWord(comment)) newErrors.comment = t("reviews.modal.reviewInappropriate");
+        if (!projectId) newErrors.projectId = t("reviews.modal.selectProject");
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -177,22 +186,21 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         } catch (err: any) {
             const status = err?.response?.status;
             if (status === 422) {
-                const message = err?.response?.data?.message || "Your review contains inappropriate language.";
-                setErrors({ submit: message });
+                setErrors({ submit: t("reviews.modal.reviewInappropriate") });
             } else if (status === 409) {
-                setErrors({ submit: "You already reviewed this project." });
+                setErrors({ submit: t("reviews.modal.alreadyReviewed") });
             } else if (status === 403) {
                 const data = err?.response?.data;
                 if (data?.permanent) {
-                    setErrors({ submit: "You are permanently banned from creating reviews." });
+                    setErrors({ submit: t("reviews.modal.permanentlyBanned") });
                 } else if (data?.banUntil) {
                     const until = new Date(data.banUntil).toLocaleString();
-                    setErrors({ submit: `You are banned from creating reviews until ${until}.` });
+                    setErrors({ submit: t("reviews.modal.bannedUntil", { until }) });
                 } else {
-                    setErrors({ submit: "You are banned from creating reviews." });
+                    setErrors({ submit: t("reviews.modal.banned") });
                 }
             } else {
-                setErrors({ submit: "Error submitting review." });
+                setErrors({ submit: t("reviews.modal.submitError") });
             }
         }
     }
@@ -201,14 +209,14 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Leave a Review</h2>
+                    <h2 className="text-xl font-semibold">{t("reviews.modal.title")}</h2>
                     <button onClick={onClose}><X className="w-6 h-6" /></button>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                     <div>
                         <label className="block text-sm font-semibold mb-2">
-                            Project <span className="text-red-500">*</span>
+                            {t("reviews.modal.project")} <span className="text-red-500">*</span>
                         </label>
                         <select
                             value={projectId}
@@ -229,7 +237,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                     <div>
                         <input
                             type="text"
-                            placeholder="Your name"
+                            placeholder={t("reviews.modal.yourName")}
                             value={clientName}
                             onChange={(e) => setClientName(e.target.value)}
                             className="w-full border border-gray-300 rounded-xl p-3"
@@ -240,7 +248,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
 
                     <div>
                         <textarea
-                            placeholder="Your message"
+                            placeholder={t("reviews.modal.yourMessage")}
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             className="w-full border border-gray-300 rounded-xl p-3 h-24"
@@ -265,7 +273,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
 
                          <div>
                         <label className="block text-sm font-semibold mb-2">
-                            Project Type <span className="text-red-500">*</span>
+                            {t("reviews.modal.projectType")} <span className="text-red-500">*</span>
                         </label>
                         <select
                             value={type}
@@ -273,14 +281,14 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                             required
                         >
-                            {reviewTypes.map((t) => (
-                                <option key={t} value={t}>{t}</option>
+                            {reviewTypes.map((rt) => (
+                                <option key={rt.value} value={rt.value}>{t(rt.labelKey)}</option>
                             ))}
                         </select>
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium">Upload Photo</label>
+                        <label className="block mb-1 font-medium">{t("reviews.modal.uploadPhoto")}</label>
                         <input
                             type="file"
                             accept="image/*"
@@ -300,7 +308,7 @@ export default function ReviewModal({ open, onClose, onSubmitSuccess, appointmen
                         style={{ backgroundColor: '#FCC700' }}
                         className="w-full text-black py-3 rounded-xl font-semibold"
                     >
-                        Submit Review
+                        {t("reviews.modal.submitReview")}
                     </button>
                 </form>
             </div>
