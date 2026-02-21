@@ -3,15 +3,22 @@ package org.example.vladtech.estimates.presentation;
 import lombok.RequiredArgsConstructor;
 import org.example.vladtech.estimates.data.Estimate;
 import org.example.vladtech.estimates.data.EstimateRepository;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/estimates")
@@ -82,5 +89,67 @@ public class EstimateController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.status(403).build();
+    }
+
+    
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<Resource> getEstimatePdf(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null || jwt.getClaimAsString("sub") == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String userId = jwt.getClaimAsString("sub");
+        Optional<Estimate> maybe = estimateRepository.findByEstimateIdAndOwnerAuth0Id(id, userId);
+        if (maybe.isEmpty()) return ResponseEntity.status(403).build();
+
+        Path pdfPath = Paths.get("uploads", "estimates", id + ".pdf");
+        if (!Files.exists(pdfPath)) return ResponseEntity.notFound().build();
+
+        try {
+            byte[] data = Files.readAllBytes(pdfPath);
+            ByteArrayResource resource = new ByteArrayResource(data);
+            return ResponseEntity.ok()
+                    .contentLength(data.length)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(resource);
+        } catch (IOException ex) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PostMapping(value = "/{id}/upload-pdf", consumes = {
+            "multipart/form-data"
+    })
+    public ResponseEntity<Estimate> uploadEstimatePdf(@PathVariable String id,
+                                                      @RequestParam("file") MultipartFile file,
+                                                      @AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null || jwt.getClaimAsString("sub") == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String userId = jwt.getClaimAsString("sub");
+        Optional<Estimate> maybe = estimateRepository.findByEstimateIdAndOwnerAuth0Id(id, userId);
+        if (maybe.isEmpty()) return ResponseEntity.status(403).build();
+
+        Estimate e = maybe.get();
+        Path uploadDir = Paths.get("uploads", "estimates");
+        try {
+            Files.createDirectories(uploadDir);
+            Path outFile = uploadDir.resolve(id + ".pdf");
+
+            // Enforce single PDF per estimate
+            if (e.getPdfUrl() != null && !e.getPdfUrl().isEmpty()) {
+                return ResponseEntity.status(409).build();
+            }
+            if (Files.exists(outFile)) {
+                return ResponseEntity.status(409).build();
+            }
+
+            Files.write(outFile, file.getBytes());
+            e.setPdfUrl("/api/estimates/" + id + "/pdf");
+            estimateRepository.save(e);
+            return ResponseEntity.ok(e);
+        } catch (IOException ex) {
+            return ResponseEntity.status(500).build();
+        }
     }
 }

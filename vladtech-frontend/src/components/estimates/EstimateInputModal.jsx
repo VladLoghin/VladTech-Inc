@@ -2,11 +2,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Estimate.css";
 import { api } from "../../api/http";
+import { generatePdfBlob } from "../../utils/exportUtils";
 import { useLanguage } from "../../context/LanguageContext";
 import { estimateTranslations } from "../../translations/estimateTranslations";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = null, openResultInitially = false }) => {
+const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false, fromSavedList = false }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
@@ -432,6 +433,12 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
     const [toast, setToast] = useState(null);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [saveTitle, setSaveTitle] = useState("");
+    const [savedEstimate, setSavedEstimate] = useState(null);
+
+    // Initialize savedEstimate when modal is opened from saved list
+    useEffect(() => {
+        if (initialSavedEstimate) setSavedEstimate(initialSavedEstimate);
+    }, [initialSavedEstimate]);
 
     // Helper to auto-fill materialCostPerSqFt when missing based on preset type
     const validateField = (field, value) => {
@@ -745,9 +752,49 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                 project,
             };
 
-            await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
-            setToast({ type: "success", message: "Estimate saved" });
-            // show toast confirmation and close the save modal
+            const resp = await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
+            const saved = resp.data || null;
+            setSavedEstimate(saved);
+
+            // Auto-generate and upload PDF using existing exporter style
+            (async () => {
+                try {
+                    const projectObj = saved?.project || project || {};
+                    const mapped = {
+                        name: saved?.title || projectObj.name || 'Estimate',
+                        projectIdentifier: saved?.estimateId || '',
+                        projectType: projectObj.projectType || projectObj.key || 'GENERAL',
+                        // include breakdown fields for the PDF, prefer saved project values then form inputs then result
+                        estimatePrice: projectObj.estimatePrice ?? formData.estimatePrice ?? result?.estimatePrice,
+                        taxAmount: projectObj.taxAmount ?? formData.taxAmount ?? result?.taxAmount,
+                        taxRate: projectObj.taxRate ?? formData.taxRate ?? result?.taxRate,
+                        totalPrice: projectObj.totalPrice ?? formData.totalPrice ?? result?.totalPrice,
+                        materialCostPerSqFt: projectObj.materialCostPerSqFt ?? formData.materialCostPerSqFt ?? result?.materialCostPerSqFt,
+                        laborRate: projectObj.laborRate ?? formData.laborRate ?? result?.laborRate,
+                        applianceAllowance: projectObj.applianceAllowance ?? formData.applianceAllowance ?? result?.applianceAllowance,
+                        numSkylights: projectObj.numSkylights ?? formData.numSkylights ?? result?.numSkylights,
+                        tearOffRequired: projectObj.tearOffRequired ?? formData.tearOffRequired ?? result?.tearOffRequired,
+                        includeInsulation: projectObj.includeInsulation ?? formData.includeInsulation ?? result?.includeInsulation,
+                        subfloorRepairNeeded: projectObj.subfloorRepairNeeded ?? formData.subfloorRepairNeeded ?? result?.subfloorRepairNeeded,
+                        overheadRate: projectObj.overheadRate ?? formData.overheadRate ?? result?.overheadRate,
+                        contingencyRate: projectObj.contingencyRate ?? formData.contingencyRate ?? result?.contingencyRate,
+                        locationFactor: projectObj.locationFactor ?? formData.locationFactor ?? result?.locationFactor,
+                        areaSqFt: projectObj.areaSqFt ?? projectObj.squareFeet ?? projectObj.deckAreaSqFt ?? projectObj.area ?? formData.areaSqFt ?? formData.squareFeet ?? formData.deckAreaSqFt ?? formData.area ?? result?.areaSqFt ?? result?.squareFeet ?? result?.area
+                    };
+
+                    const blob = await generatePdfBlob([mapped], `estimate_${mapped.projectIdentifier || 'export'}.pdf`, { title: 'Estimate', exporterName: 'VladTech', isEstimate: true });
+                    if (blob) {
+                        const form = new FormData();
+                        form.append('file', blob, `${saved.estimateId || 'estimate'}.pdf`);
+                        await api.post(`/estimates/${saved.estimateId}/upload-pdf`, form, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                    }
+                } catch (pdfErr) {
+                    console.error('Auto PDF generation/upload failed', pdfErr);
+                }
+            })();
+
             setToast({ type: "success", message: "Estimate saved successfully." });
             setIsSaveModalOpen(false);
         } catch (err) {
@@ -999,91 +1046,91 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                             })()}
                             
                             {/* Appliance Allowance (Kitchen Remodel) */}
-                            {formData.applianceAllowance && parseFloat(formData.applianceAllowance) > 0 && (
+                            {((result?.applianceAllowance ?? formData.applianceAllowance) && parseFloat(result?.applianceAllowance ?? formData.applianceAllowance) > 0) && (
                                 <div className="breakdown-row">
                                     <span>{t.applianceAllowance}:</span>
                                     <span className="breakdown-amount">
-                                        ${parseFloat(formData.applianceAllowance).toFixed(2)}
+                                        ${parseFloat(result?.applianceAllowance ?? formData.applianceAllowance).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Skylights (Roofing) */}
-                            {formData.hasSkylights && formData.numSkylights && parseFloat(formData.numSkylights) > 0 && (
+                            {((result?.hasSkylights ?? formData.hasSkylights) && (result?.numSkylights ?? formData.numSkylights) && parseFloat(result?.numSkylights ?? formData.numSkylights) > 0) && (
                                 <div className="breakdown-row">
-                                    <span>{t.skylights} ({formData.numSkylights}):</span>
+                                    <span>{t.skylights} ({result?.numSkylights ?? formData.numSkylights}):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(formData.numSkylights) * 1000).toFixed(2)}
+                                        ${(parseFloat(result?.numSkylights ?? formData.numSkylights) * 1000).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Tear Off Cost (Roofing) */}
-                            {formData.tearOffRequired && result.squareFeet && (
+                            {((result?.tearOffRequired ?? formData.tearOffRequired) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.tearOff}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 1.50).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 1.50).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Insulation (Siding) */}
-                            {formData.includeInsulation && result.squareFeet && (
+                            {((result?.includeInsulation ?? formData.includeInsulation) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.insulation}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 0.75).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 0.75).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Subfloor Repair (Floor Replace) */}
-                            {formData.subfloorRepairNeeded && result.squareFeet && (
+                            {((result?.subfloorRepairNeeded ?? formData.subfloorRepairNeeded) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.subfloorRepair}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 3.50).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 3.50).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Overhead Rate (as percentage) */}
-                            {result.overheadRate && (
+                            {((result?.overheadRate ?? formData.overheadRate) && (parseFloat(result?.overheadRate ?? formData.overheadRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.overhead} ({(parseFloat(result.overheadRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.overhead} ({(parseFloat(result?.overheadRate ?? formData.overheadRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.overheadRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                        ${(parseFloat(result?.estimatePrice ?? formData.estimatePrice) * parseFloat(result?.overheadRate ?? formData.overheadRate) / (1 + parseFloat(result?.overheadRate ?? formData.overheadRate) + parseFloat(result?.contingencyRate ?? formData.contingencyRate))).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Contingency Rate (as percentage) */}
-                            {result.contingencyRate && (
+                            {((result?.contingencyRate ?? formData.contingencyRate) && (parseFloat(result?.contingencyRate ?? formData.contingencyRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.contingency} ({(parseFloat(result.contingencyRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.contingency} ({(parseFloat(result?.contingencyRate ?? formData.contingencyRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.contingencyRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                        ${(parseFloat(result?.estimatePrice ?? formData.estimatePrice) * parseFloat(result?.contingencyRate ?? formData.contingencyRate) / (1 + parseFloat(result?.overheadRate ?? formData.overheadRate) + parseFloat(result?.contingencyRate ?? formData.contingencyRate))).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Location Factor */}
-                            {result.locationFactor && parseFloat(result.locationFactor) !== 1 && (
+                            {((result?.locationFactor ?? formData.locationFactor) && parseFloat(result?.locationFactor ?? formData.locationFactor) !== 1) && (
                                 <div className="breakdown-row">
                                     <span>{t.locationAdjustment}:</span>
                                     <span className="breakdown-amount">
-                                        {((parseFloat(result.locationFactor) - 1) * 100).toFixed(1)}%
+                                        {((parseFloat(result?.locationFactor ?? formData.locationFactor) - 1) * 100).toFixed(1)}%
                                     </span>
                                 </div>
                             )}
                             
                             {/* Tax Rate */}
-                            {result.taxRate && (
+                            {((result?.taxRate ?? formData.taxRate) && (parseFloat(result?.taxRate ?? formData.taxRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.tax} ({(parseFloat(result.taxRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.tax} ({(parseFloat(result?.taxRate ?? formData.taxRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${parseFloat(result.taxAmount).toFixed(2)}
+                                        ${parseFloat(result?.taxAmount ?? formData.taxAmount ?? 0).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -1092,7 +1139,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                             
                             <div className="breakdown-row breakdown-total">
                                 <span><strong>{t.estimatedTotal}:</strong></span>
-                                <span className="breakdown-amount"><strong>${parseFloat(result.totalPrice).toFixed(2)}</strong></span>
+                                <span className="breakdown-amount"><strong>${parseFloat(result?.totalPrice ?? result?.estimatePrice ?? formData.totalPrice ?? formData.estimatePrice ?? 0).toFixed(2)}</strong></span>
                             </div>
                         </div>
                         
@@ -1112,14 +1159,16 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen, initialProject = nu
                         </div>
                         
                         <div className="modal-actions">
-                            <button
-                                type="button"
-                                onClick={handleSaveEstimate}
-                                data-testid="estimate-result-save"
-                                style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
-                            >
-                                {t.save ?? "Save"}
-                            </button>
+                            {!fromSavedList && (
+                                <button
+                                    type="button"
+                                    onClick={handleSaveEstimate}
+                                    data-testid="estimate-result-save"
+                                    style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
+                                >
+                                    {t.save ?? "Save"}
+                                </button>
+                            )}
                             <button
                                 type="button"
                                 onClick={() => {

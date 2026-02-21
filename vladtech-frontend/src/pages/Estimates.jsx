@@ -10,7 +10,7 @@ const EstimatesPage = () => {
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [toast, setToast] = useState(null);
-  const [hoveredId, setHoveredId] = useState(null);
+  // hovered state removed — saved items are no longer interactive
   const [openEstimateModal, setOpenEstimateModal] = useState(false);
   const [selectedEstimate, setSelectedEstimate] = useState(null);
 
@@ -72,28 +72,38 @@ const EstimatesPage = () => {
 
         <ul className="space-y-4">
           {estimates.map((est) => {
-            const isHovered = hoveredId === est.estimateId;
             return (
               <li
                 key={est.estimateId}
                 className="p-4 border rounded-md flex justify-between items-center"
-                onMouseEnter={() => setHoveredId(est.estimateId)}
-                onMouseLeave={() => setHoveredId(null)}
                 style={{
-                  transition: 'transform 150ms ease, box-shadow 150ms ease',
-                  transform: isHovered ? 'translateY(-4px)' : 'none',
-                  boxShadow: isHovered ? '0 8px 20px rgba(0,0,0,0.08)' : 'none',
                   cursor: 'default'
                 }}
               >
-                <div style={{ cursor: 'pointer' }} onClick={() => { setSelectedEstimate(est.project || est); setOpenEstimateModal(true); }}>
+                <div>
                   <div className="font-semibold">{est.title || "Untitled"}</div>
                   <div className="text-sm text-gray-600">Created: {new Date(est.createdAt).toLocaleString()}</div>
                 </div>
                 <div className="flex gap-2">
-                  <a href={est.pdfUrl || '#'} target="_blank" rel="noreferrer" className="underline text-sm">
+                  <button
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      try {
+                        const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
+                        const resp = await api.get(`/estimates/${est.estimateId}/pdf`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
+                        const blob = new Blob([resp.data], { type: 'application/pdf' });
+                        const url = window.URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                      } catch (err) {
+                        console.error('Failed to fetch PDF', err);
+                        setToast({ type: 'error', message: err.response?.status === 403 ? 'Forbidden' : 'Failed to open PDF' });
+                        setTimeout(() => setToast(null), 3000);
+                      }
+                    }}
+                    className="underline text-sm"
+                  >
                     PDF
-                  </a>
+                  </button>
                   <button onClick={() => handleDelete(est.estimateId)} className="text-sm text-red-600">
                     Delete
                   </button>
@@ -120,8 +130,10 @@ const EstimatesPage = () => {
           <EstimateInputModal
             isOpen={openEstimateModal}
             onClose={() => { setOpenEstimateModal(false); setSelectedEstimate(null); }}
-            initialProject={selectedEstimate}
+            initialProject={selectedEstimate ? (selectedEstimate.project || selectedEstimate) : null}
+            initialSavedEstimate={selectedEstimate}
             openResultInitially={true}
+            fromSavedList={true}
           />
         )}
       </div>
