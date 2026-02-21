@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -18,8 +19,9 @@ public class Estimate {
 
     private String title;
 
-    // Store the full project (inputs + derived values)
-    private RenovationProject project;
+    // Store the full project (inputs + derived values).
+    // Use a flexible map so subclass-specific and optional fields are preserved.
+    private Map<String, Object> project;
 
     // Owner (Auth0 subject / user id)
     private String ownerAuth0Id;

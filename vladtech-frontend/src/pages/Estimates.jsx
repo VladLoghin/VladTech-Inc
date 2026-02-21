@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../api/http";
 import Navbar from "../components/Navbar";
 import EstimateInputModal from "../components/estimates/EstimateInputModal";
+import { generateEstimatePdfBlob } from "../utils/exportUtils";
 
 const EstimatesPage = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
@@ -88,24 +89,29 @@ const EstimatesPage = () => {
                   <button
                     onClick={async (e) => {
                       e.preventDefault();
-                          try {
-                            const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
-                            const resp = await api.get(`/estimates/${est.estimateId}/pdf`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
-                            const blob = new Blob([resp.data], { type: 'application/pdf' });
+                      try {
+                        // Generate PDF client-side from the stored estimate data
+                        const projectSource = est.project && Object.keys(est.project || {}).length > 0 ? est.project : est;
+                        // Normalize common optional keys that may have different names from older saves
+                        const normalized = {
+                          ...projectSource,
+                          applianceAllowance: projectSource.applianceAllowance ?? projectSource.appliance_allowance ?? projectSource.appliance ?? projectSource.appliances,
+                          numSkylights: projectSource.numSkylights ?? projectSource.skylights ?? projectSource.num_skylights ?? projectSource.skylightCount,
+                          tearOffRequired: projectSource.tearOffRequired ?? projectSource.tearOff ?? projectSource.tear_off ?? projectSource.tearOffNeeded ?? projectSource.tear_off_required,
+                          includeInsulation: projectSource.includeInsulation ?? projectSource.include_insulation ?? projectSource.insulationIncluded ?? projectSource.insulation ?? false,
+                          subfloorRepairNeeded: projectSource.subfloorRepairNeeded ?? projectSource.subfloorRepair ?? projectSource.subfloor_repair ?? projectSource.subfloorRepairNeeded ?? false,
+                        };
 
-                            // Use the estimate title as the suggested filename when downloading
-                            const url = window.URL.createObjectURL(blob);
-
-                            // Auto-open in a new tab (users can still save from the new tab)
-                            window.open(url, '_blank');
-
-                            // Revoke URL after a short delay to allow the new tab to load
-                            setTimeout(() => window.URL.revokeObjectURL(url), 2000);
-                          } catch (err) {
-                            console.error('Failed to fetch PDF', err);
-                            setToast({ type: 'error', message: err.response?.status === 403 ? 'Forbidden' : 'Failed to open PDF' });
-                            setTimeout(() => setToast(null), 3000);
-                          }
+                        const blob = await generateEstimatePdfBlob([normalized], `${(est.title || 'estimate').replace(/[^a-z0-9-_]/gi, '_')}.pdf`, { title: 'Estimate', exporterName: 'VladTech', locale: 'en-CA' });
+                        if (!blob) throw new Error('PDF generation failed');
+                        const url = window.URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                        setTimeout(() => window.URL.revokeObjectURL(url), 2000);
+                      } catch (err) {
+                        console.error('Failed to generate PDF', err);
+                        setToast({ type: 'error', message: 'Failed to generate PDF' });
+                        setTimeout(() => setToast(null), 3000);
+                      }
                     }}
                     className="underline text-sm"
                   >
