@@ -159,9 +159,9 @@ const ReviewsPage = () => {
     <>
       <Navbar isNavbarDark={true} />
 
-      <main className="reviews-page" data-testid="reviews-page">
+      <main className="reviews-page" data-testid="reviews-page" style={{ marginTop: "120px" }}>
         <h1 className="sr-only">{t("nav.reviews")}</h1>
-        <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
+        <div className="container mx-auto p-4">
           <h2 className="title text-4xl font-extrabold tracking-wide text-black mb-4">
             {t("reviews.customerHighlights")}
           </h2>
