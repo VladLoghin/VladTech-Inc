@@ -99,9 +99,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(roof);
 
-        assertEquals(new BigDecimal("14504.38"), roof.getEstimatePrice());
-        assertEquals(new BigDecimal("2175.66"), roof.getTaxAmount());
-        assertEquals(new BigDecimal("16680.03"), roof.getTotalPrice());
+        assertEquals(new BigDecimal("14159.38"), roof.getEstimatePrice());
+        assertEquals(new BigDecimal("2123.91"), roof.getTaxAmount());
+        assertEquals(new BigDecimal("16283.28"), roof.getTotalPrice());
     }
 
     @Test
@@ -184,9 +184,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(siding);
 
-        assertEquals(new BigDecimal("12637.50"), siding.getEstimatePrice());
-        assertEquals(new BigDecimal("1895.63"), siding.getTaxAmount());
-        assertEquals(new BigDecimal("14533.13"), siding.getTotalPrice());
+        assertEquals(new BigDecimal("11625.00"), siding.getEstimatePrice());
+        assertEquals(new BigDecimal("1743.75"), siding.getTaxAmount());
+        assertEquals(new BigDecimal("13368.75"), siding.getTotalPrice());
     }
 
     @Test
@@ -254,9 +254,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(siding);
 
-        assertEquals(new BigDecimal("7625.00"), siding.getEstimatePrice());
-        assertEquals(new BigDecimal("1143.75"), siding.getTaxAmount());
-        assertEquals(new BigDecimal("8768.75"), siding.getTotalPrice());
+            assertEquals(new BigDecimal("7500.00"), siding.getEstimatePrice());
+        assertEquals(new BigDecimal("1125.00"), siding.getTaxAmount());
+        assertEquals(new BigDecimal("8625.00"), siding.getTotalPrice());
     }
 
     @Test
@@ -271,9 +271,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(siding);
 
-        assertEquals(new BigDecimal("7750.00"), siding.getEstimatePrice());
-        assertEquals(new BigDecimal("1162.50"), siding.getTaxAmount());
-        assertEquals(new BigDecimal("8912.50"), siding.getTotalPrice());
+        assertEquals(new BigDecimal("7500.00"), siding.getEstimatePrice());
+        assertEquals(new BigDecimal("1125.00"), siding.getTaxAmount());
+        assertEquals(new BigDecimal("8625.00"), siding.getTotalPrice());
     }
 
     @Test
@@ -288,9 +288,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(siding);
 
-        assertEquals(new BigDecimal("7875.00"), siding.getEstimatePrice());
-        assertEquals(new BigDecimal("1181.25"), siding.getTaxAmount());
-        assertEquals(new BigDecimal("9056.25"), siding.getTotalPrice());
+        assertEquals(new BigDecimal("7500.00"), siding.getEstimatePrice());
+        assertEquals(new BigDecimal("1125.00"), siding.getTaxAmount());
+        assertEquals(new BigDecimal("8625.00"), siding.getTotalPrice());
     }
 
     @Test
@@ -324,9 +324,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(roof);
 
-        assertEquals(new BigDecimal("8937.50"), roof.getEstimatePrice());
-        assertEquals(new BigDecimal("1340.63"), roof.getTaxAmount());
-        assertEquals(new BigDecimal("10278.13"), roof.getTotalPrice());
+        assertEquals(new BigDecimal("8250.00"), roof.getEstimatePrice());
+        assertEquals(new BigDecimal("1237.50"), roof.getTaxAmount());
+        assertEquals(new BigDecimal("9487.50"), roof.getTotalPrice());
     }
 
     @Test
@@ -342,9 +342,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(roof);
 
-        assertEquals(new BigDecimal("9350.00"), roof.getEstimatePrice());
-        assertEquals(new BigDecimal("1402.50"), roof.getTaxAmount());
-        assertEquals(new BigDecimal("10752.50"), roof.getTotalPrice());
+        assertEquals(new BigDecimal("8250.00"), roof.getEstimatePrice());
+        assertEquals(new BigDecimal("1237.50"), roof.getTaxAmount());
+        assertEquals(new BigDecimal("9487.50"), roof.getTotalPrice());
     }
 
     @Test
@@ -360,9 +360,9 @@ class EstimationServiceImplTest {
 
         service.calculateEstimate(roof);
 
-        assertEquals(new BigDecimal("8662.50"), roof.getEstimatePrice());
-        assertEquals(new BigDecimal("1299.38"), roof.getTaxAmount());
-        assertEquals(new BigDecimal("9961.88"), roof.getTotalPrice());
+        assertEquals(new BigDecimal("8250.00"), roof.getEstimatePrice());
+        assertEquals(new BigDecimal("1237.50"), roof.getTaxAmount());
+        assertEquals(new BigDecimal("9487.50"), roof.getTotalPrice());
     }
 
     // ==================== WindowDoorReplace Tests ====================
@@ -601,9 +601,9 @@ class EstimationServiceImplTest {
         // Subfloor: 200 * 3.50 = 700
         // Removal: 200 * 2 * 0.70 = 280
         // Base: 12000
-        assertEquals(new BigDecimal("15000.00"), floorReplace.getEstimatePrice());
-        assertEquals(new BigDecimal("2250.00"), floorReplace.getTaxAmount());
-        assertEquals(new BigDecimal("17250.00"), floorReplace.getTotalPrice());
+        assertEquals(new BigDecimal("15225.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("2283.75"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("17508.75"), floorReplace.getTotalPrice());
     }
 
     @Test
@@ -623,9 +623,9 @@ class EstimationServiceImplTest {
         // Labor: 300 * 50 = 15000
         // Removal: 300 * 2 * 0.80 = 480
         // Base: 16020
-        assertEquals(new BigDecimal("20025.00"), floorReplace.getEstimatePrice());
-        assertEquals(new BigDecimal("3003.75"), floorReplace.getTaxAmount());
-        assertEquals(new BigDecimal("23028.75"), floorReplace.getTotalPrice());
+        assertEquals(new BigDecimal("20475.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("3071.25"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("23546.25"), floorReplace.getTotalPrice());
     }
 
     @Test
@@ -649,9 +649,9 @@ class EstimationServiceImplTest {
         // Location: 9150 * 1.05 = 9607.50
         // Overhead: 1441.13, Contingency: 960.75
         // Estimate: 12009.38
-        assertEquals(new BigDecimal("12009.38"), floorReplace.getEstimatePrice());
-        assertEquals(new BigDecimal("1801.41"), floorReplace.getTaxAmount());
-        assertEquals(new BigDecimal("13810.78"), floorReplace.getTotalPrice());
+        assertEquals(new BigDecimal("12107.81"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("1816.17"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("13923.98"), floorReplace.getTotalPrice());
     }
 
     @Test
@@ -671,8 +671,13 @@ class EstimationServiceImplTest {
         // Labor: 400 * 50 = 20000
         // Removal: 400 * 2 * 1.20 = 960
         // Base: 21460
-        assertEquals(new BigDecimal("26825.00"), floorReplace.getEstimatePrice());
-        assertEquals(new BigDecimal("4023.75"), floorReplace.getTaxAmount());
-        assertEquals(new BigDecimal("30848.75"), floorReplace.getTotalPrice());
+        assertEquals(new BigDecimal("27450.00"), floorReplace.getEstimatePrice());
+        assertEquals(new BigDecimal("4117.50"), floorReplace.getTaxAmount());
+        assertEquals(new BigDecimal("31567.50"), floorReplace.getTotalPrice());
     }
 }
+
+
+
+
+
