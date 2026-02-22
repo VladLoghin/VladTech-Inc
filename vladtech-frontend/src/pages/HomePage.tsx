@@ -174,7 +174,7 @@ export default function HomePage({
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       {/* ✅ THE ONLY NAVBAR ON THIS PAGE */}
       <Navbar
         isNavbarDark={isNavbarDark}
@@ -182,7 +182,7 @@ export default function HomePage({
         onScrollToSection={scrollToSection}
       />
 
-      <main>
+      <main className="min-h-screen bg-white">
       {/* Hero Section */}
       <div className="relative min-h-screen bg-white flex items-center justify-center overflow-hidden pt-20">
         {/* Decorative Dots */}
@@ -516,6 +516,6 @@ export default function HomePage({
           <p className="text-black/30 text-sm mt-2 tracking-wide">Your Ideas. We Realize.</p>
         </div>
       </footer>
-    </div>
+    </>
   );
 }

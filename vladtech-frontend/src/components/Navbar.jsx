@@ -44,9 +44,8 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
   const scrollTo = (id) => closeAnd(() => onScrollToSection?.(id))();
 
   return (
-    <nav
+    <header
       ref={navRef}
-      aria-label="Main navigation"
       className={`fixed top-0 left-0 right-0 z-[50] backdrop-blur-sm border-b transition-all duration-300 ${
         isNavbarDark ? "bg-black/95 border-white/10" : "bg-white/95 border-black/10"
       }`}
@@ -110,7 +109,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
         {/* RIGHT cluster */}
         <div className="flex items-center gap-6">
           {/* Desktop links */}
-          <div className="hidden md:flex gap-12 items-center">
+          <nav aria-label="Main navigation" className="hidden md:flex gap-12 items-center">
             {showHomeLinks && onScrollToSection && (
               <>
                 <a
@@ -231,7 +230,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
             )}
 
             {rightSlot}
-          </div>
+          </nav>
 
           {/* Mobile hamburger */}
           <button
@@ -373,7 +372,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
           )}
         </div>
       </motion.div>
-    </nav>
+    </header>
   );
 };
 
