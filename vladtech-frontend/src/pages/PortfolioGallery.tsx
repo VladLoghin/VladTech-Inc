@@ -192,7 +192,7 @@ export default function PortfolioGallery() {
               className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-medium hover:bg-yellow-500 transition-all"
             >
               {selectedType === "All" ? t("portfolio.filterAll") : selectedType === "Interior" ? t("reviews.interior") : selectedType === "Kitchen" ? t("reviews.kitchen") : selectedType === "Bathroom" ? t("reviews.bathroom") : t("reviews.exteriorYard")}
-              <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
 
             <AnimatePresence>
@@ -228,18 +228,19 @@ export default function PortfolioGallery() {
       />
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
-      <div className="pt-[88px] min-h-screen flex flex-col">
+      <main className="pt-[88px] min-h-screen flex flex-col">
         <div className="flex-1">
           <div className="grid grid-cols-3 gap-0">
             {currentItems.map((item, index) => (
-              <motion.div
+              <motion.button
                 key={item.portfolioId}
-                initial={{ opacity: 0 }}
+                type="button"
+                initial={false}
                 animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.05 }}
                 whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
                 onClick={() => { setCurrentImageIndex(0); setSelectedItem(item); }}
-                className="cursor-pointer overflow-hidden aspect-square relative group"
+                aria-label={`View ${item.title}`}
+                className="overflow-hidden aspect-square relative group cursor-pointer border-0 p-0 bg-transparent text-left focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-inset focus-visible:z-10"
               >
                 <img
                   src={getImageUrl(item.imageUrl)}
@@ -252,12 +253,12 @@ export default function PortfolioGallery() {
                     <p className="text-white text-sm font-medium tracking-wide">{item.reviewerName}</p>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-white text-lg tracking-wide mb-2">{item.title}</h3>
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -268,9 +269,10 @@ export default function PortfolioGallery() {
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
+              aria-label="Previous page"
               className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="h-6 w-6 text-yellow-400" />
+              <ChevronLeft className="h-6 w-6 text-yellow-400" aria-hidden="true" />
             </button>
             
             <div className="flex items-center gap-2">
@@ -295,13 +297,14 @@ export default function PortfolioGallery() {
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
+              aria-label="Next page"
               className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="h-6 w-6 text-yellow-400" />
+              <ChevronRight className="h-6 w-6 text-yellow-400" aria-hidden="true" />
             </button>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Instagram-like Comment Modal */}
       <AnimatePresence>
@@ -338,21 +341,25 @@ export default function PortfolioGallery() {
                         <>
                           <button
                             onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                            aria-label="Previous image"
                             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
                           >
-                            <ChevronLeft className="h-5 w-5" />
+                            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+                            aria-label="Next image"
                             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
                           >
-                            <ChevronRight className="h-5 w-5" />
+                            <ChevronRight className="h-5 w-5" aria-hidden="true" />
                           </button>
                           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                             {images.map((_, idx) => (
                               <button
                                 key={idx}
                                 onClick={() => setCurrentImageIndex(idx)}
+                                aria-label={`Go to image ${idx + 1}`}
+                                aria-current={idx === currentImageIndex ? "true" : undefined}
                                 className={`w-2.5 h-2.5 rounded-full transition-colors ${
                                   idx === currentImageIndex ? 'bg-yellow-400' : 'bg-white/50 hover:bg-white/80'
                                 }`}
@@ -375,9 +382,10 @@ export default function PortfolioGallery() {
                   </div>
                   <button
                     onClick={() => setSelectedItem(null)}
+                    aria-label="Close modal"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    <X className="h-6 w-6" />
+                    <X className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -420,7 +428,7 @@ export default function PortfolioGallery() {
                         disabled={!newComment.trim() || isSubmitting}
                         className="bg-yellow-400 hover:bg-yellow-500 text-black h-auto px-6 disabled:opacity-50"
                       >
-                        <Send className="h-5 w-5" />
+                        <Send className="h-5 w-5" aria-hidden="true" />
                       </Button>
                     </div>
                   </form>

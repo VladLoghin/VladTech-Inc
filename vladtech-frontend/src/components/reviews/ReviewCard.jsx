@@ -69,9 +69,9 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const stars = Array.from({ length: 5 }, (_, i) =>
         i < numericRating ? (
-            <FaStar key={i} className="star-icon" />
+            <FaStar key={i} className="star-icon" aria-hidden="true" />
         ) : (
-            <FaRegStar key={i} className="star-icon" />
+            <FaRegStar key={i} className="star-icon" aria-hidden="true" />
         )
     );
 
@@ -225,7 +225,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
                 <img
                     src={imgSrc}
-                    alt={photo?.filename}
+                    alt={photo ? `Review photo by ${clientName}` : ""}
                     onError={handleError}
                     data-testid="review-image"
                 />
@@ -250,7 +250,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                     </p>
                 )}
 
-                <div className="stars" data-testid="review-stars">
+                <div className="stars" data-testid="review-stars" aria-hidden="true">
                     {stars.map((star, index) =>
                         star.type === FaStar ? (
                             <span key={index} data-testid="review-star-filled">
@@ -263,6 +263,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         )
                     )}
                 </div>
+                <span className="sr-only">{numericRating} out of 5 stars</span>
 
                 <p className="comment" data-testid="review-comment">
                     {comment}
