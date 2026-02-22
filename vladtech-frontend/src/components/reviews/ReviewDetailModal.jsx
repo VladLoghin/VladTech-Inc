@@ -27,7 +27,7 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
     const numericRating = ratingMap[rating] || 0;
 
     const stars = Array.from({ length: 5 }, (_, i) =>
-        i < numericRating ? <FaStar key={i} className="star-icon" /> : <FaRegStar key={i} className="star-icon" />
+        i < numericRating ? <FaStar key={i} className="star-icon" role="presentation" /> : <FaRegStar key={i} className="star-icon" role="presentation" />
     );
 
     const handleBackdropClick = (e) => {
@@ -64,9 +64,10 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
                         {clientName}
                     </p>
 
-                    <div className="stars enlarged" data-testid="review-detail-stars" role="img" aria-label={`${numericRating} out of 5 stars`}>
+                    <div className="stars enlarged" data-testid="review-detail-stars">
                         {stars}
                     </div>
+                    <span className="sr-only">{numericRating} out of 5 stars</span>
 
                     <p className="comment enlarged" data-testid="review-detail-comment">
                         {comment}
