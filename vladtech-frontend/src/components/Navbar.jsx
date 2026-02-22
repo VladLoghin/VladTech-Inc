@@ -109,7 +109,8 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
         {/* RIGHT cluster */}
         <div className="flex items-center gap-6">
           {/* Desktop links */}
-          <nav aria-label="Main navigation" className="hidden md:flex gap-12 items-center">
+          <div className="hidden md:flex gap-12 items-center">
+            <nav aria-label="Main navigation" className="flex gap-12 items-center">
             {showHomeLinks && onScrollToSection && (
               <>
                 <a
@@ -188,6 +189,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 {t("nav.dashboard")}
               </a>
             )}
+            </nav>
 
             {isAuthenticated && (isAdmin || isEmployee || isClient) && (
               <span
@@ -212,7 +214,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
-                <LogIn className="h-4 w-4" aria-hidden="true" />
+                <LogIn className="h-4 w-4" role="presentation" focusable="false" />
                 {t("nav.login")}
               </button>
             ) : (
@@ -224,13 +226,13 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     : "bg-black text-white hover:bg-yellow-400 hover:text-black"
                 }`}
               >
-                <LogOut className="h-4 w-4" aria-hidden="true" />
+                <LogOut className="h-4 w-4" role="presentation" focusable="false" />
                 {t("nav.logout")}
               </button>
             )}
 
             {rightSlot}
-          </nav>
+          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -354,7 +356,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   : "bg-black text-white hover:bg-yellow-400 hover:text-black"
               }`}
             >
-              <LogIn className="h-4 w-4" aria-hidden="true" />
+              <LogIn className="h-4 w-4" role="presentation" focusable="false" />
               {t("nav.login")}
             </button>
           ) : (
@@ -366,7 +368,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   : "bg-black text-white hover:bg-yellow-400 hover:text-black"
               }`}
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <LogOut className="h-4 w-4" role="presentation" focusable="false" />
               {t("nav.logout")}
             </button>
           )}

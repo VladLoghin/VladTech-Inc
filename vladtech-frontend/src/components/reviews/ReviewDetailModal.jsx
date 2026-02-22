@@ -64,10 +64,9 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
                         {clientName}
                     </p>
 
-                    <div className="stars enlarged" data-testid="review-detail-stars" aria-hidden="true">
+                    <div className="stars enlarged" data-testid="review-detail-stars" role="img" aria-label={`${numericRating} out of 5 stars`}>
                         {stars}
                     </div>
-                    <span className="sr-only">{numericRating} out of 5 stars</span>
 
                     <p className="comment enlarged" data-testid="review-detail-comment">
                         {comment}
