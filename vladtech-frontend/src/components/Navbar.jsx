@@ -110,85 +110,101 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
         <div className="flex items-center gap-6">
           {/* Desktop links */}
           <div className="hidden md:flex gap-12 items-center">
-            <nav aria-label="Main navigation" className="flex gap-12 items-center">
-            {showHomeLinks && onScrollToSection && (
-              <>
-                <a
-                  href="#about"
-                  onClick={(e) => { e.preventDefault(); onScrollToSection("about"); }}
-                  className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
-                  }`}
-                >
-                  {t("nav.about")}
-                </a>
-                <a
-                  href="#contact"
-                  onClick={(e) => { e.preventDefault(); onScrollToSection("contact"); }}
-                  className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                    isNavbarDark ? "text-white" : "text-black"
-                  }`}
-                >
-                  {t("nav.contact")}
-                </a>
-              </>
-            )}
+            <nav aria-label="Main navigation">
+              <ul className="flex gap-12 items-center list-none m-0 p-0">
+                {showHomeLinks && onScrollToSection && (
+                  <>
+                    <li>
+                      <a
+                        href="#about"
+                        onClick={(e) => { e.preventDefault(); onScrollToSection("about"); }}
+                        className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                          isNavbarDark ? "text-white" : "text-black"
+                        }`}
+                      >
+                        {t("nav.about")}
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#contact"
+                        onClick={(e) => { e.preventDefault(); onScrollToSection("contact"); }}
+                        className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                          isNavbarDark ? "text-white" : "text-black"
+                        }`}
+                      >
+                        {t("nav.contact")}
+                      </a>
+                    </li>
+                  </>
+                )}
 
-            <a
-              href="/portfolio"
-              onClick={(e) => { e.preventDefault(); navigate("/portfolio"); }}
-              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
-            >
-              {t("nav.portfolio")}
-            </a>
+                <li>
+                  <a
+                    href="/portfolio"
+                    onClick={(e) => { e.preventDefault(); navigate("/portfolio"); }}
+                    className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                      isNavbarDark ? "text-white" : "text-black"
+                    }`}
+                  >
+                    {t("nav.portfolio")}
+                  </a>
+                </li>
 
-            <a
-              href="/reviews"
-              onClick={(e) => { e.preventDefault(); navigate("/reviews"); }}
-              className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
-            >
-              {t("nav.reviews")}
-            </a>
+                <li>
+                  <a
+                    href="/reviews"
+                    onClick={(e) => { e.preventDefault(); navigate("/reviews"); }}
+                    className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                      isNavbarDark ? "text-white" : "text-black"
+                    }`}
+                  >
+                    {t("nav.reviews")}
+                  </a>
+                </li>
 
-            {isAuthenticated && isAdmin && (
-              <a
-                href="/admin"
-                onClick={(e) => { e.preventDefault(); navigate("/admin"); }}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
-              >
-                {t("nav.adminPanel")}
-              </a>
-            )}
+                {isAuthenticated && isAdmin && (
+                  <li>
+                    <a
+                      href="/admin"
+                      onClick={(e) => { e.preventDefault(); navigate("/admin"); }}
+                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                        isNavbarDark ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {t("nav.adminPanel")}
+                    </a>
+                  </li>
+                )}
 
-            {isAuthenticated && isEmployee && (
-              <a
-                href="/employee"
-                onClick={(e) => { e.preventDefault(); navigate("/employee"); }}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
-              >
-                {t("nav.employeeTools")}
-              </a>
-            )}
+                {isAuthenticated && isEmployee && (
+                  <li>
+                    <a
+                      href="/employee"
+                      onClick={(e) => { e.preventDefault(); navigate("/employee"); }}
+                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                        isNavbarDark ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {t("nav.employeeTools")}
+                    </a>
+                  </li>
+                )}
 
-            {isAuthenticated && !isAdmin && !isClient && (
-              <a
-                href="/dashboard"
-                onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
-              >
-                {t("nav.dashboard")}
-              </a>
-            )}
+                {isAuthenticated && !isAdmin && !isClient && (
+                  <li>
+                    <a
+                      href="/dashboard"
+                      onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}
+                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                        isNavbarDark ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {t("nav.dashboard")}
+                    </a>
+                  </li>
+                )}
+              </ul>
             </nav>
 
             {isAuthenticated && (isAdmin || isEmployee || isClient) && (

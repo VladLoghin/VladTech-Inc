@@ -228,7 +228,7 @@ export default function PortfolioGallery() {
       />
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
-      <main className="min-h-screen bg-black pt-[88px] flex flex-col">
+      <main className="min-h-[calc(100vh-88px)] bg-black mt-[88px] flex flex-col">
         <h1 className="sr-only">{t("nav.portfolio")}</h1>
         <div className="flex-1">
           <div className="grid grid-cols-3 gap-0">
