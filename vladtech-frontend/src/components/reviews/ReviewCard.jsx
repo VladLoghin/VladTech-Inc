@@ -69,9 +69,9 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
 
     const stars = Array.from({ length: 5 }, (_, i) =>
         i < numericRating ? (
-            <FaStar key={i} className="star-icon" aria-hidden="true" />
+            <FaStar key={i} className="star-icon" />
         ) : (
-            <FaRegStar key={i} className="star-icon" aria-hidden="true" />
+            <FaRegStar key={i} className="star-icon" />
         )
     );
 
@@ -188,8 +188,6 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
             <div
                 className="review-card"
                 data-testid="review-card"
-                onClick={onClick}
-                style={{ cursor: onClick ? "pointer" : "default" }}
             >
                 {canToggleVisibility && (
                     <label
@@ -199,7 +197,6 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                             gap: "8px",
                             marginTop: "12px",
                         }}
-                        onClick={(e) => e.stopPropagation()}
                     >
                         <input
                             type="checkbox"
@@ -223,51 +220,68 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                     </div>
                 )}
 
-                <img
-                    src={imgSrc}
-                    alt={photo ? `Review photo by ${clientName}` : ""}
-                    onError={handleError}
-                    data-testid="review-image"
-                />
+                <button
+                    type="button"
+                    onClick={onClick}
+                    aria-label={`View review by ${clientName}`}
+                    style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        width: "100%",
+                        textAlign: "inherit",
+                        cursor: onClick ? "pointer" : "default",
+                        font: "inherit",
+                        color: "inherit",
+                        display: "block",
+                    }}
+                >
+                    <img
+                        src={imgSrc}
+                        alt={photo ? `Review photo by ${clientName}` : ""}
+                        onError={handleError}
+                        data-testid="review-image"
+                    />
 
-                <p className="client-name" data-testid="review-client">
-                    {clientName}
-                </p>
-
-                {type && (
-                    <p style={{
-                        fontSize: "12px",
-                        color: "#666",
-                        fontWeight: 500,
-                        marginBottom: "8px",
-                        display: "inline-block",
-                        backgroundColor: "#f3f4f6",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        marginRight: "8px"
-                    }}>
-                        {type}
+                    <p className="client-name" data-testid="review-client">
+                        {clientName}
                     </p>
-                )}
 
-                <div className="stars" data-testid="review-stars" aria-hidden="true">
-                    {stars.map((star, index) =>
-                        star.type === FaStar ? (
-                            <span key={index} data-testid="review-star-filled">
-                                {star}
-                            </span>
-                        ) : (
-                            <span key={index} data-testid="review-star-empty">
-                                {star}
-                            </span>
-                        )
+                    {type && (
+                        <p style={{
+                            fontSize: "12px",
+                            color: "#666",
+                            fontWeight: 500,
+                            marginBottom: "8px",
+                            display: "inline-block",
+                            backgroundColor: "#f3f4f6",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            marginRight: "8px"
+                        }}>
+                            {type}
+                        </p>
                     )}
-                </div>
-                <span className="sr-only">{numericRating} out of 5 stars</span>
 
-                <p className="comment" data-testid="review-comment">
-                    {comment}
-                </p>
+                    <div className="stars" data-testid="review-stars" aria-hidden="true">
+                        {stars.map((star, index) =>
+                            star.type === FaStar ? (
+                                <span key={index} data-testid="review-star-filled">
+                                    {star}
+                                </span>
+                            ) : (
+                                <span key={index} data-testid="review-star-empty">
+                                    {star}
+                                </span>
+                            )
+                        )}
+                    </div>
+                    <span className="sr-only">{numericRating} out of 5 stars</span>
+
+                    <p className="comment" data-testid="review-comment">
+                        {comment}
+                    </p>
+                </button>
 
                 {canSendToPortfolio && (
                     <>

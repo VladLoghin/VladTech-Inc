@@ -182,7 +182,7 @@ export default function PortfolioGallery() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <>
       <Navbar
         isNavbarDark={true}
         rightSlot={
@@ -228,7 +228,7 @@ export default function PortfolioGallery() {
       />
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
-      <main className="pt-[88px] min-h-screen flex flex-col">
+      <main className="min-h-screen bg-black pt-[88px] flex flex-col">
         <div className="flex-1">
           <div className="grid grid-cols-3 gap-0">
             {currentItems.map((item, index) => (
@@ -452,6 +452,6 @@ export default function PortfolioGallery() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }

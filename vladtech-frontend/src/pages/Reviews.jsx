@@ -156,10 +156,10 @@ const ReviewsPage = () => {
   }, [checkUnreviewedProjects]);
 
   return (
-    <div className="reviews-page" data-testid="reviews-page">
+    <>
       <Navbar isNavbarDark={true} />
 
-      <main>
+      <main className="reviews-page" data-testid="reviews-page">
         <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
           <h2 className="title text-4xl font-extrabold tracking-wide text-black mb-4">
             {t("reviews.customerHighlights")}
@@ -332,7 +332,7 @@ const ReviewsPage = () => {
           }}
         />
       </main>
-    </div>
+    </>
   );
 };
 

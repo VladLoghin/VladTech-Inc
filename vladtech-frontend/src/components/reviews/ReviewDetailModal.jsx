@@ -27,7 +27,7 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
     const numericRating = ratingMap[rating] || 0;
 
     const stars = Array.from({ length: 5 }, (_, i) =>
-        i < numericRating ? <FaStar key={i} className="star-icon" aria-hidden="true" /> : <FaRegStar key={i} className="star-icon" aria-hidden="true" />
+        i < numericRating ? <FaStar key={i} className="star-icon" /> : <FaRegStar key={i} className="star-icon" />
     );
 
     const handleBackdropClick = (e) => {
