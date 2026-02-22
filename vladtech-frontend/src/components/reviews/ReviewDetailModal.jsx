@@ -27,7 +27,7 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
     const numericRating = ratingMap[rating] || 0;
 
     const stars = Array.from({ length: 5 }, (_, i) =>
-        i < numericRating ? <FaStar key={i} className="star-icon" /> : <FaRegStar key={i} className="star-icon" />
+        i < numericRating ? <FaStar key={i} className="star-icon" aria-hidden="true" /> : <FaRegStar key={i} className="star-icon" aria-hidden="true" />
     );
 
     const handleBackdropClick = (e) => {
@@ -49,13 +49,13 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
                     aria-label="Close modal"
                     data-testid="review-detail-close-button"
                 >
-                    <FaTimes />
+                    <FaTimes aria-hidden="true" />
                 </button>
 
                 <div className="review-card enlarged">
                     <img
                         src={imgSrc}
-                        alt={photo?.filename}
+                        alt={photo ? `Review photo by ${clientName}` : ""}
                         onError={handleError}
                         data-testid="review-detail-image"
                     />
@@ -64,9 +64,10 @@ const ReviewDetailModal = ({ review, open, onClose }) => {
                         {clientName}
                     </p>
 
-                    <div className="stars enlarged" data-testid="review-detail-stars">
+                    <div className="stars enlarged" data-testid="review-detail-stars" aria-hidden="true">
                         {stars}
                     </div>
+                    <span className="sr-only">{numericRating} out of 5 stars</span>
 
                     <p className="comment enlarged" data-testid="review-detail-comment">
                         {comment}
