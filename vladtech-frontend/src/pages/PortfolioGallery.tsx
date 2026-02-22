@@ -192,7 +192,7 @@ export default function PortfolioGallery() {
               className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-medium hover:bg-yellow-500 transition-all"
             >
               {selectedType === "All" ? t("portfolio.filterAll") : selectedType === "Interior" ? t("reviews.interior") : selectedType === "Kitchen" ? t("reviews.kitchen") : selectedType === "Bathroom" ? t("reviews.bathroom") : t("reviews.exteriorYard")}
-              <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} role="presentation" focusable="false" />
             </button>
 
             <AnimatePresence>
@@ -229,6 +229,7 @@ export default function PortfolioGallery() {
 
       {/* Portfolio Grid - No gaps, starts right after navbar */}
       <main className="min-h-screen bg-black pt-[88px] flex flex-col">
+        <h1 className="sr-only">{t("nav.portfolio")}</h1>
         <div className="flex-1">
           <div className="grid grid-cols-3 gap-0">
             {currentItems.map((item, index) => (
@@ -240,7 +241,7 @@ export default function PortfolioGallery() {
                 whileHover={{ scale: 1.05, zIndex: 10, transition: { duration: 0.2 } }}
                 onClick={() => { setCurrentImageIndex(0); setSelectedItem(item); }}
                 aria-label={`View ${item.title}`}
-                className="overflow-hidden aspect-square relative group cursor-pointer border-0 p-0 bg-transparent text-left focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-inset focus-visible:z-10"
+                className="overflow-hidden aspect-square relative group cursor-pointer border-0 p-0 bg-transparent text-left focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-inset focus-visible:z-10 scroll-mt-[100px]"
               >
                 <img
                   src={getImageUrl(item.imageUrl)}
@@ -272,7 +273,7 @@ export default function PortfolioGallery() {
               aria-label="Previous page"
               className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="h-6 w-6 text-yellow-400" aria-hidden="true" />
+              <ChevronLeft className="h-6 w-6 text-yellow-400" role="presentation" focusable="false" />
             </button>
             
             <div className="flex items-center gap-2">
@@ -300,7 +301,7 @@ export default function PortfolioGallery() {
               aria-label="Next page"
               className="p-2 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="h-6 w-6 text-yellow-400" aria-hidden="true" />
+              <ChevronRight className="h-6 w-6 text-yellow-400" role="presentation" focusable="false" />
             </button>
           </div>
         )}

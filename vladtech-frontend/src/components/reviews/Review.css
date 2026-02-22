@@ -11,6 +11,13 @@
     max-width: 20rem;
     margin: 10px;
     overflow: hidden;
+    scroll-margin-top: 100px;
+}
+
+/* Prevent fixed header from overlapping focused elements */
+.review-card button,
+.review-card input {
+    scroll-margin-top: 100px;
 }
 
 .review-card:hover {

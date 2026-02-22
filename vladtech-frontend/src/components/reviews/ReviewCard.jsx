@@ -223,7 +223,6 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                 <button
                     type="button"
                     onClick={onClick}
-                    aria-label={`View review by ${clientName}`}
                     style={{
                         background: "none",
                         border: "none",
@@ -234,6 +233,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         font: "inherit",
                         color: "inherit",
                         display: "block",
+                        scrollMarginTop: "100px",
                     }}
                 >
                     <img
@@ -263,7 +263,7 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                         </p>
                     )}
 
-                    <div className="stars" data-testid="review-stars" aria-hidden="true">
+                    <div className="stars" data-testid="review-stars" role="img" aria-label={`${numericRating} out of 5 stars`}>
                         {stars.map((star, index) =>
                             star.type === FaStar ? (
                                 <span key={index} data-testid="review-star-filled">
@@ -276,7 +276,6 @@ const ReviewCard = ({ review, onClick, onDelete }) => {
                             )
                         )}
                     </div>
-                    <span className="sr-only">{numericRating} out of 5 stars</span>
 
                     <p className="comment" data-testid="review-comment">
                         {comment}

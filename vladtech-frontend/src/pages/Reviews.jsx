@@ -160,6 +160,7 @@ const ReviewsPage = () => {
       <Navbar isNavbarDark={true} />
 
       <main className="reviews-page" data-testid="reviews-page">
+        <h1 className="sr-only">{t("nav.reviews")}</h1>
         <div className="container mx-auto p-4" style={{ marginTop: "120px" }}>
           <h2 className="title text-4xl font-extrabold tracking-wide text-black mb-4">
             {t("reviews.customerHighlights")}
@@ -177,7 +178,7 @@ const ReviewsPage = () => {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, clientName: e.target.value }))
                   }
-                  className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm"
+                  className="px-5 py-3 rounded-full border border-gray-300 text-sm text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 shadow-sm scroll-mt-[100px]"
                 />
 
                 <input
@@ -313,25 +314,26 @@ const ReviewsPage = () => {
           </section>
         </div>
 
-        <ReviewModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          onSubmitSuccess={async () => {
-            setShowModal(false);
-            await fetchReviews();
-            await checkUnreviewedProjects();
-          }}
-        />
-
-        <ReviewDetailModal
-          open={showDetailModal}
-          review={selectedReview}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedReview(null);
-          }}
-        />
       </main>
+
+      <ReviewModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmitSuccess={async () => {
+          setShowModal(false);
+          await fetchReviews();
+          await checkUnreviewedProjects();
+        }}
+      />
+
+      <ReviewDetailModal
+        open={showDetailModal}
+        review={selectedReview}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedReview(null);
+        }}
+      />
     </>
   );
 };
