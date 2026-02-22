@@ -170,7 +170,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                   isNavbarDark ? "text-white" : "text-black"
                 }`}
               >
-                ESTIMATES
+                MY ESTIMATES
               </button>
             )}
 
