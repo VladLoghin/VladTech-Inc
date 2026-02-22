@@ -164,14 +164,17 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 </li>
 
             {isAuthenticated && (
-              <button
-                onClick={() => navigate("/estimates")}
-                className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                  isNavbarDark ? "text-white" : "text-black"
-                }`}
-              >
-                MY ESTIMATES
-              </button>
+              <li>
+                <a
+                  href="/estimates"
+                  onClick={(e) => { e.preventDefault(); navigate("/estimates"); }}
+                  className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                    isNavbarDark ? "text-white" : "text-black"
+                  }`}
+                >
+                  MY ESTIMATES
+                </a>
+              </li>
             )}
 
             {isAuthenticated && isAdmin && (
@@ -348,6 +351,18 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
           >
             {t("nav.reviews")}
           </a>
+
+          {isAuthenticated && (
+            <a
+              href="/estimates"
+              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/estimates"))(); }}
+              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
+                isNavbarDark ? "text-white" : "text-black"
+              }`}
+            >
+              MY ESTIMATES
+            </a>
+          )}
 
           {isAuthenticated && isAdmin && (
             <a
