@@ -202,20 +202,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     </a>
                   </li>
                 )}
-
-                {isAuthenticated && !isAdmin && !isClient && (
-                  <li>
-                    <a
-                      href="/dashboard"
-                      onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}
-                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                        isNavbarDark ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {t("nav.dashboard")}
-                    </a>
-                  </li>
-                )}
               </ul>
             </nav>
 
@@ -372,18 +358,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               }`}
             >
               {t("nav.employeeTools")}
-            </a>
-          )}
-
-          {isAuthenticated && !isAdmin && !isClient && (
-            <a
-              href="/dashboard"
-              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/dashboard"))(); }}
-              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
-            >
-              {t("nav.dashboard")}
             </a>
           )}
 
