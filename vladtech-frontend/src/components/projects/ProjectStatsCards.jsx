@@ -174,16 +174,16 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
           : t("admin.stats.typeBreakdown");
 
         return (
-          <div className="w-full bg-white border-2 border-black rounded-lg p-6">
+          <div className="w-full bg-white border-2 border-black rounded-lg p-4 sm:p-6">
             {/* View Mode Tabs */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6">
               <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">{t("admin.stats.view")}:</span>
-              <div className="flex border-2 border-black rounded-lg overflow-hidden">
+              <div className="flex border-2 border-black rounded-lg overflow-hidden w-full sm:w-auto">
                 <button
                   onClick={() => onViewModeChange('status')}
-                  className={`px-4 py-2 font-semibold transition-all ${
-                    viewMode === 'status' 
-                      ? 'bg-black text-white' 
+                  className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold transition-all ${
+                    viewMode === 'status'
+                      ? 'bg-black text-white'
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
@@ -191,9 +191,9 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                 </button>
                 <button
                   onClick={() => onViewModeChange('priority')}
-                  className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
-                    viewMode === 'priority' 
-                      ? 'bg-black text-white' 
+                  className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold transition-all border-l-2 border-black ${
+                    viewMode === 'priority'
+                      ? 'bg-black text-white'
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
@@ -201,9 +201,9 @@ const ProjectStatsCards = ({ stats, onStatClick, viewMode = 'status', onViewMode
                 </button>
                 <button
                   onClick={() => onViewModeChange('projectType')}
-                  className={`px-4 py-2 font-semibold transition-all border-l-2 border-black ${
-                    viewMode === 'projectType' 
-                      ? 'bg-black text-white' 
+                  className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold transition-all border-l-2 border-black ${
+                    viewMode === 'projectType'
+                      ? 'bg-black text-white'
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >

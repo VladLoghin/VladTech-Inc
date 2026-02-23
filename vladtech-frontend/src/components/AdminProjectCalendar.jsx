@@ -136,11 +136,11 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
     <div
       className="transition-all duration-300 bg-white shadow-md border-2 border-black rounded-xl p-4 relative"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">{t("admin.projectCalendar")}</h2>
-        
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold">{t("admin.projectCalendar")}</h2>
+
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs sm:text-sm font-medium cursor-pointer select-none">
             <span>{t("admin.showCounts") !== "admin.showCounts" ? t("admin.showCounts") : "Show Project Counts"}</span>
             <div
               onClick={() => setShowCounts(!showCounts)}
@@ -205,7 +205,7 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
           transition: background-color 0.2s;
         }
         .fc-daygrid-day:hover {
-          background-color: #f3f4f6 !important; /* Tailwind gray-100 */
+          background-color: #f3f4f6 !important;
         }
         .fc-event {
           pointer-events: none;
@@ -213,8 +213,50 @@ const AdminProjectCalendar = ({ projects = [], onDateSelect, selectedDate }) => 
         /* Selection Box (Background Event) */
         .fc-bg-event.fc-selected-date-event {
           opacity: 1 !important;
-          background-color: rgba(0, 0, 0, 0.05) !important; /* Black tint */
-          box-shadow: inset 0 0 0 2px black !important; /* Black border */
+          background-color: rgba(0, 0, 0, 0.05) !important;
+          box-shadow: inset 0 0 0 2px black !important;
+        }
+        /* Mobile: stack toolbar rows & square day cells */
+        @media (max-width: 640px) {
+          .fc .fc-toolbar {
+            flex-direction: column;
+            gap: 8px;
+          }
+          .fc .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+          }
+          .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+          }
+          .fc .fc-scrollgrid-sync-table {
+            height: auto !important;
+          }
+          .fc .fc-daygrid-body {
+            height: auto !important;
+          }
+          .fc .fc-daygrid-day-frame {
+            min-height: 2.5rem !important;
+            max-height: 2.5rem !important;
+            height: 2.5rem !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .fc .fc-daygrid-day-top {
+            justify-content: center;
+          }
+          .fc .fc-daygrid-day-number {
+            padding: 2px;
+            font-size: 0.85rem;
+          }
+          .fc .fc-daygrid-day-events {
+            display: none;
+          }
+          .fc .fc-daygrid-day-bg {
+            position: absolute;
+            inset: 0;
+          }
         }
       `}</style>
 
