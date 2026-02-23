@@ -116,13 +116,27 @@ const EmployeeProjectCalendar = ({ projects = [], onDateSelect }) => {
           transition: background-color 0.2s;
         }
         .fc-daygrid-day:hover {
-          background-color: #f3f4f6 !important; /* Tailwind gray-100 */
+          background-color: #f3f4f6 !important;
         }
         /* Selection Box (Background Event) */
         .fc-bg-event.fc-selected-date-event {
           opacity: 1 !important;
-          background-color: rgba(0, 0, 0, 0.05) !important; /* Black tint */
-          box-shadow: inset 0 0 0 2px black !important; /* 2px Black border */
+          background-color: rgba(0, 0, 0, 0.05) !important;
+          box-shadow: inset 0 0 0 2px black !important;
+        }
+        /* Mobile: stack toolbar rows */
+        @media (max-width: 640px) {
+          .fc .fc-toolbar {
+            flex-direction: column;
+            gap: 8px;
+          }
+          .fc .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+          }
+          .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+          }
         }
       `}</style>
     </div>

@@ -84,10 +84,10 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
   }, [projects, dueSoonDays]);
 
   return (
-    <div className="border-2 border-black rounded-xl bg-white p-6 shadow-md">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="border-2 border-black rounded-xl bg-white p-4 sm:p-6 shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-xl sm:text-2xl font-bold">
             {t("employee.dashboard.title", { defaultValue: "My Dashboard" })}
           </h2>
           <p className="text-sm text-black/60">
@@ -97,29 +97,29 @@ const EmployeeProjectStatsCards = ({ projects, dueSoonDays = 7 }) => {
           </p>
         </div>
 
-        <div className="flex gap-3 flex-wrap">
-          <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
+        <div className="grid grid-cols-3 sm:flex gap-2 sm:gap-3">
+          <div className="px-3 sm:px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-0 sm:min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
               {t("employee.dashboard.total", { defaultValue: "Total" })}
             </p>
-            <p className="text-2xl font-bold">{stats.total}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
           </div>
 
-          <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
+          <div className="px-3 sm:px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-0 sm:min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
               {t("employee.dashboard.dueSoon", { defaultValue: "Due Soon" })}
             </p>
-            <p className="text-2xl font-bold">{stats.dueSoon}</p>
-            <p className="text-xs text-black/50">
+            <p className="text-xl sm:text-2xl font-bold">{stats.dueSoon}</p>
+            <p className="text-xs text-black/50 hidden sm:block">
               {t("employee.dashboard.next7Days", { defaultValue: "Next 7 days" })}
             </p>
           </div>
 
-          <div className="px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-[140px]">
+          <div className="px-3 sm:px-4 py-3 rounded-xl border border-black/10 bg-gray-50 min-w-0 sm:min-w-[140px]">
             <p className="text-xs font-bold text-black/60 uppercase">
               {t("employee.dashboard.overdue", { defaultValue: "Overdue" })}
             </p>
-            <p className="text-2xl font-bold">{stats.overdue}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats.overdue}</p>
           </div>
         </div>
       </div>
