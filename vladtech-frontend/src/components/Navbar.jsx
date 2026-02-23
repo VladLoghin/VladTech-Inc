@@ -172,7 +172,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  MY ESTIMATES
+                  {t("nav.estimates")}
                 </a>
               </li>
             )}
@@ -188,19 +188,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 {t("nav.adminPanel")}
               </a>
             )}
-                {isAuthenticated && isAdmin && (
-                  <li>
-                    <a
-                      href="/admin"
-                      onClick={(e) => { e.preventDefault(); navigate("/admin"); }}
-                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                        isNavbarDark ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {t("nav.adminPanel")}
-                    </a>
-                  </li>
-                )}
 
                 {isAuthenticated && isEmployee && (
                   <li>
@@ -212,20 +199,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                       }`}
                     >
                       {t("nav.employeeTools")}
-                    </a>
-                  </li>
-                )}
-
-                {isAuthenticated && !isAdmin && !isClient && (
-                  <li>
-                    <a
-                      href="/dashboard"
-                      onClick={(e) => { e.preventDefault(); navigate("/dashboard"); }}
-                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                        isNavbarDark ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {t("nav.dashboard")}
                     </a>
                   </li>
                 )}
@@ -385,18 +358,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
               }`}
             >
               {t("nav.employeeTools")}
-            </a>
-          )}
-
-          {isAuthenticated && !isAdmin && !isClient && (
-            <a
-              href="/dashboard"
-              onClick={(e) => { e.preventDefault(); closeAnd(() => navigate("/dashboard"))(); }}
-              className={`text-left hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                isNavbarDark ? "text-white" : "text-black"
-              }`}
-            >
-              {t("nav.dashboard")}
             </a>
           )}
 
