@@ -31,6 +31,7 @@ const resources = {
       "nav.reviews": "REVIEWS",
       "nav.login": "LOGIN",
       "nav.logout": "LOGOUT",
+      "nav.estimates": "MY ESTIMATES",
 
       // HomePage
       "home.innovate": "INNOVATE",
@@ -575,6 +576,7 @@ const resources = {
       "nav.reviews": "AVIS",
       "nav.login": "CONNEXION",
       "nav.logout": "DÉCONNEXION",
+      "nav.estimates": "MES ESTIMATIONS",
 
       // HomePage
       "home.innovate": "INNOVER",

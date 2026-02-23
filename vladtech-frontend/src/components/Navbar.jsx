@@ -172,7 +172,7 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                     isNavbarDark ? "text-white" : "text-black"
                   }`}
                 >
-                  MY ESTIMATES
+                  {t("nav.estimates")}
                 </a>
               </li>
             )}
@@ -188,19 +188,6 @@ const Navbar = ({ isNavbarDark = false, onScrollToSection = null, showHomeLinks 
                 {t("nav.adminPanel")}
               </a>
             )}
-                {isAuthenticated && isAdmin && (
-                  <li>
-                    <a
-                      href="/admin"
-                      onClick={(e) => { e.preventDefault(); navigate("/admin"); }}
-                      className={`hover:text-yellow-400 transition-colors text-sm tracking-wider ${
-                        isNavbarDark ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {t("nav.adminPanel")}
-                    </a>
-                  </li>
-                )}
 
                 {isAuthenticated && isEmployee && (
                   <li>
