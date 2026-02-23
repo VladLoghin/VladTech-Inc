@@ -13,6 +13,11 @@ const formatMoney = (amount, currency, locale = 'en-CA') => {
   }).format(num);
 };
 
+// Compatibility alias: some code imports `generatePdfBlob`.
+export const generatePdfBlob = (projects, filename = 'estimate.pdf', options = {}) => {
+  return generateEstimatePdfBlob(projects, filename, options);
+};
+
 const formatEmployees = (emails, noneLabel = '-') => {
   if (!emails || emails.length === 0) return noneLabel;
   return emails.filter(e => e && !e.startsWith('auth0|')).join(', ');
@@ -152,6 +157,7 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
 
   const { exporterName = 'System', title = 'Project Report', locale = 'en-CA', sortBy, sortOrder } = options;
   const t = (key, opts) => i18n.t(key, { ...opts, lng: locale.split('-')[0] });
+  // note: labels are defined in estimate exporter when needed
   
   const doc = new jsPDF('p', 'mm', 'a4');
   doc.setCharSpace(0);
@@ -395,4 +401,236 @@ export const generatePdf = (projects, filename = 'projects.pdf', options = {}) =
   }
 
   doc.save(filename);
+};
+
+export const generateEstimatePdfBlob = (projects, filename = 'estimate.pdf', options = {}) => {
+  if (!projects || projects.length === 0) {
+    console.warn('generateEstimatePdfBlob: No projects to export');
+    return;
+  }
+
+  const { locale = 'en-CA', exporterName = 'System', title = 'Estimate' } = options;
+  const t = (key, opts) => i18n.t(key, { ...opts, lng: locale.split('-')[0] });
+
+  const labels = {
+    materialCost: 'Material Cost',
+    labor: 'Labor',
+    applianceAllowance: 'Appliance Allowance',
+    skylights: 'Skylights',
+    tearOff: 'Tear Off',
+    insulation: 'Insulation',
+    subfloorRepair: 'Subfloor Repair',
+    overhead: 'Overhead',
+    contingency: 'Contingency',
+    locationAdjustment: 'Location Adjustment',
+    tax: 'Tax',
+    estimatedTotal: 'Estimated Total'
+  };
+  const labelFor = (key) => labels[key] || (key ? key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()) : key);
+
+  const doc = new jsPDF('p', 'mm', 'a4');
+  doc.setCharSpace(0);
+
+  // attach filename to PDF metadata so param is used and eslint is satisfied
+  try {
+    doc.setProperties({ title: filename });
+  } catch {
+    // ignore if setProperties isn't supported in this environment
+  }
+
+  // Header (black) with logo and minimal meta
+  doc.setFillColor(20, 20, 20);
+  doc.rect(0, 0, 210, 28, 'F');
+  doc.addImage(logo, 'PNG', 11, 5, 45, 11);
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(title, 14, 24);
+
+  doc.setFontSize(8);
+  doc.text(`${t('pdf.exportedBy')}: ${exporterName}`, 196, 11, { align: 'right' });
+  doc.text(`${t('pdf.date')}: ${new Date().toLocaleString(locale, { timeZoneName: 'short' })}`, 196, 15, { align: 'right' });
+  // Intentionally do NOT show total projects here for estimates
+
+  let cursorY = 35;
+
+  projects.forEach((p, idx) => {
+    const projectTitle = p.name || `Estimate ${idx + 1}`;
+    if (projects.length > 1) {
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(projectTitle, 14, cursorY);
+      cursorY += 8;
+    }
+
+    // Render a small "Selections" table listing form choices (area, materials, options)
+    const selections = [];
+    const pushSelection = (label, value) => {
+      if (value === undefined || value === null) return;
+      const str = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value);
+      if (str.trim() === '') return;
+      selections.push([label, str]);
+    };
+
+    // Area / square footage
+    const areaLabel = 'Area (sq ft)';
+    const areaVal = p.areaSqFt ?? p.squareFeet ?? p.deckAreaSqFt ?? p.area;
+    if (areaVal !== undefined) pushSelection(areaLabel, areaVal);
+
+    // Common material/choice fields
+    pushSelection('Siding Material', p.sidingMaterial);
+    pushSelection('Roof Material', p.roofMaterial);
+    pushSelection('Countertop Material', p.countertopMaterial);
+    pushSelection('New Floor Material', p.newFloorMaterial);
+    pushSelection('Deck Material', p.deckMaterial);
+    pushSelection('Cabinet Quality', p.cabinetQuality);
+    pushSelection('Flooring Material', p.flooringMaterial);
+    pushSelection('Window Type', p.windowType);
+    pushSelection('Door Type', p.doorType);
+    pushSelection('Stories', p.stories);
+    pushSelection('Has Railing', p.hasRailing);
+    pushSelection('Stairs Count', p.stairsCount);
+    pushSelection('Is Covered', p.isCovered);
+    pushSelection('Include Insulation', p.includeInsulation);
+    pushSelection('Tear Off Required', p.tearOffRequired);
+    pushSelection('Number of Skylights', p.numSkylights);
+    pushSelection('Appliance Allowance', p.applianceAllowance);
+
+    if (selections.length > 0) {
+      autoTable(doc, {
+        head: [[ 'Selection', 'Value' ]],
+        body: selections,
+        startY: cursorY,
+        margin: { left: 14, right: 14 },
+        theme: 'plain',
+        headStyles: { fillColor: [245, 245, 245], textColor: [40, 40, 40], fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        columnStyles: { 0: { cellWidth: 100 }, 1: { halign: 'left' } }
+      });
+
+      cursorY = doc.lastAutoTable.finalY + 6;
+    }
+
+    // Build cost breakdown rows tailored per preset/projectType and omit empty values
+    const rows = [];
+    const area = p.areaSqFt ?? p.squareFeet ?? p.deckAreaSqFt ?? p.area;
+    const areaNum = area ? Number(area) : NaN;
+    const estimatePriceNum = Number(p.estimatePrice ?? p.estimatedPrice ?? p.estimate ?? 0) || 0;
+    const overheadRate = Number(p.overheadRate ?? 0);
+    const contingencyRate = Number(p.contingencyRate ?? 0);
+
+    const pushIf = (label, value) => {
+      if (value === undefined || value === null) return;
+      if (typeof value === 'number' && Number.isNaN(value)) return;
+      if (String(value).trim() === '') return;
+      rows.push([label, String(value)]);
+    };
+
+    const currency = p.estimatedCostCurrency || 'CAD';
+
+    const type = (p.projectType || 'GENERAL').toUpperCase();
+    if (type === 'SIDING_REPLACE') {
+      if (!isNaN(areaNum) && p.materialCostPerSqFt) {
+        pushIf(labelFor('materialCost'), formatMoney(Number(p.materialCostPerSqFt) * areaNum, currency, locale));
+      }
+      if (!isNaN(areaNum) && p.laborRate) {
+        pushIf(labelFor('labor'), formatMoney(Number(p.laborRate) * areaNum, currency, locale));
+      }
+      if (p.includeInsulation) pushIf(labelFor('insulation'), formatMoney(areaNum * 0.75, currency, locale));
+      if (p.locationFactor && Number(p.locationFactor) !== 1) pushIf(labelFor('locationAdjustment'), `${((Number(p.locationFactor) - 1) * 100).toFixed(1)}%`);
+    } else if (type === 'ROOFING_REPLACE') {
+      if (!isNaN(areaNum) && p.materialCostPerSqFt) pushIf(labelFor('materialCost'), formatMoney(Number(p.materialCostPerSqFt) * areaNum, currency, locale));
+      if (!isNaN(areaNum) && p.laborRate) pushIf(labelFor('labor'), formatMoney(Number(p.laborRate) * areaNum, currency, locale));
+      if (p.numSkylights && Number(p.numSkylights) > 0) pushIf(`${labelFor('skylights')} (${p.numSkylights})`, formatMoney(Number(p.numSkylights) * 1000, currency, locale));
+      if (p.tearOffRequired) pushIf(labelFor('tearOff'), formatMoney(areaNum * 1.5, currency, locale));
+    } else if (type === 'KITCHEN_REMODEL') {
+      if (!isNaN(areaNum) && p.materialCostPerSqFt) pushIf(labelFor('materialCost'), formatMoney(Number(p.materialCostPerSqFt) * areaNum, currency, locale));
+      if (!isNaN(areaNum) && p.laborRate) pushIf(labelFor('labor'), formatMoney(Number(p.laborRate) * areaNum, currency, locale));
+      if (p.applianceAllowance && Number(p.applianceAllowance) > 0) pushIf(labelFor('applianceAllowance'), formatMoney(Number(p.applianceAllowance), currency, locale));
+    } else if (type === 'DECK_PATIO_ADDITION') {
+      if (!isNaN(areaNum) && p.materialCostPerSqFt) pushIf(labelFor('materialCost'), formatMoney(Number(p.materialCostPerSqFt) * areaNum, currency, locale));
+      if (!isNaN(areaNum) && p.laborRate) pushIf(labelFor('labor'), formatMoney(Number(p.laborRate) * areaNum, currency, locale));
+    } else {
+      // GENERAL fallback: mirror modal's visible breakdown logic
+      if (!isNaN(areaNum) && p.materialCostPerSqFt) pushIf(labelFor('materialCost'), formatMoney(Number(p.materialCostPerSqFt) * areaNum, currency, locale));
+      if (!isNaN(areaNum) && p.laborRate) pushIf(labelFor('labor'), formatMoney(Number(p.laborRate) * areaNum, currency, locale));
+      if (p.applianceAllowance && Number(p.applianceAllowance) > 0) pushIf(labelFor('applianceAllowance'), formatMoney(Number(p.applianceAllowance), currency, locale));
+      if (p.numSkylights && Number(p.numSkylights) > 0) pushIf(`${labelFor('skylights')} (${p.numSkylights})`, formatMoney(Number(p.numSkylights) * 1000, currency, locale));
+      if (p.tearOffRequired) pushIf(labelFor('tearOff'), formatMoney(areaNum * 1.5, currency, locale));
+      if (p.includeInsulation) pushIf(labelFor('insulation'), formatMoney(areaNum * 0.75, currency, locale));
+      if (p.subfloorRepairNeeded) pushIf(labelFor('subfloorRepair'), formatMoney(areaNum * 3.5, currency, locale));
+    }
+
+    // Compute numeric pieces for total calculation
+    const matNum = !isNaN(areaNum) && p.materialCostPerSqFt ? (areaNum * Number(p.materialCostPerSqFt || 0)) : 0;
+    const labNum = !isNaN(areaNum) && p.laborRate ? (areaNum * Number(p.laborRate || 0)) : 0;
+    const applianceNum = p.applianceAllowance ? Number(p.applianceAllowance || 0) : 0;
+    const skylightNum = p.numSkylights ? (Number(p.numSkylights || 0) * 1000) : 0;
+    const tearOffNum = p.tearOffRequired && !isNaN(areaNum) ? (areaNum * 1.5) : 0;
+    const insulationNum = p.includeInsulation && !isNaN(areaNum) ? (areaNum * 0.75) : 0;
+    const subfloorNum = p.subfloorRepairNeeded && !isNaN(areaNum) ? (areaNum * 3.5) : 0;
+
+    const overheadAmt = overheadRate ? (estimatePriceNum * overheadRate) / (1 + overheadRate + (contingencyRate || 0)) : 0;
+    const contingencyAmt = contingencyRate ? (estimatePriceNum * contingencyRate) / (1 + overheadRate + contingencyRate) : 0;
+    const taxNum = p.taxAmount ? Number(p.taxAmount || 0) : 0;
+
+    // Compute numeric total: prefer explicit `totalPrice`, else derive from available parts
+    let totalValue = 0;
+    if (p.totalPrice !== undefined && p.totalPrice !== null) {
+      totalValue = Number(p.totalPrice) || 0;
+    } else if (p.estimatePrice !== undefined && p.estimatePrice !== null) {
+      // If estimatePrice looks like the subtotal (pre-tax), add computed pieces and tax; otherwise fall back to estimatePrice + tax
+      if (estimatePriceNum > 0) {
+        totalValue = estimatePriceNum + taxNum; // best effort
+      } else {
+        totalValue = matNum + labNum + applianceNum + skylightNum + tearOffNum + insulationNum + subfloorNum + overheadAmt + contingencyAmt + taxNum;
+      }
+    } else if (Array.isArray(p.costBreakdown) && p.costBreakdown.length > 0) {
+      totalValue = p.costBreakdown.reduce((s, it) => s + (Number(it.amount ?? it.value ?? 0) || 0), 0);
+    }
+
+    // Overhead / Contingency / Tax / Location (push into rows for visible breakdown)
+    if (overheadRate) {
+      pushIf(`${labelFor('overhead')} (${(overheadRate * 100).toFixed(1)}%)`, formatMoney(overheadAmt, currency, locale));
+    }
+    if (contingencyRate) {
+      pushIf(`${labelFor('contingency')} (${(contingencyRate * 100).toFixed(1)}%)`, formatMoney(contingencyAmt, currency, locale));
+    }
+    if (p.locationFactor && Number(p.locationFactor) && Number(p.locationFactor) !== 1) pushIf(labelFor('locationAdjustment'), `${((Number(p.locationFactor) - 1) * 100).toFixed(1)}%`);
+    if (p.taxRate) pushIf(`${labelFor('tax')} (${(Number(p.taxRate) * 100).toFixed(1)}%)`, formatMoney(taxNum, currency, locale));
+
+    // Always include an Estimated Total row (visible in the table)
+    pushIf(labelFor('estimatedTotal'), formatMoney(totalValue, currency, locale));
+
+    // Render table: two columns (Description, Amount)
+    autoTable(doc, {
+      head: [[ 'Description', 'Amount' ]],
+      body: rows,
+      startY: cursorY,
+      margin: { left: 14, right: 14 },
+      theme: 'plain',
+      headStyles: { fillColor: [245, 245, 245], textColor: [40, 40, 40], fontStyle: 'bold' },
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 140 }, 1: { halign: 'right' } }
+    });
+
+    cursorY = doc.lastAutoTable.finalY + 6;
+
+    // Add page if running out of space
+    if (idx < projects.length - 1 && cursorY > 240) {
+      doc.addPage();
+      cursorY = 20;
+    }
+  });
+
+  // Return blob instead of saving directly
+  try {
+    const blob = doc.output('blob');
+    return blob;
+  } catch (e) {
+    console.error('generateEstimatePdfBlob: failed to create blob', e);
+    return null;
+  }
 };

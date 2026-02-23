@@ -51,6 +51,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/portfolio/*/unarchive").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.GET, "/api/portfolio/archived").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.POST, "/api/portfolio/*/comments").hasAnyAuthority("Client", "Admin")
+                        // Allow public GET access to estimate config so frontend can auto-fill fields
+                        .requestMatchers(HttpMethod.GET, "/api/estimates/config/**").permitAll()
+                        // Restrict non-GET operations on estimate config to Admins
                         .requestMatchers("/api/estimates/config/**").hasAuthority("Admin")
                         .requestMatchers("/api/estimates/**").permitAll()
                         .requestMatchers("/images/**").permitAll()

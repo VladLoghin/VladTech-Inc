@@ -25,12 +25,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
+import org.example.vladtech.estimates.data.RenovationProject;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(RenovationEstimateController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -340,5 +343,55 @@ class RenovationEstimateControllerTest {
                         .param("deckAreaSqFt", "200")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void kitchenRequest_convertsEnumsAndValuesAndIsPassedToService() throws Exception {
+        // Arrange - let service return a simple RoofingReplace so controller returns OK
+        when(estimationService.calculateEstimate(any())).thenReturn(new RoofingReplace());
+        when(responseMapper.toResponse(any())).thenReturn(
+                new RenovationEstimateResponseModel(BigDecimal.TEN, null, null, null, null, null, null, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN)
+        );
+
+        // Act
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "KITCHEN_REMODEL")
+                        .param("squareFeet", "150")
+                        .param("materialCostPerSqFt", "80")
+                        .param("flooringMaterial", "HARDWOOD")
+                        .param("cabinetQuality", "CUSTOM")
+                        .param("countertopMaterial", "GRANITE"))
+                .andExpect(status().isOk());
+
+        // Assert that the controller constructed a KitchenRemodel with enums set
+        org.mockito.ArgumentCaptor<org.example.vladtech.estimates.data.RenovationProject> captor = org.mockito.ArgumentCaptor.forClass(org.example.vladtech.estimates.data.RenovationProject.class);
+        org.mockito.Mockito.verify(estimationService).calculateEstimate(captor.capture());
+        RenovationProject passed = captor.getValue();
+        assertTrue(passed instanceof org.example.vladtech.estimates.data.kitchen.KitchenRemodel);
+        org.example.vladtech.estimates.data.kitchen.KitchenRemodel kitchen = (org.example.vladtech.estimates.data.kitchen.KitchenRemodel) passed;
+        assertEquals(org.example.vladtech.estimates.data.shared.FlooringMaterial.HARDWOOD, kitchen.getFlooringMaterial());
+        assertEquals(org.example.vladtech.estimates.data.kitchen.CabinetQuality.CUSTOM, kitchen.getCabinetQuality());
+        assertEquals(org.example.vladtech.estimates.data.kitchen.CountertopMaterial.GRANITE, kitchen.getCountertopMaterial());
+    }
+
+    @Test
+    void windowDoorDefaults_windowAndDoorCountsDefaultToZero() throws Exception {
+        when(estimationService.calculateEstimate(any())).thenReturn(new RoofingReplace());
+        when(responseMapper.toResponse(any())).thenReturn(
+                new RenovationEstimateResponseModel(BigDecimal.TEN, null, null, null, null, null, null, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN)
+        );
+
+        mockMvc.perform(get("/api/estimates/calculate")
+                        .param("projectType", "WINDOW_DOOR_REPLACE")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        org.mockito.ArgumentCaptor<org.example.vladtech.estimates.data.RenovationProject> captor = org.mockito.ArgumentCaptor.forClass(org.example.vladtech.estimates.data.RenovationProject.class);
+        org.mockito.Mockito.verify(estimationService).calculateEstimate(captor.capture());
+        RenovationProject passed = captor.getValue();
+        assertTrue(passed instanceof org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace);
+        org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace w = (org.example.vladtech.estimates.data.windowanddoor.WindowDoorReplace) passed;
+        assertEquals(0, w.getWindowCount());
+        assertEquals(0, w.getDoorCount());
     }
 }

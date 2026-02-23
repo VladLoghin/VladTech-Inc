@@ -86,61 +86,61 @@ public class EstimateSettings {
         settings.setFloorRemovalBaseCostPerSqFt(new BigDecimal("2.00"));
 
         settings.setSidingFactors(new SidingFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("1.10"),
-                new BigDecimal("1.20"),
-                new BigDecimal("1.30"),
-                new BigDecimal("1.45")
+            new BigDecimal("3.50"),
+            new BigDecimal("6.00"),
+            new BigDecimal("5.00"),
+            new BigDecimal("12.00"),
+            new BigDecimal("15.00")
         ));
 
         settings.setRoofFactors(new RoofFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("1.20"),
-                new BigDecimal("1.50"),
-                new BigDecimal("1.80"),
-                new BigDecimal("1.30")
+            new BigDecimal("4.00"),
+            new BigDecimal("7.50"),
+            new BigDecimal("9.00"),
+            new BigDecimal("12.00"),
+            new BigDecimal("6.00")
         ));
 
         settings.setWindowFactors(new WindowFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("0.95"),
-                new BigDecimal("1.05"),
-                new BigDecimal("1.10"),
-                new BigDecimal("0.85")
+            new BigDecimal("1.00"),
+            new BigDecimal("0.95"),
+            new BigDecimal("1.05"),
+            new BigDecimal("1.10"),
+            new BigDecimal("0.85")
         ));
 
         settings.setDoorFactors(new DoorFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("1.15"),
-                new BigDecimal("1.05"),
-                new BigDecimal("1.30")
+            new BigDecimal("1.00"),
+            new BigDecimal("1.15"),
+            new BigDecimal("1.05"),
+            new BigDecimal("1.30")
         ));
 
         settings.setDeckFactors(new DeckFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("1.25"),
-                new BigDecimal("1.40"),
-                new BigDecimal("1.50")
+            new BigDecimal("25.00"),
+            new BigDecimal("31.25"),
+            new BigDecimal("35.00"),
+            new BigDecimal("37.50")
         ));
 
         settings.setFlooringFactors(new FlooringFactors(
-                new BigDecimal("1.00"),
-                new BigDecimal("0.85"),
-                new BigDecimal("0.60"),
-                new BigDecimal("0.50"),
-                new BigDecimal("0.90"),
-                new BigDecimal("0.70"),
-                new BigDecimal("0.95")
+            new BigDecimal("8.00"),
+            new BigDecimal("6.00"),
+            new BigDecimal("3.00"),
+            new BigDecimal("2.50"),
+            new BigDecimal("5.00"),
+            new BigDecimal("3.50"),
+            new BigDecimal("6.00")
         ));
 
         settings.setFlooringRemovalFactors(new FlooringRemovalFactors(
-                new BigDecimal("1.20"),
-                new BigDecimal("1.10"),
-                new BigDecimal("0.80"),
-                new BigDecimal("0.70"),
-                new BigDecimal("1.50"),
-                new BigDecimal("0.60"),
-                new BigDecimal("0.50")
+            new BigDecimal("2.40"),
+            new BigDecimal("2.20"),
+            new BigDecimal("1.60"),
+            new BigDecimal("1.40"),
+            new BigDecimal("3.00"),
+            new BigDecimal("1.20"),
+            new BigDecimal("1.00")
         ));
 
         return settings;

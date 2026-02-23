@@ -2,35 +2,77 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Estimate.css";
 import { api } from "../../api/http";
+import { generatePdfBlob } from "../../utils/exportUtils";
 import { useLanguage } from "../../context/LanguageContext";
 import { estimateTranslations } from "../../translations/estimateTranslations";
+import { useAuth0 } from "@auth0/auth0-react";
 
-const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
+const EstimateInputModal = ({ onClose, onSave = null, presets = [], isOpen, initialProject = null, initialSavedEstimate = null, openResultInitially = false }) => {
     const { language } = useLanguage();
     const t = estimateTranslations[language];
 
-    const sidingBasePrices = useMemo(
-        () => ({
+    // Load estimate settings early so all derived useMemo hooks can access them
+    const [estimateSettings, setEstimateSettings] = React.useState(null);
+    React.useEffect(() => {
+        let mounted = true;
+        const fetchSettings = async () => {
+            try {
+                const resp = await api.get("/estimates/config");
+                if (!mounted) return;
+                setEstimateSettings(resp.data || null);
+            } catch (err) {
+                    if (!mounted) return;
+                    console.error(err);
+                    setEstimateSettings(null);
+                }
+        };
+        fetchSettings();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const sidingBasePrices = useMemo(() => {
+        const f = estimateSettings?.sidingFactors;
+        if (f) {
+            return {
+                VINYL: Number(f.vinyl ?? 3.5),
+                WOOD: Number(f.wood ?? 6.0),
+                FIBER_CEMENT: Number(f.fiberCement ?? 5.0),
+                BRICK: Number(f.brick ?? 12.0),
+                STONE_VENEER: Number(f.stoneVeneer ?? 15.0),
+                OTHER: 0,
+            };
+        }
+        return {
             VINYL: 3.5,
             WOOD: 6.0,
             FIBER_CEMENT: 5.0,
             BRICK: 12.0,
             STONE_VENEER: 15.0,
             OTHER: 0,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
 
-    const roofBasePrices = useMemo(
-        () => ({
+    const roofBasePrices = useMemo(() => {
+        const f = estimateSettings?.roofFactors;
+        if (f) {
+            return {
+                ASPHALT: Number(f.asphalt ?? 4.0),
+                METAL: Number(f.metal ?? 7.5),
+                CLAY: Number(f.clay ?? 9.0),
+                SLATE: Number(f.slate ?? 12.0),
+                SYNTHETIC: Number(f.synthetic ?? 6.0),
+            };
+        }
+        return {
             ASPHALT: 4.0,
             METAL: 7.5,
             CLAY: 9.0,
             SLATE: 12.0,
             SYNTHETIC: 6.0,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
 
     const kitchenBasePrices = useMemo(
         () => ({
@@ -56,8 +98,20 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         []
     );
 
-    const flooringBasePrices = useMemo(
-        () => ({
+    const flooringBasePrices = useMemo(() => {
+        const f = estimateSettings?.flooringFactors;
+        if (f) {
+            return {
+                HARDWOOD: Number(f.hardwood ?? 8),
+                ENGINEERED_HARDWOOD: Number(f.engineeredHardwood ?? 6),
+                LAMINATE: Number(f.laminate ?? 3),
+                VINYL: Number(f.vinyl ?? 2.5),
+                TILE: Number(f.tile ?? 5),
+                CARPET: Number(f.carpet ?? 3.5),
+                POLISHED_CONCRETE: Number(f.polishedConcrete ?? 6),
+            };
+        }
+        return {
             HARDWOOD: 8,
             ENGINEERED_HARDWOOD: 6,
             LAMINATE: 3,
@@ -65,9 +119,26 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
             TILE: 5,
             CARPET: 3.5,
             POLISHED_CONCRETE: 6,
-        }),
-        []
-    );
+        };
+    }, [estimateSettings]);
+
+    // Deck & Patio defaults (effective values are read from `estimateSettings` above)
+    const deckMaterialCosts = React.useMemo(() => {
+        const defaultDeckMaterialCosts = {
+            WOOD: 25.0,
+            COMPOSITE: 31.25,
+            PVC: 35.0,
+            ALUMINUM: 37.5,
+        };
+        const f = estimateSettings?.deckFactors || {};
+        return {
+            WOOD: f.wood ?? defaultDeckMaterialCosts.WOOD,
+            COMPOSITE: f.composite ?? defaultDeckMaterialCosts.COMPOSITE,
+            PVC: f.pvc ?? defaultDeckMaterialCosts.PVC,
+            ALUMINUM: f.aluminum ?? defaultDeckMaterialCosts.ALUMINUM,
+        };
+    }, [estimateSettings]);
+
 
     const builtInPresets = useMemo(
     () => [
@@ -255,10 +326,12 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 stairsCount: "0",
                 isCovered: false,
                 deckAreaSqFt: "",
+                materialCostPerSqFt: "",
                 locationFactor: "1.00",
             },
             fields: [
                 { name: "deckAreaSqFt", label: t.deckAreaSqFt ?? "Deck Area (sq ft)", type: "number", required: true, min: 1, step: "0.01" },
+                { name: "materialCostPerSqFt", label: t.materialCostPerSqFt, type: "number", required: true, min: 0, step: "0.01" },
                 {
                     name: "deckMaterial",
                     label: t.deckMaterial ?? "Deck Material",
@@ -275,6 +348,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 { name: "stairsCount", label: t.stairsCount ?? "Number of Stair Sets", type: "number", required: false, min: 0, step: "1" },
                 { name: "isCovered", label: t.isCovered ?? "Include Roof Cover", type: "checkbox", required: false },
             ],
+            // ...existing code...
         },
         {
             name: t.floorReplacePreset ?? "Floor Replace",
@@ -355,6 +429,15 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const [result, setResult] = useState(null);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [toast, setToast] = useState(null);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [saveTitle, setSaveTitle] = useState("");
+    const [savedEstimate, setSavedEstimate] = useState(null);
+    const initSavedIdRef = React.useRef(null);
+
+    // Initialize savedEstimate when modal is opened from saved list
+    useEffect(() => {
+        if (initialSavedEstimate) setSavedEstimate(initialSavedEstimate);
+    }, [initialSavedEstimate]);
 
     // Helper to auto-fill materialCostPerSqFt when missing based on preset type
     const validateField = (field, value) => {
@@ -375,7 +458,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         return "";
     };
 
-    const withAutoPrice = (preset, data) => {
+    const withAutoPrice = React.useCallback((preset, data) => {
         if (!preset) return data;
         const hasPrice = data.materialCostPerSqFt !== undefined && data.materialCostPerSqFt !== "";
 
@@ -414,17 +497,72 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
 
         return data;
-    };
+    }, [sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
 
 
     useEffect(() => {
-        if (isOpen && sortedPresets.length > 0) {
+        // Only initialize the default preset when opening the modal for a new estimate
+        // Do not overwrite when editing a saved estimate (use `initialSavedEstimate` to detect saved opens)
+        if (isOpen && sortedPresets.length > 0 && !initialSavedEstimate && !initialProject) {
             const defaultPreset = sortedPresets[0];
             const initialValues = withAutoPrice(defaultPreset, defaultPreset.defaultValues || {});
             setSelectedPreset(defaultPreset);
             setFormData(initialValues);
         }
-    }, [isOpen, sortedPresets, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+    }, [isOpen, sortedPresets, initialSavedEstimate, initialProject, withAutoPrice]);
+
+    // If an initial project is provided (e.g., opening a saved estimate), populate form (editable)
+    useEffect(() => {
+        if (!initialProject || !isOpen) return;
+        // Only initialize once per saved estimate to avoid repeatedly overwriting user edits
+        const incomingId = initialSavedEstimate?.estimateId || initialProject?.estimateId || initialProject?.id || null;
+        if (initSavedIdRef.current && incomingId && initSavedIdRef.current === incomingId) return;
+
+        try {
+            // Match a preset: prefer exact projectType/key match, otherwise score by field overlap
+            let match = null;
+            if (initialProject.projectType) {
+                match = sortedPresets?.find(p => (p.projectType && p.projectType.toString().toUpperCase() === initialProject.projectType.toString().toUpperCase()) || (p.key && p.key.toString().toUpperCase() === initialProject.projectType.toString().toUpperCase()) || (p.key && p.key.toString().toUpperCase() === (initialProject.key || '').toString().toUpperCase()));
+            }
+
+            if (!match && sortedPresets && sortedPresets.length > 0) {
+                // Score presets by how many of their field names exist on the incoming project
+                const scores = sortedPresets.map(p => {
+                    const names = (p.fields || []).map(f => f.name);
+                    const count = names.reduce((acc, n) => acc + (initialProject && initialProject[n] !== undefined ? 1 : 0), 0);
+                    return { preset: p, score: count };
+                });
+                scores.sort((a, b) => b.score - a.score);
+                if (scores[0] && scores[0].score > 0) match = scores[0].preset;
+            }
+
+            if (match) {
+                setSelectedPreset(match);
+                // merge listed defaults with incoming project values and apply auto pricing
+                const merged = { ...(match.defaultValues || {}), ...(initialProject || {}) };
+                const values = withAutoPrice(match, merged);
+                setFormData(values);
+            } else {
+                // fallback: use the incoming project directly so fields are editable
+                setSelectedPreset(null);
+                setFormData(initialProject);
+            }
+
+            // Only open the read-only result panel if explicitly requested
+            setResult(openResultInitially ? initialProject : null);
+            setIsResultModalOpen(Boolean(openResultInitially));
+
+            // mark initialized for this saved estimate id (if present)
+            if (incomingId) initSavedIdRef.current = incomingId;
+        } catch (err) {
+            console.error('Failed to load initial project into modal', err);
+        }
+    }, [initialProject, isOpen, openResultInitially, sortedPresets, initialSavedEstimate, withAutoPrice]);
+
+    // Reset the initialized ref when modal closes so subsequent openings reinitialize correctly
+    useEffect(() => {
+        if (!isOpen) initSavedIdRef.current = null;
+    }, [isOpen]);
 
     useEffect(() => {
         if (toast) {
@@ -505,7 +643,20 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 }));
             }
         }
-    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices]);
+
+        if (selectedPreset.projectType === "DECK_PATIO_ADDITION") {
+            const material = formData.deckMaterial;
+            if (!material) return;
+            const cost = deckMaterialCosts[material];
+            if (cost !== undefined) {
+                const autoPrice = Number(cost).toFixed(2);
+                setFormData((prev) => ({
+                    ...prev,
+                    materialCostPerSqFt: String(autoPrice),
+                }));
+            }
+        }
+    }, [formData.sidingMaterial, formData.roofMaterial, formData.cabinetQuality, formData.countertopMaterial, formData.flooringMaterial, formData.newFloorMaterial, formData.deckMaterial, selectedPreset, selectedPreset?.projectType, sidingBasePrices, roofBasePrices, kitchenBasePrices, countertopBasePrices, flooringBasePrices, deckMaterialCosts]);
 
     const handlePresetSelect = (presetName) => {
         const preset = sortedPresets.find((p) => p.name === presetName);
@@ -517,7 +668,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         const nextValue = type === "checkbox" ? checked : value;
-
+        console.log('handleChange', { name, value: nextValue, type });
         setFormData((prevData) => {
             const updated = { ...prevData, [name]: nextValue };
             if (selectedPreset?.projectType === "SIDING_REPLACE" && name === "sidingMaterial") {
@@ -595,6 +746,11 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
     };
 
+    // Debug: log when formData actually updates
+    useEffect(() => {
+        console.log('formData changed:', formData);
+    }, [formData]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
@@ -615,10 +771,134 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         }
     };
 
-    const handleCloseResultModal = () => {
+    const { getAccessTokenSilently } = useAuth0();
+
+    // Close only the result view and return to the edit form (keep `formData` intact)
+    const handleBackToEdit = () => {
+        setIsResultModalOpen(false);
+        setResult(null);
+    };
+
+    // Close the entire modal (result and edit) — used for 'Close' action
+    const handleCloseAll = () => {
         setIsResultModalOpen(false);
         setResult(null);
         onClose();
+    };
+
+    const handleSaveEstimate = async () => {
+        // If this is an existing saved estimate, update it directly (PUT) using current values
+        const existingId = initialSavedEstimate?.estimateId || savedEstimate?.estimateId;
+        if (existingId) {
+            const titleLocal = initialSavedEstimate?.title || savedEstimate?.title || selectedPreset?.name || "Estimate";
+            await confirmSaveEstimate(titleLocal);
+            return;
+        }
+
+        // otherwise open inline modal to ask for title for a new save
+        setSaveTitle(selectedPreset?.name || "Estimate");
+        setIsSaveModalOpen(true);
+    };
+
+    const confirmSaveEstimate = async (titleParam = null) => {
+        try {
+            const token = await getAccessTokenSilently({ authorizationParams: { audience: "https://vladtech/api" } });
+
+            // Merge inputs and calculated result into a project object
+            const project = { ...formData, ...result };
+
+            const payload = {
+                title: titleParam ?? saveTitle ?? "Untitled",
+                project,
+            };
+
+            let resp;
+            // If editing an existing saved estimate, update it via PUT
+            const existingId = initialSavedEstimate?.estimateId || savedEstimate?.estimateId;
+            if (existingId) {
+                resp = await api.put(`/estimates/${existingId}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+            } else {
+                resp = await api.post("/estimates", payload, { headers: { Authorization: `Bearer ${token}` } });
+            }
+            const saved = resp.data || null;
+            setSavedEstimate(saved);
+
+            // Notify parent that an estimate was saved/updated so lists can refresh
+            if (onSave && typeof onSave === 'function') {
+                try {
+                    onSave(saved);
+                } catch (err) {
+                    // swallow parent handler errors
+                    console.error('onSave handler threw', err);
+                }
+            }
+
+            // Auto-generate and upload PDF using existing exporter style
+            (async () => {
+                try {
+                    const projectObj = saved?.project || project || {};
+                    const mapped = {
+                        name: saved?.title || projectObj.name || 'Estimate',
+                        projectIdentifier: saved?.estimateId || '',
+                        projectType: projectObj.projectType || projectObj.key || 'GENERAL',
+                        // include breakdown fields for the PDF, prefer saved project values then form inputs then result
+                        estimatePrice: projectObj.estimatePrice ?? formData.estimatePrice ?? result?.estimatePrice,
+                        taxAmount: projectObj.taxAmount ?? formData.taxAmount ?? result?.taxAmount,
+                        taxRate: projectObj.taxRate ?? formData.taxRate ?? result?.taxRate,
+                        totalPrice: projectObj.totalPrice ?? formData.totalPrice ?? result?.totalPrice,
+                        materialCostPerSqFt: projectObj.materialCostPerSqFt ?? formData.materialCostPerSqFt ?? result?.materialCostPerSqFt,
+                        // include chosen material/type fields so PDF can display selections
+                        sidingMaterial: projectObj.sidingMaterial ?? formData.sidingMaterial ?? result?.sidingMaterial,
+                        roofMaterial: projectObj.roofMaterial ?? formData.roofMaterial ?? result?.roofMaterial,
+                        countertopMaterial: projectObj.countertopMaterial ?? formData.countertopMaterial ?? result?.countertopMaterial,
+                        newFloorMaterial: projectObj.newFloorMaterial ?? formData.newFloorMaterial ?? result?.newFloorMaterial,
+                        deckMaterial: projectObj.deckMaterial ?? formData.deckMaterial ?? result?.deckMaterial,
+                        cabinetQuality: projectObj.cabinetQuality ?? formData.cabinetQuality ?? result?.cabinetQuality,
+                        flooringMaterial: projectObj.flooringMaterial ?? formData.flooringMaterial ?? result?.flooringMaterial,
+                        windowType: projectObj.windowType ?? formData.windowType ?? result?.windowType,
+                        doorType: projectObj.doorType ?? formData.doorType ?? result?.doorType,
+                        stories: projectObj.stories ?? formData.stories ?? result?.stories,
+                        hasRailing: projectObj.hasRailing ?? formData.hasRailing ?? result?.hasRailing,
+                        stairsCount: projectObj.stairsCount ?? formData.stairsCount ?? result?.stairsCount,
+                        isCovered: projectObj.isCovered ?? formData.isCovered ?? result?.isCovered,
+                        laborRate: projectObj.laborRate ?? formData.laborRate ?? result?.laborRate,
+                        applianceAllowance: projectObj.applianceAllowance ?? formData.applianceAllowance ?? result?.applianceAllowance,
+                        numSkylights: projectObj.numSkylights ?? formData.numSkylights ?? result?.numSkylights,
+                        tearOffRequired: projectObj.tearOffRequired ?? formData.tearOffRequired ?? result?.tearOffRequired,
+                        includeInsulation: projectObj.includeInsulation ?? formData.includeInsulation ?? result?.includeInsulation,
+                        // area fields
+                        squareFeet: projectObj.squareFeet ?? formData.squareFeet ?? result?.squareFeet,
+                        deckAreaSqFt: projectObj.deckAreaSqFt ?? formData.deckAreaSqFt ?? result?.deckAreaSqFt,
+                        subfloorRepairNeeded: projectObj.subfloorRepairNeeded ?? formData.subfloorRepairNeeded ?? result?.subfloorRepairNeeded,
+                        overheadRate: projectObj.overheadRate ?? formData.overheadRate ?? result?.overheadRate,
+                        contingencyRate: projectObj.contingencyRate ?? formData.contingencyRate ?? result?.contingencyRate,
+                        locationFactor: projectObj.locationFactor ?? formData.locationFactor ?? result?.locationFactor,
+                        areaSqFt: projectObj.areaSqFt ?? projectObj.squareFeet ?? projectObj.deckAreaSqFt ?? projectObj.area ?? formData.areaSqFt ?? formData.squareFeet ?? formData.deckAreaSqFt ?? formData.area ?? result?.areaSqFt ?? result?.squareFeet ?? result?.area
+                    };
+
+                    const blob = await generatePdfBlob([mapped], `estimate_${mapped.projectIdentifier || 'export'}.pdf`, { title: 'Estimate', exporterName: 'VladTech', isEstimate: true });
+                    if (blob) {
+                        const form = new FormData();
+                        form.append('file', blob, `${saved.estimateId || 'estimate'}.pdf`);
+                        await api.post(`/estimates/${saved.estimateId}/upload-pdf`, form, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                    }
+                } catch (pdfErr) {
+                    console.error('Auto PDF generation/upload failed', pdfErr);
+                }
+            })();
+
+            setToast({ type: "success", message: "Estimate saved successfully." });
+            setIsSaveModalOpen(false);
+        } catch (err) {
+            console.error("Failed to save estimate", err);
+            setToast({ type: "error", message: "Failed to save estimate" });
+        }
+    };
+
+    const cancelSaveEstimate = () => {
+        setIsSaveModalOpen(false);
     };
 
     const handleBackdropPointerDown = (e) => {
@@ -638,6 +918,11 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
         if (e.target === e.currentTarget) {
             e.currentTarget.dataset.pointerStartedOutside = 'true';
         }
+    };
+
+    const handleCloseResultModal = () => {
+        setIsResultModalOpen(false);
+        setResult(null);
     };
 
     const handleResultBackdropPointerUp = (e) => {
@@ -679,39 +964,99 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         </div>
                     )}
 
-                    {selectedPreset && (
+                    {(selectedPreset || (formData && Object.keys(formData).length > 0)) && (
                         <form onSubmit={handleSubmit}>
-                            {(() => {
-                                const checkboxFields = selectedPreset.fields.filter(f => f.type === "checkbox");
-                                const conditionalFieldNames = ["numSkylights", "applianceAllowance"];
-                                const otherFields = selectedPreset.fields.filter(f => f.type !== "checkbox" && !conditionalFieldNames.includes(f.name));
-                                const conditionalFields = selectedPreset.fields.filter(f => conditionalFieldNames.includes(f.name));
-                                
-                                return (
-                                    <>
-                                        {/* Render non-checkbox, non-conditional fields first */}
-                                        {otherFields.map((field) => {
-                                            return (
-                                                <div key={field.name} className="form-group">
-                                                    <label htmlFor={field.name}>{field.label}:</label>
-                                                    {field.type === "select" ? (
-                                                        <select
-                                                            id={field.name}
-                                                            name={field.name}
-                                                            value={formData[field.name] ?? ""}
-                                                            onChange={handleChange}
-                                                            required={field.required}
-                                                        >
-                                                            <option value="" disabled>
-                                                                {t.selectPreset}
-                                                            </option>
-                                                            {field.options.map((opt) => (
-                                                                <option key={opt.value} value={opt.value}>
-                                                                    {opt.label}
+                            {selectedPreset ? (
+                                (() => {
+                                    const checkboxFields = selectedPreset.fields.filter(f => f.type === "checkbox");
+                                    const conditionalFieldNames = ["numSkylights", "applianceAllowance"];
+                                    const otherFields = selectedPreset.fields.filter(f => f.type !== "checkbox" && !conditionalFieldNames.includes(f.name));
+                                    const conditionalFields = selectedPreset.fields.filter(f => conditionalFieldNames.includes(f.name));
+                                    
+                                    return (
+                                        <>
+                                            {/* Render non-checkbox, non-conditional fields first */}
+                                            {otherFields.map((field) => {
+                                                return (
+                                                    <div key={field.name} className="form-group">
+                                                        <label htmlFor={field.name}>{field.label}:</label>
+                                                        {field.type === "select" ? (
+                                                            <select
+                                                                id={field.name}
+                                                                name={field.name}
+                                                                value={formData[field.name] ?? ""}
+                                                                onChange={handleChange}
+                                                                required={field.required}
+                                                            >
+                                                                <option value="" disabled>
+                                                                    {t.selectPreset}
                                                                 </option>
-                                                            ))}
-                                                        </select>
-                                                    ) : (
+                                                                {field.options.map((opt) => (
+                                                                    <option key={opt.value} value={opt.value}>
+                                                                        {opt.label}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <input
+                                                                id={field.name}
+                                                                type={field.type}
+                                                                name={field.name}
+                                                                value={formData[field.name] ?? ""}
+                                                                onChange={handleChange}
+                                                                required={field.required}
+                                                                min={field.min !== undefined ? String(field.min) : undefined}
+                                                                step={field.step}
+                                                                onInvalid={(e) => {
+                                                                    if (e.target.validity.valueMissing) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
+                                                                    } else if (e.target.validity.rangeUnderflow) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
+                                                                    } else if (e.target.validity.typeMismatch) {
+                                                                        e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
+                                                                    }
+                                                                }}
+                                                                onInput={(e) => e.target.setCustomValidity("")}
+                                                            />
+                                                        )}
+                                                        {errors[field.name] && (
+                                                            <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                                {errors[field.name]}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                            
+                                            {/* Render checkboxes in grid if any exist */}
+                                            {checkboxFields.length > 0 && (
+                                                <div className="checkboxes-grid">
+                                                    {checkboxFields.map((field) => (
+                                                        <div key={field.name} className="checkbox-grid-item">
+                                                            <label htmlFor={field.name} className="checkbox-label">
+                                                                {field.label}
+                                                            </label>
+                                                            <input
+                                                                id={field.name}
+                                                                className="checkbox-input"
+                                                                type="checkbox"
+                                                                name={field.name}
+                                                                checked={!!formData[field.name]}
+                                                                onChange={handleChange}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Render conditional fields last, below checkboxes */}
+                                            {conditionalFields.map((field) => {
+                                                if (field.name === "numSkylights" && !formData.hasSkylights) return null;
+                                                if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
+                                                
+                                                return (
+                                                    <div key={field.name} className="collapsible-section">
+                                                        <label htmlFor={field.name}>{field.label}:</label>
                                                         <input
                                                             id={field.name}
                                                             type={field.type}
@@ -732,76 +1077,37 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                                                             }}
                                                             onInput={(e) => e.target.setCustomValidity("")}
                                                         />
-                                                    )}
-                                                    {errors[field.name] && (
-                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
-                                                            {errors[field.name]}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                        
-                                        {/* Render checkboxes in grid if any exist */}
-                                        {checkboxFields.length > 0 && (
-                                            <div className="checkboxes-grid">
-                                                {checkboxFields.map((field) => (
-                                                    <div key={field.name} className="checkbox-grid-item">
-                                                        <label htmlFor={field.name} className="checkbox-label">
-                                                            {field.label}
-                                                        </label>
-                                                        <input
-                                                            id={field.name}
-                                                            className="checkbox-input"
-                                                            type="checkbox"
-                                                            name={field.name}
-                                                            checked={!!formData[field.name]}
-                                                            onChange={handleChange}
-                                                        />
+                                                        {errors[field.name] && (
+                                                            <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
+                                                                {errors[field.name]}
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        
-                                        {/* Render conditional fields last, below checkboxes */}
-                                        {conditionalFields.map((field) => {
-                                            if (field.name === "numSkylights" && !formData.hasSkylights) return null;
-                                            if (field.name === "applianceAllowance" && !formData.includeApplianceAllowance) return null;
-                                            
-                                            return (
-                                                <div key={field.name} className="collapsible-section">
-                                                    <label htmlFor={field.name}>{field.label}:</label>
-                                                    <input
-                                                        id={field.name}
-                                                        type={field.type}
-                                                        name={field.name}
-                                                        value={formData[field.name] ?? ""}
-                                                        onChange={handleChange}
-                                                        required={field.required}
-                                                        min={field.min !== undefined ? String(field.min) : undefined}
-                                                        step={field.step}
-                                                        onInvalid={(e) => {
-                                                            if (e.target.validity.valueMissing) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.isRequired}`);
-                                                            } else if (e.target.validity.rangeUnderflow) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeGreaterThanZero}`);
-                                                            } else if (e.target.validity.typeMismatch) {
-                                                                e.target.setCustomValidity(`${field.label} ${t.mustBeValidNumber}`);
-                                                            }
-                                                        }}
-                                                        onInput={(e) => e.target.setCustomValidity("")}
-                                                    />
-                                                    {errors[field.name] && (
-                                                        <span style={{ color: "#ef4444", fontSize: "0.875rem", marginTop: "0.25rem", display: "block" }}>
-                                                            {errors[field.name]}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </>
-                                );
-                            })()}
+                                                );
+                                            })}
+                                        </>
+                                    );
+                                })()
+                            ) : (
+                                // Generic editable form when no preset matches: render simple inputs for each formData key
+                                Object.keys(formData).map((k) => {
+                                    // skip internal metadata keys
+                                    if (["estimateId", "createdAt", "ownerAuth0Id", "pdfUrl"].includes(k)) return null;
+                                    const val = formData[k];
+                                    const isBool = typeof val === 'boolean';
+                                    const isNumberLike = !isBool && val !== null && val !== undefined && !Number.isNaN(Number(val)) && String(val) !== '';
+                                    return (
+                                        <div key={k} className="form-group">
+                                            <label htmlFor={k}>{k}:</label>
+                                            {isBool ? (
+                                                <input id={k} type="checkbox" name={k} checked={!!val} onChange={handleChange} />
+                                            ) : (
+                                                <input id={k} type={isNumberLike ? "number" : "text"} name={k} value={val ?? ""} onChange={handleChange} />
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
 
                             <div className="modal-actions">
                                 <button type="submit">{t.submit}</button>
@@ -830,112 +1136,121 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         <div className="estimate-breakdown">
                             <h3 style={{ marginBottom: "1rem", fontSize: "1.1rem" }}>{t.costBreakdown}</h3>
                             
-                            {/* Material Cost */}
-                            {result.materialCostPerSqFt && result.squareFeet && (
-                                <div className="breakdown-row">
-                                    <span>{t.materialCost}:</span>
-                                    <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * parseFloat(result.materialCostPerSqFt)).toFixed(2)}
-                                    </span>
-                                </div>
-                            )}
-                            
-                            {/* Labor Cost (laborRate is $/sqft) */}
-                            {result.laborRate && result.squareFeet && (
-                                <div className="breakdown-row">
-                                    <span>{t.labor} (${parseFloat(result.laborRate).toFixed(2)}/sqft):</span>
-                                    <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * parseFloat(result.laborRate)).toFixed(2)}
-                                    </span>
-                                </div>
-                            )}
+                            {/* Material & Labor Cost */}
+                            {(() => {
+                                const area = result.areaSqFt ?? result.squareFeet ?? formData.deckAreaSqFt ?? formData.squareFeet;
+                                const areaNum = area ? parseFloat(area) : NaN;
+                                const mat = result.materialCostPerSqFt;
+                                const lab = result.laborRate;
+
+                                return (
+                                    <>
+                                        {!isNaN(areaNum) && mat && (
+                                            <div className="breakdown-row">
+                                                <span>{t.materialCost}:</span>
+                                                <span className="breakdown-amount">
+                                                    ${(areaNum * parseFloat(mat)).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {!isNaN(areaNum) && lab && (
+                                            <div className="breakdown-row">
+                                                <span>{t.labor} (${parseFloat(lab).toFixed(2)}/sqft):</span>
+                                                <span className="breakdown-amount">
+                                                    ${(areaNum * parseFloat(lab)).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                             
                             {/* Appliance Allowance (Kitchen Remodel) */}
-                            {formData.applianceAllowance && parseFloat(formData.applianceAllowance) > 0 && (
+                            {((result?.applianceAllowance ?? formData.applianceAllowance) && parseFloat(result?.applianceAllowance ?? formData.applianceAllowance) > 0) && (
                                 <div className="breakdown-row">
                                     <span>{t.applianceAllowance}:</span>
                                     <span className="breakdown-amount">
-                                        ${parseFloat(formData.applianceAllowance).toFixed(2)}
+                                        ${parseFloat(result?.applianceAllowance ?? formData.applianceAllowance).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Skylights (Roofing) */}
-                            {formData.hasSkylights && formData.numSkylights && parseFloat(formData.numSkylights) > 0 && (
+                            {((result?.hasSkylights ?? formData.hasSkylights) && (result?.numSkylights ?? formData.numSkylights) && parseFloat(result?.numSkylights ?? formData.numSkylights) > 0) && (
                                 <div className="breakdown-row">
-                                    <span>{t.skylights} ({formData.numSkylights}):</span>
+                                    <span>{t.skylights} ({result?.numSkylights ?? formData.numSkylights}):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(formData.numSkylights) * 1000).toFixed(2)}
+                                        ${(parseFloat(result?.numSkylights ?? formData.numSkylights) * 1000).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Tear Off Cost (Roofing) */}
-                            {formData.tearOffRequired && result.squareFeet && (
+                            {((result?.tearOffRequired ?? formData.tearOffRequired) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.tearOff}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 1.50).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 1.50).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Insulation (Siding) */}
-                            {formData.includeInsulation && result.squareFeet && (
+                            {((result?.includeInsulation ?? formData.includeInsulation) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.insulation}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 0.75).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 0.75).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Subfloor Repair (Floor Replace) */}
-                            {formData.subfloorRepairNeeded && result.squareFeet && (
+                            {((result?.subfloorRepairNeeded ?? formData.subfloorRepairNeeded) && (result?.squareFeet ?? formData.squareFeet)) && (
                                 <div className="breakdown-row">
                                     <span>{t.subfloorRepair}:</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.squareFeet) * 3.50).toFixed(2)}
+                                        ${(parseFloat(result?.squareFeet ?? formData.squareFeet) * 3.50).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Overhead Rate (as percentage) */}
-                            {result.overheadRate && (
+                            {((result?.overheadRate ?? formData.overheadRate) && (parseFloat(result?.overheadRate ?? formData.overheadRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.overhead} ({(parseFloat(result.overheadRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.overhead} ({(parseFloat(result?.overheadRate ?? formData.overheadRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.overheadRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                        ${(parseFloat(result?.estimatePrice ?? formData.estimatePrice) * parseFloat(result?.overheadRate ?? formData.overheadRate) / (1 + parseFloat(result?.overheadRate ?? formData.overheadRate) + parseFloat(result?.contingencyRate ?? formData.contingencyRate))).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Contingency Rate (as percentage) */}
-                            {result.contingencyRate && (
+                            {((result?.contingencyRate ?? formData.contingencyRate) && (parseFloat(result?.contingencyRate ?? formData.contingencyRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.contingency} ({(parseFloat(result.contingencyRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.contingency} ({(parseFloat(result?.contingencyRate ?? formData.contingencyRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${(parseFloat(result.estimatePrice) * parseFloat(result.contingencyRate) / (1 + parseFloat(result.overheadRate) + parseFloat(result.contingencyRate))).toFixed(2)}
+                                        ${(parseFloat(result?.estimatePrice ?? formData.estimatePrice) * parseFloat(result?.contingencyRate ?? formData.contingencyRate) / (1 + parseFloat(result?.overheadRate ?? formData.overheadRate) + parseFloat(result?.contingencyRate ?? formData.contingencyRate))).toFixed(2)}
                                     </span>
                                 </div>
                             )}
                             
                             {/* Location Factor */}
-                            {result.locationFactor && parseFloat(result.locationFactor) !== 1 && (
+                            {((result?.locationFactor ?? formData.locationFactor) && parseFloat(result?.locationFactor ?? formData.locationFactor) !== 1) && (
                                 <div className="breakdown-row">
                                     <span>{t.locationAdjustment}:</span>
                                     <span className="breakdown-amount">
-                                        {((parseFloat(result.locationFactor) - 1) * 100).toFixed(1)}%
+                                        {((parseFloat(result?.locationFactor ?? formData.locationFactor) - 1) * 100).toFixed(1)}%
                                     </span>
                                 </div>
                             )}
                             
                             {/* Tax Rate */}
-                            {result.taxRate && (
+                            {((result?.taxRate ?? formData.taxRate) && (parseFloat(result?.taxRate ?? formData.taxRate) !== 0)) && (
                                 <div className="breakdown-row">
-                                    <span>{t.tax} ({(parseFloat(result.taxRate) * 100).toFixed(1)}%):</span>
+                                    <span>{t.tax} ({(parseFloat(result?.taxRate ?? formData.taxRate) * 100).toFixed(1)}%):</span>
                                     <span className="breakdown-amount">
-                                        ${parseFloat(result.taxAmount).toFixed(2)}
+                                        ${parseFloat(result?.taxAmount ?? formData.taxAmount ?? 0).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -944,7 +1259,7 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                             
                             <div className="breakdown-row breakdown-total">
                                 <span><strong>{t.estimatedTotal}:</strong></span>
-                                <span className="breakdown-amount"><strong>${parseFloat(result.totalPrice).toFixed(2)}</strong></span>
+                                <span className="breakdown-amount"><strong>${parseFloat(result?.totalPrice ?? result?.estimatePrice ?? formData.totalPrice ?? formData.estimatePrice ?? 0).toFixed(2)}</strong></span>
                             </div>
                         </div>
                         
@@ -966,21 +1281,41 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                         <div className="modal-actions">
                             <button
                                 type="button"
+                                onClick={handleSaveEstimate}
+                                data-testid="estimate-result-save"
+                                style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}
+                            >
+                                {t.save ?? "Save"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleBackToEdit}
+                                style={{ marginLeft: 8 }}
+                            >
+                                {t.back ?? "Back"}
+                            </button>
+
+                            <button
+                                type="button"
                                 onClick={() => {
-                                    handleCloseResultModal();
+                                    handleCloseAll();
                                     window.location.href = "/#contact";
                                 }}
                                 style={{ 
                                     backgroundColor: "#FCC700",
-                                    color: "black"
+                                    color: "black",
+                                    marginLeft: 8
                                 }}
                             >
                                 {t.contactUs}
                             </button>
+
                             <button
                                 type="button"
-                                onClick={handleCloseResultModal}
+                                onClick={handleCloseAll}
                                 data-testid="estimate-result-close"
+                                style={{ marginLeft: 8 }}
                             >
                                 {t.close}
                             </button>
@@ -989,9 +1324,52 @@ const EstimateInputModal = ({ onClose, presets = [], isOpen }) => {
                 </div>
             )}
 
+            {isSaveModalOpen && (
+                <div
+                    className="modal"
+                    role="dialog"
+                    aria-modal="true"
+                    data-testid="estimate-save-modal"
+                    onPointerDown={(e) => { if (e.target === e.currentTarget) e.currentTarget.dataset.pointerStartedOutside = 'true'; }}
+                    onPointerUp={(e) => { if (e.target === e.currentTarget && e.currentTarget.dataset.pointerStartedOutside === 'true') { cancelSaveEstimate(); } delete e.currentTarget.dataset.pointerStartedOutside; }}
+                >
+                    <div className="modal-content">
+                        <h2>{t.saveEstimateTitle ?? "Save Estimate"}</h2>
+                        <div style={{ marginTop: 8 }}>
+                            <label style={{ display: 'block', marginBottom: 6 }}>{t.estimateName ?? "Name"}</label>
+                            <input
+                                type="text"
+                                value={saveTitle}
+                                onChange={(e) => setSaveTitle(e.target.value)}
+                                style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #ddd' }}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="modal-actions" style={{ marginTop: 12 }}>
+                            <button onClick={() => confirmSaveEstimate()} style={{ backgroundColor: "#10B981", color: "white", padding: "0.5rem 1rem", borderRadius: "6px" }}>
+                                {t.save ?? "Save"}
+                            </button>
+                            <button onClick={cancelSaveEstimate} style={{ marginLeft: 8 }}>
+                                {t.cancel ?? "Cancel"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {toast && (
-                <div className={`toast toast-${toast.type}`} role="alert" data-testid="estimate-toast">
-                    {toast.message}
+                <div data-testid="estimate-toast" style={{ position: "fixed", top: 16, right: 16, zIndex: 1000 }}>
+                    <div style={{
+                        backgroundColor: toast.type === "success" ? "#10B981" : "#EF4444",
+                        color: "white",
+                        padding: "0.75rem 1rem",
+                        borderRadius: 8,
+                        boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+                        minWidth: 200,
+                        textAlign: "center",
+                    }}>
+                        {toast.message}
+                    </div>
                 </div>
             )}
         </>

@@ -19,6 +19,7 @@ public class RenovationProject {
     private BigDecimal contingencyRate;
     private BigDecimal locationFactor;
     private BigDecimal taxRate;
+    
 
     // Derived values
     private BigDecimal estimatePrice;
